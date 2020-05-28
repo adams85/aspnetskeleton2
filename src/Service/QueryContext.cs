@@ -1,0 +1,46 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using WebApp.DataAccess;
+
+namespace WebApp.Service
+{
+    internal partial class QueryContext : IDisposable
+    {
+        private readonly IServiceScope _serviceScope;
+
+        private QueryContext(IQuery query, IServiceScope serviceScope)
+        {
+            Query = query;
+            QueryType = query.GetType();
+            ResultType = GetResultType(QueryType);
+
+            _serviceScope = serviceScope;
+        }
+
+        public QueryContext(IQuery query, IServiceScopeFactory serviceScopeFactory)
+            : this(query, serviceScopeFactory.CreateScope()) { }
+
+        public QueryContext(IQuery query, IServiceProvider serviceProvider)
+            : this(query, serviceProvider.CreateScope()) { }
+
+        public void Dispose()
+        {
+            _serviceScope.Dispose();
+        }
+
+        public IServiceProvider ScopedServices => _serviceScope.ServiceProvider;
+
+        public IQuery Query { get; }
+        public Type QueryType { get; }
+        public Type ResultType { get; }
+
+        private DataContext? _dbContext;
+        public virtual DataContext DbContext => LazyInitializer.EnsureInitialized(ref _dbContext, () => ScopedServices.GetRequiredService<ReadOnlyDataContext>())!;
+
+        private IDictionary<object, object>? _properties;
+        public virtual IDictionary<object, object> Properties => LazyInitializer.EnsureInitialized(ref _properties, () => new Dictionary<object, object>())!;
+
+    }
+}

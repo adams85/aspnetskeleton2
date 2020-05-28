@@ -1,0 +1,80 @@
+﻿﻿<#@ template language="C#" inherits="QueryTemplateBase" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using <#= $"{Namespace}.DataAccess.Entities" #>;
+
+namespace <#= $"{Namespace}.Service.{Group}" #>
+{
+<#
+var resultType = GetResultType();
+#>
+    internal sealed class <#= $"{Name}QueryHandler" #> : <#= GetQueryHandlerBaseType(resultType) #>
+    {
+        public async Task<<#= resultType #>> HandleAsync(<#= $"{Name}Query" #> query, QueryContext context, CancellationToken cancellationToken)
+        {
+<#
+if (!IsList)
+{
+#>
+            Entity entity = await context.DbContext.Entities
+                .FindAsync(new object[] { query.Id }, cancellationToken).ConfigureAwait(false);
+
+            RequireExisting(entity, q => q.Id);
+
+            // ...
+<#
+if (IsProgressReporter)
+{
+#>
+
+            query.Progress?.Report(new ProgressEventData
+            {
+                StatusText = "Finished",
+                Progress = 1f
+            });
+<#
+}
+#>
+
+            return new <#= resultType #>
+            {
+            };
+<#
+} 
+else 
+{
+#>
+            IQueryable<Entity> entityQuery = context.DbContext.Settings;
+
+            // ...
+<#
+if (IsProgressReporter)
+{
+#>
+
+            query.Progress?.Report(new ProgressEventData
+            {
+                StatusText = "Finished",
+                Progress = 1f
+            });
+<#
+}
+#>
+
+            var entityDataQuery = entityQuery.ToData();
+
+            return await ResultAsync(query, entityDataQuery, cancellationToken).ConfigureAwait(false);
+<#
+}
+#>
+        }
+    }
+}

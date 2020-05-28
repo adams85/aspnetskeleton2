@@ -1,0 +1,425 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Transactions;
+using MailKit;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+using MimeKit;
+using WebApp.Core.Helpers;
+using WebApp.Core.Infrastructure;
+using WebApp.DataAccess;
+using WebApp.DataAccess.Entities;
+using WebApp.Service.Helpers;
+
+namespace WebApp.Service.Mailing
+{
+    internal sealed class MailSenderService : BackgroundService, IMailSenderService
+    {
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IMailTypeCatalog _mailTypeCatalog;
+        private readonly IClock _clock;
+
+        private readonly string? _smtpHost;
+        private readonly int _smtpPort;
+        private readonly SecureSocketOptions _smtpSecurity;
+        private readonly NetworkCredential? _smtpCredentials;
+
+        private readonly Func<MailTransport> _smtpClientFactory;
+        private MailTransport _smtpClient;
+
+        private readonly ushort _batchSize;
+        private readonly TimeSpan _sleepTime;
+        private readonly TimeSpan _initialRetryTime;
+        private readonly TimeSpan _maxRetryTime;
+        private readonly TimeSpan _errorWaitTime;
+
+        private readonly ILogger _logger;
+
+        public MailSenderService(IServiceScopeFactory serviceScopeFactory, IMailTypeCatalog mailTypeCatalog, IGuidProvider guidProvider, IClock clock,
+            IOptions<SmtpOptions>? smtpOptions, IOptions<MailSenderServiceOptions>? options, ILogger<MailSenderService>? logger)
+        {
+            if (guidProvider == null)
+                throw new ArgumentNullException(nameof(guidProvider));
+
+            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+            _mailTypeCatalog = mailTypeCatalog ?? throw new ArgumentNullException(nameof(mailTypeCatalog));
+            _clock = clock ?? throw new ArgumentNullException(nameof(clock));
+
+            var smtpOptionsValue = smtpOptions?.Value;
+            var usePickupDir = smtpOptionsValue?.UsePickupDir ?? true;
+            if (usePickupDir)
+            {
+                var pickupDirPath = smtpOptionsValue?.PickupDirPath ?? string.Empty;
+                if (!Path.IsPathRooted(pickupDirPath))
+                    pickupDirPath = Path.Combine(AppContext.BaseDirectory, pickupDirPath);
+
+                _smtpClientFactory = () => new PickupDirMailClient(guidProvider, pickupDirPath);
+            }
+            else
+            {
+                _smtpHost =
+                    smtpOptionsValue!.Host ??
+                    throw new ArgumentException($"{nameof(SmtpOptions.Host)} must be specified.", nameof(smtpOptions));
+
+                _smtpPort = smtpOptionsValue.Port ?? SmtpOptions.DefaultPort;
+                _smtpSecurity = smtpOptionsValue.Security ?? SmtpOptions.DefaultSecurity;
+
+                var smtpUserName = smtpOptionsValue.UserName;
+                var smtpPassword = smtpOptionsValue.Password;
+                _smtpCredentials = smtpUserName != null || smtpPassword != null ? new NetworkCredential(smtpUserName, smtpPassword) : null;
+
+                var smtpTimeout = smtpOptionsValue.Timeout ?? SmtpOptions.DefaultTimeout;
+                _smtpClientFactory = () => new SmtpClient { Timeout = checked((int)smtpTimeout.TotalMilliseconds) };
+            }
+
+            _smtpClient = _smtpClientFactory();
+
+            var optionsValue = options?.Value;
+            _batchSize = optionsValue?.BatchSize ?? MailSenderServiceOptions.DefaultBatchSize;
+
+            _sleepTime = optionsValue?.SleepTime ?? MailSenderServiceOptions.DefaultSleepTime;
+
+            _initialRetryTime = optionsValue?.InitialRetryTime ?? _sleepTime;
+            if (_initialRetryTime <= TimeSpan.Zero)
+                _initialRetryTime = MailSenderServiceOptions.DefaultInitialRetryTime;
+
+            _maxRetryTime = optionsValue?.MaxRetryTime ?? MailSenderServiceOptions.DefaultMaxRetryTime;
+            if (_maxRetryTime < _initialRetryTime)
+                _maxRetryTime = _initialRetryTime;
+
+            _errorWaitTime = optionsValue?.ErrorWaitTime ?? MailSenderServiceOptions.DefaultErrorWaitTime;
+
+            _logger = logger ?? (ILogger)NullLogger.Instance;
+        }
+
+        public override void Dispose()
+        {
+            _smtpClient.Dispose();
+            base.Dispose();
+        }
+
+        private event EventHandler? Enqueued;
+
+        public async Task EnqueueItemAsync(MailModel model, DataContext dbContext, IChangeToken? transactionCommittedToken, CancellationToken cancellationToken)
+        {
+            var isTransactionPresent = dbContext.Database.CurrentTransaction != null || Transaction.Current != null;
+            if (isTransactionPresent && transactionCommittedToken == null)
+                throw new ArgumentNullException(nameof(transactionCommittedToken), "A change token signalling on successful commit must be supplied when a transaction is present.");
+
+            var mailTypeDefinition = _mailTypeCatalog.GetDefinition(model.MailType, throwIfNotFound: true)!;
+
+            var serializedMailModel = mailTypeDefinition.SerializeModel(model);
+
+            var utcNow = _clock.UtcNow;
+            dbContext.MailQueue.Add(new MailQueueItem
+            {
+                CreationDate = utcNow,
+                DueDate = utcNow,
+                MailType = model.MailType,
+                MailModel = serializedMailModel,
+            });
+
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            var transaction = dbContext.Database.CurrentTransaction;
+            if (isTransactionPresent)
+                transactionCommittedToken!.RegisterChangeCallback(state => ((MailSenderService)state).Enqueued?.Invoke(this, EventArgs.Empty), this);
+            else
+                Enqueued?.Invoke(this, EventArgs.Empty);
+        }
+
+        private IAsyncEnumerable<MailQueueItem> PeekItems(DataContext dbContext)
+        {
+            var utcNow = _clock.UtcNow;
+
+            IQueryable<MailQueueItem> queueItems =
+                from item in dbContext.MailQueue
+                where item.DueDate != null && item.DueDate.Value <= utcNow
+                orderby item.DueDate
+                select item;
+
+            if (_batchSize > 0)
+                queueItems = queueItems.Take(_batchSize);
+
+            return queueItems.AsAsyncEnumerable();
+        }
+
+        private async Task RemoveItemAsync(WritableDataContext dbContext, Mail mail, CancellationToken cancellationToken)
+        {
+            dbContext.MailQueue.Remove(mail.QueueItem);
+
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private DateTime GetRetryDueDate(DateTime creationDate, DateTime currentDueDate)
+        {
+            var retryTime = currentDueDate - creationDate;
+            if (retryTime < TimeSpan.Zero)
+                retryTime = TimeSpan.Zero;
+
+            retryTime += _initialRetryTime;
+            if (retryTime > _maxRetryTime)
+                retryTime = _maxRetryTime;
+
+            return currentDueDate + retryTime;
+        }
+
+        private async Task RegisterItemFailureAsync(WritableDataContext dbContext, MailQueueItem queueItem, bool canRetry, CancellationToken cancellationToken)
+        {
+            queueItem.DueDate = canRetry ? GetRetryDueDate(queueItem.CreationDate, queueItem.DueDate!.Value) : (DateTime?)null;
+
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<Mail> ProduceMailAsync(MailQueueItem queueItem, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        {
+            IMailTypeDefinition mailTypeDefinition;
+            try
+            {
+                mailTypeDefinition = _mailTypeCatalog.GetDefinition(queueItem.MailType, throwIfNotFound: true)!;
+            }
+            catch (ArgumentException ex)
+            {
+                return new Mail(queueItem, null, new MailTypeNotSupportedException(ex));
+            }
+
+            MailModel mailModel;
+            try
+            {
+                mailModel = mailTypeDefinition.DeserializeModel(queueItem.MailModel);
+            }
+            catch (Exception ex)
+            {
+                return new Mail(queueItem, null, new MailModelSerializationException(ex));
+            }
+
+            var mailMessageProducer = mailTypeDefinition.CreateMailMessageProducer(serviceProvider);
+
+            MimeMessage message;
+            try
+            {
+                message = await mailMessageProducer.ProduceAsync(mailModel, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (!(ex is OperationCanceledException))
+            {
+                return new Mail(queueItem, null, ex);
+            }
+
+            return new Mail(queueItem, message, null);
+        }
+
+        private async Task<IReadOnlyList<Task<Mail>>> ProduceMailsAsync(IAsyncEnumerable<MailQueueItem> queueItems, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        {
+            List<Task<Mail>> produceMailTasks;
+
+            var enumerator = queueItems.WithCancellation(cancellationToken).ConfigureAwait(false).GetAsyncEnumerator();
+            try
+            {
+                if (!await enumerator.MoveNextAsync())
+                    return Array.Empty<Task<Mail>>();
+
+                produceMailTasks = new List<Task<Mail>>(1);
+
+                ConfiguredValueTaskAwaitable<bool> moveNextTask;
+                do
+                {
+                    var queueItem = enumerator.Current;
+                    // ProduceMailAsync does some synchronous job before going async (e.g. deserialization of the model data),
+                    // so before we're processing the current item, we instantly start to load the next one
+                    moveNextTask = enumerator.MoveNextAsync();
+
+                    produceMailTasks.Add(ProduceMailAsync(queueItem, serviceProvider, cancellationToken));
+                }
+                while (await moveNextTask);
+            }
+            finally { await enumerator.DisposeAsync(); }
+
+            await Task.WhenAll(produceMailTasks).ConfigureAwait(false);
+
+            return produceMailTasks;
+        }
+
+        private async Task HandleMailErrorAsync(WritableDataContext dbContext, Mail mail, CancellationToken cancellationToken)
+        {
+            switch (mail.Error)
+            {
+                case MailTypeNotSupportedException ex:
+                    _logger.LogError(ex.InnerException, "Mail type '{TYPE}' is not supported. Queue item id: {ID}.", mail.QueueItem.MailType, mail.QueueItem.Id);
+                    await RegisterItemFailureAsync(dbContext, mail.QueueItem, canRetry: false, cancellationToken).ConfigureAwait(false);
+                    return;
+                case MailModelSerializationException ex:
+                    _logger.LogError(ex.InnerException, "Model of mail type '{TYPE}' could not be deserialized. Queue item id: {ID}.", mail.QueueItem.MailType, mail.QueueItem.Id);
+                    await RegisterItemFailureAsync(dbContext, mail.QueueItem, canRetry: false, cancellationToken).ConfigureAwait(false);
+                    return;
+                default:
+                    _logger.LogError(mail.Error, "Producing MIME message of mail type '{TYPE}' failed. Queue item id: {ID}.", mail.QueueItem.MailType, mail.QueueItem.Id);
+                    await RegisterItemFailureAsync(dbContext, mail.QueueItem, canRetry: false, cancellationToken).ConfigureAwait(false);
+                    return;
+            }
+        }
+
+        private async Task SendMailAsync(WritableDataContext dbContext, Mail mail, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _smtpClient.SendAsync(mail.Message!, cancellationToken).ConfigureAwait(false);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex.InnerException, "Sending MIME message of mail type '{TYPE}' failed. Queue item id: {ID}.", mail.QueueItem.MailType, mail.QueueItem.Id);
+                await RegisterItemFailureAsync(dbContext, mail.QueueItem, canRetry: false, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            catch (CommandException ex)
+            {
+                _logger.LogError(ex.InnerException, "Sending MIME message of mail type '{TYPE}' failed. Queue item id: {ID}.", mail.QueueItem.MailType, mail.QueueItem.Id);
+                await RegisterItemFailureAsync(dbContext, mail.QueueItem, canRetry: true, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            // cancellation token is not passed since mails should be sent and deleted without interruption,
+            // otherwise they could be sent multiple times
+            await RemoveItemAsync(dbContext, mail, default).ConfigureAwait(false);
+        }
+
+        private async Task SendMailsAsync(IReadOnlyList<Task<Mail>> produceMailTasks, WritableDataContext dbContext, CancellationToken cancellationToken)
+        {
+            try
+            {
+                for (int i = 0, n = produceMailTasks.Count; i < n; i++)
+                {
+                    var mail = await produceMailTasks[i].ConfigureAwait(false);
+
+                    if (mail.Message != null)
+                    {
+                        if (!_smtpClient.IsConnected)
+                        {
+                            try
+                            {
+                                await _smtpClient.ConnectAsync(_smtpHost, _smtpPort, _smtpSecurity, cancellationToken).ConfigureAwait(false);
+                            }
+                            catch (Exception ex) when (!(ex is OperationCanceledException))
+                            {
+                                var smtpClient = _smtpClient;
+                                _smtpClient = _smtpClientFactory();
+                                smtpClient.Dispose();
+                                throw;
+                            }
+
+                            if (_smtpCredentials != null)
+                                await _smtpClient.AuthenticateAsync(_smtpCredentials, cancellationToken).ConfigureAwait(false);
+                        }
+
+                        await SendMailAsync(dbContext, mail, cancellationToken).ConfigureAwait(false);
+                    }
+                    else if (mail.Error != null)
+                        await HandleMailErrorAsync(dbContext, mail, cancellationToken).ConfigureAwait(false);
+                    else
+                        // we should never get here
+                        throw new InvalidOperationException();
+                }
+            }
+            finally
+            {
+                if (_smtpClient.IsConnected)
+                    await _smtpClient.DisconnectAsync(quit: true, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private async Task ProcessAsync(CancellationToken cancellationToken)
+        {
+            using (var scope = _serviceScopeFactory.CreateScope())
+            using (var dbContext = scope.ServiceProvider.GetRequiredService<WritableDataContext>())
+            {
+                IReadOnlyList<Task<Mail>> produceMailTasks;
+                do
+                {
+                    var queueItems = PeekItems(dbContext);
+
+                    produceMailTasks = await ProduceMailsAsync(queueItems, scope.ServiceProvider, cancellationToken).ConfigureAwait(false);
+
+                    if (produceMailTasks.Count > 0)
+                        await SendMailsAsync(produceMailTasks, dbContext, cancellationToken).ConfigureAwait(false);
+                    else
+                        return;
+                }
+                while (_batchSize > 0 && produceMailTasks.Count >= _batchSize);
+            }
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            // https://blog.stephencleary.com/2020/05/backgroundservice-gotcha-startup.html
+            // TODO: revise this workaround when upgrading to .NET 5 (https://github.com/dotnet/runtime/issues/36063)
+            await Task.Yield();
+
+            using (var wakeEvent = new AutoResetEvent(false))
+            {
+                void HandleEnqueued(object s, EventArgs e)
+                {
+                    try { wakeEvent.Set(); }
+                    // ObjectDisposedException can safely be swallowed here
+                    catch (ObjectDisposedException) { }
+                }
+
+                Enqueued += HandleEnqueued;
+                try
+                {
+                    for (; ; )
+                        try
+                        {
+                            await ProcessAsync(stoppingToken).ConfigureAwait(false);
+
+                            // when queue gets empty, we wait for wake event (firing when an item is added to the queue),
+                            // but for maximum safety we check the queue periodically anyway
+                            await wakeEvent.WaitAsync(_sleepTime, stoppingToken).ConfigureAwait(false);
+                        }
+                        catch (Exception ex) when (!(ex is OperationCanceledException))
+                        {
+                            _logger.LogError(ex, $"Unexpected error occurred in the mail sender background service.");
+
+                            await Task.Delay(_errorWaitTime).ConfigureAwait(false);
+                        }
+                }
+                finally { Enqueued -= HandleEnqueued; }
+            }
+        }
+
+        private sealed class MailTypeNotSupportedException : ApplicationException
+        {
+            public MailTypeNotSupportedException(Exception innerException) : base(null, innerException) { }
+        }
+
+        private sealed class MailModelSerializationException : ApplicationException
+        {
+            public MailModelSerializationException(Exception innerException) : base(null, innerException) { }
+        }
+
+        private readonly struct Mail
+        {
+            public Mail(MailQueueItem queueItem, MimeMessage? message, Exception? error)
+            {
+                QueueItem = queueItem;
+                Message = message;
+                Error = error;
+            }
+
+            public MailQueueItem QueueItem { get; }
+            public MimeMessage? Message { get; }
+            public Exception? Error { get; }
+        }
+    }
+}

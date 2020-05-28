@@ -1,0 +1,33 @@
+﻿@using Karambolo.Common
+@using WebApp.Service.Mailing.Users
+@inherits WebApp.Service.Template<UserLockedOutMailModel>
+
+@{
+    var url = UriUtils.BuildPath(GetUIBaseUrl(), "Account/ResetPassword");
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Account Lockout</title>
+</head>
+<body>
+    <h4>[THIS IS AN AUTOMATED MESSAGE - PLEASE DO NOT REPLY DIRECTLY TO THIS EMAIL]</h4>
+    <p>
+        Dear @(Model.Name ?? Model.UserName),
+    </p>
+    <p>
+        Your account has been disabled due to too many unsuccessful login attempts.
+    </p>
+    <p>
+        In order to re-enable your account, you need to reset your password by visiting the link below:<br />
+        <a href="@url">@url</a>
+    </p>
+    <p>
+        Best regards,<br />
+        <!-- TODO -->
+        Support
+    </p>
+</body>
+</html>

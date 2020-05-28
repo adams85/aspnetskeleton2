@@ -1,0 +1,3 @@
+﻿Id;UserName;Email;Password;Comment;IsApproved;PasswordFailuresSinceLastSuccess;LastPasswordFailureDate;LastActivityDate;LastLockoutDate;LastLoginDate;ConfirmationToken;CreateDate;IsLockedOut;LastPasswordChangedDate;PasswordVerificationToken;PasswordVerificationTokenExpirationDate;JwtRefreshToken;JwtRefreshTokenExpirationDate
+11;JohnDoe;johndoe@test.com;NULL;NULL;1;0;NULL;NULL;NULL;NULL;NULL;01/01/2020;0;01/01/2020;NULL;NULL;NULL;NULL
+12;JaneDoe;janedoe@test.com;NULL;NULL;1;0;NULL;NULL;NULL;NULL;NULL;01/01/2020;0;01/01/2020;NULL;NULL;NULL;NULL

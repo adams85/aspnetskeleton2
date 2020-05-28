@@ -1,0 +1,52 @@
+﻿﻿<#@ template language="C#" inherits="CommandTemplateBase" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using <#= $"{Namespace}.DataAccess.Entities" #>;
+
+namespace <#= $"{Namespace}.Service.{Group}" #>
+{
+    internal sealed class <#= $"{Name}CommandHandler" #> : CommandHandler<<#= $"{Name}Command" #>>
+    {
+        public async Task HandleAsync(<#= $"{Name}Command" #> command, CommandContext context, CancellationToken cancellationToken)
+        {
+            Entity entity = await context.DbContext.Entities
+                .FindAsync(new object[] { command.Id }, cancellationToken).ConfigureAwait(false);
+
+            RequireExisting(entity, c => c.Id);
+
+            // ...
+<#
+if (IsProgressReporter)
+{
+#>
+
+            command.Progress?.Report(new ProgressEventData
+            {
+                StatusText = "Finished",
+                Progress = 1f
+            });
+<#
+}
+#>
+
+            await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+<#
+if (IsKeyGenerator)
+{
+#>
+
+            command.OnKeyGenerated?.Invoke(command, entity.Id);
+<#
+}
+#>
+        }
+    }
+}

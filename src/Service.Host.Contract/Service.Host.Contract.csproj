@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>WebApp.Service.Host.Contract</AssemblyName>
+    <RootNamespace>WebApp.Service.Host</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ApplicationArchitecture>Distributed</ApplicationArchitecture>
+    <DefineConstants>$(DefineConstants);DISTRIBUTED</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="protobuf-net.Grpc" Version="1.0.37" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Service.Contract\Service.Contract.csproj" />
+  </ItemGroup>
+
+</Project>

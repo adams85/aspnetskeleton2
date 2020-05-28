@@ -1,0 +1,38 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+namespace WebApp.DataAccess.Providers.PostgreSQL
+{
+    internal sealed class NpgsqlConfiguration : EFCoreConfiguration
+    {
+        private NpgsqlConfiguration(DataAccessOptions options) : base(options) { }
+
+        protected override void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider) =>
+            internalServices
+                .AddEntityFrameworkNpgsql()
+                .Replace(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomNpgsqlMigrationsSqlGenerator>())
+                .Replace(ServiceDescriptor.Singleton<IModelCustomizer, NpgsqlModelCustomizer>())
+                .AddSingleton<IDbProperties>(new NpgsqlProperties(Options.Database));
+
+        protected override void ConfigureOptionsCore(DbContextOptionsBuilder optionsBuilder, IServiceProvider internalServiceProvider, IServiceProvider applicationServiceProvider)
+        {
+            var serverVersion =
+                Options.Database.ServerVersion != null ?
+                Version.Parse(Options.Database.ServerVersion) :
+                null;
+
+            optionsBuilder.UseNpgsql(Options.Database.ConnectionString, options => options.SetPostgresVersion(serverVersion));
+        }
+
+        public sealed class Factory : IConfigurationFactory
+        {
+            public string ProviderName => NpgsqlProperties.ProviderName;
+
+            public EFCoreConfiguration Create(DataAccessOptions options) => new NpgsqlConfiguration(options);
+        }
+    }
+}

@@ -1,0 +1,39 @@
+﻿<Project>
+  <!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019#use-case-multi-level-merging -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- Architecture -->
+  <Choose>
+    <When Condition="$(SolutionName.EndsWith('.Distributed')) OR ($(SolutionName) == '' AND $(ApplicationArchitecture) == 'Distributed')">
+      <PropertyGroup>
+        <ApplicationArchitecture>Distributed</ApplicationArchitecture>
+        <DefineConstants>$(DefineConstants);DISTRIBUTED</DefineConstants>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <ApplicationArchitecture>Monolithic</ApplicationArchitecture>
+        <DefineConstants>$(DefineConstants);MONOLITHIC</DefineConstants>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <!-- DBMS -->
+  <Choose>
+    <When Condition="$(SolutionName.EndsWith('.Monolithic')) OR $(SolutionName.EndsWith('.Distributed'))">
+      <PropertyGroup>
+        <!-- For possible values see DataAccess\Providers. Leave empty for multi-provider support. -->
+        <DbProvider></DbProvider>
+      </PropertyGroup>
+    </When>
+    <When Condition="$(SolutionName.EndsWith('.Tests'))">
+      <PropertyGroup>
+        <DbProvider>SQLite</DbProvider>
+      </PropertyGroup>
+    </When>
+  </Choose>
+</Project>

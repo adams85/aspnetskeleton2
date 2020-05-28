@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>WebApp.Service.Host</AssemblyName>
+    <RootNamespace>WebApp.Service.Host</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ApplicationArchitecture>Distributed</ApplicationArchitecture>
+    <DefineConstants>$(DefineConstants);DISTRIBUTED</DefineConstants>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.4" />
+    <PackageReference Include="Karambolo.Extensions.Logging.File" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="3.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="3.1.4" />
+    <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.37" />
+    <PackageReference Include="System.Linq.Async" Version="4.1.1" />
+    <PackageReference Include="System.Linq.Async" Version="4.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Service\Service.csproj" />
+    <ProjectReference Include="..\Service.Host.Contract\Service.Host.Contract.csproj" />
+    <ProjectReference Include="..\Service.Templates.Razor\Service.Templates.Razor.csproj" />
+  </ItemGroup>
+
+</Project>

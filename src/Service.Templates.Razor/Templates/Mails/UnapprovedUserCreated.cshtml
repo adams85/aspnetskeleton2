@@ -1,0 +1,33 @@
+﻿@using Karambolo.Common
+@using WebApp.Service.Mailing.Users
+@inherits WebApp.Service.Template<UnapprovedUserCreatedMailModel>
+
+@{
+    var url = UriUtils.BuildUrl(new[] { GetUIBaseUrl(), "Account/Verify" }, new { u = Model.UserName, v = Model.VerificationToken });
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Account Activation</title>
+</head>
+<body>
+    <h4>[THIS IS AN AUTOMATED MESSAGE - PLEASE DO NOT REPLY DIRECTLY TO THIS EMAIL]</h4>
+    <p>
+        Dear @(Model.Name ?? Model.UserName),
+    </p>
+    <p>
+        Thank you for registering! Your account has been created.
+    </p>
+    <p>
+        In order to start using your account, please verify your registration by visiting the link below:<br />
+        <a href="@url">@url</a>
+    </p>
+    <p>
+        Best regards,<br />
+        <!-- TODO -->
+        Support
+    </p>
+</body>
+</html>

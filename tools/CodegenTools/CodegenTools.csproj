@@ -1,0 +1,71 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>codegen</AssemblyName>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PackageId>Karambolo.AspNetSkeleton.CodegenTools</PackageId>
+    <PackAsTool>true</PackAsTool>
+    <PackageOutputPath>..\..\.nuget</PackageOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Templates\CommandHandler.tt">
+      <LastGenOutput>CommandHandler.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\Command.tt">
+      <LastGenOutput>Command.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\QueryHandler.tt">
+      <LastGenOutput>QueryHandler.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\Result.tt">
+      <LastGenOutput>Result.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\Query.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Query.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Templates\Command.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Command.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\CommandHandler.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CommandHandler.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\Query.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Query.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\QueryHandler.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>QueryHandler.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\Result.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Result.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

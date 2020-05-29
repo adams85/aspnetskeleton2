@@ -12,7 +12,7 @@ namespace WebApp.Service.Roles
 {
     internal sealed class IsUserInRoleQueryHandler : QueryHandler<IsUserInRoleQuery, bool>
     {
-        public async Task<bool> HandleAsync(IsUserInRoleQuery query, QueryContext context, CancellationToken cancellationToken)
+        public override async Task<bool> HandleAsync(IsUserInRoleQuery query, QueryContext context, CancellationToken cancellationToken)
         {
             IQueryable<UserRole> linq = context.DbContext.UserRoles;
 

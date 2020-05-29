@@ -16,7 +16,7 @@ namespace WebApp.Service.Mailing
             _mailSenderService = mailSenderService ?? throw new ArgumentNullException(nameof(mailSenderService));
         }
 
-        public async Task HandleAsync(EnqueueMailCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(EnqueueMailCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var mailTypeDefinition = _mailTypeCatalog.GetDefinition(command.Model.MailType);
             RequireValid(mailTypeDefinition != null, c => c.Model.MailType);

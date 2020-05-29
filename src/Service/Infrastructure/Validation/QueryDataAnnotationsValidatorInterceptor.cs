@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace WebApp.Service.Infrastructure.Validation
 {
-    internal sealed class QueryDataAnnotationsValidatorInterceptor
+    internal sealed class QueryDataAnnotationsValidatorInterceptor : IQueryInterceptor
     {
         private readonly QueryExecutionDelegate _next;
 

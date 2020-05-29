@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Karambolo.Common;
 
 namespace WebApp.Service
@@ -9,6 +11,8 @@ namespace WebApp.Service
         where TCommand : ICommand
     {
         protected CommandHandler() { }
+
+        public abstract Task HandleAsync(TCommand command, CommandContext context, CancellationToken cancellationToken);
 
         #region Helpers for manual validation
 

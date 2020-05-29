@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace WebApp.Service.Infrastructure.Caching
 {
-    internal class CachedQueryInvalidatorInterceptor
+    internal class CachedQueryInvalidatorInterceptor : ICommandInterceptor
     {
         private readonly CommandExecutionDelegate _next;
         private readonly Type[] _queryTypes;

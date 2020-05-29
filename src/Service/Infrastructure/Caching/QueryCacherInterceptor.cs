@@ -9,7 +9,7 @@ using WebApp.Service.Infrastructure.Serialization;
 
 namespace WebApp.Service.Infrastructure.Caching
 {
-    internal class QueryCacherInterceptor
+    internal class QueryCacherInterceptor : IQueryInterceptor
     {
         private readonly QueryExecutionDelegate _next;
         private readonly QueryCachingOptions _options;

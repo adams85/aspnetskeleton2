@@ -8,7 +8,7 @@ namespace WebApp.Service.Users
 {
     internal sealed class ListUsersQueryHandler : ListQueryHandler<ListUsersQuery, UserData>
     {
-        public async Task<ListResult<UserData>> HandleAsync(ListUsersQuery query, QueryContext context, CancellationToken cancellationToken)
+        public override async Task<ListResult<UserData>> HandleAsync(ListUsersQuery query, QueryContext context, CancellationToken cancellationToken)
         {
             var linq =
                 query.RoleName != null ?

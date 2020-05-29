@@ -5,7 +5,7 @@ namespace WebApp.Service.Users
 {
     internal sealed class DeleteUserCommandHandler : CommandHandler<DeleteUserCommand>
     {
-        public async Task HandleAsync(DeleteUserCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(DeleteUserCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var user = await context.DbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
             RequireExisting(user, c => c.UserName);

@@ -25,7 +25,7 @@ namespace WebApp.Service.Users
             _lockoutOptions = lockoutOptions?.Value;
         }
 
-        public async Task HandleAsync(RegisterUserActivityCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(RegisterUserActivityCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var user = await context.DbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
             RequireExisting(user, c => c.UserName);

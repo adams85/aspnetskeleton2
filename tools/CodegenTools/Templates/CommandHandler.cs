@@ -18,7 +18,7 @@ namespace CodegenTools.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
+    #line 1 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class CommandHandler : CommandTemplateBase
     {
@@ -33,35 +33,35 @@ namespace CodegenTools.Templates
                     "m.Threading;\r\nusing System.Threading.Tasks;\r\nusing Microsoft.EntityFrameworkCore" +
                     ";\r\nusing ");
             
-            #line 12 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
+            #line 12 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Namespace}.DataAccess.Entities"));
             
             #line default
             #line hidden
             this.Write(";\r\n\r\nnamespace ");
             
-            #line 14 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
+            #line 14 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Namespace}.Service.{Group}"));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n    internal sealed class ");
             
-            #line 16 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
+            #line 16 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}CommandHandler"));
             
             #line default
             #line hidden
             this.Write(" : CommandHandler<");
             
-            #line 16 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
+            #line 16 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}Command"));
             
             #line default
             #line hidden
-            this.Write(">\r\n    {\r\n        public async Task HandleAsync(");
+            this.Write(">\r\n    {\r\n        public override async Task HandleAsync(");
             
-            #line 18 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
+            #line 18 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}Command"));
             
             #line default
@@ -76,7 +76,7 @@ namespace CodegenTools.Templates
             // ...
 ");
             
-            #line 26 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
+            #line 26 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
 
 if (IsProgressReporter)
 {
@@ -88,7 +88,7 @@ if (IsProgressReporter)
                     "            StatusText = \"Finished\",\r\n                Progress = 1f\r\n           " +
                     " });\r\n");
             
-            #line 36 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
+            #line 36 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
 
 }
 
@@ -98,7 +98,7 @@ if (IsProgressReporter)
             this.Write("\r\n            await context.DbContext.SaveChangesAsync(cancellationToken).Configu" +
                     "reAwait(false);\r\n");
             
-            #line 41 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
+            #line 41 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
 
 if (IsKeyGenerator)
 {
@@ -108,7 +108,7 @@ if (IsKeyGenerator)
             #line hidden
             this.Write("\r\n            command.OnKeyGenerated?.Invoke(command, entity.Id);\r\n");
             
-            #line 47 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
+            #line 47 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\CommandHandler.tt"
 
 }
 

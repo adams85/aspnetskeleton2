@@ -32,7 +32,7 @@ namespace WebApp.Service.Infrastructure.Caching
                 var options = builder.BuildOptions();
 
                 var queryInterceptorActivator = ActivatorUtilities.CreateFactory(builder.QueryInterceptorType, new[] { typeof(QueryExecutionDelegate), typeof(QueryCachingOptions) });
-                QueryInterceptorFactory queryInterceptorFactory = (sp, next) => queryInterceptorActivator(sp, new object[] { next, options });
+                QueryInterceptorFactory queryInterceptorFactory = (sp, next) => (IQueryInterceptor)queryInterceptorActivator(sp, new object[] { next, options });
                 interceptorConfiguration.QueryInterceptorFactories.Add((queryType.IsAssignableFrom, queryInterceptorFactory));
 
                 foreach (var key in builder.Invalidators)
@@ -49,7 +49,7 @@ namespace WebApp.Service.Infrastructure.Caching
                 var queryTypes = queryTypeList.ToArray();
 
                 var commandInterceptorActivator = ActivatorUtilities.CreateFactory(commandInterceptorType, new[] { typeof(CommandExecutionDelegate), typeof(Type[]) });
-                CommandInterceptorFactory commandInterceptorFactory = (sp, next) => commandInterceptorActivator(sp, new object[] { next, queryTypes });
+                CommandInterceptorFactory commandInterceptorFactory = (sp, next) => (ICommandInterceptor)commandInterceptorActivator(sp, new object[] { next, queryTypes });
                 interceptorConfiguration.CommandInterceptorFactories.Add((commandType.IsAssignableFrom, commandInterceptorFactory));
             }
         }

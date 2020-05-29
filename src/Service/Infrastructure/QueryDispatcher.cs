@@ -7,16 +7,11 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Karambolo.Common;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using WebApp.Core.Helpers;
 
 namespace WebApp.Service.Infrastructure
 {
-    internal delegate Task<object?> QueryExecutionDelegate(QueryContext context, CancellationToken cancellationToken);
-
-    internal delegate object QueryInterceptorFactory(IServiceProvider serviceProvider, QueryExecutionDelegate next);
-
     internal sealed class QueryDispatcher : IQueryDispatcher
     {
         private readonly IServiceProvider _serviceProvider;
@@ -50,17 +45,11 @@ namespace WebApp.Service.Infrastructure
         private sealed class InterceptorChain
         {
             private static readonly PropertyInfo s_contextScopedServicesProperty = Lambda.Property((QueryContext context) => context.ScopedServices);
-            private static readonly PropertyInfo s_contextQueryProperty = Lambda.Property((QueryContext context) => context.Query);
 
-            private static readonly MethodInfo s_convertHandlerResultMethodDefinition =
-                new Func<Task<object>, Task<object?>>(ConvertHandlerResult<object>).Method.GetGenericMethodDefinition();
-
-            private static async Task<object?> ConvertHandlerResult<TResult>(Task<TResult> task) => await task.ConfigureAwait(false);
-
-            private static QueryExecutionDelegate BuildExecutionDelegate(object target, Type resultType, bool isHandler)
+            private static QueryExecutionDelegate BuildExecutionDelegate(IQueryInterceptor target)
             {
                 var type = target.GetType();
-                var methodName = isHandler ? "HandleAsync" : "InvokeAsync";
+                const string methodName = "InvokeAsync";
                 MethodInfo? method;
 
                 try { method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public); }
@@ -69,18 +58,13 @@ namespace WebApp.Service.Infrastructure
                 if (method == null)
                     throw new InvalidOperationException($"Type {type} declares no or multiple {methodName} methods.");
 
-                var methodReturnType = isHandler ? typeof(Task<>).MakeGenericType(resultType) : typeof(Task<object?>);
+                var methodReturnType = typeof(Task<object?>);
                 if (method.ReturnType != methodReturnType)
                     throw new InvalidOperationException($"Method {type}.{methodName} must return {methodReturnType}.");
 
-                var convertReturnType =
-                    isHandler ?
-                    (methodCall, _) => Expression.Call(s_convertHandlerResultMethodDefinition.MakeGenericMethod(resultType), methodCall) :
-                    (Func<MethodCallExpression, Type, Expression>?)null;
-
                 return method.BuildMethodInjectionDelegate<QueryExecutionDelegate>(
-                    _ => Expression.Constant(target),
-                    (delegateParams, methodParam, _) =>
+                    getTargetInstance: _ => Expression.Constant(target),
+                    getStaticArguments: (delegateParams, methodParam, _) =>
                     {
                         if (methodParam.ParameterType == typeof(QueryContext))
                             return delegateParams[0];
@@ -88,30 +72,26 @@ namespace WebApp.Service.Infrastructure
                         if (methodParam.ParameterType == typeof(CancellationToken))
                             return delegateParams[1];
 
-                        if (typeof(IQuery).IsAssignableFrom(methodParam.ParameterType))
-                            return Expression.Convert(Expression.MakeMemberAccess(delegateParams[0], s_contextQueryProperty), methodParam.ParameterType);
-
                         return null;
                     },
-                    delegateParams => Expression.MakeMemberAccess(delegateParams[0], s_contextScopedServicesProperty),
-                    convertReturnType);
+                    getServiceProvider: delegateParams => Expression.MakeMemberAccess(delegateParams[0], s_contextScopedServicesProperty));
             }
 
             public InterceptorChain(QueryDispatcher dispatcher, Type queryType)
             {
                 var resultType = QueryContext.GetResultType(queryType);
-                var handlerType = typeof(QueryHandler<,>).MakeGenericType(queryType, resultType);
 
-                var handler = dispatcher._serviceProvider.GetRequiredService(handlerType);
-                var executionDelegate = BuildExecutionDelegate(handler, resultType, isHandler: true);
+                var handlerInvokerInterceptorType = typeof(HandlerInvokerInterceptor<,>).MakeGenericType(queryType, resultType);
+                var interceptor = (IQueryInterceptor)Activator.CreateInstance(handlerInvokerInterceptorType);
+                var executionDelegate = BuildExecutionDelegate(interceptor);
 
                 for (var i = dispatcher._interceptorFactories.Count - 1; i >= 0; i--)
                 {
                     var (queryTypeFilter, interceptorFactory) = dispatcher._interceptorFactories[i];
                     if (queryTypeFilter(queryType))
                     {
-                        var interceptor = interceptorFactory(dispatcher._serviceProvider, executionDelegate);
-                        executionDelegate = BuildExecutionDelegate(interceptor, resultType, isHandler: false);
+                        interceptor = interceptorFactory(dispatcher._serviceProvider, executionDelegate);
+                        executionDelegate = BuildExecutionDelegate(interceptor);
                     }
                 }
 
@@ -119,6 +99,13 @@ namespace WebApp.Service.Infrastructure
             }
 
             public QueryExecutionDelegate ExecuteAsync { get; }
+        }
+
+        private sealed class HandlerInvokerInterceptor<TQuery, TResult> : IQueryInterceptor
+            where TQuery : IQuery<TResult>
+        {
+            public async Task<object?> InvokeAsync(QueryHandler<TQuery, TResult> handler, QueryContext context, CancellationToken cancellationToken) =>
+                await handler.HandleAsync((TQuery)context.Query, context, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace WebApp.Service.Roles
 {
     internal sealed class AddUsersToRolesCommandHandler : CommandHandler<AddUsersToRolesCommand>
     {
-        public async Task HandleAsync(AddUsersToRolesCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(AddUsersToRolesCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var dbProperties = context.DbContext.GetDbProperties();
 

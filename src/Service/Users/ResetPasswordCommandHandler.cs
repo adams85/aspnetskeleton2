@@ -24,7 +24,7 @@ namespace WebApp.Service.Users
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         }
 
-        public async Task HandleAsync(ResetPasswordCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(ResetPasswordCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var userWithProfile = await
             (

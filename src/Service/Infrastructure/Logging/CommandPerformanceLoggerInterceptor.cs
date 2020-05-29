@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace WebApp.Service.Infrastructure.Logging
 {
-    internal sealed class CommandPerformanceLoggerInterceptor
+    internal sealed class CommandPerformanceLoggerInterceptor : ICommandInterceptor
     {
         private readonly CommandExecutionDelegate _next;
         private readonly ILoggerFactory? _loggerFactory;

@@ -18,7 +18,7 @@ namespace CodegenTools.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+    #line 1 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class Query : QueryTemplateBase
     {
@@ -32,27 +32,27 @@ namespace CodegenTools.Templates
             this.Write("using System;\r\nusing System.Collections.Generic;\r\nusing System.Runtime.Serializat" +
                     "ion;\r\n\r\nnamespace ");
             
-            #line 10 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 10 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Namespace}.Service.{Group}"));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n    [DataContract]\r\n    public class ");
             
-            #line 13 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 13 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}Query"));
             
             #line default
             #line hidden
             this.Write(" : ");
             
-            #line 13 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 13 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetQueryBaseType(GetResultType())));
             
             #line default
             #line hidden
             
-            #line 13 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 13 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(IsProgressReporter ? ", IProgressReporterQuery" : ""));
             
             #line default
@@ -60,7 +60,7 @@ namespace CodegenTools.Templates
             this.Write("\r\n    {\r\n        [DataMember(Order = 1)] public string Property { get; set; } = n" +
                     "ull!;\r\n");
             
-            #line 16 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 16 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
 
 if (IsProgressReporter)
 {
@@ -70,7 +70,7 @@ if (IsProgressReporter)
             #line hidden
             this.Write("\r\n        public IProgress<ProgressEventData>? Progress { get; set; }\r\n");
             
-            #line 22 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 22 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
 
 }
 

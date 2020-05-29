@@ -18,7 +18,7 @@ namespace CodegenTools.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Result.tt"
+    #line 1 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Result.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class Result : QueryTemplateBase
     {
@@ -32,20 +32,20 @@ namespace CodegenTools.Templates
             this.Write("using System;\r\nusing System.Collections.Generic;\r\nusing System.Runtime.Serializat" +
                     "ion;\r\n\r\nnamespace ");
             
-            #line 10 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Result.tt"
+            #line 10 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Result.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Namespace}.Service.{Group}"));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n    [DataContract]\r\n    public class ");
             
-            #line 13 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Result.tt"
+            #line 13 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Result.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}Result"));
             
             #line default
             #line hidden
             
-            #line 13 "E:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Result.tt"
+            #line 13 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Result.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(IsList ? $" : ListResult<{ListItemType}>" : ""));
             
             #line default

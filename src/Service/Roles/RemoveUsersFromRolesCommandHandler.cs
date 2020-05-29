@@ -13,7 +13,7 @@ namespace WebApp.Service.Roles
 {
     internal sealed class RemoveUsersFromRolesCommandHandler : CommandHandler<RemoveUsersFromRolesCommand>
     {
-        public async Task HandleAsync(RemoveUsersFromRolesCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(RemoveUsersFromRolesCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var dbProperties = context.DbContext.GetDbProperties();
 

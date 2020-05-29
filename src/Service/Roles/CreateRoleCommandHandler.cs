@@ -7,7 +7,7 @@ namespace WebApp.Service.Roles
 {
     internal sealed class CreateRoleCommandHandler : CommandHandler<CreateRoleCommand>
     {
-        public async Task HandleAsync(CreateRoleCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(CreateRoleCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var roleExists = await context.DbContext.Roles.FilterByName(command.RoleName).AnyAsync(cancellationToken).ConfigureAwait(false);
             RequireUnique(roleExists, c => c.RoleName);

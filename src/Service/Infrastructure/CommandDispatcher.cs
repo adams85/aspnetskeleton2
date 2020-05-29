@@ -7,16 +7,11 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Karambolo.Common;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using WebApp.Core.Helpers;
 
 namespace WebApp.Service.Infrastructure
 {
-    internal delegate Task CommandExecutionDelegate(CommandContext context, CancellationToken cancellationToken);
-
-    internal delegate object CommandInterceptorFactory(IServiceProvider serviceProvider, CommandExecutionDelegate next);
-
     internal sealed class CommandDispatcher : ICommandDispatcher
     {
         private readonly IServiceProvider _serviceProvider;
@@ -47,12 +42,11 @@ namespace WebApp.Service.Infrastructure
         private sealed class InterceptorChain
         {
             private static readonly PropertyInfo s_contextScopedServicesProperty = Lambda.Property((CommandContext context) => context.ScopedServices);
-            private static readonly PropertyInfo s_contextCommandProperty = Lambda.Property((CommandContext context) => context.Command);
 
-            private static CommandExecutionDelegate BuildExecutionDelegate(object target, bool isHandler)
+            private static CommandExecutionDelegate BuildExecutionDelegate(ICommandInterceptor target)
             {
                 var type = target.GetType();
-                var methodName = isHandler ? "HandleAsync" : "InvokeAsync";
+                const string methodName = "InvokeAsync";
                 MethodInfo? method;
 
                 try { method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public); }
@@ -66,8 +60,8 @@ namespace WebApp.Service.Infrastructure
                     throw new InvalidOperationException($"Method {type}.{methodName} must return {methodReturnType}.");
 
                 return method.BuildMethodInjectionDelegate<CommandExecutionDelegate>(
-                    _ => Expression.Constant(target),
-                    (delegateParams, methodParam, _) =>
+                    getTargetInstance: _ => Expression.Constant(target),
+                    getStaticArguments: (delegateParams, methodParam, _) =>
                     {
                         if (methodParam.ParameterType == typeof(CommandContext))
                             return delegateParams[0];
@@ -75,28 +69,24 @@ namespace WebApp.Service.Infrastructure
                         if (methodParam.ParameterType == typeof(CancellationToken))
                             return delegateParams[1];
 
-                        if (typeof(ICommand).IsAssignableFrom(methodParam.ParameterType))
-                            return Expression.Convert(Expression.MakeMemberAccess(delegateParams[0], s_contextCommandProperty), methodParam.ParameterType);
-
                         return null;
                     },
-                    delegateParams => Expression.MakeMemberAccess(delegateParams[0], s_contextScopedServicesProperty));
+                    getServiceProvider: delegateParams => Expression.MakeMemberAccess(delegateParams[0], s_contextScopedServicesProperty));
             }
 
             public InterceptorChain(CommandDispatcher dispatcher, Type commandType)
             {
-                var handlerType = typeof(CommandHandler<>).MakeGenericType(commandType);
-
-                var handler = dispatcher._serviceProvider.GetRequiredService(handlerType);
-                var executionDelegate = BuildExecutionDelegate(handler, isHandler: true);
+                var handlerInvokerInterceptorType = typeof(HandlerInvokerInterceptor<>).MakeGenericType(commandType);
+                var interceptor = (ICommandInterceptor)Activator.CreateInstance(handlerInvokerInterceptorType);
+                var executionDelegate = BuildExecutionDelegate(interceptor);
 
                 for (var i = dispatcher._interceptorFactories.Count - 1; i >= 0; i--)
                 {
                     var (commandTypeFilter, interceptorFactory) = dispatcher._interceptorFactories[i];
                     if (commandTypeFilter(commandType))
                     {
-                        var interceptor = interceptorFactory(dispatcher._serviceProvider, executionDelegate);
-                        executionDelegate = BuildExecutionDelegate(interceptor, isHandler: false);
+                        interceptor = interceptorFactory(dispatcher._serviceProvider, executionDelegate);
+                        executionDelegate = BuildExecutionDelegate(interceptor);
                     }
                 }
 
@@ -104,6 +94,13 @@ namespace WebApp.Service.Infrastructure
             }
 
             public CommandExecutionDelegate ExecuteAsync { get; }
+        }
+
+        private sealed class HandlerInvokerInterceptor<TCommand> : ICommandInterceptor
+            where TCommand : ICommand
+        {
+            public Task InvokeAsync(CommandHandler<TCommand> handler, CommandContext context, CancellationToken cancellationToken) =>
+                handler.HandleAsync((TCommand)context.Command, context, cancellationToken);
         }
     }
 }

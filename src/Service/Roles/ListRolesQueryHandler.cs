@@ -9,7 +9,7 @@ namespace WebApp.Service.Roles
 {
     internal sealed class ListRolesQueryHandler : ListQueryHandler<ListRolesQuery, RoleData>
     {
-        public async Task<ListResult<RoleData>> HandleAsync(ListRolesQuery query, QueryContext context, CancellationToken cancellationToken)
+        public override async Task<ListResult<RoleData>> HandleAsync(ListRolesQuery query, QueryContext context, CancellationToken cancellationToken)
         {
             IQueryable<Role> linq;
             if (query.UserName != null)

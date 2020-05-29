@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace WebApp.Service.Infrastructure.Validation
 {
-    internal sealed class CommandDataAnnotationsValidatorInterceptor
+    internal sealed class CommandDataAnnotationsValidatorInterceptor : ICommandInterceptor
     {
         private readonly CommandExecutionDelegate _next;
 

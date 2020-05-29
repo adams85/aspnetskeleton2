@@ -14,7 +14,7 @@ namespace WebApp.Service.Users
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         }
 
-        public async Task HandleAsync(LockUserCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(LockUserCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var user = await context.DbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
             RequireExisting(user, c => c.UserName);

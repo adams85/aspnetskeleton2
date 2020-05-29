@@ -6,7 +6,7 @@ namespace WebApp.Service.Users
 {
     internal sealed class ApproveUserCommandHandler : CommandHandler<ApproveUserCommand>
     {
-        public async Task HandleAsync(ApproveUserCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(ApproveUserCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var user = await context.DbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
             RequireExisting(user, c => c.UserName);

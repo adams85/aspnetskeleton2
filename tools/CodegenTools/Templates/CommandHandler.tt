@@ -15,7 +15,7 @@ namespace <#= $"{Namespace}.Service.{Group}" #>
 {
     internal sealed class <#= $"{Name}CommandHandler" #> : CommandHandler<<#= $"{Name}Command" #>>
     {
-        public async Task HandleAsync(<#= $"{Name}Command" #> command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(<#= $"{Name}Command" #> command, CommandContext context, CancellationToken cancellationToken)
         {
             Entity entity = await context.DbContext.Entities
                 .FindAsync(new object[] { command.Id }, cancellationToken).ConfigureAwait(false);

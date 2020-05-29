@@ -7,7 +7,7 @@ namespace WebApp.Service.Users
 {
     internal sealed class AuthenticateUserQueryHandler : QueryHandler<AuthenticateUserQuery, AuthenticateUserResult>
     {
-        public async Task<AuthenticateUserResult> HandleAsync(AuthenticateUserQuery query, QueryContext context, CancellationToken cancellationToken)
+        public override async Task<AuthenticateUserResult> HandleAsync(AuthenticateUserQuery query, QueryContext context, CancellationToken cancellationToken)
         {
             var user = await context.DbContext.Users.GetByNameAsync(query.UserName, cancellationToken).ConfigureAwait(false);
 

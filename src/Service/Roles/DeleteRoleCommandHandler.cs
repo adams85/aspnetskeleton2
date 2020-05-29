@@ -6,7 +6,7 @@ namespace WebApp.Service.Roles
 {
     internal sealed class DeleteRoleCommandHandler : CommandHandler<DeleteRoleCommand>
     {
-        public async Task HandleAsync(DeleteRoleCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(DeleteRoleCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var role = await context.DbContext.Roles.GetByNameAsync(command.RoleName, cancellationToken).ConfigureAwait(false);
             RequireExisting(role, c => c.RoleName);

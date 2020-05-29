@@ -8,7 +8,7 @@ namespace WebApp.Service.Roles
 {
     internal sealed class GetRoleQueryHandler : QueryHandler<GetRoleQuery, RoleData?>
     {
-        public async Task<RoleData?> HandleAsync(GetRoleQuery query, QueryContext context, CancellationToken cancellationToken)
+        public override async Task<RoleData?> HandleAsync(GetRoleQuery query, QueryContext context, CancellationToken cancellationToken)
         {
             Role role;
             switch (query.Identifier)

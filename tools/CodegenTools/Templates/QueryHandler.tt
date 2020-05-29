@@ -18,7 +18,7 @@ var resultType = GetResultType();
 #>
     internal sealed class <#= $"{Name}QueryHandler" #> : <#= GetQueryHandlerBaseType(resultType) #>
     {
-        public async Task<<#= resultType #>> HandleAsync(<#= $"{Name}Query" #> query, QueryContext context, CancellationToken cancellationToken)
+        public override async Task<<#= resultType #>> HandleAsync(<#= $"{Name}Query" #> query, QueryContext context, CancellationToken cancellationToken)
         {
 <#
 if (!IsList)

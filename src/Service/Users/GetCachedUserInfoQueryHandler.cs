@@ -7,7 +7,7 @@ namespace WebApp.Service.Users
 {
     internal sealed class GetCachedUserInfoQueryHandler : QueryHandler<GetCachedUserInfoQuery, CachedUserInfoData?>
     {
-        public async Task<CachedUserInfoData?> HandleAsync(GetCachedUserInfoQuery query, QueryContext context, CancellationToken cancellationToken)
+        public override async Task<CachedUserInfoData?> HandleAsync(GetCachedUserInfoQuery query, QueryContext context, CancellationToken cancellationToken)
         {
             var linq =
                 from u in context.DbContext.Users.FilterByName(query.UserName)

@@ -30,7 +30,7 @@ namespace WebApp.Service.Users
             _passwordOptions = passwordOptions?.Value;
         }
 
-        public async Task HandleAsync(CreateUserCommand command, CommandContext context, CancellationToken cancellationToken)
+        public override async Task HandleAsync(CreateUserCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var userExists = await context.DbContext.Users.FilterByName(command.UserName).AnyAsync(cancellationToken).ConfigureAwait(false);
             RequireUnique(userExists, c => c.UserName);

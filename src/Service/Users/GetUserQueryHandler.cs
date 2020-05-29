@@ -7,7 +7,7 @@ namespace WebApp.Service.Users
 {
     internal sealed class GetUserQueryHandler : QueryHandler<GetUserQuery, UserData?>
     {
-        public async Task<UserData?> HandleAsync(GetUserQuery query, QueryContext context, CancellationToken cancellationToken)
+        public override async Task<UserData?> HandleAsync(GetUserQuery query, QueryContext context, CancellationToken cancellationToken)
         {
             User user;
             switch (query.Identifier)

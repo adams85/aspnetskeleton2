@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Karambolo.Common;
 using ProtoBuf.Grpc;
@@ -38,53 +39,39 @@ namespace WebApp.Service.Host.Services
 
             var query = (IQuery)ServiceHostContractSerializer.Default.Deserialize(request.SerializedQuery ?? Array.Empty<byte>(), queryType);
 
-            ServiceErrorException? errorException = null;
             object? result = null;
+            ServiceErrorException? errorException = null;
+
+            Task<object?> dispatchTask;
 
             if (notifyEvents && query is IEventProducerQuery eventProducerQuery)
             {
-                using (var eventSubject = new Subject<Event>())
+                var channel = Channel.CreateUnbounded<Event>(new UnboundedChannelOptions
                 {
-                    eventProducerQuery.OnEvent = (_, @event) => eventSubject.OnNext(@event);
+                    SingleReader = true,
+                    SingleWriter = false,
+                });
 
-                    var dispatchStatus = Observable.FromAsync(() => _queryDispatcher.DispatchAsync(query, cancellationToken))
-                        .Select(result => (executed: true, result))
-                        .StartWith((executed: false, result: null));
+                eventProducerQuery.OnEvent = (_, @event) => channel.Writer.TryWrite(@event);
 
-                    var events = eventSubject
-                        .StartWith(default(Event)!)
-                        .CombineLatest(dispatchStatus, (@event, status) => (@event, status.executed, status.result))
-                        .Skip(1);
+                dispatchTask = Task.Run(async () =>
+                {
+                    try { return await _queryDispatcher.DispatchAsync(query, cancellationToken); }
+                    finally { channel.Writer.Complete(); }
+                });
 
-                    await using (var enumerator = events.ToAsyncEnumerable().GetAsyncEnumerator(cancellationToken))
-                    {
-                        for (; ; )
+                while (await channel.Reader.WaitToReadAsync(cancellationToken))
+                    while (channel.Reader.TryRead(out var @event))
+                        yield return new QueryResponse.Notification
                         {
-                            bool success;
-                            try { success = await enumerator.MoveNextAsync(); }
-                            catch (ServiceErrorException ex)
-                            {
-                                errorException = ex;
-                                break;
-                            }
-
-                            if (!success || enumerator.Current.executed)
-                            {
-                                result = enumerator.Current.result;
-                                break;
-                            }
-
-                            yield return new QueryResponse.Notification
-                            {
-                                Event = new EventData { Value = enumerator.Current.@event }
-                            };
-                        }
-                    }
-                }
+                            Event = new EventData { Value = @event }
+                        };
             }
             else
-                try { result = await _queryDispatcher.DispatchAsync(query, cancellationToken); }
-                catch (ServiceErrorException ex) { errorException = ex; }
+                dispatchTask = _queryDispatcher.DispatchAsync(query, cancellationToken);
+
+            try { result = await dispatchTask; }
+            catch (ServiceErrorException ex) { errorException = ex; }
 
             if (errorException != null)
                 yield return new QueryResponse.Failure { Error = errorException.ToData() };
@@ -95,14 +82,17 @@ namespace WebApp.Service.Host.Services
                     new QueryResponse.Success { IsResultNull = true };
         }
 
-        public ValueTask<QueryResponse> Invoke(QueryRequest request, CallContext context = default)
+        public async ValueTask<QueryResponse> Invoke(QueryRequest request, CallContext context = default)
         {
-            return InvokeCore(request, notifyEvents: false, context.CancellationToken).SingleAsync();
+            await using var enumerator = InvokeCore(request, notifyEvents: false, context.CancellationToken).GetAsyncEnumerator();
+
+            if (!await enumerator.MoveNextAsync())
+                throw new InvalidOperationException();
+
+            return enumerator.Current;
         }
 
-        public IAsyncEnumerable<QueryResponse> InvokeWithEventNotification(QueryRequest request, CallContext context = default)
-        {
-            return InvokeCore(request, notifyEvents: true, context.CancellationToken);
-        }
+        public IAsyncEnumerable<QueryResponse> InvokeWithEventNotification(QueryRequest request, CallContext context = default) =>
+            InvokeCore(request, notifyEvents: true, context.CancellationToken);
     }
 }

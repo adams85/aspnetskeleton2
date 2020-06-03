@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Karambolo.Common;
 using ProtoBuf.Grpc;
@@ -55,47 +56,36 @@ namespace WebApp.Service.Host.Services
 
             try
             {
+                Task dispatchTask;
+
                 if (notifyEvents && command is IEventProducerCommand eventProducerCommand)
                 {
-                    using (var eventSubject = new Subject<Event>())
+                    var channel = Channel.CreateUnbounded<Event>(new UnboundedChannelOptions
                     {
-                        eventProducerCommand.OnEvent = (_, @event) => eventSubject.OnNext(@event);
+                        SingleReader = true,
+                        SingleWriter = false,
+                    });
 
-                        var dispatchStatus = Observable.FromAsync(() => _commandDispatcher.DispatchAsync(command, cancellationToken))
-                            .Select(_ => true)
-                            .StartWith(false);
+                    eventProducerCommand.OnEvent = (_, @event) => channel.Writer.TryWrite(@event);
 
-                        var events = eventSubject
-                            .StartWith(default(Event)!)
-                            .CombineLatest(dispatchStatus, (@event, status) => (@event, executed: status))
-                            .Skip(1);
+                    dispatchTask = Task.Run(async () =>
+                    {
+                        try { await _commandDispatcher.DispatchAsync(command, cancellationToken); }
+                        finally { channel.Writer.Complete(); }
+                    });
 
-                        await using (var enumerator = events.ToAsyncEnumerable().GetAsyncEnumerator(cancellationToken))
-                        {
-                            for (; ; )
+                    while (await channel.Reader.WaitToReadAsync(cancellationToken))
+                        while (channel.Reader.TryRead(out var @event))
+                            yield return new CommandResponse.Notification
                             {
-                                bool success;
-                                try { success = await enumerator.MoveNextAsync(); }
-                                catch (ServiceErrorException ex)
-                                {
-                                    errorException = ex;
-                                    break;
-                                }
-
-                                if (!success || enumerator.Current.executed)
-                                    break;
-
-                                yield return new CommandResponse.Notification
-                                {
-                                    Event = new EventData { Value = enumerator.Current.@event }
-                                };
-                            }
-                        }
-                    }
+                                Event = new EventData { Value = @event }
+                            };
                 }
                 else
-                    try { await _commandDispatcher.DispatchAsync(command, cancellationToken); }
-                    catch (ServiceErrorException ex) { errorException = ex; }
+                    dispatchTask = _commandDispatcher.DispatchAsync(command, cancellationToken);
+
+                try { await dispatchTask; }
+                catch (ServiceErrorException ex) { errorException = ex; }
             }
             finally
             {
@@ -109,14 +99,17 @@ namespace WebApp.Service.Host.Services
                 yield return new CommandResponse.Success { Key = key != null ? KeyData.From(key) : null };
         }
 
-        public ValueTask<CommandResponse> Invoke(CommandRequest request, CallContext context = default)
+        public async ValueTask<CommandResponse> Invoke(CommandRequest request, CallContext context = default)
         {
-            return InvokeCore(request, notifyEvents: false, context.CancellationToken).SingleAsync();
+            await using var enumerator = InvokeCore(request, notifyEvents: false, context.CancellationToken).GetAsyncEnumerator();
+
+            if (!await enumerator.MoveNextAsync())
+                throw new InvalidOperationException();
+
+            return enumerator.Current;
         }
 
-        public IAsyncEnumerable<CommandResponse> InvokeWithEventNotification(CommandRequest request, CallContext context = default)
-        {
-            return InvokeCore(request, notifyEvents: true, context.CancellationToken);
-        }
+        public IAsyncEnumerable<CommandResponse> InvokeWithEventNotification(CommandRequest request, CallContext context = default) =>
+            InvokeCore(request, notifyEvents: true, context.CancellationToken);
     }
 }

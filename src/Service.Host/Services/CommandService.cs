@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Karambolo.Common;
 using ProtoBuf.Grpc;
-using ProtoBuf.Grpc.Internal;
-using WebApp.Service.Host;
 using WebApp.Service.Host.Models;
-using WebApp.Service.Host.Services;
 using WebApp.Service.Infrastructure;
 
 namespace WebApp.Service.Host.Services
@@ -20,6 +14,12 @@ namespace WebApp.Service.Host.Services
     public sealed class CommandService : ICommandService
     {
         private static readonly string s_serviceContractAssemblyName = typeof(ICommand).Assembly.GetName().Name!;
+
+        private static readonly UnboundedChannelOptions s_eventChannelOptions = new UnboundedChannelOptions
+        {
+            SingleReader = true,
+            SingleWriter = false,
+        };
 
         private readonly ICommandDispatcher _commandDispatcher;
 
@@ -60,22 +60,18 @@ namespace WebApp.Service.Host.Services
 
                 if (notifyEvents && command is IEventProducerCommand eventProducerCommand)
                 {
-                    var channel = Channel.CreateUnbounded<Event>(new UnboundedChannelOptions
-                    {
-                        SingleReader = true,
-                        SingleWriter = false,
-                    });
+                    var eventChannel = Channel.CreateUnbounded<Event>(s_eventChannelOptions);
 
-                    eventProducerCommand.OnEvent = (_, @event) => channel.Writer.TryWrite(@event);
+                    eventProducerCommand.OnEvent = (_, @event) => eventChannel.Writer.TryWrite(@event);
 
                     dispatchTask = Task.Run(async () =>
                     {
                         try { await _commandDispatcher.DispatchAsync(command, cancellationToken); }
-                        finally { channel.Writer.Complete(); }
+                        finally { eventChannel.Writer.Complete(); }
                     });
 
-                    while (await channel.Reader.WaitToReadAsync(cancellationToken))
-                        while (channel.Reader.TryRead(out var @event))
+                    while (await eventChannel.Reader.WaitToReadAsync(cancellationToken))
+                        while (eventChannel.Reader.TryRead(out var @event))
                             yield return new CommandResponse.Notification
                             {
                                 Event = new EventData { Value = @event }

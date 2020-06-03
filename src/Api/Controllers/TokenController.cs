@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +16,7 @@ namespace WebApp.Api.Controllers
 
         public TokenController(ISecurityService securityService)
         {
-            _securityService = securityService;
+            _securityService = securityService ?? throw new ArgumentNullException(nameof(securityService));
         }
 
         /// <summary>

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using WebApp.Api.Helpers;
 using WebApp.Api.Infrastructure.Security;
 using WebApp.Common.Roles;
 using WebApp.Service;
@@ -20,14 +19,14 @@ namespace WebApp.Api.Controllers
     [Authorize(SecurityService.ApiAuthorizationPolicy, Roles = nameof(RoleEnum.Administators))]
     public class SettingsController : Controller
     {
-        private readonly IQueryDispatcher _queryDispatcher;
         private readonly ICommandDispatcher _commandDispatcher;
+        private readonly IQueryDispatcher _queryDispatcher;
         private readonly ISettingsAccessor _settingsAccessor;
 
-        public SettingsController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, ISettingsAccessor settingsAccessor)
+        public SettingsController(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher, ISettingsAccessor settingsAccessor)
         {
-            _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
             _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
+            _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
             _settingsAccessor = settingsAccessor ?? throw new ArgumentNullException(nameof(settingsAccessor));
         }
 

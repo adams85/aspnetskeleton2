@@ -6,6 +6,7 @@ using WebApp.Api.Infrastructure.Security;
 using WebApp.Common.Roles;
 using WebApp.Service.Infrastructure;
 using WebApp.Service.Roles;
+using WebApp.Service.Settings;
 using WebApp.Service.Users;
 
 namespace WebApp.Api.Controllers
@@ -15,19 +16,26 @@ namespace WebApp.Api.Controllers
     [Authorize(SecurityService.ApiAuthorizationPolicy, Roles = nameof(RoleEnum.Administators))]
     public class UsersController : Controller
     {
-        private readonly IQueryDispatcher _queryDispatcher;
         private readonly ICommandDispatcher _commandDispatcher;
+        private readonly IQueryDispatcher _queryDispatcher;
+        private readonly ISettingsAccessor _settingsAccessor;
 
-        public UsersController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher)
+        public UsersController(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher, ISettingsAccessor settingsAccessor)
         {
-            _queryDispatcher = queryDispatcher;
-            _commandDispatcher = commandDispatcher;
+            _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
+            _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
+            _settingsAccessor = settingsAccessor ?? throw new ArgumentNullException(nameof(settingsAccessor));
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<UserData[]>> List([FromQuery] ListUsersQuery model)
         {
+            if (model == null)
+                return BadRequest();
+
+            model.MaxPageSize = _settingsAccessor.GetMaxPageSize();
+
             var result = await _queryDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 
             return result.Items ?? Array.Empty<UserData>();
@@ -50,6 +58,9 @@ namespace WebApp.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Approve([FromBody] ApproveUserCommand model)
         {
+            if (model == null)
+                return BadRequest();
+
             await _commandDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 
             return Ok();
@@ -58,6 +69,9 @@ namespace WebApp.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUsersToRoles([FromBody] AddUsersToRolesCommand model)
         {
+            if (model == null)
+                return BadRequest();
+
             await _commandDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 
             return Ok();
@@ -66,6 +80,9 @@ namespace WebApp.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> RemoveUsersFromRolesCommand([FromBody] RemoveUsersFromRolesCommand model)
         {
+            if (model == null)
+                return BadRequest();
+
             await _commandDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 
             return Ok();

@@ -33,12 +33,12 @@ namespace WebApp.Service.Infrastructure
 
             QueryResponse? response = null;
 
-            if (query is IProgressReporterQuery progressReporterQuery && progressReporterQuery.Progress != null)
+            if (query is IEventProducerQuery eventProducerQuery && eventProducerQuery.OnEvent != null)
             {
-                await foreach (var currentResponse in _queryService.InvokeWithProgressReporting(queryRequest, callContext).ConfigureAwait(false))
+                await foreach (var currentResponse in _queryService.InvokeWithEventNotification(queryRequest, callContext).ConfigureAwait(false))
                 {
-                    if (currentResponse is QueryResponse.Progress progressResponse)
-                        progressReporterQuery.Progress.Report(progressResponse.Event);
+                    if (currentResponse is QueryResponse.Notification notificationResponse)
+                        eventProducerQuery.OnEvent.Invoke(query, notificationResponse.Event.Value);
 
                     response = currentResponse;
                 }

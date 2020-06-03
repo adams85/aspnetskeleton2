@@ -44,7 +44,7 @@ namespace WebApp.UI
             var routingServices = new ServiceCollection();
             var routingAbstractionsAssembly = typeof(IRouter).Assembly;
             var routingAssembly = typeof(RouteBase).Assembly;
-            services.RemoveAll(service => service.ServiceType.Assembly == routingAbstractionsAssembly || service.ServiceType.Assembly == routingAssembly);
+            services.RemoveAll((service, _) => service.ServiceType.Assembly == routingAbstractionsAssembly || service.ServiceType.Assembly == routingAssembly);
 
             // 2. register other shared services
 

@@ -7,6 +7,9 @@ using static WebApp.Common.ModelConstants;
 
 namespace WebApp.DataAccess.Entities
 {
+    /// <summary>
+    /// Role for access control.
+    /// </summary>
     public class Role
     {
         public int Id { get; set; }

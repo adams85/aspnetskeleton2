@@ -9,6 +9,8 @@ namespace WebApp.DataAccess
         protected DataContext(DbContextOptions options)
             : base(options) { }
 
+        public virtual DbSet<Setting> Settings { get; set; } = null!;
+
         public virtual DbSet<Role> Roles { get; set; } = null!;
         public virtual DbSet<UserRole> UserRoles { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;

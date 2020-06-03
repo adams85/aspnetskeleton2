@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Localization;
 using ProtoBuf.Grpc.Client;
 using WebApp.Core.Infrastructure;
 using WebApp.Service.Infrastructure;
+using WebApp.Service.Infrastructure.Events;
 using WebApp.Service.Infrastructure.Localization;
+using WebApp.Service.Settings;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -13,12 +16,16 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddCoreServices();
 
-            services.AddApplicationInitializers();
+            services.AddSingleton<IEventListener, ServiceHostEventListener>();
+
+            services.AddSingleton<ISettingsAccessor, SettingsAccessor>();
 
             // TODO: implement localization
             services
                 .AddSingleton<IStringLocalizerFactory>(NullStringLocalizerFactory.Instance)
                 .AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+
+            services.AddApplicationInitializers();
 
             services.AddSingleton<IServiceHostGrpcServiceFactory, ServiceHostGrpcServiceFactory>();
             services.AddSingleton<IQueryDispatcher, ServiceHostQueryDispatcher>();
@@ -32,6 +39,13 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(() =>
             {
                 GrpcClientFactory.AllowUnencryptedHttp2 = true;
+            }));
+
+            services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(_ =>
+            {
+                var settingsAccessor = sp.GetRequiredService<ISettingsAccessor>();
+
+                return Task.WhenAll(settingsAccessor.Initialization);
             }));
 
             return services;

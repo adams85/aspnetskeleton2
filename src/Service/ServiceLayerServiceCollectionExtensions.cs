@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using Karambolo.Common;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
@@ -12,8 +13,10 @@ using WebApp.Service;
 using WebApp.Service.Infrastructure;
 using WebApp.Service.Infrastructure.Caching;
 using WebApp.Service.Infrastructure.Database;
+using WebApp.Service.Infrastructure.Events;
 using WebApp.Service.Infrastructure.Localization;
 using WebApp.Service.Mailing;
+using WebApp.Service.Settings;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -29,12 +32,19 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<ICache, InProcessCache>();
 
-            services.AddApplicationInitializers();
+            services
+                .AddSingleton<EventBus>()
+                .AddSingleton<IEventNotifier>(sp => sp.GetRequiredService<EventBus>())
+                .AddSingleton<IEventListener>(sp => sp.GetRequiredService<EventBus>());
+
+            services.AddSingleton<ISettingsAccessor, SettingsAccessor>();
 
             // TODO: implement localization
             services
                 .AddSingleton<IStringLocalizerFactory>(NullStringLocalizerFactory.Instance)
                 .AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+
+            services.AddApplicationInitializers();
 
             services.AddSingleton<InterceptorConfiguration>();
 
@@ -55,7 +65,16 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static IServiceCollection AddApplicationInitializers(this IServiceCollection services)
         {
+            // registration order is important!
+
             services.AddScoped<IApplicationInitializer, DbInitializer>();
+
+            services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(_ =>
+            {
+                var settingsAccessor = sp.GetRequiredService<ISettingsAccessor>();
+
+                return Task.WhenAll(settingsAccessor.Initialization);
+            }));
 
             return services;
         }

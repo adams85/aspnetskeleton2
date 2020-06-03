@@ -21,7 +21,7 @@ namespace WebApp.Service.Roles
 
         public static RoleData ToData(this Role entity) => s_toData(entity);
 
-        public static IQueryable<RoleData> ToData(this IQueryable<Role> linq) => linq.Select(s_toDataExpr);
+        public static IQueryable<RoleData> ToData(this IQueryable<Role> source) => source.Select(s_toDataExpr);
 
         public static Expression<Func<Role, bool>> GetFilterByNameWhere(string name, bool pattern = false)
         {
@@ -31,14 +31,14 @@ namespace WebApp.Service.Roles
                 return r => r.RoleName == name;
         }
 
-        public static IQueryable<Role> FilterByName(this IQueryable<Role> linq, string name, bool pattern = false)
+        public static IQueryable<Role> FilterByName(this IQueryable<Role> source, string name, bool pattern = false)
         {
-            return linq.Where(GetFilterByNameWhere(name, pattern));
+            return source.Where(GetFilterByNameWhere(name, pattern));
         }
 
-        public static Task<Role> GetByNameAsync(this IQueryable<Role> linq, string name, CancellationToken cancellationToken)
+        public static Task<Role> GetByNameAsync(this IQueryable<Role> source, string name, CancellationToken cancellationToken)
         {
-            return linq.FilterByName(name).FirstOrDefaultAsync(cancellationToken);
+            return source.FilterByName(name).FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

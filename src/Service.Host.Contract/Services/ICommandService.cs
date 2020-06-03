@@ -13,6 +13,6 @@ namespace WebApp.Service.Host.Services
         ValueTask<CommandResponse> Invoke(CommandRequest request, CallContext context = default);
 
         [OperationContract]
-        IAsyncEnumerable<CommandResponse> InvokeWithProgressReporting(CommandRequest request, CallContext context = default);
+        IAsyncEnumerable<CommandResponse> InvokeWithEventNotification(CommandRequest request, CallContext context = default);
     }
 }

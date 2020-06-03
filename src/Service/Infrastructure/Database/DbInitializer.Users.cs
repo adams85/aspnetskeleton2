@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using WebApp.Common.Roles;
 using WebApp.Core;
 using WebApp.DataAccess.Entities;
@@ -18,6 +19,7 @@ namespace WebApp.Service.Infrastructure.Database
 
             var users = await _context.Users
                 .Where(entity => usersToLoad.Contains(entity.UserName))
+                .AsAsyncEnumerable()
                 .ToDictionarySafeAsync(entity => entity.UserName, AsExistingEntity, _caseInsensitiveComparer, cancellationToken).ConfigureAwait(false);
 
             var adminRole = _context.Roles.Local.First(r => r.RoleName == nameof(RoleEnum.Administators));

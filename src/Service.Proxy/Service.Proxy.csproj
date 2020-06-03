@@ -16,10 +16,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Grpc.Net.Client" Version="2.28.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.29.0" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="3.1.4" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.4" />
     <PackageReference Include="protobuf-net.Grpc" Version="1.0.37" />
+    <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,12 +29,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Service\Helpers\EnumerableHelper.cs" Link="Helpers\EnumerableHelper.cs" />
+    <Compile Include="..\Service\Helpers\ObservableHelper.cs" Link="Helpers\ObservableHelper.cs" />
+    <Compile Include="..\Service\Helpers\QueryableHelper.cs" Link="Helpers\QueryableHelper.cs" />
+    <Compile Include="..\Service\Helpers\StringMatchStrategy.cs" Link="Helpers\StringMatchStrategy.cs" />
+    <Compile Include="..\Service\Infrastructure\Events\EventListenerExtensions.cs" Link="Infrastructure\Events\EventListenerExtensions.cs" />
+    <Compile Include="..\Service\Infrastructure\Events\IEventListener.cs" Link="Infrastructure\Events\IEventListener.cs" />
     <Compile Include="..\Service\Infrastructure\ICommandDispatcher.cs" Link="Infrastructure\ICommandDispatcher.cs" />
     <Compile Include="..\Service\Infrastructure\IQueryDispatcher.cs" Link="Infrastructure\IQueryDispatcher.cs" />
     <Compile Include="..\Service\Infrastructure\Localization\NullStringLocalizer.cs" Link="Infrastructure\Localization\NullStringLocalizer.cs" />
     <Compile Include="..\Service\Infrastructure\Localization\NullStringLocalizerFactory.cs" Link="Infrastructure\Localization\NullStringLocalizerFactory.cs" />
     <Compile Include="..\Service\QueryContext.Shared.cs" Link="QueryContext.Shared.cs" />
     <Compile Include="..\Service\ServiceErrorException.cs" Link="ServiceErrorException.cs" />
+    <Compile Include="..\Service\Settings\ISettingsAccessor.cs" Link="Settings\ISettingsAccessor.cs" />
+    <Compile Include="..\Service\Settings\SettingsAccessor.cs" Link="Settings\SettingsAccessor.cs" />
+    <Compile Include="..\Service\Settings\SettingsAccessorExtensions.cs" Link="Settings\SettingsAccessorExtensions.cs" />
+    <Compile Include="..\Service\Settings\SettingsAccessorOptions.cs" Link="Settings\SettingsAccessorOptions.cs" />
   </ItemGroup>
 
 </Project>

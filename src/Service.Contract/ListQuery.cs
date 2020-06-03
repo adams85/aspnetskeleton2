@@ -3,14 +3,16 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using ProtoBuf;
 using WebApp.Common.Infrastructure.Localization;
+using WebApp.Service.Contract.Settings;
 using WebApp.Service.Roles;
 using WebApp.Service.Users;
 
 namespace WebApp.Service
 {
     [DataContract]
-    [ProtoInclude(11, typeof(ListRolesQuery))]
-    [ProtoInclude(12, typeof(ListUsersQuery))]
+    [ProtoInclude(11, typeof(ListSettingsQuery))]
+    [ProtoInclude(12, typeof(ListRolesQuery))]
+    [ProtoInclude(13, typeof(ListUsersQuery))]
     public class ListQuery : IQuery, IValidatableObject
     {
         [DataMember(Order = 1)] public string[]? OrderColumns { get; set; }

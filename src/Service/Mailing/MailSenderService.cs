@@ -41,10 +41,10 @@ namespace WebApp.Service.Mailing
         private MailTransport _smtpClient;
 
         private readonly ushort _batchSize;
-        private readonly TimeSpan _sleepTime;
-        private readonly TimeSpan _initialRetryTime;
-        private readonly TimeSpan _maxRetryTime;
-        private readonly TimeSpan _errorWaitTime;
+        private readonly TimeSpan _maxSleepTime;
+        private readonly TimeSpan _initialSendRetryTime;
+        private readonly TimeSpan _maxSendRetryTime;
+        private readonly TimeSpan _delayOnUnexpectedError;
 
         private readonly ILogger _logger;
 
@@ -90,17 +90,17 @@ namespace WebApp.Service.Mailing
             var optionsValue = options?.Value;
             _batchSize = optionsValue?.BatchSize ?? MailSenderServiceOptions.DefaultBatchSize;
 
-            _sleepTime = optionsValue?.SleepTime ?? MailSenderServiceOptions.DefaultSleepTime;
+            _maxSleepTime = optionsValue?.MaxSleepTime ?? MailSenderServiceOptions.DefaultMaxSleepTime;
 
-            _initialRetryTime = optionsValue?.InitialRetryTime ?? _sleepTime;
-            if (_initialRetryTime <= TimeSpan.Zero)
-                _initialRetryTime = MailSenderServiceOptions.DefaultInitialRetryTime;
+            _initialSendRetryTime = optionsValue?.InitialSendRetryTime ?? _maxSleepTime;
+            if (_initialSendRetryTime <= TimeSpan.Zero)
+                _initialSendRetryTime = MailSenderServiceOptions.DefaultInitialSendRetryTime;
 
-            _maxRetryTime = optionsValue?.MaxRetryTime ?? MailSenderServiceOptions.DefaultMaxRetryTime;
-            if (_maxRetryTime < _initialRetryTime)
-                _maxRetryTime = _initialRetryTime;
+            _maxSendRetryTime = optionsValue?.MaxSendRetryTime ?? MailSenderServiceOptions.DefaultMaxSendRetryTime;
+            if (_maxSendRetryTime < _initialSendRetryTime)
+                _maxSendRetryTime = _initialSendRetryTime;
 
-            _errorWaitTime = optionsValue?.ErrorWaitTime ?? MailSenderServiceOptions.DefaultErrorWaitTime;
+            _delayOnUnexpectedError = optionsValue?.DelayOnUnexpectedError ?? MailSenderServiceOptions.DefaultDelayOnUnexpectedError;
 
             _logger = logger ?? (ILogger)NullLogger.Instance;
         }
@@ -170,9 +170,9 @@ namespace WebApp.Service.Mailing
             if (retryTime < TimeSpan.Zero)
                 retryTime = TimeSpan.Zero;
 
-            retryTime += _initialRetryTime;
-            if (retryTime > _maxRetryTime)
-                retryTime = _maxRetryTime;
+            retryTime += _initialSendRetryTime;
+            if (retryTime > _maxSendRetryTime)
+                retryTime = _maxSendRetryTime;
 
             return currentDueDate + retryTime;
         }
@@ -378,6 +378,7 @@ namespace WebApp.Service.Mailing
                 Enqueued += HandleEnqueued;
                 try
                 {
+                    Exception? previousException = null;
                     for (; ; )
                         try
                         {
@@ -385,13 +386,19 @@ namespace WebApp.Service.Mailing
 
                             // when queue gets empty, we wait for wake event (firing when an item is added to the queue),
                             // but for maximum safety we check the queue periodically anyway
-                            await wakeEvent.WaitAsync(_sleepTime, stoppingToken).ConfigureAwait(false);
+                            await wakeEvent.WaitAsync(_maxSleepTime, stoppingToken).ConfigureAwait(false);
+
+                            previousException = null;
                         }
                         catch (Exception ex) when (!(ex is OperationCanceledException))
                         {
-                            _logger.LogError(ex, $"Unexpected error occurred in the mail sender background service.");
+                            // basic protection against littering the log with identical, recurring exceptions (e.g. db connection errors, etc.)
+                            if (previousException?.ToString() != ex.ToString())
+                                _logger.LogError(ex, $"Unexpected error occurred in the mail sender background service.");
 
-                            await Task.Delay(_errorWaitTime).ConfigureAwait(false);
+                            previousException = ex;
+
+                            await Task.Delay(_delayOnUnexpectedError).ConfigureAwait(false);
                         }
                 }
                 finally { Enqueued -= HandleEnqueued; }

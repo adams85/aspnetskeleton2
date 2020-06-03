@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace WebApp.Service.Helpers
 {
@@ -114,40 +110,6 @@ namespace WebApp.Service.Helpers
             var wherePredicate = Expression.Lambda<Func<T, bool>>(whereBody, selector.Parameters);
 
             return source.Where(wherePredicate);
-        }
-
-        public static async Task<Dictionary<TKey, TElement>> ToDictionarySafeAsync<TSource, TKey, TElement>(this IQueryable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey>? comparer, CancellationToken cancellationToken = default)
-            where TKey : notnull
-        {
-            var result = new Dictionary<TKey, TElement>(comparer);
-
-            // http://blog.monstuff.com/archives/2019/03/async-enumerables-with-cancellation.html
-            await foreach (var item in source.AsAsyncEnumerable().WithCancellation(cancellationToken).ConfigureAwait(false))
-            {
-                var key = keySelector(item);
-                if (!result.ContainsKey(key))
-                    result.Add(key, elementSelector(item));
-            }
-
-            return result;
-        }
-
-        public static Task<Dictionary<TKey, TElement>> ToDictionarySafeAsync<TSource, TKey, TElement>(this IQueryable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, CancellationToken cancellationToken = default)
-            where TKey : notnull
-        {
-            return source.ToDictionarySafeAsync(keySelector, elementSelector, null, cancellationToken);
-        }
-
-        public static Task<Dictionary<TKey, TSource>> ToDictionarySafeAsync<TSource, TKey>(this IQueryable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey>? comparer, CancellationToken cancellationToken = default)
-            where TKey : notnull
-        {
-            return source.ToDictionarySafeAsync(keySelector, item => item, comparer, cancellationToken);
-        }
-
-        public static Task<Dictionary<TKey, TSource>> ToDictionarySafeAsync<TSource, TKey>(this IQueryable<TSource> source, Func<TSource, TKey> keySelector, CancellationToken cancellationToken = default)
-            where TKey : notnull
-        {
-            return source.ToDictionarySafeAsync(keySelector, null, cancellationToken);
         }
     }
 }

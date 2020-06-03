@@ -23,15 +23,13 @@ namespace WebApp.Service.Infrastructure.Database
                 var field = typeof(RoleEnum)
                     .GetField(roleName, BindingFlags.Public | BindingFlags.Static);
 
-                var attribute = field
-                    .GetAttributes<DescriptionAttribute>()
-                    .FirstOrDefault();
+                var descriptionAttribute = field.GetAttributes<DescriptionAttribute>().FirstOrDefault();
 
-                if (attribute != null)
+                if (descriptionAttribute != null)
                     AddOrUpdateRole(roles,
                         id: (int)field.GetValue(null),
                         roleName,
-                        description: attribute.Description);
+                        description: descriptionAttribute.Description);
             }
 
             _context.Roles.AddRange(GetEntitesToAdd(roles.Values));

@@ -13,12 +13,12 @@ namespace WebApp.Api.Controllers
     [ApiController]
     [Route("[controller]/[action]")]
     [Authorize(SecurityService.ApiAuthorizationPolicy, Roles = nameof(RoleEnum.Administators))]
-    public class UserController : Controller
+    public class UsersController : Controller
     {
         private readonly IQueryDispatcher _queryDispatcher;
         private readonly ICommandDispatcher _commandDispatcher;
 
-        public UserController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher)
+        public UsersController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher)
         {
             _queryDispatcher = queryDispatcher;
             _commandDispatcher = commandDispatcher;
@@ -26,7 +26,7 @@ namespace WebApp.Api.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<UserData[]>> ListUsers([FromQuery] ListUsersQuery model)
+        public async Task<ActionResult<UserData[]>> List([FromQuery] ListUsersQuery model)
         {
             var result = await _queryDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 
@@ -34,7 +34,7 @@ namespace WebApp.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser(string username, string password, string email)
+        public async Task<IActionResult> Create(string username, string password, string email)
         {
             await _commandDispatcher.DispatchAsync(new CreateUserCommand
             {
@@ -48,7 +48,7 @@ namespace WebApp.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ApproveUser([FromBody] ApproveUserCommand model)
+        public async Task<IActionResult> Approve([FromBody] ApproveUserCommand model)
         {
             await _commandDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 

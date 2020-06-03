@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Karambolo.Common;
 using ProtoBuf.Grpc;
+using ProtoBuf.Grpc.Internal;
 using WebApp.Service.Host;
 using WebApp.Service.Host.Models;
 using WebApp.Service.Host.Services;
@@ -26,7 +27,7 @@ namespace WebApp.Service.Host.Services
             _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
         }
 
-        private async IAsyncEnumerable<CommandResponse> InvokeCore(CommandRequest request, bool reportProgress, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        private async IAsyncEnumerable<CommandResponse> InvokeCore(CommandRequest request, bool notifyEvents, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (request.CommandTypeName == null)
                 throw new ArgumentException("Command type is not specified.", nameof(request));
@@ -39,7 +40,7 @@ namespace WebApp.Service.Host.Services
             var command = (ICommand)ServiceHostContractSerializer.Default.Deserialize(request.SerializedCommand ?? Array.Empty<byte>(), commandType);
 
             ServiceErrorException? errorException = null;
-            
+
             object? key = null;
             Action<ICommand, object>? handleKeyGenerated;
 
@@ -54,22 +55,22 @@ namespace WebApp.Service.Host.Services
 
             try
             {
-                if (reportProgress && command is IProgressReporterCommand progressReporterCommand)
+                if (notifyEvents && command is IEventProducerCommand eventProducerCommand)
                 {
-                    using (var progressEventSubject = new Subject<ProgressEventData>())
+                    using (var eventSubject = new Subject<Event>())
                     {
-                        progressReporterCommand.Progress = new Progress<ProgressEventData>(@event => progressEventSubject.OnNext(@event));
+                        eventProducerCommand.OnEvent = (_, @event) => eventSubject.OnNext(@event);
 
                         var dispatchStatus = Observable.FromAsync(() => _commandDispatcher.DispatchAsync(command, cancellationToken))
                             .Select(_ => true)
                             .StartWith(false);
 
-                        var progressEvents = progressEventSubject
-                            .StartWith(default(ProgressEventData)!)
+                        var events = eventSubject
+                            .StartWith(default(Event)!)
                             .CombineLatest(dispatchStatus, (@event, status) => (@event, executed: status))
                             .Skip(1);
 
-                        await using (var enumerator = progressEvents.ToAsyncEnumerable().GetAsyncEnumerator(cancellationToken))
+                        await using (var enumerator = events.ToAsyncEnumerable().GetAsyncEnumerator(cancellationToken))
                         {
                             for (; ; )
                             {
@@ -84,7 +85,10 @@ namespace WebApp.Service.Host.Services
                                 if (!success || enumerator.Current.executed)
                                     break;
 
-                                yield return new CommandResponse.Progress { Event = enumerator.Current.@event };
+                                yield return new CommandResponse.Notification
+                                {
+                                    Event = new EventData { Value = enumerator.Current.@event }
+                                };
                             }
                         }
                     }
@@ -107,12 +111,12 @@ namespace WebApp.Service.Host.Services
 
         public ValueTask<CommandResponse> Invoke(CommandRequest request, CallContext context = default)
         {
-            return InvokeCore(request, reportProgress: false, context.CancellationToken).SingleAsync();
+            return InvokeCore(request, notifyEvents: false, context.CancellationToken).SingleAsync();
         }
 
-        public IAsyncEnumerable<CommandResponse> InvokeWithProgressReporting(CommandRequest request, CallContext context = default)
+        public IAsyncEnumerable<CommandResponse> InvokeWithEventNotification(CommandRequest request, CallContext context = default)
         {
-            return InvokeCore(request, reportProgress: true, context.CancellationToken);
+            return InvokeCore(request, notifyEvents: true, context.CancellationToken);
         }
     }
 }

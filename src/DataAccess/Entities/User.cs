@@ -8,6 +8,9 @@ using static WebApp.Common.ModelConstants;
 
 namespace WebApp.DataAccess.Entities
 {
+    /// <summary>
+    /// Security-related data of users (user account).
+    /// </summary>
     public class User
     {
         public int Id { get; set; }

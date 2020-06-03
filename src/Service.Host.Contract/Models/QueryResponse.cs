@@ -6,7 +6,7 @@ namespace WebApp.Service.Host.Models
     [DataContract]
     [ProtoInclude(1, typeof(Success))]
     [ProtoInclude(2, typeof(Failure))]
-    [ProtoInclude(3, typeof(Progress))]
+    [ProtoInclude(3, typeof(Notification))]
     public abstract class QueryResponse
     {
         [DataContract]
@@ -23,9 +23,9 @@ namespace WebApp.Service.Host.Models
         }
 
         [DataContract]
-        public class Progress : QueryResponse
+        public class Notification : QueryResponse
         {
-            [DataMember(Order = 1)] public ProgressEventData Event { get; set; } = null!;
+            [DataMember(Order = 1)] public EventData Event { get; set; } = null!;
         }
     }
 }

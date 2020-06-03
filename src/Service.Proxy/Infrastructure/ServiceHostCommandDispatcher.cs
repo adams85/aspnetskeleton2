@@ -33,12 +33,12 @@ namespace WebApp.Service.Infrastructure
 
             CommandResponse? response = null;
 
-            if (command is IProgressReporterCommand progressReporterCommand && progressReporterCommand.Progress != null)
+            if (command is IEventProducerCommand eventProducerCommand && eventProducerCommand.OnEvent != null)
             {
-                await foreach (var currentResponse in _commandService.InvokeWithProgressReporting(commandRequest, callContext).ConfigureAwait(false))
+                await foreach (var currentResponse in _commandService.InvokeWithEventNotification(commandRequest, callContext).ConfigureAwait(false))
                 {
-                    if (currentResponse is CommandResponse.Progress progressResponse)
-                        progressReporterCommand.Progress.Report(progressResponse.Event);
+                    if (currentResponse is CommandResponse.Notification notificationResponse)
+                        eventProducerCommand.OnEvent.Invoke(command, notificationResponse.Event.Value);
 
                     response = currentResponse;
                 }

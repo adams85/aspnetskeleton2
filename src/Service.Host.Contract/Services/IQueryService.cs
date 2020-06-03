@@ -13,6 +13,6 @@ namespace WebApp.Service.Host.Services
         ValueTask<QueryResponse> Invoke(QueryRequest request, CallContext context = default);
 
         [OperationContract]
-        IAsyncEnumerable<QueryResponse> InvokeWithProgressReporting(QueryRequest request, CallContext context = default);
+        IAsyncEnumerable<QueryResponse> InvokeWithEventNotification(QueryRequest request, CallContext context = default);
     }
 }

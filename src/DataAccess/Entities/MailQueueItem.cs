@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace WebApp.DataAccess.Entities
 {
+    /// <summary>
+    /// Mail message enqueued for sending.
+    /// </summary>
     public class MailQueueItem
     {
         public int Id { get; set; }

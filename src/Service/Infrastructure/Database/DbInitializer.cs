@@ -101,6 +101,7 @@ namespace WebApp.Service.Infrastructure.Database
             {
                 if (ShouldSeedObjects(DbSeedObjects.BaseData))
                 {
+                    await SeedSettingsAsync(cancellationToken).ConfigureAwait(false);
                     await SeedRolesAsync(cancellationToken).ConfigureAwait(false);
                     await SeedUsersAsync(cancellationToken).ConfigureAwait(false);
                 }

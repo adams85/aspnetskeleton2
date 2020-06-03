@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace WebApp.DataAccess.Entities
 {
+    /// <summary>
+    /// Entity for joining users and roles.
+    /// </summary>
     public class UserRole
     {
         public int UserId { get; set; }

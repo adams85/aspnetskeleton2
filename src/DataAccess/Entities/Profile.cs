@@ -6,6 +6,9 @@ using static WebApp.Common.ModelConstants;
 
 namespace WebApp.DataAccess.Entities
 {
+    /// <summary>
+    /// Profile data of users.
+    /// </summary>
     public class Profile
     {
         public int UserId { get; set; }

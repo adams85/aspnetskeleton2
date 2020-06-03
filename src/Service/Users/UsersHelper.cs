@@ -28,7 +28,7 @@ namespace WebApp.Service.Users
 
         public static UserData ToData(this User entity) => s_toData(entity);
 
-        public static IQueryable<UserData> ToData(this IQueryable<User> linq) => linq.Select(s_toDataExpr);
+        public static IQueryable<UserData> ToData(this IQueryable<User> source) => source.Select(s_toDataExpr);
 
         public static Expression<Func<User, bool>> GetFilterByNameWhere(string name, bool pattern = false)
         {
@@ -38,14 +38,14 @@ namespace WebApp.Service.Users
                 return u => u.UserName == name;
         }
 
-        public static IQueryable<User> FilterByName(this IQueryable<User> linq, string name, bool pattern = false)
+        public static IQueryable<User> FilterByName(this IQueryable<User> source, string name, bool pattern = false)
         {
-            return linq.Where(GetFilterByNameWhere(name, pattern));
+            return source.Where(GetFilterByNameWhere(name, pattern));
         }
 
-        public static Task<User> GetByNameAsync(this IQueryable<User> linq, string name, CancellationToken cancellationToken)
+        public static Task<User> GetByNameAsync(this IQueryable<User> source, string name, CancellationToken cancellationToken)
         {
-            return linq.FilterByName(name).FirstOrDefaultAsync(cancellationToken);
+            return source.FilterByName(name).FirstOrDefaultAsync(cancellationToken);
         }
 
         public static Expression<Func<User, bool>> GetFilterByEmailWhere(string email, bool pattern = false)
@@ -56,14 +56,14 @@ namespace WebApp.Service.Users
                 return u => u.Email == email;
         }
 
-        public static IQueryable<User> FilterByEmail(this IQueryable<User> linq, string email, bool pattern = false)
+        public static IQueryable<User> FilterByEmail(this IQueryable<User> source, string email, bool pattern = false)
         {
-            return linq.Where(GetFilterByEmailWhere(email, pattern));
+            return source.Where(GetFilterByEmailWhere(email, pattern));
         }
 
-        public static Task<User> GetByEmailAsync(this IQueryable<User> linq, string email, CancellationToken cancellationToken)
+        public static Task<User> GetByEmailAsync(this IQueryable<User> source, string email, CancellationToken cancellationToken)
         {
-            return linq.FilterByEmail(email).FirstOrDefaultAsync(cancellationToken);
+            return source.FilterByEmail(email).FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

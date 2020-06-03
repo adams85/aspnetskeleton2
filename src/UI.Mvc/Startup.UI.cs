@@ -42,7 +42,7 @@ namespace WebApp.UI
                     {
                         // ApplicationPartManager finds the Api assembly (as it is referenced), so we have to exclude it manually
                         // because we don't want the API controllers to be visible to the UI branch
-                        manager.ApplicationParts.RemoveAll(part => part is AssemblyPart assemblyPart && assemblyPart.Assembly == typeof(Api.Startup).Assembly);
+                        manager.ApplicationParts.RemoveAll((part, _) => part is AssemblyPart assemblyPart && assemblyPart.Assembly == typeof(Api.Startup).Assembly);
                     });
 
                 _apiStartup.ConfigureModelServices(mvcBuilder);

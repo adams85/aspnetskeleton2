@@ -26,7 +26,7 @@ namespace WebApp.Service.Host.Services
             _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
         }
 
-        private async IAsyncEnumerable<QueryResponse> InvokeCore(QueryRequest request, bool reportProgress, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        private async IAsyncEnumerable<QueryResponse> InvokeCore(QueryRequest request, bool notifyEvents, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (request.QueryTypeName == null)
                 throw new ArgumentException("Query type is not specified.", nameof(request));
@@ -41,22 +41,22 @@ namespace WebApp.Service.Host.Services
             ServiceErrorException? errorException = null;
             object? result = null;
 
-            if (reportProgress && query is IProgressReporterQuery progressReporterQuery)
+            if (notifyEvents && query is IEventProducerQuery eventProducerQuery)
             {
-                using (var progressEventSubject = new Subject<ProgressEventData>())
+                using (var eventSubject = new Subject<Event>())
                 {
-                    progressReporterQuery.Progress = new Progress<ProgressEventData>(@event => progressEventSubject.OnNext(@event));
+                    eventProducerQuery.OnEvent = (_, @event) => eventSubject.OnNext(@event);
 
                     var dispatchStatus = Observable.FromAsync(() => _queryDispatcher.DispatchAsync(query, cancellationToken))
                         .Select(result => (executed: true, result))
                         .StartWith((executed: false, result: null));
 
-                    var progressEvents = progressEventSubject
-                        .StartWith(default(ProgressEventData)!)
+                    var events = eventSubject
+                        .StartWith(default(Event)!)
                         .CombineLatest(dispatchStatus, (@event, status) => (@event, status.executed, status.result))
                         .Skip(1);
 
-                    await using (var enumerator = progressEvents.ToAsyncEnumerable().GetAsyncEnumerator(cancellationToken))
+                    await using (var enumerator = events.ToAsyncEnumerable().GetAsyncEnumerator(cancellationToken))
                     {
                         for (; ; )
                         {
@@ -74,7 +74,10 @@ namespace WebApp.Service.Host.Services
                                 break;
                             }
 
-                            yield return new QueryResponse.Progress { Event = enumerator.Current.@event };
+                            yield return new QueryResponse.Notification
+                            {
+                                Event = new EventData { Value = enumerator.Current.@event }
+                            };
                         }
                     }
                 }
@@ -94,12 +97,12 @@ namespace WebApp.Service.Host.Services
 
         public ValueTask<QueryResponse> Invoke(QueryRequest request, CallContext context = default)
         {
-            return InvokeCore(request, reportProgress: false, context.CancellationToken).SingleAsync();
+            return InvokeCore(request, notifyEvents: false, context.CancellationToken).SingleAsync();
         }
 
-        public IAsyncEnumerable<QueryResponse> InvokeWithProgressReporting(QueryRequest request, CallContext context = default)
+        public IAsyncEnumerable<QueryResponse> InvokeWithEventNotification(QueryRequest request, CallContext context = default)
         {
-            return InvokeCore(request, reportProgress: true, context.CancellationToken);
+            return InvokeCore(request, notifyEvents: true, context.CancellationToken);
         }
     }
 }

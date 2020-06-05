@@ -37,7 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddSingleton<IEventNotifier>(sp => sp.GetRequiredService<EventBus>())
                 .AddSingleton<IEventListener>(sp => sp.GetRequiredService<EventBus>());
 
-            services.AddSingleton<ISettingsAccessor, SettingsAccessor>();
+            services.AddSingleton<ISettingsProvider, SettingsProvider>();
 
             // TODO: implement localization
             services
@@ -71,9 +71,9 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(_ =>
             {
-                var settingsAccessor = sp.GetRequiredService<ISettingsAccessor>();
+                var settingsProvider = sp.GetRequiredService<ISettingsProvider>();
 
-                return Task.WhenAll(settingsAccessor.Initialization);
+                return Task.WhenAll(settingsProvider.Initialization);
             }));
 
             return services;

@@ -6,7 +6,7 @@ using WebApp.Service.Contract.Settings;
 
 namespace WebApp.Service.Settings
 {
-    internal class ListSettingsQueryHandler : ListQueryHandler<ListSettingsQuery, SettingData>
+    internal sealed class ListSettingsQueryHandler : ListQueryHandler<ListSettingsQuery, SettingData>
     {
         public override async Task<ListResult<SettingData>> HandleAsync(ListSettingsQuery query, QueryContext context, CancellationToken cancellationToken)
         {

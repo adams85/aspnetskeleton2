@@ -8,7 +8,7 @@ using WebApp.Service.Contract.Settings;
 
 namespace WebApp.Service.Settings
 {
-    internal class UpdateSettingCommandHandler : CommandHandler<UpdateSettingCommand>
+    internal sealed class UpdateSettingCommandHandler : CommandHandler<UpdateSettingCommand>
     {
         public override async Task HandleAsync(UpdateSettingCommand command, CommandContext context, CancellationToken cancellationToken)
         {

@@ -41,10 +41,10 @@
     <Compile Include="..\Service\Infrastructure\Localization\NullStringLocalizerFactory.cs" Link="Infrastructure\Localization\NullStringLocalizerFactory.cs" />
     <Compile Include="..\Service\QueryContext.Shared.cs" Link="QueryContext.Shared.cs" />
     <Compile Include="..\Service\ServiceErrorException.cs" Link="ServiceErrorException.cs" />
-    <Compile Include="..\Service\Settings\ISettingsAccessor.cs" Link="Settings\ISettingsAccessor.cs" />
-    <Compile Include="..\Service\Settings\SettingsAccessor.cs" Link="Settings\SettingsAccessor.cs" />
-    <Compile Include="..\Service\Settings\SettingsAccessorExtensions.cs" Link="Settings\SettingsAccessorExtensions.cs" />
-    <Compile Include="..\Service\Settings\SettingsAccessorOptions.cs" Link="Settings\SettingsAccessorOptions.cs" />
+    <Compile Include="..\Service\Settings\ISettingsProvider.cs" Link="Settings\ISettingsProvider.cs" />
+    <Compile Include="..\Service\Settings\SettingsProvider.cs" Link="Settings\SettingsProvider.cs" />
+    <Compile Include="..\Service\Settings\SettingsProviderExtensions.cs" Link="Settings\SettingsProviderExtensions.cs" />
+    <Compile Include="..\Service\Settings\SettingsProviderOptions.cs" Link="Settings\SettingsProviderOptions.cs" />
   </ItemGroup>
 
 </Project>

@@ -12,7 +12,7 @@ using WebApp.Service.Infrastructure.Events;
 
 namespace WebApp.Service.Settings
 {
-    internal class SettingsAccessor : ISettingsAccessor, IDisposable
+    internal sealed class SettingsProvider : ISettingsProvider, IDisposable
     {
         private readonly IQueryDispatcher _queryDispatcher;
         private readonly ILogger _logger;
@@ -26,7 +26,7 @@ namespace WebApp.Service.Settings
 
         private Exception? _previousException;
 
-        public SettingsAccessor(IEventListener eventListener, IQueryDispatcher queryDispatcher, IOptions<SettingsAccessorOptions>? options, ILogger<SettingsAccessor>? logger)
+        public SettingsProvider(IEventListener eventListener, IQueryDispatcher queryDispatcher, IOptions<SettingsProviderOptions>? options, ILogger<SettingsProvider>? logger)
         {
             if (eventListener == null)
                 throw new ArgumentNullException(nameof(eventListener));
@@ -35,7 +35,7 @@ namespace WebApp.Service.Settings
             _logger = logger ?? (ILogger)NullLogger.Instance;
 
             var optionsValue = options?.Value;
-            _delayOnRefreshError = optionsValue?.DelayOnRefreshError ?? SettingsAccessorOptions.DefaultDelayOnRefreshError;
+            _delayOnRefreshError = optionsValue?.DelayOnRefreshError ?? SettingsProviderOptions.DefaultDelayOnRefreshError;
 
             _initializedTcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
 

@@ -4,7 +4,7 @@ using WebApp.Common.Settings;
 
 namespace WebApp.Service.Settings
 {
-    public interface ISettingsAccessor
+    public interface ISettingsProvider
     {
         Task Initialization { get; }
 

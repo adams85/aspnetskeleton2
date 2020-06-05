@@ -21,13 +21,13 @@ namespace WebApp.Api.Controllers
     {
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly IQueryDispatcher _queryDispatcher;
-        private readonly ISettingsAccessor _settingsAccessor;
+        private readonly ISettingsProvider _settingsProvider;
 
-        public SettingsController(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher, ISettingsAccessor settingsAccessor)
+        public SettingsController(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher, ISettingsProvider settingsProvider)
         {
             _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
             _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
-            _settingsAccessor = settingsAccessor ?? throw new ArgumentNullException(nameof(settingsAccessor));
+            _settingsProvider = settingsProvider ?? throw new ArgumentNullException(nameof(settingsProvider));
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace WebApp.Api.Controllers
             if (model == null)
                 return BadRequest();
 
-            model.MaxPageSize = _settingsAccessor.GetMaxPageSize();
+            model.MaxPageSize = _settingsProvider.GetMaxPageSize();
 
             var result = await _queryDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 

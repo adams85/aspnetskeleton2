@@ -2,7 +2,7 @@
 
 namespace WebApp.Service.Settings
 {
-    public class SettingsAccessorOptions
+    public class SettingsProviderOptions
     {
         public static readonly TimeSpan DefaultDelayOnRefreshError = TimeSpan.FromSeconds(5);
 

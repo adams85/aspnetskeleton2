@@ -8,16 +8,14 @@ namespace WebApp.Service.Infrastructure
 {
     internal static class CachingConfiguration
     {
-        public static void ConfigureQueryCaching(this InterceptorConfiguration interceptorConfiguration, CacheOptions defaultCacheOptions)
+        public static CachingBuilder ConfigureQueryCaching(this CachingBuilder builder, CacheOptions defaultCacheOptions)
         {
-            var builder = new CachingBuilder();
-
             builder.Cache<GetCachedSettingsQuery>()
                 .InvalidatedBy<UpdateSettingCommand, GetCachedSettingsQueryInvalidatorInterceptor>()
                 .WithSlidingExpiration(defaultCacheOptions.SlidingExpiration);
 
             builder.Cache<GetCachedUserInfoQuery>()
-                .WithScope(q => q.UserName)
+                .InvalidatedBy<CreateUserCommand, GetCachedUserInfoQueryInvalidatorInterceptor>()
                 .InvalidatedBy<ApproveUserCommand, GetCachedUserInfoQueryInvalidatorInterceptor>()
                 .InvalidatedBy<LockUserCommand, GetCachedUserInfoQueryInvalidatorInterceptor>()
                 .InvalidatedBy<UnlockUserCommand, GetCachedUserInfoQueryInvalidatorInterceptor>()
@@ -29,7 +27,7 @@ namespace WebApp.Service.Infrastructure
                 .InvalidatedBy<DeleteRoleCommand>()
                 .WithSlidingExpiration(defaultCacheOptions.SlidingExpiration);
 
-            builder.Build(interceptorConfiguration);
+            return builder;
         }
     }
 }

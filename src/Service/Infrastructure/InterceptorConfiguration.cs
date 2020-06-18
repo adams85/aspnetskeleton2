@@ -9,46 +9,59 @@ using WebApp.Service.Infrastructure.Validation;
 
 namespace WebApp.Service.Infrastructure
 {
-    internal sealed class InterceptorConfiguration : IConfigureOptions<CommandDispatcherOptions>, IConfigureOptions<QueryDispatcherOptions>
+    internal static class InterceptorConfiguration 
     {
-        private IEnumerable<(Predicate<Type>, CommandInterceptorFactory)> GetCommandInterceptorFactories()
-        {
-            yield return (typeof(ICommand).IsAssignableFrom, (sp, next) => new CommandPerformanceLoggerInterceptor(next, sp.GetRequiredService<ILoggerFactory>()));
-            yield return (typeof(ICommand).IsAssignableFrom, (sp, next) => new CommandDataAnnotationsValidatorInterceptor(next));
-        }
-
-        private IEnumerable<(Predicate<Type>, QueryInterceptorFactory)> GetQueryInterceptorFactories()
-        {
-            yield return (typeof(IQuery).IsAssignableFrom, (sp, next) => new QueryPerformanceLoggerInterceptor(next, sp.GetRequiredService<ILoggerFactory>()));
-            yield return (typeof(IQuery).IsAssignableFrom, (sp, next) => new QueryDataAnnotationsValidatorInterceptor(next));
-        }
-
-        public InterceptorConfiguration(IOptions<CacheOptions>? defaultCacheOptions)
+        public static CommandExecutionBuilder ConfigureInterceptors(this CommandExecutionBuilder builder, Action<CommandExecutionBuilder>? addCachedQueryInvalidatorInterceptors)
         {
             // order matters: the earlier an interceptor is registered, the earlier it runs during execution
 
-            // 1) other command interceptors
-            CommandInterceptorFactories.AddRange(GetCommandInterceptorFactories());
+            builder.AddInterceptorFor<ICommand>((sp, next) => new CommandPerformanceLoggerInterceptor(next, sp.GetRequiredService<ILoggerFactory>()));
 
-            // 2) query caching interceptors (as close to the caller as possible)
-            // 3) query cache invalidator interceptors (as close to the handler as possible)
-            this.ConfigureQueryCaching(defaultCacheOptions?.Value ?? CacheOptions.Default);
+            builder.AddInterceptorFor<ICommand>((sp, next) => new CommandDataAnnotationsValidatorInterceptor(next));
 
-            // 4) other query interceptors
-            QueryInterceptorFactories.AddRange(GetQueryInterceptorFactories());
+            // query cache invalidator interceptors should be as close to the handler as possible!
+            addCachedQueryInvalidatorInterceptors?.Invoke(builder);
+
+            return builder;
         }
 
-        public List<(Predicate<Type>, CommandInterceptorFactory)> CommandInterceptorFactories { get; } = new List<(Predicate<Type>, CommandInterceptorFactory)>();
-        public List<(Predicate<Type>, QueryInterceptorFactory)> QueryInterceptorFactories { get; } = new List<(Predicate<Type>, QueryInterceptorFactory)>();
-
-        public void Configure(CommandDispatcherOptions options)
+        public static QueryExecutionBuilder ConfigureInterceptors(this QueryExecutionBuilder builder, Action<QueryExecutionBuilder>? addQueryCacherInterceptors)
         {
-            options.InterceptorFactories = CommandInterceptorFactories;
+            // order matters: the earlier an interceptor is registered, the earlier it runs during execution
+
+            // query cacher interceptors should be as close to the caller as possible!
+            addQueryCacherInterceptors?.Invoke(builder);
+
+            builder.AddInterceptorFor<IQuery>((sp, next) => new QueryPerformanceLoggerInterceptor(next, sp.GetRequiredService<ILoggerFactory>()));
+
+            builder.AddInterceptorFor<IQuery>((sp, next) => new QueryDataAnnotationsValidatorInterceptor(next));
+
+            return builder;
         }
 
-        public void Configure(QueryDispatcherOptions options)
+        public sealed class ConfigureDispatcherOptions : IConfigureOptions<CommandDispatcherOptions>, IConfigureOptions<QueryDispatcherOptions>
         {
-            options.InterceptorFactories = QueryInterceptorFactories;
+            private readonly IReadOnlyList<(Predicate<Type>, CommandInterceptorFactory)> _commandInterceptorFactories;
+            private readonly IReadOnlyList<(Predicate<Type>, QueryInterceptorFactory)> _queryInterceptorFactories;
+
+            public ConfigureDispatcherOptions(IOptions<CacheOptions>? defaultCacheOptions)
+            {
+                var (addCachedQueryInvalidatorInterceptors, addQueryCacherInterceptors) = new CachingBuilder()
+                    .ConfigureQueryCaching(defaultCacheOptions?.Value ?? CacheOptions.Default)
+                    .Build();
+
+                _commandInterceptorFactories = new CommandExecutionBuilder()
+                    .ConfigureInterceptors(addCachedQueryInvalidatorInterceptors)
+                    .InterceptorFactories;
+
+                _queryInterceptorFactories = new QueryExecutionBuilder()
+                    .ConfigureInterceptors(addQueryCacherInterceptors)
+                    .InterceptorFactories;
+            }
+
+            public void Configure(CommandDispatcherOptions options) => options.InterceptorFactories.AddRange(_commandInterceptorFactories);
+
+            public void Configure(QueryDispatcherOptions options) => options.InterceptorFactories.AddRange(_queryInterceptorFactories);
         }
     }
 }

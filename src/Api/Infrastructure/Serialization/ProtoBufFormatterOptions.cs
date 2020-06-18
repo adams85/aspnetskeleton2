@@ -6,7 +6,7 @@ namespace WebApp.Api.Infrastructure.Serialization
     {
         public static readonly string DefaultContentType = "application/x-protobuf";
 
-        public HashSet<string> SupportedContentTypes { get; set; } = new HashSet<string> { DefaultContentType, "application/protobuf", "application/x-google-protobuf" };
-        public HashSet<string> SupportedExtensions { get; set; } = new HashSet<string> { "proto" };
+        public HashSet<string> SupportedContentTypes { get; } = new HashSet<string> { DefaultContentType, "application/protobuf", "application/x-google-protobuf" };
+        public HashSet<string> SupportedExtensions { get; } = new HashSet<string> { "proto" };
     }
 }

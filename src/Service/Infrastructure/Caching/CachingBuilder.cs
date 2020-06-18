@@ -23,8 +23,11 @@ namespace WebApp.Service.Infrastructure.Caching
             return config;
         }
 
-        public void Build(InterceptorConfiguration interceptorConfiguration)
+        public (Action<CommandExecutionBuilder>?, Action<QueryExecutionBuilder>?) Build()
         {
+            Action<CommandExecutionBuilder>? addCachedQueryInvalidatorInterceptors = null;
+            Action<QueryExecutionBuilder>? addQueryCacherInterceptors = null;
+
             var invalidatorDescriptors = new Dictionary<KeyValuePair<Type, Type>, List<Type>>();
 
             foreach (var (queryType, builder) in _builders)
@@ -33,7 +36,7 @@ namespace WebApp.Service.Infrastructure.Caching
 
                 var queryInterceptorActivator = ActivatorUtilities.CreateFactory(builder.QueryInterceptorType, new[] { typeof(QueryExecutionDelegate), typeof(QueryCachingOptions) });
                 QueryInterceptorFactory queryInterceptorFactory = (sp, next) => (IQueryInterceptor)queryInterceptorActivator(sp, new object[] { next, options });
-                interceptorConfiguration.QueryInterceptorFactories.Add((queryType.IsAssignableFrom, queryInterceptorFactory));
+                addQueryCacherInterceptors += builder => builder.AddInterceptor(queryType.IsAssignableFrom, queryInterceptorFactory);
 
                 foreach (var key in builder.Invalidators)
                 {
@@ -50,8 +53,10 @@ namespace WebApp.Service.Infrastructure.Caching
 
                 var commandInterceptorActivator = ActivatorUtilities.CreateFactory(commandInterceptorType, new[] { typeof(CommandExecutionDelegate), typeof(Type[]) });
                 CommandInterceptorFactory commandInterceptorFactory = (sp, next) => (ICommandInterceptor)commandInterceptorActivator(sp, new object[] { next, queryTypes });
-                interceptorConfiguration.CommandInterceptorFactories.Add((commandType.IsAssignableFrom, commandInterceptorFactory));
+                addCachedQueryInvalidatorInterceptors += builder => builder.AddInterceptor(commandType.IsAssignableFrom, commandInterceptorFactory);
             }
+
+            return (addCachedQueryInvalidatorInterceptors, addQueryCacherInterceptors);
         }
     }
 }

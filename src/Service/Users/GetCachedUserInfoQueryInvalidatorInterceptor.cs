@@ -15,6 +15,7 @@ namespace WebApp.Service.Users
 
         private string[]? GetAffectedUserNames(CommandContext context) => context.Command switch
         {
+            CreateUserCommand createUserCommand => new[] { createUserCommand.UserName },
             ApproveUserCommand approveUserCommand => new[] { approveUserCommand.UserName },
             LockUserCommand lockUserCommand => new[] { lockUserCommand.UserName },
             UnlockUserCommand unlockUserCommand => new[] { unlockUserCommand.UserName },

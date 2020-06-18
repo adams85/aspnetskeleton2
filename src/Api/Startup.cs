@@ -117,7 +117,7 @@ namespace WebApp.Api
             {
                 var pathAdjusterOptions = app.ApplicationServices.GetRequiredService<IOptions<PathAdjusterOptions>>();
 
-                if (!CollectionUtils.IsNullOrEmpty(pathAdjusterOptions.Value.PathAdjustments))
+                if (pathAdjusterOptions.Value.PathAdjustments.Count > 0)
                     app.UseMiddleware<PathAdjusterMiddleware>(pathAdjusterOptions);
 
                 next(app);

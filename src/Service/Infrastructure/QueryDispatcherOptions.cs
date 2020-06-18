@@ -5,6 +5,7 @@ namespace WebApp.Service.Infrastructure
 {
     internal class QueryDispatcherOptions
     {
-        public List<(Predicate<Type> QueryTypeFilter, QueryInterceptorFactory InterceptorFactory)>? InterceptorFactories { get; set; }
+        public List<(Predicate<Type> QueryTypeFilter, QueryInterceptorFactory InterceptorFactory)> InterceptorFactories { get; } =
+            new List<(Predicate<Type>, QueryInterceptorFactory)>();
     }
 }

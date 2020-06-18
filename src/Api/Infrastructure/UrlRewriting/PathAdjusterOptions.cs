@@ -6,6 +6,6 @@ namespace WebApp.Api.Infrastructure.UrlRewriting
     {
         public static readonly string DefaultSectionName = "UrlRewriting";
 
-        public IList<PathAdjustment>? PathAdjustments { get; set; }
+        public List<PathAdjustment> PathAdjustments { get; } = new List<PathAdjustment>();
     }
 }

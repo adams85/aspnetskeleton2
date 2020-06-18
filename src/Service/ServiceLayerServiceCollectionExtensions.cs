@@ -46,13 +46,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddApplicationInitializers();
 
-            services.AddSingleton<InterceptorConfiguration>();
+            services.AddSingleton<InterceptorConfiguration.ConfigureDispatcherOptions>();
 
             services.AddSingleton<ICommandDispatcher, CommandDispatcher>();
-            services.AddSingleton<IConfigureOptions<CommandDispatcherOptions>>(sp => sp.GetRequiredService<InterceptorConfiguration>());
+            services.AddSingleton<IConfigureOptions<CommandDispatcherOptions>>(sp => sp.GetRequiredService<InterceptorConfiguration.ConfigureDispatcherOptions>());
 
             services.AddSingleton<IQueryDispatcher, QueryDispatcher>();
-            services.AddSingleton<IConfigureOptions<QueryDispatcherOptions>>(sp => sp.GetRequiredService<InterceptorConfiguration>());
+            services.AddSingleton<IConfigureOptions<QueryDispatcherOptions>>(sp => sp.GetRequiredService<InterceptorConfiguration.ConfigureDispatcherOptions>());
 
             services.AddSingleton<IMailTypeCatalog, MailTypeCatalog>();
             services.AddSingleton<IMailSenderService, MailSenderService>();

@@ -2,25 +2,51 @@
 using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using Karambolo.Common;
 
 namespace WebApp.Service.Helpers
 {
     public static class ObservableHelper
     {
-        public static IObservable<TSource> RetryAfterDelay<TSource>(this IObservable<TSource> source, TimeSpan dueTime) =>
-            source.RetryAfterDelay(dueTime, DefaultScheduler.Instance);
-
-        // based on: https://stackoverflow.com/questions/18978523/write-an-rx-retryafter-extension-method#answer-20145295
-        public static IObservable<TSource> RetryAfterDelay<TSource>(this IObservable<TSource> source, TimeSpan dueTime, IScheduler scheduler)
-        {
-            return RepeateInfinitelyWithDelay(source, dueTime, scheduler).Catch();
-
-            static IEnumerable<IObservable<TSource>> RepeateInfinitelyWithDelay(IObservable<TSource> source, TimeSpan dueTime, IScheduler scheduler)
+        public static IObservable<TSource> DoOnSubscribe<TSource>(this IObservable<TSource> source, Action action) =>
+            Observable.Create<TSource>(observer =>
             {
-                yield return source;
+                action();
+                return source.SubscribeSafe(observer);
+            });
 
-                while (true)
-                    yield return source.DelaySubscription(dueTime, scheduler);
+        public static IObservable<TSource> Retry<TSource>(this IObservable<TSource> source,
+            Func<IObservable<TSource>, IObservable<TSource>>? wrapInitial = null, Func<IObservable<TSource>, IObservable<TSource>>? wrapSubsequent = null)
+        {
+            return RepeateInfinitely(source, wrapInitial ?? Identity<IObservable<TSource>>.Func, wrapSubsequent ?? Identity<IObservable<TSource>>.Func)
+                .Catch();
+
+            static IEnumerable<IObservable<TSource>> RepeateInfinitely(IObservable<TSource> source,
+                Func<IObservable<TSource>, IObservable<TSource>> wrapInitial, Func<IObservable<TSource>, IObservable<TSource>> wrapSubsequent)
+            {
+                yield return wrapInitial(source);
+
+                for (; ; )
+                    yield return wrapSubsequent(source);
+            }
+        }
+
+        public static IObservable<TSource> Retry<TSource>(this IObservable<TSource> source, int retryCount,
+            Func<IObservable<TSource>, IObservable<TSource>>? wrapInitial = null, Func<IObservable<TSource>, IObservable<TSource>>? wrapSubsequent = null)
+        {
+            if (retryCount < 0)
+                throw new ArgumentOutOfRangeException(nameof(retryCount));
+
+            return Repeate(source, retryCount, wrapInitial ?? Identity<IObservable<TSource>>.Func, wrapSubsequent ?? Identity<IObservable<TSource>>.Func)
+                .Catch();
+
+            static IEnumerable<IObservable<TSource>> Repeate(IObservable<TSource> source, int retryCount,
+                Func<IObservable<TSource>, IObservable<TSource>> wrapInitial, Func<IObservable<TSource>, IObservable<TSource>> wrapSubsequent)
+            {
+                yield return wrapInitial(source);
+
+                for (; retryCount > 0; retryCount--)
+                    yield return wrapSubsequent(source);
             }
         }
     }

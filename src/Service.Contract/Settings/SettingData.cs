@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace WebApp.Service.Contract.Settings
+namespace WebApp.Service.Settings
 {
     [DataContract]
     public class SettingData

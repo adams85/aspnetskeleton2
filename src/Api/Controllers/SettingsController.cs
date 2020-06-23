@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using WebApp.Api.Infrastructure.Security;
 using WebApp.Common.Roles;
 using WebApp.Service;
-using WebApp.Service.Contract.Settings;
 using WebApp.Service.Infrastructure;
 using WebApp.Service.Settings;
 

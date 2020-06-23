@@ -4,12 +4,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApp.Common.Settings;
-using WebApp.Service.Contract.Settings;
 
 namespace WebApp.Service.Settings
 {
     internal sealed class UpdateSettingCommandHandler : CommandHandler<UpdateSettingCommand>
     {
+        private readonly ISettingsSource _settingsSource;
+
+        public UpdateSettingCommandHandler(ISettingsSource settingsSource)
+        {
+            _settingsSource = settingsSource ?? throw new ArgumentNullException(nameof(settingsSource));
+        }
+
         public override async Task HandleAsync(UpdateSettingCommand command, CommandContext context, CancellationToken cancellationToken)
         {
             var setting = await context.DbContext.Settings
@@ -37,7 +43,10 @@ namespace WebApp.Service.Settings
 
             setting.Value = value;
 
-            await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            var changeCount = await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            if (changeCount > 0)
+                _settingsSource.Invalidate();
         }
     }
 }

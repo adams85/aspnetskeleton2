@@ -1,7 +1,5 @@
-﻿using WebApp.Service.Contract.Settings;
-using WebApp.Service.Infrastructure.Caching;
+﻿using WebApp.Service.Infrastructure.Caching;
 using WebApp.Service.Roles;
-using WebApp.Service.Settings;
 using WebApp.Service.Users;
 
 namespace WebApp.Service.Infrastructure
@@ -10,10 +8,6 @@ namespace WebApp.Service.Infrastructure
     {
         public static CachingBuilder ConfigureQueryCaching(this CachingBuilder builder, CacheOptions defaultCacheOptions)
         {
-            builder.Cache<GetCachedSettingsQuery>()
-                .InvalidatedBy<UpdateSettingCommand, GetCachedSettingsQueryInvalidatorInterceptor>()
-                .WithSlidingExpiration(defaultCacheOptions.SlidingExpiration);
-
             builder.Cache<GetCachedUserInfoQuery>()
                 .InvalidatedBy<CreateUserCommand, GetCachedUserInfoQueryInvalidatorInterceptor>()
                 .InvalidatedBy<ApproveUserCommand, GetCachedUserInfoQueryInvalidatorInterceptor>()

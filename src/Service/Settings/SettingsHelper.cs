@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Linq.Expressions;
 using WebApp.DataAccess.Entities;
-using WebApp.Service.Contract.Settings;
 
 namespace WebApp.Service.Settings
 {

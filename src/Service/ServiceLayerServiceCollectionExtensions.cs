@@ -37,7 +37,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddSingleton<IEventNotifier>(sp => sp.GetRequiredService<EventBus>())
                 .AddSingleton<IEventListener>(sp => sp.GetRequiredService<EventBus>());
 
-            services.AddSingleton<ISettingsProvider, SettingsProvider>();
+            services
+                .AddSingleton<ISettingsSource, SettingsSource>()
+                .AddSingleton<ISettingsProvider, SettingsProvider>();
 
             // TODO: implement localization
             services

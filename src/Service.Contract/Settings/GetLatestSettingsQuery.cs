@@ -3,7 +3,5 @@
 namespace WebApp.Service.Settings
 {
     [DataContract]
-    public class ListSettingsQuery : ListQuery, IQuery<ListResult<SettingData>>
-    {
-    }
+    public class GetLatestSettingsQuery : IQuery<SettingsChangedEvent> { }
 }

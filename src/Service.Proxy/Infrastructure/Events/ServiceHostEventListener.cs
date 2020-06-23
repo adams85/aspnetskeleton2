@@ -53,7 +53,7 @@ namespace WebApp.Service.Infrastructure.Events
                         .Subscribe(Noop<Unit>.Action, observer.OnError);
                 })
                 .Do(OnEventReceived, OnStreamError)
-                .RetryAfterDelay(_delayOnDropout)
+                .Retry(wrapSubsequent: source => source.DelaySubscription(_delayOnDropout))
                 // when subject completes, event stream should complete as well
                 .TakeUntil(_isActiveSubject.Where(_ => false).Materialize())
                 .Publish();

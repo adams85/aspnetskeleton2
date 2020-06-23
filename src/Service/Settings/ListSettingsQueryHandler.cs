@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using WebApp.DataAccess.Entities;
-using WebApp.Service.Contract.Settings;
 
 namespace WebApp.Service.Settings
 {

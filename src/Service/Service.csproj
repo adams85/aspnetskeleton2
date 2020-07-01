@@ -11,6 +11,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Karambolo.PO" Version="1.6.0" />
     <PackageReference Include="MailKit" Version="2.7.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.4" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="3.1.4" />
@@ -33,4 +34,4 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-  </Project>
+</Project>

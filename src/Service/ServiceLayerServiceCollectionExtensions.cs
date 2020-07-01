@@ -17,6 +17,7 @@ using WebApp.Service.Infrastructure.Events;
 using WebApp.Service.Infrastructure.Localization;
 using WebApp.Service.Mailing;
 using WebApp.Service.Settings;
+using WebApp.Service.Translations;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -40,6 +41,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services
                 .AddSingleton<ISettingsSource, SettingsSource>()
                 .AddSingleton<ISettingsProvider, SettingsProvider>();
+
+            services
+                .AddSingleton<ITranslationsSource, TranslationsSource>()
+                .AddSingleton<ITranslationsProvider, TranslationsProvider>();
 
             // TODO: implement localization
             services
@@ -74,8 +79,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(_ =>
             {
                 var settingsProvider = sp.GetRequiredService<ISettingsProvider>();
-
-                return Task.WhenAll(settingsProvider.Initialization);
+                var translationsProvider = sp.GetRequiredService<ITranslationsProvider>();
+                return Task.WhenAll(settingsProvider.Initialization, translationsProvider.Initialization);
             }));
 
             return services;

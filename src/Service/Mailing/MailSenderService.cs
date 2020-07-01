@@ -360,19 +360,16 @@ namespace WebApp.Service.Mailing
             }
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        // https://blog.stephencleary.com/2020/05/backgroundservice-gotcha-startup.html
+        // TODO: revise this workaround when upgrading to .NET 5 (https://github.com/dotnet/runtime/issues/36063)
+        protected override Task ExecuteAsync(CancellationToken stoppingToken) => Task.Run(async () =>
         {
-            // https://blog.stephencleary.com/2020/05/backgroundservice-gotcha-startup.html
-            // TODO: revise this workaround when upgrading to .NET 5 (https://github.com/dotnet/runtime/issues/36063)
-            await Task.Yield();
-
             using (var wakeEvent = new AutoResetEvent(false))
             {
                 void HandleEnqueued(object s, EventArgs e)
                 {
                     try { wakeEvent.Set(); }
-                    // ObjectDisposedException can safely be swallowed here
-                    catch (ObjectDisposedException) { }
+                    catch (ObjectDisposedException) { /* ObjectDisposedException can safely be swallowed here */ }
                 }
 
                 Enqueued += HandleEnqueued;
@@ -403,7 +400,7 @@ namespace WebApp.Service.Mailing
                 }
                 finally { Enqueued -= HandleEnqueued; }
             }
-        }
+        }, stoppingToken);
 
         private sealed class MailTypeNotSupportedException : ApplicationException
         {

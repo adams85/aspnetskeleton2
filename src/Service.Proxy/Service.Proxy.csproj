@@ -17,6 +17,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Grpc.Net.Client" Version="2.29.0" />
+    <PackageReference Include="Karambolo.PO" Version="1.6.0" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="3.1.4" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.4" />
     <PackageReference Include="protobuf-net.Grpc" Version="1.0.37" />
@@ -45,6 +46,10 @@
     <Compile Include="..\Service\Settings\SettingsProvider.cs" Link="Settings\SettingsProvider.cs" />
     <Compile Include="..\Service\Settings\SettingsProviderExtensions.cs" Link="Settings\SettingsProviderExtensions.cs" />
     <Compile Include="..\Service\Settings\SettingsProviderOptions.cs" Link="Settings\SettingsProviderOptions.cs" />
+    <Compile Include="..\Service\Translations\ITranslationsProvider.cs" Link="Translations\ITranslationsProvider.cs" />
+    <Compile Include="..\Service\Translations\TranslationsHelper.Shared.cs" Link="Translations\TranslationsHelper.Shared.cs" />
+    <Compile Include="..\Service\Translations\TranslationsProvider.cs" Link="Translations\TranslationsProvider.cs" />
+    <Compile Include="..\Service\Translations\TranslationsProviderOptions.cs" Link="Translations\TranslationsProviderOptions.cs" />
   </ItemGroup>
 
 </Project>

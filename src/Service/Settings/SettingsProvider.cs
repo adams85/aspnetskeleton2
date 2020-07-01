@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Karambolo.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -24,7 +24,8 @@ namespace WebApp.Service.Settings
         private readonly TaskCompletionSource<object?> _initializedTcs;
         private readonly IDisposable _refreshSubscription;
 
-        private volatile SettingsChangedEvent? _lastEvent;
+        private SettingsChangedEvent? _lastEvent;
+        private volatile IReadOnlyDictionary<string, string?>? _settings;
 
         private Exception? _previousResetException;
 
@@ -45,38 +46,42 @@ namespace WebApp.Service.Settings
             _refreshSubscription = _eventListener.IsActive
                 .Where(isActive => isActive)
                 .Select(_ => _eventListener.Listen<SettingsChangedEvent>()
+                    .Select(@event => (false, @event))
                     .Merge(Observable
                         .FromAsync(ct => _queryDispatcher.DispatchAsync(new GetLatestSettingsQuery { }, ct))
-                        .Do(OnResetSuccess, OnResetFailure)
+                        .Do(OnResetSuccess, OnResetError)
                         .Retry(wrapSubsequent: source => source.DelaySubscription(_delayOnRefreshError))
+                        .Select(@event => (true, @event))
                         .DoOnSubscribe(ClearResetException)))
                 .Switch()
-                .Subscribe(@event =>
+                .Subscribe(item =>
                 {
-                    lock (_gate)
-                        if (_lastEvent == null || _lastEvent!.Version < @event.Version)
-                        {
-                            @event.Data ??= new Dictionary<string, string?>();
-                            _lastEvent = @event;
-                        }
+                    var (isInitial, @event) = item;
+                    try
+                    {
+                        if (Refresh(@event))
+                            _logger.LogInformation("Internal cache was refreshed.");
 
-                    _initializedTcs.TrySetResult(null);
-
-                    _logger.LogInformation("Internal cache was refreshed.");
+                        if (isInitial)
+                            _initializedTcs.TrySetResult(null);
+                    }
+                    catch (Exception ex) when (isInitial)
+                    {
+                        _initializedTcs.TrySetException(ex);
+                    }
                 });
         }
 
-        private void ClearResetException() => _previousResetException = null;
+        private void ClearResetException() => Volatile.Write(ref _previousResetException, null);
 
         private void OnResetSuccess(SettingsChangedEvent _) => ClearResetException();
 
-        private void OnResetFailure(Exception ex)
+        private void OnResetError(Exception ex)
         {
             // basic protection against littering the log with identical, recurring exceptions (e.g. connection errors, etc.)
-            if (_previousResetException?.ToString() != ex.ToString())
+            var previousException = Interlocked.Exchange(ref _previousResetException, ex);
+            if (previousException?.ToString() != ex.ToString())
                 _logger.LogError(ex, "Resetting internal cache failed.");
-
-            _previousResetException = ex;
         }
 
         public void Dispose()
@@ -86,6 +91,25 @@ namespace WebApp.Service.Settings
 
         public Task Initialization => _initializedTcs.Task;
 
+        private bool Refresh(SettingsChangedEvent @event)
+        {
+            lock (_gate)
+            {
+                if (_lastEvent != null && _lastEvent.Version >= @event.Version)
+                    return false;
+
+                _lastEvent = new SettingsChangedEvent
+                {
+                    Version = @event.Version,
+                    Data = @event.Data
+                };
+
+                _settings = _lastEvent.Data ?? new Dictionary<string, string?>();
+
+                return true;
+            }
+        }
+
         public string? this[string name] => GetAllSettings().TryGetValue(name, out var value) ? value : null;
 
         public IReadOnlyDictionary<string, string?> GetAllSettings()
@@ -93,7 +117,7 @@ namespace WebApp.Service.Settings
             if (!Initialization.IsCompleted)
                 throw new InvalidOperationException($"Service has not been initialized yet. Await the task returned by {nameof(Initialization)} at startup to avoid this error.");
 
-            return _lastEvent!.Data!;
+            return _settings!;
         }
     }
 }

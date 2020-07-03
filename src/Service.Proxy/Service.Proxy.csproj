@@ -40,6 +40,8 @@
     <Compile Include="..\Service\Infrastructure\IQueryDispatcher.cs" Link="Infrastructure\IQueryDispatcher.cs" />
     <Compile Include="..\Service\Infrastructure\Localization\NullStringLocalizer.cs" Link="Infrastructure\Localization\NullStringLocalizer.cs" />
     <Compile Include="..\Service\Infrastructure\Localization\NullStringLocalizerFactory.cs" Link="Infrastructure\Localization\NullStringLocalizerFactory.cs" />
+    <Compile Include="..\Service\Infrastructure\Localization\POStringLocalizer.cs" Link="Infrastructure\Localization\POStringLocalizer.cs" />
+    <Compile Include="..\Service\Infrastructure\Localization\POStringLocalizerFactory.cs" Link="Infrastructure\Localization\POStringLocalizerFactory.cs" />
     <Compile Include="..\Service\QueryContext.Shared.cs" Link="QueryContext.Shared.cs" />
     <Compile Include="..\Service\ServiceErrorException.cs" Link="ServiceErrorException.cs" />
     <Compile Include="..\Service\Settings\ISettingsProvider.cs" Link="Settings\ISettingsProvider.cs" />

@@ -23,9 +23,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<ITranslationsProvider, TranslationsProvider>();
 
-            // TODO: implement localization
             services
-                .AddSingleton<IStringLocalizerFactory>(NullStringLocalizerFactory.Instance)
+                .AddSingleton<IStringLocalizerFactory, POStringLocalizerFactory>()
                 .AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
 
             services.AddApplicationInitializers();

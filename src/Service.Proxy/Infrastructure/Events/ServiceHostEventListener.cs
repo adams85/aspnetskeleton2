@@ -79,7 +79,7 @@ namespace WebApp.Service.Infrastructure.Events
         {
             _previousException = null;
 
-            _isActiveSubject.OnNext(false);
+            _isActiveSubject.OnNext(true);
 
             if (@event is StreamEvent.Init)
                 _logger.LogInformation("Connecting to remote event stream was successful.");
@@ -87,7 +87,7 @@ namespace WebApp.Service.Infrastructure.Events
 
         private void OnStreamError(Exception ex)
         {
-            _isActiveSubject.OnNext(true);
+            _isActiveSubject.OnNext(false);
 
             // basic protection against littering the log with identical, recurring exceptions (e.g. connection errors, etc.)
             if (_previousException?.ToString() != ex.ToString())

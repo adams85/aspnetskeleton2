@@ -36,6 +36,7 @@ namespace WebApp.Service.Translations
         private readonly TaskCompletionSource<object?> _initializedTcs;
         private readonly IDisposable _refreshSubscription;
 
+        private bool _resetting;
         private readonly Dictionary<(string Location, string Culture), (TranslationsChangedEvent LastEvent, POCatalog? Catalog)> _lastEvents;
         private volatile IReadOnlyDictionary<(string Location, string Culture), POCatalog>? _catalogs;
 
@@ -65,7 +66,8 @@ namespace WebApp.Service.Translations
                         .Do(OnResetSuccess, OnResetError)
                         .Retry(wrapSubsequent: source => source.DelaySubscription(_delayOnRefreshError))
                         .Select(@events => (@events ?? Array.Empty<TranslationsChangedEvent>(), (TranslationsChangedEvent?)null))
-                        .DoOnSubscribe(ClearResetException)))
+                        .DoOnSubscribe(ClearResetException))!
+                    .StartWith(((TranslationsChangedEvent[]?)null, (TranslationsChangedEvent?)null)))
                 .Switch()
                 .Subscribe(item =>
                 {
@@ -73,10 +75,12 @@ namespace WebApp.Service.Translations
                     try
                     {
                         if (Refresh(initialEvents, @event))
-                            _logger.LogInformation("Internal cache was refreshed.");
+                        {
+                            if (initialEvents != null)
+                                _initializedTcs.TrySetResult(null);
 
-                        if (initialEvents != null)
-                            _initializedTcs.TrySetResult(null);
+                            _logger.LogInformation("Internal cache was refreshed.");
+                        }
                     }
                     catch (Exception ex) when (initialEvents != null)
                     {
@@ -104,7 +108,7 @@ namespace WebApp.Service.Translations
 
         public Task Initialization => _initializedTcs.Task;
 
-        private bool RefreshCatalog(TranslationsChangedEvent @event)
+        private bool RefreshCore(TranslationsChangedEvent @event)
         {
             var key = (@event.Location, @event.Culture);
 
@@ -131,17 +135,28 @@ namespace WebApp.Service.Translations
 
         private bool Refresh(TranslationsChangedEvent[]? initialEvents, TranslationsChangedEvent? @event)
         {
-            bool hasRefreshed = false;
+            bool hasRefreshed;
 
             lock (_lastEvents)
             {
                 if (initialEvents != null)
                 {
                     for (int i = 0; i < initialEvents.Length; i++)
-                        hasRefreshed |= RefreshCatalog(initialEvents[i]);
+                        RefreshCore(initialEvents[i]);
+
+                    hasRefreshed = true;
+                    _resetting = false;
                 }
                 else if (@event != null)
-                    hasRefreshed |= RefreshCatalog(@event);
+                {
+                    hasRefreshed = RefreshCore(@event) ? !_resetting : false;
+                }
+                else
+                {
+                    _resetting = true;
+                    _lastEvents.Clear();
+                    hasRefreshed = false;
+                }
 
                 if (hasRefreshed)
                 {

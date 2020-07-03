@@ -24,6 +24,7 @@ namespace WebApp.Service.Settings
         private readonly TaskCompletionSource<object?> _initializedTcs;
         private readonly IDisposable _refreshSubscription;
 
+        private bool _resetting;
         private SettingsChangedEvent? _lastEvent;
         private volatile IReadOnlyDictionary<string, string?>? _settings;
 
@@ -52,18 +53,21 @@ namespace WebApp.Service.Settings
                         .Do(OnResetSuccess, OnResetError)
                         .Retry(wrapSubsequent: source => source.DelaySubscription(_delayOnRefreshError))
                         .Select(@event => (true, @event))
-                        .DoOnSubscribe(ClearResetException)))
+                        .DoOnSubscribe(ClearResetException))!
+                    .StartWith((true, null)))
                 .Switch()
                 .Subscribe(item =>
                 {
                     var (isInitial, @event) = item;
                     try
                     {
-                        if (Refresh(@event))
-                            _logger.LogInformation("Internal cache was refreshed.");
+                        if (Refresh(isInitial, @event))
+                        {
+                            if (isInitial)
+                                _initializedTcs.TrySetResult(null);
 
-                        if (isInitial)
-                            _initializedTcs.TrySetResult(null);
+                            _logger.LogInformation("Internal cache was refreshed.");
+                        }
                     }
                     catch (Exception ex) when (isInitial)
                     {
@@ -91,23 +95,46 @@ namespace WebApp.Service.Settings
 
         public Task Initialization => _initializedTcs.Task;
 
-        private bool Refresh(SettingsChangedEvent @event)
+        private bool RefreshCore(SettingsChangedEvent @event)
         {
+            if (_lastEvent != null && _lastEvent.Version >= @event.Version)
+                return false;
+
+            _lastEvent = new SettingsChangedEvent
+            {
+                Version = @event.Version,
+                Data = @event.Data
+            };
+
+            return true;
+        }
+
+        private bool Refresh(bool isInitial, SettingsChangedEvent? @event)
+        {
+            bool hasRefreshed;
+
             lock (_gate)
             {
-                if (_lastEvent != null && _lastEvent.Version >= @event.Version)
-                    return false;
-
-                _lastEvent = new SettingsChangedEvent
+                if (@event == null)
                 {
-                    Version = @event.Version,
-                    Data = @event.Data
-                };
+                    _resetting = true;
+                    _lastEvent = null;
+                    hasRefreshed = false;
+                }
+                else if (isInitial)
+                {
+                    RefreshCore(@event);
+                    hasRefreshed = true;
+                    _resetting = false;
+                }
+                else
+                    hasRefreshed = RefreshCore(@event) ? !_resetting : false;
 
-                _settings = _lastEvent.Data ?? new Dictionary<string, string?>();
-
-                return true;
+                if (hasRefreshed)
+                    _settings = _lastEvent!.Data ?? new Dictionary<string, string?>();
             }
+
+            return hasRefreshed;
         }
 
         public string? this[string name] => GetAllSettings().TryGetValue(name, out var value) ? value : null;

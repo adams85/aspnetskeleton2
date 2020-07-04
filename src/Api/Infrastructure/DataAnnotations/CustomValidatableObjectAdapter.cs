@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using WebApp.Api.Infrastructure.Localization;
 
@@ -65,32 +66,35 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
                     {
                         foreach (var memberName in result.MemberNames)
                         {
-                            yield return new ModelValidationResult(memberName, GetErrorMessage(validationContext, context, result));
+                            yield return new ModelValidationResult(memberName, GetErrorMessage(validationContext, context, result, memberName));
                         }
                     }
                 }
             }
         }
 
-        private string GetErrorMessage(ModelValidationContext validationContext, ValidationContext context, ValidationResult result)
+        private string GetErrorMessage(ModelValidationContext validationContext, ValidationContext context, ValidationResult result, string? memberName = null)
         {
-            if (_stringLocalizerAdapter != null &&
-                result is ExtendedValidationResult extendedValidationResult &&
-                extendedValidationResult.ValidationAttribute.AdjustToMvcLocalization(out var extendedAttribute))
+            if (result is ExtendedValidationResult extendedValidationResult)
             {
-                if (extendedAttribute != null)
-                    return extendedAttribute.FormatErrorMessage(validationContext.ModelMetadata.DisplayName, _stringLocalizerAdapter, context);
-                else
-                    return GetErrorMessage(extendedValidationResult.ValidationAttribute, validationContext) ?? result.ErrorMessage;
+                var isLocalizable = extendedValidationResult.ValidationAttribute.AdjustToMvcLocalization(out var extendedAttribute);
+
+                ModelMetadata? memberModelMetadata;
+                if (memberName != null && (memberModelMetadata = validationContext.ModelMetadata.Properties[memberName]) != null)
+                {
+                    var memberValue = memberModelMetadata.PropertyGetter(validationContext.Model);
+                    validationContext = new ModelValidationContext(validationContext.ActionContext, memberModelMetadata, validationContext.MetadataProvider, validationContext.Model, memberValue);
+                }
+
+                var adapter = _validationAttributeAdapterProvider.GetAttributeAdapter(extendedValidationResult.ValidationAttribute, _stringLocalizerAdapter);
+                if (adapter != null)
+                    return adapter.GetErrorMessage(validationContext);
+
+                if (isLocalizable && _stringLocalizerAdapter != null && extendedAttribute != null)
+                    return extendedAttribute.FormatErrorMessage(validationContext.ModelMetadata.GetDisplayName(), _stringLocalizerAdapter, context);
             }
 
             return result.ErrorMessage;
-        }
-
-        private string? GetErrorMessage(ValidationAttribute attribute, ModelValidationContextBase validationContext)
-        {
-            var adapter = _validationAttributeAdapterProvider.GetAttributeAdapter(attribute, _stringLocalizerAdapter?.StringLocalizer);
-            return adapter?.GetErrorMessage(validationContext);
         }
     }
 }

@@ -100,22 +100,16 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
 
         private string GetErrorMessage(ModelValidationContext validationContext, ValidationContext context, ValidationResult result)
         {
-            if (_stringLocalizerAdapter != null && Attribute.AdjustToMvcLocalization(out var extendedAttribute))
-            {
-                if (extendedAttribute != null)
-                    return extendedAttribute.FormatErrorMessage(validationContext.ModelMetadata.DisplayName, _stringLocalizerAdapter, context);
-                else
-                    return GetErrorMessage(validationContext) ?? result.ErrorMessage;
-            }
+            var isLocalizable = Attribute.AdjustToMvcLocalization(out var extendedAttribute);
+
+            var adapter = _validationAttributeAdapterProvider.GetAttributeAdapter(Attribute, _stringLocalizerAdapter);
+            if (adapter != null)
+                return adapter.GetErrorMessage(validationContext);
+
+            if (isLocalizable && _stringLocalizerAdapter != null && extendedAttribute != null)
+                return extendedAttribute.FormatErrorMessage(validationContext.ModelMetadata.GetDisplayName(), _stringLocalizerAdapter, context);
 
             return result.ErrorMessage;
         }
-
-        private string? GetErrorMessage(ModelValidationContextBase validationContext)
-        {
-            var adapter = _validationAttributeAdapterProvider.GetAttributeAdapter(Attribute, _stringLocalizerAdapter?.StringLocalizer);
-            return adapter?.GetErrorMessage(validationContext);
-        }
     }
 }
-

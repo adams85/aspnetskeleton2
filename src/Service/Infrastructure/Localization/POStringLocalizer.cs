@@ -1,69 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Karambolo.Common.Localization;
 using Karambolo.PO;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using WebApp.Service.Translations;
 
 namespace WebApp.Service.Infrastructure.Localization
 {
-    internal sealed class POStringLocalizer : IStringLocalizer
+    internal sealed class POStringLocalizer : IExtendedStringLocalizer
     {
         private readonly ITranslationsProvider _translationsProvider;
         private readonly string _location;
         private readonly CultureInfo? _culture;
+        private readonly ILogger _logger;
 
-        public POStringLocalizer(ITranslationsProvider translationsProvider, string location, CultureInfo? culture = null)
+        public POStringLocalizer(ITranslationsProvider translationsProvider, string location, CultureInfo? culture = null, ILogger<POStringLocalizer>? logger = null)
         {
             _translationsProvider = translationsProvider;
             _location = location;
             _culture = culture;
-        }
-
-        private bool TryGetTranslation(string id, Plural plural, TextContext context, [MaybeNullWhen(false)] out string translation)
-        {
-            var catalogs = _translationsProvider.GetCatalogs();
-
-            var catalog = GetCatalog(catalogs, _location, _culture ?? CultureInfo.CurrentUICulture);
-            if (catalog != null)
-            {
-                var key = new POKey(id, plural.Id, context.Id);
-                translation = plural.Id == null ? catalog.GetTranslation(key) : catalog.GetTranslation(key, plural.Count);
-                if (translation != null)
-                    return true;
-            }
-
-            translation = default;
-            return false;
-
-            static POCatalog? GetCatalog(IReadOnlyDictionary<(string, string), POCatalog> catalogs, string location, CultureInfo culture)
-            {
-                for (; ; )
-                {
-                    if (catalogs.TryGetValue((location, culture.Name), out var catalog))
-                        return catalog;
-
-                    var parentCulture = culture.Parent;
-                    if (culture == parentCulture)
-                        return null;
-
-                    culture = parentCulture;
-                }
-            }
+            _logger = logger ?? (ILogger)NullLogger.Instance;
         }
 
         public LocalizedString this[string name]
         {
             get
             {
-                var translationFound = TryGetTranslation(name, default, default, out var value);
-                // TODO: log when not found
+                var translationFound = TryLocalize(name, out var searchedLocation, out var value);
                 if (!translationFound)
-                    value = name;
-
-                return new LocalizedString(name, value, !translationFound, _location);
+                {
+                    _logger.TranslationNotFound(name, searchedLocation);
+                    NullStringLocalizer.Instance.TryLocalize(name, out var _, out value);
+                }
+                return new LocalizedString(name, value, resourceNotFound: !translationFound, searchedLocation);
             }
         }
 
@@ -71,22 +43,69 @@ namespace WebApp.Service.Infrastructure.Localization
         {
             get
             {
-                var plural = (Plural?)Array.Find(arguments, arg => arg is Plural) ?? default;
-                var context = arguments.Length > 0 ? (arguments[^1] as TextContext? ?? default) : default;
-
-                var translationFound = TryGetTranslation(name, plural, context, out var value);
-                // TODO: log when not found
+                var translationFound = TryLocalize(name, arguments, out var searchedLocation, out var value);
                 if (!translationFound)
-                    value = plural.Id != null && plural.Count != 1 ? plural.Id : name;
-
-                return new LocalizedString(name, string.Format(value, arguments), !translationFound, _location);
+                {
+                    _logger.TranslationNotFound(name, searchedLocation);
+                    NullStringLocalizer.Instance.TryLocalize(name, arguments, out var _, out value);
+                }
+                return new LocalizedString(name, value, resourceNotFound: !translationFound, searchedLocation);
             }
+        }
+
+        private POCatalog? GetCatalog()
+        {
+            var catalogs = _translationsProvider.GetCatalogs();
+            var culture = _culture ?? CultureInfo.CurrentUICulture;
+            for (; ; )
+            {
+                if (catalogs.TryGetValue((_location, culture.Name), out var catalog))
+                    return catalog;
+
+                var parentCulture = culture.Parent;
+                if (culture == parentCulture)
+                    return null;
+
+                culture = parentCulture;
+            }
+        }
+
+        private bool TryGetTranslation(string id, Plural plural, TextContext context, [MaybeNullWhen(false)] out string value)
+        {
+            var catalog = GetCatalog();
+            if (catalog != null)
+            {
+                var key = new POKey(id, plural.Id, context.Id);
+                value = plural.Id == null ? catalog.GetTranslation(key) : catalog.GetTranslation(key, plural.Count);
+                if (value != null)
+                    return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        public bool TryLocalize(string name, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
+        {
+            searchedLocation = _location;
+            return TryGetTranslation(name, default, default, out value);
+        }
+
+        public bool TryLocalize(string name, object[] arguments, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
+        {
+            searchedLocation = _location;
+
+            var (plural, context) = LocalizationHelper.GetSpecialArgs(arguments);
+            if (!TryGetTranslation(name, plural, context, out value))
+                return false;
+
+            value = string.Format(value, arguments);
+            return true;
         }
 
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
         {
             var catalogs = _translationsProvider.GetCatalogs();
-
             var culture = _culture ?? CultureInfo.CurrentUICulture;
             do
             {

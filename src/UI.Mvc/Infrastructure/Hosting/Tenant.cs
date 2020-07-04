@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting.Internal;
+using WebApp.Core.Helpers;
 
 namespace WebApp.UI.Infrastructure.Hosting
 {
@@ -64,6 +65,8 @@ namespace WebApp.UI.Infrastructure.Hosting
 
         public abstract void ConfigureServices(IServiceCollection services);
 
+        protected virtual bool ShouldResolveFromRoot(ServiceDescriptor service) => false;
+
         public void InitializeServices(AutofacServiceProvider rootServices)
         {
             TenantServices ??= new AutofacServiceProvider(rootServices.LifetimeScope.BeginLifetimeScope(builder =>
@@ -79,7 +82,7 @@ namespace WebApp.UI.Infrastructure.Hosting
 
                 ConfigureServices(services);
 
-                services.Remove(dummyWebHostEnvironment);
+                services.RemoveAll((service, _) => service == dummyWebHostEnvironment || ShouldResolveFromRoot(service));
 
                 builder.Populate(services);
             }));

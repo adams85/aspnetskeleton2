@@ -38,6 +38,9 @@
     <Compile Include="..\Service\Infrastructure\Events\IEventListener.cs" Link="Infrastructure\Events\IEventListener.cs" />
     <Compile Include="..\Service\Infrastructure\ICommandDispatcher.cs" Link="Infrastructure\ICommandDispatcher.cs" />
     <Compile Include="..\Service\Infrastructure\IQueryDispatcher.cs" Link="Infrastructure\IQueryDispatcher.cs" />
+    <Compile Include="..\Service\Infrastructure\Localization\CompositeStringLocalizer.cs" Link="Infrastructure\Localization\CompositeStringLocalizer.cs" />
+    <Compile Include="..\Service\Infrastructure\Localization\IExtendedStringLocalizer.cs" Link="Infrastructure\Localization\IExtendedStringLocalizer.cs" />
+    <Compile Include="..\Service\Infrastructure\Localization\LocalizationHelper.cs" Link="Infrastructure\Localization\LocalizationHelper.cs" />
     <Compile Include="..\Service\Infrastructure\Localization\NullStringLocalizer.cs" Link="Infrastructure\Localization\NullStringLocalizer.cs" />
     <Compile Include="..\Service\Infrastructure\Localization\NullStringLocalizerFactory.cs" Link="Infrastructure\Localization\NullStringLocalizerFactory.cs" />
     <Compile Include="..\Service\Infrastructure\Localization\POStringLocalizer.cs" Link="Infrastructure\Localization\POStringLocalizer.cs" />

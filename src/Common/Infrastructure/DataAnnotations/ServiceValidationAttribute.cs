@@ -39,20 +39,26 @@ namespace System.ComponentModel.DataAnnotations
             var validator = serviceProvider != null ? GetValidator(serviceProvider) : null;
 
             if (validator == null)
-                return base.FormatErrorMessage(localizedName, textLocalizer, serviceProvider);
+                return FormatErrorMessageFallback(localizedName, textLocalizer, serviceProvider);
 
             return _validatorHelper.FormatErrorMessage(validator, localizedName, textLocalizer, this);
         }
+
+        protected virtual string FormatErrorMessageFallback(string localizedName, ITextLocalizer textLocalizer, IServiceProvider? serviceProvider) =>
+            base.FormatErrorMessage(localizedName, textLocalizer, serviceProvider);
 
         protected sealed override ValidationResult IsValid(object? value, ValidationContext validationContext)
         {
             var validator = GetValidator(validationContext);
 
             if (validator == null)
-                return ValidationResult.Success;
+                return IsValidFallback(value, validationContext);
 
             return _validatorHelper.IsValid(validator, value, validationContext, this);
         }
+
+        protected virtual ValidationResult IsValidFallback(object? value, ValidationContext validationContext) =>
+            ValidationResult.Success;
 
         private delegate string FormatErrorMessageDelegate(object validator, string localizedName, ITextLocalizer textLocalizer, ServiceValidationAttribute validationAttribute);
 

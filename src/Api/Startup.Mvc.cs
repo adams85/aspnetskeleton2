@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
@@ -6,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WebApp.Api.Infrastructure.DataAnnotations;
 using WebApp.Api.Infrastructure.ModelBinding;
+using WebApp.Service.Infrastructure.Localization;
 
 namespace WebApp.Api
 {
@@ -42,7 +45,14 @@ namespace WebApp.Api
 
             ReplaceDataAnnotationsModelValidatorProvider(builder);
 
-            builder.AddDataAnnotationsLocalization();
+            builder.Services.AddOptions<MvcDataAnnotationsLocalizationOptions>()
+                .Configure<ILoggerFactory>((options, loggerFactory) => options.DataAnnotationLocalizerProvider = (type, stringLocalizerFactory) =>
+                    new CompositeStringLocalizer(new[]
+                    {
+                        stringLocalizerFactory.Create(type),
+                        stringLocalizerFactory.Create(typeof(ValidationErrorMessages))
+                    },
+                    loggerFactory.CreateLogger<CompositeStringLocalizer>()));
         }
 
         private static IMvcBuilder ReplaceDataAnnotationsModelValidatorProvider(IMvcBuilder builder)

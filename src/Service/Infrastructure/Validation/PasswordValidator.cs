@@ -2,7 +2,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using Karambolo.Common.Localization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using WebApp.Common.Infrastructure.Localization;
 using WebApp.Common.Infrastructure.Validation;
@@ -13,10 +15,13 @@ namespace WebApp.Service.Infrastructure.Validation
     {
         private readonly PasswordOptions? _passwordOptions;
 
-        public PasswordValidator(IOptions<PasswordOptions>? passwordOptions)
+        public PasswordValidator(IStringLocalizer<PasswordValidator> stringLocalizer, IOptions<PasswordOptions>? passwordOptions)
         {
             _passwordOptions = passwordOptions?.Value;
+            T = stringLocalizer;
         }
+
+        private IStringLocalizer<PasswordValidator> T { get; }
 
         private bool IsValidPassword(string? value)
         {
@@ -48,18 +53,15 @@ namespace WebApp.Service.Infrastructure.Validation
             if (!validationAttribute.IncludeComplexityRequirementsInErrorMessage)
                 return errorMessage;
 
-#pragma warning disable IDE1006 // Naming Styles
-            var T = textLocalizer;
-#pragma warning restore IDE1006 // Naming Styles
-
             var sb = new StringBuilder(errorMessage);
 
-            // TODO: plural support?
-            sb.Append(Environment.NewLine).Append(T["Passwords must be at least {0} character(s) long.", Math.Max(1, _passwordOptions!.RequiredLength)]);
+            sb.AppendLine();
+            sb.Append(T["Passwords must be at least {0} character long.", Plural.From("Passwords must be at least {0} characters long.", Math.Max(1, _passwordOptions!.RequiredLength))]);
 
             if (_passwordOptions.RequireNonAlphanumeric || _passwordOptions.RequireDigit || _passwordOptions.RequireLowercase || _passwordOptions.RequireUppercase)
             {
-                sb.Append(Environment.NewLine).Append(T["Must contain characters from the following categories:"]).Append(' ');
+                sb.AppendLine();
+                sb.Append(T["Must contain characters from the following categories:"]).Append(' ');
 
                 if (_passwordOptions.RequireNonAlphanumeric)
                     sb.Append(T["non-alphabetic characters (!, $, #, etc.)"]).Append(", ");
@@ -77,8 +79,10 @@ namespace WebApp.Service.Infrastructure.Validation
             }
 
             if (_passwordOptions.RequiredUniqueChars > 0)
-                // TODO: plural support?
-                sb.Append(Environment.NewLine).Append(T["Must contain at least {0} different character(s).", _passwordOptions.RequiredUniqueChars]);
+            {
+                sb.AppendLine();
+                sb.Append(T["Must contain at least {0} different character.", Plural.From("Must contain at least {0} different characters.", _passwordOptions.RequiredUniqueChars)]);
+            }
 
             return sb.ToString();
         }

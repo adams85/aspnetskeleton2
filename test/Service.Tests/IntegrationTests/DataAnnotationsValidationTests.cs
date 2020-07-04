@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using WebApp.Common.Infrastructure.Localization;
 using WebApp.Common.Infrastructure.Validation;
 using WebApp.Service.Infrastructure.Validation;
@@ -148,6 +149,8 @@ namespace WebApp.Service.Infrastructure
                 options.RequiredUniqueChars = 2;
             });
 
+            services.AddSingleton<IStringLocalizerFactory>(NullStringLocalizerFactory.Instance);
+            services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
             services.AddSingleton<IValidator<PasswordAttribute>, PasswordValidator>();
 
             var command = new ChangePasswordCommand

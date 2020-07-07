@@ -2,15 +2,15 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <AssemblyName>codegen</AssemblyName>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackageId>Karambolo.AspNetSkeleton.CodegenTools</PackageId>
     <PackAsTool>true</PackAsTool>
+    <ToolCommandName>codegen</ToolCommandName>
     <PackageOutputPath>..\..\.nuget</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.5.0" />
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -25,9 +25,9 @@ namespace WebApp.Service
 
         [DataMember(Order = 5)] public bool SkipTotalItemCount { get; set; }
 
-        [Translatable] private const string NonNegativeIntegerValidatorErrorMessage = "The field {0} must be a non-negative integer.";
+        [Localized] private const string NonNegativeIntegerValidatorErrorMessage = "The field {0} must be a non-negative integer.";
 
-        [Translatable] private const string ItemsRequiredValidatorErrorMessage = "The field {0} must contain non-empty strings.";
+        [Localized] private const string ItemsRequiredValidatorErrorMessage = "The field {0} must contain non-empty strings.";
 
         private static readonly ValidationAttribute s_nonNegativeIntegerValidator = new RangeAttribute(0, int.MaxValue)
         {

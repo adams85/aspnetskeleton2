@@ -7,32 +7,32 @@ namespace System.ComponentModel.DataAnnotations
     {
         #region Built-in validation attributes
 
-        [Translatable] private const string CompareAttribute_DefaultErrorMessage = "'{0}' and '{1}' do not match.";
+        [Localized] private const string CompareAttribute_DefaultErrorMessage = "'{0}' and '{1}' do not match.";
 
-        [Translatable] private const string FileExtensionsAttribute_DefaultErrorMessage = "The {0} field only accepts files with the following extensions: {1}";
+        [Localized] private const string FileExtensionsAttribute_DefaultErrorMessage = "The {0} field only accepts files with the following extensions: {1}";
 
-        [Translatable] private const string MaxLengthAttribute_DefaultErrorMessage = "The field {0} must be a string or array type with a maximum length of '{1}'.";
+        [Localized] private const string MaxLengthAttribute_DefaultErrorMessage = "The field {0} must be a string or array type with a maximum length of '{1}'.";
 
-        [Translatable] private const string MinLengthAttribute_DefaultErrorMessage = "The field {0} must be a string or array type with a minimum length of '{1}'.";
+        [Localized] private const string MinLengthAttribute_DefaultErrorMessage = "The field {0} must be a string or array type with a minimum length of '{1}'.";
 
-        [Translatable] private const string RangeAttribute_DefaultErrorMessage = "The field {0} must be between {1} and {2}.";
+        [Localized] private const string RangeAttribute_DefaultErrorMessage = "The field {0} must be between {1} and {2}.";
 
-        [Translatable] private const string RegularExpressionAttribute_DefaultErrorMessage = "The field {0} must match the regular expression '{1}'.";
+        [Localized] private const string RegularExpressionAttribute_DefaultErrorMessage = "The field {0} must match the regular expression '{1}'.";
 
-        [Translatable] private const string RequiredAttribute_DefaultErrorMessage = "The {0} field is required.";
+        [Localized] private const string RequiredAttribute_DefaultErrorMessage = "The {0} field is required.";
 
-        [Translatable] private const string StringLengthAttribute_DefaultErrorMessage = "The field {0} must be a string with a maximum length of {1}.";
-        [Translatable] private const string StringLengthAttribute_IncludingMinimumErrorMessage = "The field {0} must be a string with a minimum length of {2} and a maximum length of {1}.";
+        [Localized] private const string StringLengthAttribute_DefaultErrorMessage = "The field {0} must be a string with a maximum length of {1}.";
+        [Localized] private const string StringLengthAttribute_IncludingMinimumErrorMessage = "The field {0} must be a string with a minimum length of {2} and a maximum length of {1}.";
 
-        [Translatable] private const string ValidationAttribute_DefaultErrorMessage = "The field {0} is invalid.";
+        [Localized] private const string ValidationAttribute_DefaultErrorMessage = "The field {0} is invalid.";
 
         #endregion
 
         #region Custom validation attributes
 
-        [Translatable] internal const string ItemsRequiredAttribute_DefaultErrorMessage = "The field {0} must be a collection containing no unset items.";
+        [Localized] internal const string ItemsRequiredAttribute_DefaultErrorMessage = "The field {0} must be a collection containing no unset items.";
 
-        [Translatable] internal const string PasswordAttribute_DefaultErrorMessage = "The field {0} must meet password complexity requirements.";
+        [Localized] internal const string PasswordAttribute_DefaultErrorMessage = "The field {0} must meet password complexity requirements.";
 
         #endregion
 

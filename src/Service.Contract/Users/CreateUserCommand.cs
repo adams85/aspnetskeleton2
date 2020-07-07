@@ -34,6 +34,6 @@ namespace WebApp.Service.Users
 
         public Action<ICommand, object>? OnKeyGenerated { get; set; }
 
-        [Translatable] private const string CommaNotAllowedErrorMessage = "The field {0} must contain no comma characters.";
+        [Localized] private const string CommaNotAllowedErrorMessage = "The field {0} must contain no comma characters.";
     }
 }

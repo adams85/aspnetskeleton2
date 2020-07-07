@@ -6,9 +6,9 @@ namespace WebApp.Common.Infrastructure.Localization
     /// Custom attribute which supports localizable text extraction from source code (POTools).
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
-    public sealed class TranslatableAttribute : Attribute
+    public sealed class LocalizedAttribute : Attribute
     {
         public string? PluralId { get; set; }
-        public string? TextContext { get; set; }
+        public string? ContextId { get; set; }
     }
 }

@@ -170,8 +170,7 @@ namespace WebApp.Service.Translations
             if (!parseResult.Success)
             {
                 var diagnosticMessages = parseResult.Diagnostics
-                    .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
-                    .Select(diagnostic => diagnostic.Message);
+                    .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
 
                 _logger.LogWarning("Translation file \"{PATH}\" has errors: {ERRORS}", filePath, string.Join(Environment.NewLine, diagnosticMessages));
                 return null;

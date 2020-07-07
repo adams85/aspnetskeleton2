@@ -2,15 +2,15 @@
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using CodegenTools.Commands;
+using POTools.Commands;
 using McMaster.Extensions.CommandLineUtils;
 
-namespace CodegenTools
+namespace POTools
 {
-    [Command("codegen", FullName = "CLI tools for generating boilerplate code")]
+    [Command("po", FullName = "CLI tools for extracting localizable text from source files in PO format")]
     [HelpOption(Inherited = true)]
     [VersionOptionFromMember("--version", MemberName = nameof(GetVersion))]
-    [Subcommand(typeof(GenerateCommandCommand), typeof(GenerateQueryCommand))]
+    [Subcommand(typeof(ScanCommand), typeof(ExtractCommand))]
     public class Program
     {
         public static async Task<int> Main(string[] args)

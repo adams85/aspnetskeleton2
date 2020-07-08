@@ -27,7 +27,7 @@ namespace WebApp.Service.Infrastructure.Database
 
         public DbInitializer(WritableDataContext context, IOptions<DbInitializerOptions> options, IClock clock, ILogger<DbInitializer>? logger)
         {
-            if (options == null)
+            if (options?.Value == null)
                 throw new ArgumentNullException(nameof(options));
 
             _context = context ?? throw new ArgumentNullException(nameof(context));

@@ -43,7 +43,16 @@ namespace WebApp.Api
         {
             builder.Services.Replace(ServiceDescriptor.Singleton<IModelMetadataProvider, CustomModelMetadataProvider>());
 
-            ReplaceDataAnnotationsModelValidatorProvider(builder);
+            builder.Services.AddOptions<MvcOptions>()
+                .Configure<IServiceProvider>((options, sp) =>
+                {
+                    options.ModelValidatorProviders.Add(new DataAnnotationLocalizationAdjuster(
+                        sp.GetRequiredService<IValidationAttributeAdapterProvider>(),
+                        sp.GetRequiredService<IOptions<MvcDataAnnotationsLocalizationOptions>>(),
+                        sp.GetService<IStringLocalizerFactory>()));
+                });
+
+            builder.Services.Replace(ServiceDescriptor.Singleton<IValidationAttributeAdapterProvider, CustomValidationAttributeAdapterProvider>());
 
             builder.Services.AddOptions<MvcDataAnnotationsLocalizationOptions>()
                 .Configure<ILoggerFactory>((options, loggerFactory) => options.DataAnnotationLocalizerProvider = (type, stringLocalizerFactory) =>
@@ -53,30 +62,6 @@ namespace WebApp.Api
                         stringLocalizerFactory.Create(typeof(ValidationErrorMessages))
                     },
                     loggerFactory.CreateLogger<CompositeStringLocalizer>()));
-        }
-
-        private static IMvcBuilder ReplaceDataAnnotationsModelValidatorProvider(IMvcBuilder builder)
-        {
-            builder.Services.AddOptions<MvcOptions>()
-                 .Configure<IServiceProvider>((options, sp) =>
-                 {
-                     var providerCount = options.ModelValidatorProviders.Count;
-
-                     // we need to replace DataAnnotationsModelValidatorProvider with our customized version,
-                     // but unfortunataly, that type is internal, so we resort to removing it by name
-                     for (int i = providerCount - 1; i >= 0; i--)
-                         if (options.ModelValidatorProviders[i].GetType().FullName == "Microsoft.AspNetCore.Mvc.DataAnnotations.DataAnnotationsModelValidatorProvider")
-                             options.ModelValidatorProviders.RemoveAt(i);
-
-                     Debug.Assert(providerCount - options.ModelValidatorProviders.Count == 1, "Microsoft.AspNetCore.Mvc.DataAnnotations internals has apparently changed.");
-
-                     options.ModelValidatorProviders.Add(new CustomDataAnnotationsModelValidatorProvider(
-                         sp.GetRequiredService<IValidationAttributeAdapterProvider>(),
-                         sp.GetRequiredService<IOptions<MvcDataAnnotationsLocalizationOptions>>(),
-                         sp.GetService<IStringLocalizerFactory>()));
-                 });
-
-            return builder;
         }
     }
 }

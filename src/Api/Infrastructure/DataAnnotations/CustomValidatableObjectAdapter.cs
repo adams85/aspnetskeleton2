@@ -13,9 +13,9 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
     public sealed class CustomValidatableObjectAdapter : IModelValidator
     {
         private readonly IValidationAttributeAdapterProvider _validationAttributeAdapterProvider;
-        private readonly StringLocalizerAdapter? _stringLocalizerAdapter;
+        private readonly StringLocalizerAdapter _stringLocalizerAdapter;
 
-        public CustomValidatableObjectAdapter(IValidationAttributeAdapterProvider validationAttributeAdapterProvider, StringLocalizerAdapter? stringLocalizerAdapter)
+        public CustomValidatableObjectAdapter(IValidationAttributeAdapterProvider validationAttributeAdapterProvider, StringLocalizerAdapter stringLocalizerAdapter)
         {
             _validationAttributeAdapterProvider = validationAttributeAdapterProvider;
             _stringLocalizerAdapter = stringLocalizerAdapter;
@@ -77,21 +77,18 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
         {
             if (result is ExtendedValidationResult extendedValidationResult)
             {
-                var isLocalizable = extendedValidationResult.ValidationAttribute.AdjustToMvcLocalization(out var extendedAttribute);
-
-                ModelMetadata? memberModelMetadata;
-                if (memberName != null && (memberModelMetadata = validationContext.ModelMetadata.Properties[memberName]) != null)
-                {
-                    var memberValue = memberModelMetadata.PropertyGetter(validationContext.Model);
-                    validationContext = new ModelValidationContext(validationContext.ActionContext, memberModelMetadata, validationContext.MetadataProvider, validationContext.Model, memberValue);
-                }
-
                 var adapter = _validationAttributeAdapterProvider.GetAttributeAdapter(extendedValidationResult.ValidationAttribute, _stringLocalizerAdapter);
                 if (adapter != null)
-                    return adapter.GetErrorMessage(validationContext);
+                {
+                    ModelMetadata? memberModelMetadata;
+                    if (memberName != null && (memberModelMetadata = validationContext.ModelMetadata.Properties[memberName]) != null)
+                    {
+                        var memberValue = memberModelMetadata.PropertyGetter(validationContext.Model);
+                        validationContext = new ModelValidationContext(validationContext.ActionContext, memberModelMetadata, validationContext.MetadataProvider, validationContext.Model, memberValue);
+                    }
 
-                if (isLocalizable && _stringLocalizerAdapter != null && extendedAttribute != null)
-                    return extendedAttribute.FormatErrorMessage(validationContext.ModelMetadata.GetDisplayName(), _stringLocalizerAdapter, context);
+                    return adapter.GetErrorMessage(validationContext);
+                }
             }
 
             return result.ErrorMessage;

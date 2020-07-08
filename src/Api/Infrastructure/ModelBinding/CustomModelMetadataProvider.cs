@@ -10,10 +10,9 @@ using Microsoft.Extensions.Options;
 namespace WebApp.Api.Infrastructure.ModelBinding
 {
     /// <summary>
-    /// Customizes model metadata discovery.
+    /// Makes <see cref="IModelMetadataProvider"/> respect <see cref="DataContractAttribute"/> and <see cref="DataMemberAttribute"/>.
     /// </summary>
     /// <remarks>
-    /// Makes <see cref="IModelMetadataProvider"/> respect <see cref="DataContractAttribute"/> and <see cref="DataMemberAttribute"/>.
     /// This class is necessary for correct Swagger JSON generation as operation parameters are generated based on model metadata.
     /// </remarks>
     public sealed class CustomModelMetadataProvider : DefaultModelMetadataProvider

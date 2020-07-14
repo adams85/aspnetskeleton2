@@ -15,10 +15,10 @@ namespace WebApp.UI
         {
             private readonly Api.Startup _apiStartup;
 
-            public ApiTenant(string id, Api.Startup apiStartup, Assembly? entryAssembly = null)
-                : base(id, apiStartup.Configuration, apiStartup.Environment, entryAssembly)
+            public ApiTenant(string id, Startup startup, Assembly? entryAssembly = null)
+                : base(id, startup.Configuration, startup.Environment, entryAssembly)
             {
-                _apiStartup = apiStartup;
+                _apiStartup = startup.ApiStartup;
             }
 
             public override Func<HttpContext, bool>? BranchPredicate { get; } = CreatePathPrefixBranchPredicate("/api");

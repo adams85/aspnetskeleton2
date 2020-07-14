@@ -298,9 +298,10 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-# Other
-/.nuget/
-*.Development.db
-
 # Auto-generated files
 /release/**
+
+# Other
+/.nuget/
+/src/UI.Mvc/wwwroot/lib
+*.Development.db

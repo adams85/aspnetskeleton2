@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Net;
-using Karambolo.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -27,27 +26,24 @@ namespace WebApp.Api
             Environment = environment;
 
             _provideRazorTemplating = provideRazorTemplating;
+
+            ApiOptions = new ApiOptions();
         }
 
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment Environment { get; }
 
         public bool IsRunningBehindProxy { get; private set; }
-        public bool IsSwaggerEnabled { get; private set; }
+        public ApiOptions ApiOptions { get; private set; }
 
         partial void ConfigureBaseServicesPartial(IServiceCollection services);
 
-        public void ConfigureBaseServices(IServiceCollection services)
+        public void ConfigureBaseServices(IServiceCollection services, IServiceProvider optionsProvider)
         {
-            using (var optionsProvider = BuildImmediateOptionsProvider())
-            {
-                IsRunningBehindProxy = string.Equals(bool.TrueString, Configuration["ForwardedHeaders_Enabled"], StringComparison.OrdinalIgnoreCase);
+            IsRunningBehindProxy = Configuration.GetValue("ForwardedHeaders_Enabled", false);
+            ApiOptions = optionsProvider.GetRequiredService<IOptions<ApiOptions>>().Value;
 
-                var apiOptions = optionsProvider.GetRequiredService<IOptions<ApiOptions>>();
-                IsSwaggerEnabled = apiOptions.Value.EnableSwagger;
-
-                services.AddServiceLayer(optionsProvider);
-            }
+            services.AddServiceLayer(optionsProvider);
 
             ConfigureOptions(services);
 
@@ -70,7 +66,7 @@ namespace WebApp.Api
         {
             ConfigureSecurityServices(services);
 
-            if (IsSwaggerEnabled)
+            if (ApiOptions.EnableSwagger)
                 ConfigureSwaggerServices(services);
 
             ConfigureAppServicesPartial(services);
@@ -84,7 +80,8 @@ namespace WebApp.Api
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            ConfigureBaseServices(services);
+            using (var optionsProvider = BuildImmediateOptionsProvider())
+                ConfigureBaseServices(services, optionsProvider);
 
             ConfigureAppServices(services);
         }
@@ -97,7 +94,7 @@ namespace WebApp.Api
             if (!IsRunningBehindProxy)
                 app.UseHttpsRedirection();
 
-            if (IsSwaggerEnabled)
+            if (ApiOptions.EnableSwagger)
                 ConfigureSwagger(app);
 
             app.UseRouting();

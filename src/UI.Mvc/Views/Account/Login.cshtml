@@ -1,0 +1,48 @@
+﻿@model WebApp.UI.Models.Account.LoginModel
+
+<div class="page-header">
+    <h1>@T["Login to Your Account"]</h1>
+</div>
+<div>
+    <form asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal" role="form">
+        <div class="row">
+            <div class="col-sm-offset-2 col-sm-4" asp-validation-summary="ModelOnly"></div>
+        </div>
+
+        <div class="row form-group">
+            <label asp-for="UserName" class="col-sm-2 control-label"></label>
+            <div class="col-sm-4">
+                <input asp-for="UserName" type="text" class="form-control" autofocus />
+                <span asp-validation-for="UserName"></span>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label asp-for="Password" class="col-sm-2 control-label"></label>
+            <div class="col-sm-4">
+                <input asp-for="Password" type="password" class="form-control" />
+                <span asp-validation-for="Password"></span>
+            </div>
+            <div class="col-sm-6 form-text">
+                <a asp-action="ResetPassword">@T["Forgot your password?"]</a>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input asp-for="RememberMe" type="checkbox" />
+                <label asp-for="RememberMe"></label>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">@T["Login"]</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section ScriptsBody {
+    @await Html.PartialAsync("Partials/_ValidationScripts")
+}

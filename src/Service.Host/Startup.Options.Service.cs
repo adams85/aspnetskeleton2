@@ -38,8 +38,6 @@ namespace WebApp.Service.Host
             services.Configure<LockoutOptions>(Configuration.GetSection("Security:Lockout"));
 
             services.Configure<SmtpOptions>(Configuration.GetSection(SmtpOptions.DefaultSectionName));
-
-            services.Configure<MailingOptions>(Configuration.GetSection(MailingOptions.DefaultSectionName));
         }
     }
 }

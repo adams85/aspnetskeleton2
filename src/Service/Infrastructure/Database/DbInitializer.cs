@@ -48,7 +48,7 @@ namespace WebApp.Service.Infrastructure.Database
         {
             if (!designTime && _dbEnsureCreated)
             {
-                _logger.LogInformation("Creating database...");
+                _logger.LogInformation("Ensuring database...");
                 try
                 {
                     await _context.Database.EnsureCreatedAsync(cancellationToken).ConfigureAwait(false);

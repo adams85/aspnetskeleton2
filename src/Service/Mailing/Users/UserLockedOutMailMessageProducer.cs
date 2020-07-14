@@ -1,26 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Extensions.Options;
+﻿using System.Collections.Generic;
 using WebApp.Service.Infrastructure.Templating;
+using WebApp.Service.Settings;
 
 namespace WebApp.Service.Mailing.Users
 {
     internal sealed class UserLockedOutMailMessageProducer : MailMessageProducer<UserLockedOutMailModel>
     {
-        private readonly string _noReplyMailFrom;
+        private readonly string _sender;
 
-        public UserLockedOutMailMessageProducer(ITemplateRenderer templateRenderer, IOptions<MailingOptions> mailingOptions)
+        public UserLockedOutMailMessageProducer(ITemplateRenderer templateRenderer, ISettingsProvider settingsProvider)
             : base(templateRenderer)
         {
-            if (mailingOptions?.Value == null)
-                throw new ArgumentNullException(nameof(mailingOptions));
-
-            _noReplyMailFrom =
-                mailingOptions.Value.NoReplyMailFrom ??
-                throw new ArgumentException($"{nameof(MailingOptions.NoReplyMailFrom)} must be specified.", nameof(mailingOptions));
+            _sender = settingsProvider.NoReplyMailAddress();
         }
 
-        protected override string GetSender(UserLockedOutMailModel model) => _noReplyMailFrom;
+        protected override string GetSender(UserLockedOutMailModel model) => _sender;
 
         protected override IEnumerable<string> GetTo(UserLockedOutMailModel model) => new[] { model.Email };
 

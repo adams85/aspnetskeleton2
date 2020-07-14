@@ -12,9 +12,9 @@ namespace WebApp.Api.Controllers
     [Route("[controller]/[action]")]
     public class TokenController : Controller
     {
-        private readonly ISecurityService _securityService;
+        private readonly IApiSecurityService _securityService;
 
-        public TokenController(ISecurityService securityService)
+        public TokenController(IApiSecurityService securityService)
         {
             _securityService = securityService ?? throw new ArgumentNullException(nameof(securityService));
         }
@@ -23,10 +23,10 @@ namespace WebApp.Api.Controllers
         /// Validates the specified user credentials and issues a JWT access token with a refresh token upon success.
         /// </summary>
         /// <remarks>
-        /// The tokens are returned as HTTP headers (see <see cref="SecurityService.JwtAccessTokenHttpHeaderName"/> and <see cref="SecurityService.JwtRefreshTokenHttpHeaderName"/>).<br/>
+        /// The tokens are returned as HTTP headers (see <see cref="ApiSecurityService.JwtAccessTokenHttpHeaderName"/> and <see cref="ApiSecurityService.JwtRefreshTokenHttpHeaderName"/>).<br/>
         /// The short-lived access token can then be used to access protected endpoints, while the long-lived refresh token can be used to renew the access token.<br/>
         /// On expiration of the access token, repeat the request with the refresh token supplied as an appendix of the Authorization HTTP header
-        /// in the form of "Bearer &lt;access-token&gt;; &lt;param_name&gt;=&lt;refresh-token&gt;" where param_name is <see cref="SecurityService.JwtRefreshTokenAuthorizationHeaderParamName"/>.<br/>
+        /// in the form of "Bearer &lt;access-token&gt;; &lt;param_name&gt;=&lt;refresh-token&gt;" where param_name is <see cref="ApiSecurityService.JwtRefreshTokenAuthorizationHeaderParamName"/>.<br/>
         /// Alternatively, the refresh token can be passed in each request to renew the tokens without an extra round-trip in case of expiration.
         /// </remarks>
         /// <param name="model">The user credentials.</param>

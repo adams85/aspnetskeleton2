@@ -13,7 +13,7 @@ namespace WebApp.Api.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    [Authorize(SecurityService.ApiAuthorizationPolicy, Roles = nameof(RoleEnum.Administators))]
+    [Authorize(ApiSecurityService.ApiAuthorizationPolicy, Roles = nameof(RoleEnum.Administators))]
     public class UsersController : Controller
     {
         private readonly ICommandDispatcher _commandDispatcher;
@@ -34,7 +34,7 @@ namespace WebApp.Api.Controllers
             if (model == null)
                 return BadRequest();
 
-            model.MaxPageSize = _settingsProvider.GetMaxPageSize();
+            model.MaxPageSize = _settingsProvider.MaxPageSize();
 
             var result = await _queryDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 

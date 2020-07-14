@@ -1,0 +1,29 @@
+﻿@model string
+
+@using System.Security.Claims
+
+@{
+    var user = ViewContext.HttpContext.User;
+}
+
+<ul class="nav navbar-nav navbar-right">
+@if (!user.Identity.IsAuthenticated)
+{
+    <li class="@(Model == "Login" ? "active" : null)"><a asp-area="" asp-controller="Account" asp-action="Login"><span class="glyphicon glyphicon-log-in"></span> @T["Login"]</a></li>
+    <li class="@(Model == "Register" ? "active" : null)"><a asp-area="" asp-controller="Account" asp-action="Register"><span class="glyphicon glyphicon-pencil"></span> @T["Register"]</a></li>
+}
+else
+{
+    <li class="@(Model == "Dashboard" ? "active" : null)"><a asp-area="Dashboard" asp-controller="Home" asp-action="Index"><span class="glyphicon glyphicon-cog"></span> @T["Dashboard"]</a></li>
+    <li><a asp-area="" asp-controller="Account" asp-action="Logout"><span class="glyphicon glyphicon-off"></span> @T["Logout"]</a></li>
+}
+</ul>
+
+@if (user.Identity.IsAuthenticated)
+{
+    var firstName = user.FindFirstValue(ClaimTypes.GivenName);
+
+<div class="navbar-right hidden-sm hidden-xs">
+    <p class="navbar-text">@T["Welcome, {0}!", firstName]</p>
+</div>
+}

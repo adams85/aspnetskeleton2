@@ -29,9 +29,6 @@ namespace WebApp.Service.Users
         [MaxLength(UserLastNameMaxLength)]
         [DataMember(Order = 7)] public string? LastName { get; set; }
 
-        [MaxLength(UserPhoneNumberMaxLength)]
-        [DataMember(Order = 8)] public string? PhoneNumber { get; set; }
-
         public Action<ICommand, object>? OnKeyGenerated { get; set; }
 
         [Localized] private const string CommaNotAllowedErrorMessage = "The field {0} must contain no comma characters.";

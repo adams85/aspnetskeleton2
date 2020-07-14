@@ -4,11 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Karambolo.Common.Localization;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
 
 namespace WebApp.Service.Infrastructure.Localization
 {
-    internal sealed class NullStringLocalizer : IExtendedStringLocalizer
+    public sealed class NullStringLocalizer : IExtendedStringLocalizer
     {
         public static readonly NullStringLocalizer Instance = new NullStringLocalizer();
 
@@ -18,8 +17,8 @@ namespace WebApp.Service.Infrastructure.Localization
         {
             get
             {
-                var translationFound = TryLocalize(name, out var searchedLocation, out var value);
-                return new LocalizedString(name, value, resourceNotFound: !translationFound, searchedLocation);
+                TryLocalize(name, out var searchedLocation, out var value);
+                return new LocalizedString(name, value, resourceNotFound: false, searchedLocation);
             }
         }
 
@@ -27,23 +26,36 @@ namespace WebApp.Service.Infrastructure.Localization
         {
             get
             {
-                var translationFound = TryLocalize(name, arguments, out var searchedLocation, out var value);
-                return new LocalizedString(name, value, resourceNotFound: !translationFound, searchedLocation);
+                TryLocalize(name, arguments, out var searchedLocation, out var value);
+                return new LocalizedString(name, value, resourceNotFound: false, searchedLocation);
             }
+        }
+
+        public string GetTranslation(string name, Plural plural, TextContext context, out string? searchedLocation, out bool resourceNotFound)
+        {
+            TryGetTranslation(name, plural, context, out searchedLocation, out var value);
+            resourceNotFound = false;
+            return value!;
+        }
+
+        public bool TryGetTranslation(string name, Plural plural, TextContext context, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
+        {
+            searchedLocation = null;
+            value = plural.Id != null && plural.Count != 1 ? plural.Id : name;
+            return true;
         }
 
         public bool TryLocalize(string name, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
         {
-            searchedLocation = null;
-            value = name;
+            TryGetTranslation(name, default, default, out searchedLocation, out value!);
             return true;
         }
 
         public bool TryLocalize(string name, object[] arguments, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
         {
-            searchedLocation = null;
-            var (plural, _) = LocalizationHelper.GetSpecialArgs(arguments);
-            value = string.Format(plural.Id == null || plural.Count == 1 ? name : plural.Id, arguments);
+            var (plural, context) = LocalizationHelper.GetSpecialArgs(arguments);
+            TryGetTranslation(name, plural, context, out searchedLocation, out value);
+            value = string.Format(value, arguments);
             return true;
         }
 

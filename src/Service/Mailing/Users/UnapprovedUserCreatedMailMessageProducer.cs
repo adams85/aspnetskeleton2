@@ -1,26 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Extensions.Options;
+﻿using System.Collections.Generic;
 using WebApp.Service.Infrastructure.Templating;
+using WebApp.Service.Settings;
 
 namespace WebApp.Service.Mailing.Users
 {
     internal sealed class UnapprovedUserCreatedMailMessageProducer : MailMessageProducer<UnapprovedUserCreatedMailModel>
     {
-        private readonly string _noReplyMailFrom;
+        private readonly string _sender;
 
-        public UnapprovedUserCreatedMailMessageProducer(ITemplateRenderer templateRenderer, IOptions<MailingOptions> mailingOptions)
+        public UnapprovedUserCreatedMailMessageProducer(ITemplateRenderer templateRenderer, ISettingsProvider settingsProvider)
             : base(templateRenderer)
         {
-            if (mailingOptions?.Value == null)
-                throw new ArgumentNullException(nameof(mailingOptions));
-
-            _noReplyMailFrom =
-                mailingOptions.Value.NoReplyMailFrom ??
-                throw new ArgumentException($"{nameof(MailingOptions.NoReplyMailFrom)} must be specified.", nameof(mailingOptions));
+            _sender = settingsProvider.NoReplyMailAddress();
         }
 
-        protected override string GetSender(UnapprovedUserCreatedMailModel model) => _noReplyMailFrom;
+        protected override string GetSender(UnapprovedUserCreatedMailModel model) => _sender;
 
         protected override IEnumerable<string> GetTo(UnapprovedUserCreatedMailModel model) => new[] { model.Email };
 

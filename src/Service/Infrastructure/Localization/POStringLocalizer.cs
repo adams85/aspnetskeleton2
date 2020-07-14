@@ -10,7 +10,7 @@ using WebApp.Service.Translations;
 
 namespace WebApp.Service.Infrastructure.Localization
 {
-    internal sealed class POStringLocalizer : IExtendedStringLocalizer
+    public sealed class POStringLocalizer : IExtendedStringLocalizer
     {
         private readonly ITranslationsProvider _translationsProvider;
         private readonly string _location;
@@ -25,17 +25,19 @@ namespace WebApp.Service.Infrastructure.Localization
             _logger = logger ?? (ILogger)NullLogger.Instance;
         }
 
+        private CultureInfo CurrentCulture => _culture ?? CultureInfo.CurrentUICulture;
+
         public LocalizedString this[string name]
         {
             get
             {
-                var translationFound = TryLocalize(name, out var searchedLocation, out var value);
-                if (!translationFound)
+                var resourceNotFound = !TryLocalize(name, out var searchedLocation, out var value);
+                if (resourceNotFound)
                 {
-                    _logger.TranslationNotFound(name, searchedLocation);
+                    _logger.TranslationNotAvailable(name, CurrentCulture, searchedLocation);
                     NullStringLocalizer.Instance.TryLocalize(name, out var _, out value);
                 }
-                return new LocalizedString(name, value, resourceNotFound: !translationFound, searchedLocation);
+                return new LocalizedString(name, value, resourceNotFound, searchedLocation);
             }
         }
 
@@ -43,20 +45,20 @@ namespace WebApp.Service.Infrastructure.Localization
         {
             get
             {
-                var translationFound = TryLocalize(name, arguments, out var searchedLocation, out var value);
-                if (!translationFound)
+                var resourceNotFound = !TryLocalize(name, arguments, out var searchedLocation, out var value);
+                if (resourceNotFound)
                 {
-                    _logger.TranslationNotFound(name, searchedLocation);
+                    _logger.TranslationNotAvailable(name, CurrentCulture, searchedLocation);
                     NullStringLocalizer.Instance.TryLocalize(name, arguments, out var _, out value);
                 }
-                return new LocalizedString(name, value, resourceNotFound: !translationFound, searchedLocation);
+                return new LocalizedString(name, value, resourceNotFound, searchedLocation);
             }
         }
 
         private POCatalog? GetCatalog()
         {
             var catalogs = _translationsProvider.GetCatalogs();
-            var culture = _culture ?? CultureInfo.CurrentUICulture;
+            var culture = CurrentCulture;
             for (; ; )
             {
                 if (catalogs.TryGetValue((_location, culture.Name), out var catalog))
@@ -70,33 +72,44 @@ namespace WebApp.Service.Infrastructure.Localization
             }
         }
 
-        private bool TryGetTranslation(string id, Plural plural, TextContext context, [MaybeNullWhen(false)] out string value)
+        public string GetTranslation(string name, Plural plural, TextContext context, out string? searchedLocation, out bool resourceNotFound)
+        {
+            resourceNotFound = !TryGetTranslation(name, plural, context, out searchedLocation, out var value);
+            if (resourceNotFound)
+            {
+                _logger.TranslationNotAvailable(name, CurrentCulture, searchedLocation);
+                value = NullStringLocalizer.Instance.GetTranslation(name, plural, context, out var _, out var _);
+            }
+
+            return value!;
+        }
+
+        public bool TryGetTranslation(string name, Plural plural, TextContext context, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
         {
             var catalog = GetCatalog();
             if (catalog != null)
             {
-                var key = new POKey(id, plural.Id, context.Id);
+                var key = new POKey(name, plural.Id, context.Id);
                 value = plural.Id == null ? catalog.GetTranslation(key) : catalog.GetTranslation(key, plural.Count);
                 if (value != null)
+                {
+                    searchedLocation = _location;
                     return true;
+                }
             }
 
+            searchedLocation = _location;
             value = default;
             return false;
         }
 
-        public bool TryLocalize(string name, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
-        {
-            searchedLocation = _location;
-            return TryGetTranslation(name, default, default, out value);
-        }
+        public bool TryLocalize(string name, out string? searchedLocation, [MaybeNullWhen(false)] out string value) =>
+            TryGetTranslation(name, default, default, out searchedLocation, out value);
 
         public bool TryLocalize(string name, object[] arguments, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
         {
-            searchedLocation = _location;
-
             var (plural, context) = LocalizationHelper.GetSpecialArgs(arguments);
-            if (!TryGetTranslation(name, plural, context, out value))
+            if (!TryGetTranslation(name, plural, context, out searchedLocation, out value))
                 return false;
 
             value = string.Format(value, arguments);
@@ -106,7 +119,7 @@ namespace WebApp.Service.Infrastructure.Localization
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
         {
             var catalogs = _translationsProvider.GetCatalogs();
-            var culture = _culture ?? CultureInfo.CurrentUICulture;
+            var culture = CurrentCulture;
             do
             {
                 if (catalogs.TryGetValue((_location, culture.Name), out var catalog))
@@ -123,6 +136,7 @@ namespace WebApp.Service.Infrastructure.Localization
             while (includeParentCultures);
         }
 
-        public IStringLocalizer WithCulture(CultureInfo? culture) => new POStringLocalizer(_translationsProvider, _location, culture);
+        public IStringLocalizer WithCulture(CultureInfo culture) =>
+            new POStringLocalizer(_translationsProvider, _location, culture, _logger as ILogger<POStringLocalizer>);
     }
 }

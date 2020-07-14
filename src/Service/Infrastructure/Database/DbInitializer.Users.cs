@@ -28,8 +28,8 @@ namespace WebApp.Service.Infrastructure.Database
 
             AddOrUpdateUser(users,
                 userName: ApplicationConstants.BuiltInRootUserName,
-                password: "root",
-                email: "root@local",
+                password: "admin",
+                email: "admin@localhost",
                 firstName: "Built-in Local Adminstrator",
                 lastName: null,
                 isApproved: true,

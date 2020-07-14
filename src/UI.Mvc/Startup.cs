@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using WebApp.Core.Helpers;
 using WebApp.UI.Infrastructure.Hosting;
 
@@ -19,10 +20,16 @@ namespace WebApp.UI
         {
             Configuration = configuration;
             Environment = environment;
+
+            ApiStartup = new Api.Startup(Configuration, Environment, provideRazorTemplating: false);
+            UIOptions = new UIOptions();
         }
 
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment Environment { get; }
+
+        public Api.Startup ApiStartup { get; }
+        public UIOptions UIOptions { get; private set; }
 
         partial void ConfigureServicesPartial(IServiceCollection services);
 
@@ -46,18 +53,22 @@ namespace WebApp.UI
             var routingAssembly = typeof(RouteBase).Assembly;
             services.RemoveAll((service, _) => service.ServiceType.Assembly == routingAbstractionsAssembly || service.ServiceType.Assembly == routingAssembly);
 
-            // 2. register other shared services
+            // 2. register other shared services and obtain options necessary for DI configuration
 
-            var apiStartup = new Api.Startup(Configuration, Environment, provideRazorTemplating: false);
+            using (var optionsProvider = ApiStartup.BuildImmediateOptionsProvider(ConfigureImmediateOptions))
+            {
+                ApiStartup.ConfigureBaseServices(services, optionsProvider);
+                UIOptions = optionsProvider.GetRequiredService<IOptions<UIOptions>>().Value;
+            }
 
-            apiStartup.ConfigureBaseServices(services);
+            ConfigureOptions(services);
 
             ConfigureServicesPartial(services);
 
             // 3. then register the tenants
             services.AddSingleton(new Tenants(
-                new ApiTenant(ApiTenantId, apiStartup, typeof(Api.Startup).Assembly),
-                new UITenant(UITenantId, apiStartup, typeof(Startup).Assembly)));
+                new ApiTenant(ApiTenantId, this, typeof(Api.Startup).Assembly),
+                new UITenant(UITenantId, this, typeof(Startup).Assembly)));
 
             // 4. finally register a startup filter which ensures that the main branch is set up before any other middleware added
             services.Insert(0, ServiceDescriptor.Transient<IStartupFilter, MainBranchSetupFilter>());

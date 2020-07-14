@@ -19,15 +19,11 @@ namespace WebApp.Service.Users
         private readonly IGuidProvider _guidProvider;
         private readonly IClock _clock;
 
-        private readonly PasswordOptions? _passwordOptions;
-
-        public CreateUserCommandHandler(IMailSenderService mailSenderService, IGuidProvider guidProvider, IClock clock, IOptions<PasswordOptions>? passwordOptions)
+        public CreateUserCommandHandler(IMailSenderService mailSenderService, IGuidProvider guidProvider, IClock clock)
         {
             _mailSenderService = mailSenderService ?? throw new ArgumentNullException(nameof(mailSenderService));
             _guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
-
-            _passwordOptions = passwordOptions?.Value;
         }
 
         public override async Task HandleAsync(CreateUserCommand command, CommandContext context, CancellationToken cancellationToken)
@@ -61,7 +57,6 @@ namespace WebApp.Service.Users
 
                 profile.FirstName = command.FirstName;
                 profile.LastName = command.LastName;
-                profile.PhoneNumber = command.PhoneNumber;
 
                 user.Profile = profile;
             }

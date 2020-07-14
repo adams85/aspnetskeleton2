@@ -1,0 +1,27 @@
+﻿@model WebApp.UI.Models.Home.ErrorViewModel
+
+@inject ISettingsProvider SettingsProvider
+
+@{
+    ViewData["Title"] = T["Error"].Value;
+}
+
+<div class="page-header">
+    <h1 class="text-danger">@T["Error"]</h1>
+</div>
+
+<h2 class="text-danger">@T["An error occurred while processing your request."]</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>@T["Request ID:"]</strong> <code>@Model.RequestId</code>
+    </p>
+}
+
+<br />
+
+<p>
+    @T["Please try again or <a href=\"mailto:{0}\">contact the system administrator</a> if the problem persists.",
+         SettingsProvider.AdminMailAddress()]
+</p>

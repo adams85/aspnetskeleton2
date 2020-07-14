@@ -1,3 +1,11 @@
-﻿@using WebApp.UI
-@using WebApp.UI.Models
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Karambolo.AspNetCore.Bundling.ViewHelpers
+@using Karambolo.Common.Localization
+@using WebApp.Core
+@using WebApp.Service.Settings
+@using WebApp.UI
+
+@addTagHelper *, Karambolo.AspNetCore.Bundling
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@inject IViewLocalizer T

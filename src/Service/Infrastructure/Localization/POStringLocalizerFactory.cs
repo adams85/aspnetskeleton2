@@ -6,7 +6,7 @@ using WebApp.Service.Translations;
 
 namespace WebApp.Service.Infrastructure.Localization
 {
-    internal sealed class POStringLocalizerFactory : IStringLocalizerFactory
+    public sealed class POStringLocalizerFactory : IStringLocalizerFactory
     {
         private readonly ITranslationsProvider _translationsProvider;
         private readonly ILoggerFactory _loggerFactory;

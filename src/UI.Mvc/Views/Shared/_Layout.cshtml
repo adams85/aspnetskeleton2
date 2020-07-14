@@ -1,48 +1,101 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@inject WebApp.UI.Infrastructure.Theming.IThemeManager ThemeManager
+
+@{
+    var title = (string)ViewData["Title"];
+    title = !string.IsNullOrEmpty(title) ? " - " + title : null;
+    var activeMenuItem = (string)ViewData["ActiveMenuItem"];
+
+    var currentTheme = await ThemeManager.GetCurrentThemeAsync(ViewContext.HttpContext);
+}
+
+<!DOCTYPE html>
+<html>
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - WebApp.UI</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    @RenderSection("Metas", required: false)
+
+    <title>AspNetSkeleton@(title)</title>
+    <link rel="icon" type="image/png" href="@Url.Content("~/favicon.ico")" />
+
+    @* stylesheets *@
+    <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/bootstrap.css" />
+    <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/site.css" />
+
+    @RenderSection("Stylesheets", required: false)
+
+    @* scripts *@
+    @RenderSection("ScriptsHead", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <div id="page-wrapper">
+        @* header *@
+        <div id="page-header" class="navbar navbar-inverse navbar-fixed-top">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">WebApp.UI</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-main-navbar-collapse" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                    <img src="@Url.Content("~/images/logo.png")" alt="Logo" class="navbar-logo pull-left" />
+                    <a href="@Url.Action("Index", "Home", new { area = "" })" class="navbar-brand">AspNetSkeleton</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-main-navbar-collapse">
+                    <ul class="nav navbar-nav navbar-left">
+                        <li class="@(activeMenuItem == "Page1" ? "active" : null)"><a href="javascript:void(0)">@T["Page 1"]</a></li>
+                        <li class="@(activeMenuItem == "Page2" ? "active" : null)"><a href="javascript:void(0)">@T["Page 2"]</a></li>
                     </ul>
+
+                    @* TODO: donut caching? *@
+                    @await Html.PartialAsync("Partials/_VaryingMenu", activeMenuItem)
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+        </div>
+        @* content *@
+        <section id="page-content" class="container">
             @RenderBody()
-        </main>
+        </section>
+        @* footer *@
+        <footer id="page-footer">
+            <div class="container">
+                <div class="col-xs-6 text-left">
+                    © 2020 Adam Simon
+                </div>
+                <div class="col-xs-6 text-right">
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2020 - WebApp.UI - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @RenderSection("Scripts", required: false)
+    <div class="overlay"></div>
+
+    @* scripts *@
+    <environment include="Development">
+        <script src="~/lib/jquery/jquery.js"></script>
+        <script src="~/lib/bootstrap/assets/javascripts/bootstrap.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+                asp-fallback-src="~/js/jquery/jquery.min.js" asp-fallback-test="window.jQuery"
+                integrity="sha512-bnIvzh6FU75ZKxp0GXLH9bewza/OIw6dLVh9ICg0gogclmYGguQJWl8U30WpbsGTqbIiAwxTsbe76DErLq5EDQ==" crossorigin="anonymous">
+        </script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"
+                asp-fallback-src="~/js/bootstrap/bootstrap.min.js" asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                integrity="sha512-oBTprMeNEKCnqfuqKd6sbvFzmFQtlXS3e0C/RGFV0hD6QzhHV+ODfaQbAlmY6/q0ubbwlAM/nCJjkrgA3waLzg==" crossorigin="anonymous">
+        </script>
+    </environment>
+
+    <script src="~/bundles/js/site.js"></script>
+
+    @RenderSection("ScriptsBody", required: false)
+
+    <script type="text/javascript">
+        page.confirmDeleteMessage = '@T["Do you really want to delete this item?"]';
+        page.errorText = '@T["Error"]';
+    </script>
 </body>
 </html>

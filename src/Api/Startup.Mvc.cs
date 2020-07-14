@@ -56,12 +56,10 @@ namespace WebApp.Api
 
             builder.Services.AddOptions<MvcDataAnnotationsLocalizationOptions>()
                 .Configure<ILoggerFactory>((options, loggerFactory) => options.DataAnnotationLocalizerProvider = (type, stringLocalizerFactory) =>
-                    new CompositeStringLocalizer(new[]
-                    {
-                        stringLocalizerFactory.Create(type),
-                        stringLocalizerFactory.Create(typeof(ValidationErrorMessages))
-                    },
-                    loggerFactory.CreateLogger<CompositeStringLocalizer>()));
+                    new CompositeStringLocalizer(
+                        stringLocalizerFactory,
+                        types: new[] { type, typeof(ValidationErrorMessages) },
+                        logger: loggerFactory.CreateLogger<CompositeStringLocalizer>()));
         }
     }
 }

@@ -20,9 +20,6 @@ namespace WebApp.DataAccess.Entities
         [StringLength(UserLastNameMaxLength)]
         public string? LastName { get; set; }
 
-        [StringLength(UserPhoneNumberMaxLength)]
-        public string? PhoneNumber { get; set; }
-
         internal sealed class Configuration : IEntityTypeConfiguration<Profile>
         {
             public void Configure(EntityTypeBuilder<Profile> builder)

@@ -13,6 +13,9 @@ namespace WebApp.Api.Infrastructure.ErrorHandling
 {
     public sealed class ApiErrorHandlerMiddleware
     {
+        private static readonly Action<ILogger, Exception> s_logUnhandledException =
+            LoggerMessage.Define(LogLevel.Error, new EventId(1, "UnhandledException"), "An unhandled exception has occurred while executing the request.");
+
         private static readonly ActionDescriptor s_emptyActionDescriptor = new ActionDescriptor();
 
         private readonly RequestDelegate _next;
@@ -66,7 +69,7 @@ namespace WebApp.Api.Infrastructure.ErrorHandling
                         };
                         break;
                     default:
-                        _logger.LogError(exception, "Unexpected error.");
+                        s_logUnhandledException(_logger, exception);
 
                         result = new StatusCodeWithReasonResult(StatusCodes.Status500InternalServerError,
                             "A server error occurred. Try again or contact the system administrator if the problem persists.");
@@ -81,7 +84,7 @@ namespace WebApp.Api.Infrastructure.ErrorHandling
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Handling of unexpected error failed.");
+                _logger.LogError(ex, "Unexpected error occurred while handling an exception.");
             }
 
             edi.Throw();

@@ -1,0 +1,38 @@
+﻿@model bool?
+
+@inject ISettingsProvider SettingsProvider
+
+<div class="page-header">
+    <h1>@T["Account Verification"]</h1>
+</div>
+
+@if (Model == null)
+{
+<p class="lead">
+    @T["A message has been sent to the e-mail address you entered. Please follow the instructions given in the message in order to complete your registration."]
+</p>
+
+<p>
+    @T["If you don't receive this message in a few minutes, check your spam folder or contact us."]
+</p>
+}
+else if (Model.Value)
+{
+<p class="lead text-info">
+    @T["Well done! Your account has been verified."]
+</p>
+<p>
+    @T["You can <a href=\"{0}\">login</a> now.",
+        Url.Action("Login")]
+</p>
+}
+else
+{
+<p class="lead text-danger">
+    @T["Your account could not be verified."]
+</p>
+<p>
+    @T["Please try again or <a href=\"mailto:{0}\">contact the system administrator</a> if the problem persists.",
+        SettingsProvider.AdminMailAddress()]
+</p>
+}

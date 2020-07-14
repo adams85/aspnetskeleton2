@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using WebApp.Api.Infrastructure.Security;
 using WebApp.Api.Infrastructure.UrlRewriting;
@@ -7,10 +8,11 @@ namespace WebApp.Api
 {
     public partial class Startup
     {
-        private ServiceProvider BuildImmediateOptionsProvider()
+        public ServiceProvider BuildImmediateOptionsProvider(Action<IServiceCollection>? configure = null)
         {
             var optionsServices = new ServiceCollection().AddOptions();
             ConfigureImmediateOptions(optionsServices);
+            configure?.Invoke(optionsServices);
             return optionsServices.BuildServiceProvider();
         }
 
@@ -35,7 +37,7 @@ namespace WebApp.Api
             ConfigureServiceLayerOptionsPartial(services);
             ConfigureOptionsPartial(services);
 
-            services.Configure<SecurityOptions>(Configuration.GetSection(SecurityOptions.DefaultSectionName));
+            services.Configure<ApiSecurityOptions>(Configuration.GetSection(ApiSecurityOptions.DefaultSectionName));
 
             if (IsRunningBehindProxy)
             {

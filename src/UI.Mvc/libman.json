@@ -1,0 +1,29 @@
+﻿{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "provider": "jsdelivr",
+      "library": "bootstrap-sass@3.4.1",
+      "destination": "wwwroot/lib/bootstrap/"
+    },
+    {
+      "library": "jquery@3.4.1",
+      "destination": "wwwroot/lib/jquery/"
+    },
+    {
+      "library": "jquery-validate@1.19.1",
+      "destination": "wwwroot/lib/jquery-validation/",
+      "files": [
+        "additional-methods.js",
+        "additional-methods.min.js",
+        "jquery.validate.js",
+        "jquery.validate.min.js"
+      ]
+    },
+    {
+      "library": "jquery-validation-unobtrusive@3.2.11",
+      "destination": "wwwroot/lib/jquery-validation-unobtrusive/"
+    }
+  ]
+}

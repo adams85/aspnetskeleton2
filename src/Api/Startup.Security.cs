@@ -11,14 +11,14 @@ namespace WebApp.Api
     {
         private void ConfigureSecurityServices(IServiceCollection services)
         {
-            services.AddSingleton<ISecurityService, SecurityService>();
+            services.AddSingleton<IApiSecurityService, ApiSecurityService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddCookie(options => options.ForwardChallenge = JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer();
+                .AddJwtBearer()
+                .AddCookie(options => options.ForwardChallenge = JwtBearerDefaults.AuthenticationScheme);
 
             services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
-                .Configure<ISecurityService>((options, securityService) => securityService.ConfigureJwtBearer(options));
+                .Configure<IApiSecurityService>((options, securityService) => securityService.ConfigureJwtBearer(options));
 
             services.AddAuthorization(ConfigureAuthorization);
         }
@@ -26,7 +26,7 @@ namespace WebApp.Api
         private void ConfigureAuthorization(AuthorizationOptions options)
         {
             // https://stackoverflow.com/questions/43800763/using-multiple-authentication-schemes-in-asp-net-core
-            options.AddPolicy(SecurityService.ApiAuthorizationPolicy, builder =>
+            options.AddPolicy(ApiSecurityService.ApiAuthorizationPolicy, builder =>
             {
                 builder.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, JwtBearerDefaults.AuthenticationScheme);
                 builder.RequireAuthenticatedUser();

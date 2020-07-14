@@ -39,15 +39,18 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddSingleton<IEventListener>(sp => sp.GetRequiredService<EventBus>());
 
             services
-                .AddSingleton<ISettingsSource, SettingsSource>()
+                .AddSingleton<ISettingsSource, DbSettingsSource>()
                 .AddSingleton<ISettingsProvider, SettingsProvider>();
 
             services
-                .AddSingleton<ITranslationsSource, TranslationsSource>()
+                .AddSingleton<ITranslationsSource, FileTranslationsSource>()
                 .AddSingleton<ITranslationsProvider, TranslationsProvider>();
 
             services
-                .AddSingleton<IStringLocalizerFactory, POStringLocalizerFactory>()
+                .AddSingleton(sp =>
+                    sp.GetRequiredService<ISettingsProvider>().EnableLocalization() ?
+                    ActivatorUtilities.CreateInstance<POStringLocalizerFactory>(sp) :
+                    (IStringLocalizerFactory)NullStringLocalizerFactory.Instance)
                 .AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
 
             services.AddApplicationInitializers();
@@ -75,11 +78,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<IApplicationInitializer, DbInitializer>();
 
-            services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(_ =>
+            services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(ct =>
             {
                 var settingsProvider = sp.GetRequiredService<ISettingsProvider>();
                 var translationsProvider = sp.GetRequiredService<ITranslationsProvider>();
-                return Task.WhenAll(settingsProvider.Initialization, translationsProvider.Initialization);
+                return Task.WhenAll(settingsProvider.Initialization, translationsProvider.Initialization).AsCancelable(ct);
             }));
 
             return services;

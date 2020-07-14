@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Karambolo.Common;
 using Microsoft.Extensions.Localization;
 using ProtoBuf.Grpc.Client;
 using WebApp.Core.Infrastructure;
@@ -24,7 +25,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<ITranslationsProvider, TranslationsProvider>();
 
             services
-                .AddSingleton<IStringLocalizerFactory, POStringLocalizerFactory>()
+                .AddSingleton(sp =>
+                    sp.GetRequiredService<ISettingsProvider>().EnableLocalization() ?
+                    ActivatorUtilities.CreateInstance<POStringLocalizerFactory>(sp) :
+                    (IStringLocalizerFactory)NullStringLocalizerFactory.Instance)
                 .AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
 
             services.AddApplicationInitializers();
@@ -43,11 +47,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 GrpcClientFactory.AllowUnencryptedHttp2 = true;
             }));
 
-            services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(_ =>
+            services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(ct =>
             {
                 var settingsProvider = sp.GetRequiredService<ISettingsProvider>();
                 var translationsProvider = sp.GetRequiredService<ITranslationsProvider>();
-                return Task.WhenAll(settingsProvider.Initialization, translationsProvider.Initialization);
+                return Task.WhenAll(settingsProvider.Initialization, translationsProvider.Initialization).AsCancelable(ct);
             }));
 
             return services;

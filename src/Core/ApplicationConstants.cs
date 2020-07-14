@@ -2,6 +2,6 @@
 {
     public static class ApplicationConstants
     {
-        public const string BuiltInRootUserName = "root";
+        public const string BuiltInRootUserName = "admin";
     }
 }

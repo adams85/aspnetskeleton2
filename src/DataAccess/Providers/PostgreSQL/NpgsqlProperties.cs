@@ -47,7 +47,7 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
             return collation switch
             {
                 DefaultCaseSensitiveCollationName => StringComparer.Ordinal,
-                "English_United States.1252" => StringComparer.Create(new CultureInfo("en-US"), ignoreCase: false),
+                "English_United States.1252" => StringComparer.Create(CultureInfo.GetCultureInfo("en-US"), ignoreCase: false),
                 _ => throw CreateUndefinedCollationError(Provider, CaseSensitiveCollation, caseSensitive: true),
             };
         }
@@ -57,7 +57,7 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
             return collation switch
             {
                 DefaultCaseInsensitiveCollationName => StringComparer.OrdinalIgnoreCase,
-                "English_United States.1252" => StringComparer.Create(new CultureInfo("en-US"), ignoreCase: true),
+                "English_United States.1252" => StringComparer.Create(CultureInfo.GetCultureInfo("en-US"), ignoreCase: true),
                 _ => throw CreateUndefinedCollationError(Provider, collation, caseSensitive: false),
             };
         }

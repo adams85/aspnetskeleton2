@@ -3,7 +3,7 @@ using Microsoft.Extensions.Localization;
 
 namespace WebApp.Service.Infrastructure.Localization
 {
-    internal sealed class NullStringLocalizerFactory : IStringLocalizerFactory
+    public sealed class NullStringLocalizerFactory : IStringLocalizerFactory
     {
         public static readonly NullStringLocalizerFactory Instance = new NullStringLocalizerFactory();
 

@@ -20,15 +20,13 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
     /// An instance of this class must be added to the <see cref="MvcOptions.ModelValidatorProviders"/> list and it must be placed after
     /// the built-in <see cref="DataAnnotationsModelValidatorProvider"/>.
     /// </remarks>
-    public sealed class DataAnnotationLocalizationAdjuster : IMetadataBasedModelValidatorProvider
+    public sealed class DataAnnotationsLocalizationAdjuster : IMetadataBasedModelValidatorProvider
     {
-        private static readonly object s_gate = new object();
-
         private readonly IValidationAttributeAdapterProvider _validationAttributeAdapterProvider;
         private readonly Func<Type, IStringLocalizerFactory, IStringLocalizer>? _dataAnnotationLocalizerProvider;
         private readonly IStringLocalizerFactory? _stringLocalizerFactory;
 
-        public DataAnnotationLocalizationAdjuster(IValidationAttributeAdapterProvider validationAttributeAdapterProvider, IOptions<MvcDataAnnotationsLocalizationOptions> options,
+        public DataAnnotationsLocalizationAdjuster(IValidationAttributeAdapterProvider validationAttributeAdapterProvider, IOptions<MvcDataAnnotationsLocalizationOptions> options,
             IStringLocalizerFactory? stringLocalizerFactory)
         {
             if (options?.Value == null)
@@ -56,19 +54,8 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
                 // 1. default messages of built-in validation attributes aren't localized by default (https://github.com/aspnet/Localization/issues/286);
                 // the least cumbersome solution to this problem is setting the ErrorMessage property, which will ensure that the message will run through the localizer
 
-                if (result.ValidatorMetadata is ValidationAttribute validationAttribute && !(validationAttribute is ExtendedValidationAttribute))
-                {
-                    if (validationAttribute.ErrorMessageResourceType == null &&
-                        string.IsNullOrEmpty(validationAttribute.ErrorMessageResourceName) &&
-                        string.IsNullOrEmpty(validationAttribute.ErrorMessage))
-                    {
-                        // attribute instances can be cached or static and this method can be called from multiple threads concurrently,
-                        // so it's safer to lock during assignment (it's better to not make assumptions on the implementation of the setter of ErrorMessage);
-                        // the preceding check can be done outside the lock as multiple assignments do no harm (the same constant value is assigned anyway)
-                        lock (s_gate)
-                            validationAttribute.ErrorMessage = validationAttribute.GetDefaultErrorMessage();
-                    }
-                }
+                if (result.ValidatorMetadata is ValidationAttribute validationAttribute)
+                    validationAttribute.AdjustToMvcLocalization();
 
                 // 2. support for ExtendedValidationResult localization in the case of IValidatableObject
 

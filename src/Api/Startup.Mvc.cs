@@ -45,7 +45,7 @@ namespace WebApp.Api
             builder.Services.AddOptions<MvcOptions>()
                 .Configure<IServiceProvider>((options, sp) =>
                 {
-                    options.ModelValidatorProviders.Add(new DataAnnotationLocalizationAdjuster(
+                    options.ModelValidatorProviders.Add(new DataAnnotationsLocalizationAdjuster(
                         sp.GetRequiredService<IValidationAttributeAdapterProvider>(),
                         sp.GetRequiredService<IOptions<MvcDataAnnotationsLocalizationOptions>>(),
                         sp.GetService<IStringLocalizerFactory>()));

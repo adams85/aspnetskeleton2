@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
 using WebApp.Core.Helpers;
 using WebApp.Service.Settings;
+using WebApp.UI.Infrastructure.DataAnnotations;
 using WebApp.UI.Infrastructure.Hosting;
 using WebApp.UI.Infrastructure.Localization;
 using WebApp.UI.Infrastructure.Security;
@@ -131,6 +133,8 @@ namespace WebApp.UI
                 services.TryAdd(ServiceDescriptor.Transient<IViewLocalizer, ViewLocalizer>());
 
                 _apiStartup.ConfigureDataAnnotationServices(mvcBuilder);
+
+                services.Configure<MvcViewOptions>(options => options.ClientModelValidatorProviders.Add(new DataAnnotationsClientLocalizationAdjuster()));
 
 #if !RAZOR_PRECOMPILE
                 mvcBuilder.AddRazorRuntimeCompilation();

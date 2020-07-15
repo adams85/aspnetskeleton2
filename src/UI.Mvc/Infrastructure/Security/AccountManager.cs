@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Karambolo.Common;
 using Microsoft.Extensions.Options;
 using WebApp.Service;
 using WebApp.Service.Infrastructure;
+using WebApp.Service.Infrastructure.Validation;
 using WebApp.Service.Users;
 using WebApp.UI.Areas.Dashboard.Models.Account;
 using WebApp.UI.Models.Account;
@@ -27,7 +28,7 @@ namespace WebApp.UI.Infrastructure.Security
 
             _passwordTokenExpirationTime = optionsValue?.PasswordTokenExpirationTime ?? UISecurityOptions.DefaultPasswordTokenExpirationTime;
         }
-        
+
         public async Task<CachedUserInfoData?> GetCachedUserInfo(string userName, bool registerActivity, CancellationToken cancellationToken)
         {
             var result = await _queryDispatcher.DispatchAsync(new GetCachedUserInfoQuery { UserName = userName }, cancellationToken);
@@ -46,88 +47,109 @@ namespace WebApp.UI.Infrastructure.Security
             return result;
         }
 
-        public async Task<bool> ValidateUserAsync(LoginModel model, CancellationToken cancellationToken)
+        public async Task<AuthenticateUserStatus> ValidateUserAsync(NetworkCredential credentials, CancellationToken cancellationToken)
         {
-            var authResult = await _queryDispatcher.DispatchAsync(model.ToQuery(), cancellationToken);
-            if (authResult.UserId == null)
-                return false;
+            var authResult = await _queryDispatcher.DispatchAsync(new AuthenticateUserQuery
+            {
+                UserName = credentials.UserName,
+                Password = credentials.Password,
+            }, cancellationToken);
 
-            var success = authResult.Status == AuthenticateUserStatus.Successful;
+            if (authResult.UserId != null)
+            {
+                var authSuccess = authResult.Status == AuthenticateUserStatus.Successful;
 
-            if (success || authResult.Status == AuthenticateUserStatus.Failed)
-                await _commandDispatcher.DispatchAsync(new RegisterUserActivityCommand
-                {
-                    UserName = model.UserName,
-                    SuccessfulLogin = success,
-                    UIActivity = success,
-                }, CancellationToken.None);
+                if (authSuccess || authResult.Status == AuthenticateUserStatus.Failed)
+                    await _commandDispatcher.DispatchAsync(new RegisterUserActivityCommand
+                    {
+                        UserName = credentials.UserName,
+                        SuccessfulLogin = authSuccess,
+                        UIActivity = authSuccess,
+                    }, CancellationToken.None);
+            }
 
-            return success;
+            return authResult.Status;
         }
 
-        public async Task<CreateUserResult> CreateUserAsync(RegisterModel model, CancellationToken cancellationToken)
+        public async Task<(CreateUserStatus, PasswordRequirementsData?)> CreateUserAsync(RegisterModel model, CancellationToken cancellationToken)
         {
-            CreateUserResult status;
             try
             {
                 await _commandDispatcher.DispatchAsync(model.ToCommand(), cancellationToken);
-                status = CreateUserResult.Success;
+                return (CreateUserStatus.Success, null);
             }
             catch (ServiceErrorException ex)
             {
-                string paramPath;
                 switch (ex.ErrorCode)
                 {
                     case ServiceErrorCode.ParamNotSpecified:
                     case ServiceErrorCode.ParamNotValid:
-                        paramPath = (string)ex.Args[0];
-                        status =
-                            paramPath == Lambda.MemberPath((CreateUserCommand c) => c.UserName) ? CreateUserResult.InvalidUserName :
-                            paramPath == Lambda.MemberPath((CreateUserCommand c) => c.Email) ? CreateUserResult.InvalidEmail :
-                            paramPath == Lambda.MemberPath((CreateUserCommand c) => c.Password) ? CreateUserResult.InvalidPassword :
-                            CreateUserResult.UnexpectedError;
+                        switch ((string)ex.Args[0])
+                        {
+                            case nameof(CreateUserCommand.UserName):
+                                return (CreateUserStatus.InvalidUserName, null);
+                            case nameof(CreateUserCommand.Email):
+                                return (CreateUserStatus.InvalidEmail, null);
+                            case nameof(CreateUserCommand.Password):
+                                return (CreateUserStatus.InvalidPassword, ex.Args.Length > 1 ? ex.Args[^1] as PasswordRequirementsData : null);
+                        }
                         break;
                     case ServiceErrorCode.EntityNotUnique:
-                        paramPath = (string)ex.Args[0];
-                        status =
-                            paramPath == Lambda.MemberPath((CreateUserCommand c) => c.UserName) ? CreateUserResult.DuplicateUserName :
-                            paramPath == Lambda.MemberPath((CreateUserCommand c) => c.Email) ? CreateUserResult.DuplicateEmail :
-                            CreateUserResult.UnexpectedError;
-                        break;
-                    default:
-                        status = CreateUserResult.UnexpectedError;
+                        switch ((string)ex.Args[0])
+                        {
+                            case nameof(CreateUserCommand.UserName):
+                                return (CreateUserStatus.DuplicateUserName, null);
+                            case nameof(CreateUserCommand.Email):
+                                return (CreateUserStatus.DuplicateEmail, null);
+                        }
                         break;
                 }
-            }
 
-            return status;
+                return (CreateUserStatus.UnexpectedError, null);
+            }
         }
 
-        public async Task<bool> ChangePasswordAsync(string userName, ChangePasswordModel model, CancellationToken cancellationToken)
+        public async Task<(ChangePasswordStatus, PasswordRequirementsData?)> ChangePasswordAsync(string userName, ChangePasswordModel model, CancellationToken cancellationToken)
         {
-            var authResult = await _queryDispatcher.DispatchAsync(new AuthenticateUserQuery
+            var authStatus = await ValidateUserAsync(new NetworkCredential(userName, model.CurrentPassword), cancellationToken);
+
+            switch (authStatus)
             {
-                UserName = userName,
-                Password = model.CurrentPassword
-            }, cancellationToken);
+                case AuthenticateUserStatus.NotExists:
+                    return (ChangePasswordStatus.UserNotExists, null);
+                case AuthenticateUserStatus.Unapproved:
+                    return (ChangePasswordStatus.UserUnapproved, null);
+                case AuthenticateUserStatus.LockedOut:
+                    return (ChangePasswordStatus.UserLockedOut, null);
+                case AuthenticateUserStatus.Failed:
+                    return (ChangePasswordStatus.InvalidCredentials, null);
+                case AuthenticateUserStatus.Successful:
+                    break;
+                default:
+                    return (ChangePasswordStatus.UnexpectedError, null);
+            }
 
-            if (authResult.UserId == null)
-                return false;
-
-            var success = authResult.Status == AuthenticateUserStatus.Successful;
-
-            if (success || authResult.Status == AuthenticateUserStatus.Failed)
-                await _commandDispatcher.DispatchAsync(new RegisterUserActivityCommand
-                {
-                    UserName = userName,
-                    SuccessfulLogin = success,
-                    UIActivity = success,
-                }, CancellationToken.None);
-
-            if (success)
+            try
+            {
                 await _commandDispatcher.DispatchAsync(model.ToCommand(userName), cancellationToken);
+                return (ChangePasswordStatus.Success, null);
+            }
+            catch (ServiceErrorException ex)
+            {
+                switch (ex.ErrorCode)
+                {
+                    case ServiceErrorCode.ParamNotSpecified:
+                    case ServiceErrorCode.ParamNotValid:
+                        switch ((string)ex.Args[0])
+                        {
+                            case nameof(ChangePasswordCommand.NewPassword):
+                                return (ChangePasswordStatus.InvalidNewPassword, ex.Args.Length > 1 ? ex.Args[^1] as PasswordRequirementsData : null);
+                        }
+                        break;
+                }
 
-            return success;
+                return (ChangePasswordStatus.UnexpectedError, null);
+            }
         }
 
         public async Task<bool> VerifyUserAsync(string userName, string verificationToken, CancellationToken cancellationToken)
@@ -158,23 +180,46 @@ namespace WebApp.UI.Infrastructure.Security
             }
             catch (ServiceErrorException ex)
             {
-                // when user doesn't exist, success should be display to the user to prevent probing for existing accounts
-                return
-                    ex.ErrorCode == ServiceErrorCode.EntityNotFound &&
-                    ((string)ex.Args[0]) == Lambda.MemberPath((ResetPasswordCommand c) => c.UserName);
+                switch (ex.ErrorCode)
+                {
+                    case ServiceErrorCode.EntityNotFound:
+                        switch ((string)ex.Args[0])
+                        {
+                            // when user doesn't exist, success should be display to the user to prevent probing for existing accounts
+                            case nameof(ResetPasswordCommand.UserName):
+                                return true;
+                        }
+                        break;
+                }
+
+                return false;
             }
         }
 
-        public async Task<bool> SetPasswordAsync(string userName, string verificationToken, SetPasswordModel model, CancellationToken cancellationToken)
+        public async Task<(ChangePasswordStatus, PasswordRequirementsData?)> SetPasswordAsync(string userName, string verificationToken, SetPasswordModel model, CancellationToken cancellationToken)
         {
             try
             {
                 await _commandDispatcher.DispatchAsync(model.ToCommand(userName, verificationToken), cancellationToken);
-                return true;
+                return (ChangePasswordStatus.Success, null);
             }
-            catch (ServiceErrorException)
+            catch (ServiceErrorException ex)
             {
-                return false;
+                switch (ex.ErrorCode)
+                {
+                    case ServiceErrorCode.ParamNotSpecified:
+                    case ServiceErrorCode.ParamNotValid:
+                        switch ((string)ex.Args[0])
+                        {
+                            case nameof(ChangePasswordCommand.NewPassword):
+                                return (ChangePasswordStatus.InvalidNewPassword, ex.Args.Length > 1 ? ex.Args[^1] as PasswordRequirementsData : null);
+                            case nameof(ChangePasswordCommand.VerificationToken):
+                                return (ChangePasswordStatus.InvalidCredentials, null);
+                        }
+                        break;
+                }
+
+                return (ChangePasswordStatus.UnexpectedError, null);
             }
         }
     }

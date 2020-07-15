@@ -5,10 +5,10 @@ namespace WebApp.Service.Users
     [DataContract]
     public enum AuthenticateUserStatus
     {
-        [EnumMember] Unknown,
-        [EnumMember] Failed,
+        [EnumMember] NotExists,
         [EnumMember] Unapproved,
         [EnumMember] LockedOut,
+        [EnumMember] Failed,
         [EnumMember] Successful,
     }
 }

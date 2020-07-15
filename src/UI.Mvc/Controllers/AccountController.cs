@@ -6,10 +6,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Localization;
 using WebApp.Service.Infrastructure.Localization;
+using WebApp.Service.Infrastructure.Validation;
 using WebApp.Service.Settings;
+using WebApp.Service.Users;
 using WebApp.UI.Filters;
+using WebApp.UI.Infrastructure.Localization;
 using WebApp.UI.Infrastructure.Security;
 using WebApp.UI.Models.Account;
 
@@ -32,7 +36,9 @@ namespace WebApp.UI.Controllers
 
         private async Task<bool> LoginCoreAsync(LoginModel model, CancellationToken cancellationToken)
         {
-            if (await _accountManager.ValidateUserAsync(model, cancellationToken))
+            var status = await _accountManager.ValidateUserAsync(model.Credentials, cancellationToken);
+
+            if (status == AuthenticateUserStatus.Successful)
             {
                 var claims = new Claim[]
                 {
@@ -79,7 +85,6 @@ namespace WebApp.UI.Controllers
                 ModelState.AddModelError("", T["Incorrect e-mail address or password."]);
             }
 
-            // If we got this far, something failed, redisplay form
             ViewData["ReturnUrl"] = returnUrl;
             ViewData["ActiveMenuItem"] = "Login";
             return View(model);
@@ -93,7 +98,7 @@ namespace WebApp.UI.Controllers
             return RedirectToAction(nameof(HomeController.Index), "Home", new { area = "" });
         }
 
-        private Task<CreateUserResult> RegisterCoreAsync(RegisterModel model, CancellationToken cancellationToken)
+        private Task<(CreateUserStatus, PasswordRequirementsData?)> RegisterCoreAsync(RegisterModel model, CancellationToken cancellationToken)
         {
             return _accountManager.CreateUserAsync(model, cancellationToken);
         }
@@ -116,19 +121,36 @@ namespace WebApp.UI.Controllers
             if (!_settingsProvider.EnableRegistration())
                 return NotFound();
 
-            var createStatus = CreateUserResult.Success;
-            if (ModelState.IsValid &&
-                (createStatus = await RegisterCoreAsync(model, cancellationToken)) == CreateUserResult.Success)
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Verify));
-            }
-            else
-            {
-                if (createStatus != CreateUserResult.Success)
-                    ModelState.AddModelError("", ErrorCodeToString(createStatus));
+                var (status, passwordRequirements) = await RegisterCoreAsync(model, cancellationToken);
 
-                ViewData["ActiveMenuItem"] = "Register";
-                return View(model);
+                if (status == CreateUserStatus.Success)
+                    return RedirectToAction(nameof(Verify));
+
+                AddModelError(ModelState, status, passwordRequirements);
+            }
+
+            ViewData["ActiveMenuItem"] = "Register";
+            return View(model);
+
+            void AddModelError(ModelStateDictionary modelState, CreateUserStatus status, PasswordRequirementsData? passwordRequirements)
+            {
+                switch (status)
+                {
+                    case CreateUserStatus.DuplicateUserName:
+                    case CreateUserStatus.DuplicateEmail:
+                        modelState.AddModelError(nameof(RegisterModel.UserName), T["The e-mail address is already linked to an existing account."]);
+                        return;
+
+                    case CreateUserStatus.InvalidPassword:
+                        modelState.AddModelError(nameof(RegisterModel.Password), T.LocalizePasswordRequirements(passwordRequirements));
+                        return;
+
+                    default:
+                        modelState.AddModelError(string.Empty, T["An unexpected error occurred. Please verify your entry and try again. If the problem persists, please contact your system administrator."]);
+                        return;
+                }
             }
         }
 
@@ -198,12 +220,26 @@ namespace WebApp.UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var success = await _accountManager.SetPasswordAsync(u, v, model, cancellationToken);
-                return RedirectToAction(null, new { s = Convert.ToInt32(success) });
+                var (status, passwordRequirements) = await _accountManager.SetPasswordAsync(u, v, model, cancellationToken);
+
+                if (status != ChangePasswordStatus.InvalidNewPassword)
+                    return RedirectToAction(null, new { s = Convert.ToInt32(status == ChangePasswordStatus.Success) });
+
+                AddModelError(ModelState, status, passwordRequirements);
             }
 
             ViewData["ActiveMenuItem"] = "New Password";
             return View(model);
+
+            void AddModelError(ModelStateDictionary modelState, ChangePasswordStatus status, PasswordRequirementsData? passwordRequirements)
+            {
+                switch (status)
+                {
+                    case ChangePasswordStatus.InvalidNewPassword:
+                        modelState.AddModelError(nameof(SetPasswordModel.NewPassword), T.LocalizePasswordRequirements(passwordRequirements));
+                        return;
+                }
+            }
         }
 
         [AllowAnonymous]
@@ -213,6 +249,7 @@ namespace WebApp.UI.Controllers
         }
 
         #region Helpers
+
         private IActionResult RedirectToLocal(string? returnUrl)
         {
             if (Url.IsLocalUrl(returnUrl))
@@ -220,25 +257,7 @@ namespace WebApp.UI.Controllers
             else
                 return RedirectToAction(nameof(HomeController.Index), "Home", new { area = "Dashboard" });
         }
-
-        private string ErrorCodeToString(CreateUserResult result)
-        {
-            switch (result)
-            {
-                case CreateUserResult.DuplicateUserName:
-                case CreateUserResult.DuplicateEmail:
-                    return T["The e-mail address specified is already linked to an existing account."];
-
-                case CreateUserResult.InvalidPassword:
-                    return T["The password specified is not formatted correctly. Please enter a valid password value."];
-
-                case CreateUserResult.InvalidEmail:
-                    return T["The e-mail address specified is not formatted correctly. Please enter a valid e-mail address."];
-
-                default:
-                    return T["An unknown error occurred. Please verify your entry and try again. If the problem persists, please contact your system administrator."];
-            }
-        }
+        
         #endregion
     }
 }

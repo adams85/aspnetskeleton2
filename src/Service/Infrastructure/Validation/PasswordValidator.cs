@@ -1,8 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
-using Karambolo.Common.Localization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
@@ -13,11 +11,24 @@ namespace WebApp.Service.Infrastructure.Validation
 {
     public sealed class PasswordValidator : IValidator<PasswordAttribute>
     {
-        private readonly PasswordOptions? _passwordOptions;
+        public static readonly object PasswordRequirementsPropertyKey = new object();
+
+        private static PasswordRequirementsData? GetPasswordRequirements(PasswordOptions passwordOptions) => new PasswordRequirementsData()
+        {
+            RequiredLength = passwordOptions.RequiredLength,
+            RequiredUniqueChars = passwordOptions.RequiredUniqueChars,
+            RequireNonAlphanumeric = passwordOptions.RequireNonAlphanumeric,
+            RequireLowercase = passwordOptions.RequireLowercase,
+            RequireUppercase = passwordOptions.RequireUppercase,
+            RequireDigit = passwordOptions.RequireDigit
+        };
+
+        private readonly PasswordRequirementsData? _passwordRequirements;
 
         public PasswordValidator(IStringLocalizer<PasswordValidator> stringLocalizer, IOptions<PasswordOptions>? passwordOptions)
         {
-            _passwordOptions = passwordOptions?.Value;
+            var passwordOptionsValue = passwordOptions?.Value;
+            _passwordRequirements = passwordOptionsValue != null ? GetPasswordRequirements(passwordOptionsValue) : null;
             T = stringLocalizer;
         }
 
@@ -25,74 +36,36 @@ namespace WebApp.Service.Infrastructure.Validation
 
         private bool IsValidPassword(string? value)
         {
-            if (string.IsNullOrWhiteSpace(value) || value.Length < _passwordOptions!.RequiredLength)
+            if (string.IsNullOrWhiteSpace(value) || value.Length < _passwordRequirements!.RequiredLength)
                 return false;
 
-            if (_passwordOptions.RequireNonAlphanumeric && value.All(c => char.IsDigit(c) || char.IsLetter(c)))
+            if (_passwordRequirements.RequireNonAlphanumeric && value.All(c => char.IsDigit(c) || char.IsLetter(c)))
                 return false;
 
-            if (_passwordOptions.RequireDigit && !value.Any(char.IsDigit))
+            if (_passwordRequirements.RequireDigit && !value.Any(char.IsDigit))
                 return false;
 
-            if (_passwordOptions.RequireLowercase && !value.Any(char.IsLower))
+            if (_passwordRequirements.RequireLowercase && !value.Any(char.IsLower))
                 return false;
 
-            if (_passwordOptions.RequireUppercase && !value.Any(char.IsUpper))
+            if (_passwordRequirements.RequireUppercase && !value.Any(char.IsUpper))
                 return false;
 
-            if (_passwordOptions.RequiredUniqueChars >= 1 && value.Distinct().Count() < _passwordOptions.RequiredUniqueChars)
+            if (_passwordRequirements.RequiredUniqueChars >= 1 && value.Distinct().Count() < _passwordRequirements.RequiredUniqueChars)
                 return false;
 
             return true;
         }
 
-        public string FormatErrorMessage(string localizedName, ITextLocalizer textLocalizer, PasswordAttribute validationAttribute)
-        {
-            var errorMessage = validationAttribute.FormatErrorMessage(localizedName, textLocalizer);
-
-            if (!validationAttribute.IncludeComplexityRequirementsInErrorMessage)
-                return errorMessage;
-
-            var sb = new StringBuilder(errorMessage);
-
-            sb.AppendLine();
-            sb.Append(T["Passwords must be at least {0} character long.", Plural.From("Passwords must be at least {0} characters long.", Math.Max(1, _passwordOptions!.RequiredLength))]);
-
-            if (_passwordOptions.RequireNonAlphanumeric || _passwordOptions.RequireDigit || _passwordOptions.RequireLowercase || _passwordOptions.RequireUppercase)
-            {
-                sb.AppendLine();
-                sb.Append(T["Must contain characters from the following categories:"]).Append(' ');
-
-                if (_passwordOptions.RequireNonAlphanumeric)
-                    sb.Append(T["non-alphabetic characters (!, $, #, etc.)"]).Append(", ");
-
-                if (_passwordOptions.RequireDigit)
-                    sb.Append(T["base 10 digits (0-9)"]).Append(", ");
-
-                if (_passwordOptions.RequireLowercase)
-                    sb.Append(T["English lowercase characters (a-z)"]).Append(", ");
-
-                if (_passwordOptions.RequireUppercase)
-                    sb.Append(T["English uppercase characters (A-Z)"]).Append(", ");
-
-                sb.Remove(sb.Length - 2, 2).Append('.');
-            }
-
-            if (_passwordOptions.RequiredUniqueChars > 0)
-            {
-                sb.AppendLine();
-                sb.Append(T["Must contain at least {0} different character.", Plural.From("Must contain at least {0} different characters.", _passwordOptions.RequiredUniqueChars)]);
-            }
-
-            return sb.ToString();
-        }
+        public string FormatErrorMessage(string localizedName, ITextLocalizer textLocalizer, PasswordAttribute validationAttribute) =>
+            validationAttribute.FormatErrorMessage(localizedName, textLocalizer);
 
         public ValidationResult IsValid(object? value, ValidationContext validationContext, PasswordAttribute validationAttribute)
         {
             if (!(value is string stringValue))
                 return ValidationResult.Success;
 
-            if (_passwordOptions == null)
+            if (_passwordRequirements == null)
                 return
                     validationAttribute.IgnoreIfServiceUnavailable ?
                     ValidationResult.Success :
@@ -101,7 +74,12 @@ namespace WebApp.Service.Infrastructure.Validation
             if (IsValidPassword(stringValue))
                 return ValidationResult.Success;
 
-            return new ExtendedValidationResult(validationAttribute, validationContext, new[] { validationContext.MemberName });
+            var result = new ExtendedValidationResult(validationAttribute, validationContext, new[] { validationContext.MemberName });
+
+            if (_passwordRequirements != null)
+                result.Properties[PasswordRequirementsPropertyKey] = _passwordRequirements;
+
+            return result;
         }
     }
 }

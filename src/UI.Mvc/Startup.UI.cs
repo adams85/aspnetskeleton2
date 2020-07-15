@@ -123,14 +123,14 @@ namespace WebApp.UI
                     });
 
                 // we avoid AddViewLocalization here because it calls AddLocalization under the hood, that is, it would add base localization services,
-                // but they are already registered in the root container and we need those shared instances
+                // but those are already registered in the root container and we need to keep them shared
                 // https://github.com/dotnet/aspnetcore/blob/v3.1.5/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L36
                 services.Configure<RazorViewEngineOptions>(options => options.ViewLocationExpanders.Add(new LanguageViewLocationExpander(LanguageViewLocationExpanderFormat.Suffix)));
                 services.TryAdd(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>());
                 services.TryAdd(ServiceDescriptor.Transient(typeof(IHtmlLocalizer<>), typeof(HtmlLocalizer<>)));
                 services.TryAdd(ServiceDescriptor.Transient<IViewLocalizer, ViewLocalizer>());
 
-                _apiStartup.ConfigureModelServices(mvcBuilder);
+                _apiStartup.ConfigureDataAnnotationServices(mvcBuilder);
 
 #if !RAZOR_PRECOMPILE
                 mvcBuilder.AddRazorRuntimeCompilation();

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -34,15 +33,15 @@ namespace WebApp.Api
                 options.SuppressModelStateInvalidFilter = true;
             });
 
-            ConfigureModelServices(builder);
+            builder.Services.Replace(ServiceDescriptor.Singleton<IModelMetadataProvider, CustomModelMetadataProvider>());
+
+            ConfigureDataAnnotationServices(builder);
 
             ConfigureMvcPartial(builder);
         }
 
-        public void ConfigureModelServices(IMvcBuilder builder)
+        public void ConfigureDataAnnotationServices(IMvcBuilder builder)
         {
-            builder.Services.Replace(ServiceDescriptor.Singleton<IModelMetadataProvider, CustomModelMetadataProvider>());
-
             builder.Services.AddOptions<MvcOptions>()
                 .Configure<IServiceProvider>((options, sp) =>
                 {
@@ -54,6 +53,9 @@ namespace WebApp.Api
 
             builder.Services.Replace(ServiceDescriptor.Singleton<IValidationAttributeAdapterProvider, CustomValidationAttributeAdapterProvider>());
 
+            // we avoid AddDataAnnotationsLocalization here because it calls AddLocalization under the hood, that is, it would add base localization services,
+            // but those must be resolved from the root container in a multi-tenant setup (like UI.Mvc)
+            // https://github.com/dotnet/aspnetcore/blob/v3.1.5/src/Mvc/Mvc.DataAnnotations/src/DataAnnotationsLocalizationServices.cs#L13
             builder.Services.AddOptions<MvcDataAnnotationsLocalizationOptions>()
                 .Configure<ILoggerFactory>((options, loggerFactory) => options.DataAnnotationLocalizerProvider = (type, stringLocalizerFactory) =>
                     new CompositeStringLocalizer(

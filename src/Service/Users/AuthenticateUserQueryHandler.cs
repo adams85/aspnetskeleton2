@@ -12,8 +12,12 @@ namespace WebApp.Service.Users
             var user = await context.DbContext.Users.GetByNameAsync(query.UserName, cancellationToken).ConfigureAwait(false);
 
             var result = new AuthenticateUserResult();
+
             if (user == null)
+            {
+                result.Status = AuthenticateUserStatus.NotExists;
                 return result;
+            }
 
             result.UserId = user.Id;
             if (!user.IsApproved)

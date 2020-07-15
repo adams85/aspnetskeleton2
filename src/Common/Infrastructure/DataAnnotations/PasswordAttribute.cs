@@ -4,7 +4,5 @@
     public class PasswordAttribute : ServiceValidationAttribute
     {
         public PasswordAttribute() : base(ValidationErrorMessages.PasswordAttribute_DefaultErrorMessage) { }
-
-        public bool IncludeComplexityRequirementsInErrorMessage { get; set; }
     }
 }

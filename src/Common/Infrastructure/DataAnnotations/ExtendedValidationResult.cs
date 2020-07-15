@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 
 namespace System.ComponentModel.DataAnnotations
 {
@@ -32,5 +33,8 @@ namespace System.ComponentModel.DataAnnotations
         { }
 
         public ValidationAttribute ValidationAttribute { get; }
+
+        private IDictionary<object, object>? _properties;
+        public IDictionary<object, object> Properties => LazyInitializer.EnsureInitialized(ref _properties, () => new Dictionary<object, object>())!;
     }
 }

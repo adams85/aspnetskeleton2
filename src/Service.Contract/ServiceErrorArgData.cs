@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using ProtoBuf;
+using WebApp.Service.Infrastructure.Validation;
 
 namespace WebApp.Service
 {
@@ -19,11 +20,11 @@ namespace WebApp.Service
     [ProtoInclude(12, typeof(ServiceErrorArgData<float>))]
     [ProtoInclude(13, typeof(ServiceErrorArgData<double>))]
     [ProtoInclude(14, typeof(ServiceErrorArgData<decimal>))]
-    [ProtoInclude(15, typeof(ServiceErrorArgData<Type>))]
-    [ProtoInclude(16, typeof(ServiceErrorArgData<Uri>))]
-    [ProtoInclude(17, typeof(ServiceErrorArgData<Guid>))]
-    [ProtoInclude(18, typeof(ServiceErrorArgData<TimeSpan>))]
-    [ProtoInclude(19, typeof(ServiceErrorArgData<DateTime>))]
+    [ProtoInclude(15, typeof(ServiceErrorArgData<Uri>))]
+    [ProtoInclude(16, typeof(ServiceErrorArgData<Guid>))]
+    [ProtoInclude(17, typeof(ServiceErrorArgData<TimeSpan>))]
+    [ProtoInclude(18, typeof(ServiceErrorArgData<DateTime>))]
+    [ProtoInclude(101, typeof(ServiceErrorArgData<PasswordRequirementsData>))]
     public abstract class ServiceErrorArgData
     {
         public static ServiceErrorArgData From(object value)

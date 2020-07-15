@@ -1,9 +1,9 @@
 ﻿namespace WebApp.UI.Infrastructure.Security
 {
-    public enum CreateUserResult
+    public enum CreateUserStatus
     {
+        UnexpectedError = -1,
         Success,
-        UnexpectedError,
         InvalidUserName,
         DuplicateUserName,
         InvalidEmail,

@@ -28,7 +28,7 @@ namespace WebApp.Service.Translations
             SkipInfoHeaders = true,
         };
 
-        private readonly IEventNotifier _eventNotifier;
+        private readonly IEventPublisher _eventPublisher;
         private readonly IClock _clock;
         private readonly ILogger _logger;
 
@@ -43,9 +43,9 @@ namespace WebApp.Service.Translations
 
         private Exception? _previousObtainFilesException;
 
-        public FileTranslationsSource(IEventNotifier eventNotifier, IClock clock, IOptions<FileTranslationsSourceOptions>? options, ILogger<FileTranslationsSource>? logger)
+        public FileTranslationsSource(IEventPublisher eventPublisher, IClock clock, IOptions<FileTranslationsSourceOptions>? options, ILogger<FileTranslationsSource>? logger)
         {
-            _eventNotifier = eventNotifier ?? throw new ArgumentNullException(nameof(eventNotifier));
+            _eventPublisher = eventPublisher ?? throw new ArgumentNullException(nameof(eventPublisher));
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
             _logger = logger ?? (ILogger)NullLogger.Instance;
 
@@ -91,7 +91,7 @@ namespace WebApp.Service.Translations
                     if (RegisterChange(filePath, @event))
                     {
                         _logger.LogInformation("Translation file \"{PATH}\" has been loaded.", filePath);
-                        _eventNotifier.Notify(@event);
+                        _eventPublisher.Publish(@event);
                     }
                 });
         }

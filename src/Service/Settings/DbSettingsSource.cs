@@ -16,7 +16,7 @@ namespace WebApp.Service.Settings
     internal sealed class DbSettingsSource : ISettingsSource, IDisposable
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly IEventNotifier _eventNotifier;
+        private readonly IEventPublisher _eventPublisher;
         private readonly IClock _clock;
         private readonly ILogger _logger;
 
@@ -27,11 +27,11 @@ namespace WebApp.Service.Settings
         private Action? _onInvalidate;
         private volatile SettingsChangedEvent? _lastEvent;
 
-        public DbSettingsSource(IServiceScopeFactory serviceScopeFactory, IEventNotifier eventNotifier, IClock clock,
+        public DbSettingsSource(IServiceScopeFactory serviceScopeFactory, IEventPublisher eventPublisher, IClock clock,
             ILogger<DbSettingsSource>? logger)
         {
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-            _eventNotifier = eventNotifier ?? throw new ArgumentNullException(nameof(eventNotifier));
+            _eventPublisher = eventPublisher ?? throw new ArgumentNullException(nameof(eventPublisher));
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
             _logger = logger ?? (ILogger)NullLogger.Instance;
 
@@ -52,7 +52,7 @@ namespace WebApp.Service.Settings
                     if (RegisterChange(@event))
                     {
                         _logger.LogInformation("Settings have been loaded.");
-                        _eventNotifier.Notify(@event);
+                        _eventPublisher.Publish(@event);
                     }
                 });
         }

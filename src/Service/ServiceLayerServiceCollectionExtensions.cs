@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services
                 .AddSingleton<EventBus>()
-                .AddSingleton<IEventNotifier>(sp => sp.GetRequiredService<EventBus>())
+                .AddSingleton<IEventPublisher>(sp => sp.GetRequiredService<EventBus>())
                 .AddSingleton<IEventListener>(sp => sp.GetRequiredService<EventBus>());
 
             services

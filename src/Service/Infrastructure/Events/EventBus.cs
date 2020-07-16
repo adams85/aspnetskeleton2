@@ -5,11 +5,10 @@ using System.Reactive.Subjects;
 using Karambolo.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using WebApp.Service.Helpers;
 
 namespace WebApp.Service.Infrastructure.Events
 {
-    internal sealed class EventBus : IEventNotifier, IEventListener, IDisposable
+    internal sealed class EventBus : IEventPublisher, IEventListener, IDisposable
     {
         private readonly ILogger _logger;
 
@@ -65,9 +64,9 @@ namespace WebApp.Service.Infrastructure.Events
 
         public IObservable<bool> IsActive { get; }
 
-        public void Notify(Event @event) => _subject.OnNext(@event);
+        public void Publish(Event @event) => _subject.OnNext(@event);
 
-        public IDisposable NotifyMany(IObservable<Event> events) =>
+        public IDisposable PublishMany(IObservable<Event> events) =>
             events
                 .Do(Noop<Event>.Action, ex => _logger.LogError(ex, "A source sequence terminated with error."))
                 .OnErrorResumeNext(Observable.Never<Event>())

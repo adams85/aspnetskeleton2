@@ -28,7 +28,7 @@ namespace WebApp.Service.Host.Services
             _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
         }
 
-        private async IAsyncEnumerable<CommandResponse> InvokeCore(CommandRequest request, bool notifyEvents, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        private async IAsyncEnumerable<CommandResponse> InvokeCore(CommandRequest request, bool relayEvents, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (request.CommandTypeName == null)
                 throw new ArgumentException("Command type is not specified.", nameof(request));
@@ -58,7 +58,7 @@ namespace WebApp.Service.Host.Services
             {
                 Task dispatchTask;
 
-                if (notifyEvents && command is IEventProducerCommand eventProducerCommand)
+                if (relayEvents && command is IEventProducerCommand eventProducerCommand)
                 {
                     var eventChannel = Channel.CreateUnbounded<Event>(s_eventChannelOptions);
 
@@ -97,7 +97,7 @@ namespace WebApp.Service.Host.Services
 
         public async ValueTask<CommandResponse> Invoke(CommandRequest request, CallContext context = default)
         {
-            await using var enumerator = InvokeCore(request, notifyEvents: false, context.CancellationToken).GetAsyncEnumerator();
+            await using var enumerator = InvokeCore(request, relayEvents: false, context.CancellationToken).GetAsyncEnumerator();
 
             if (!await enumerator.MoveNextAsync())
                 throw new InvalidOperationException();
@@ -106,6 +106,6 @@ namespace WebApp.Service.Host.Services
         }
 
         public IAsyncEnumerable<CommandResponse> InvokeWithEventNotification(CommandRequest request, CallContext context = default) =>
-            InvokeCore(request, notifyEvents: true, context.CancellationToken);
+            InvokeCore(request, relayEvents: true, context.CancellationToken);
     }
 }

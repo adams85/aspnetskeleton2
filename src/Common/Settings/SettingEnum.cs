@@ -25,6 +25,9 @@ namespace WebApp.Common.Settings
         [Description(EnableRegistrationDescription), DefaultValue(EnableRegistrationDefaultValue)]
         [EnumMember] EnableRegistration,
 
+        [Description(EnableSwaggerDescription), DefaultValue(EnableSwaggerDefaultValue)]
+        [EnumMember] EnableSwagger,
+
         [Description(EnableThemingDescription), DefaultValue(EnableThemingDefaultValue)]
         [EnumMember] EnableTheming,
 
@@ -59,6 +62,10 @@ namespace WebApp.Common.Settings
         [Localized]
         internal const string EnableRegistrationDescription = "Specifies whether guest users are allowed to create accounts in the application.";
         public const bool EnableRegistrationDefaultValue = true;
+
+        [Localized]
+        internal const string EnableSwaggerDescription = "Specifies whether exposing the Swagger (OpenAPI) documentation of the application's web API is enabled.";
+        public const bool EnableSwaggerDefaultValue = true;
 
         [Localized]
         internal const string EnableThemingDescription = "Specifies whether changing the appearance of the user interface is enabled. " +

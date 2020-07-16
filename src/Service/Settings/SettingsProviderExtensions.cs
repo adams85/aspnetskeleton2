@@ -55,6 +55,9 @@ namespace WebApp.Service.Settings
         public static bool EnableRegistration(this ISettingsProvider provider) =>
             provider.Get<bool?>(SettingEnum.EnableRegistration) ?? EnableRegistrationDefaultValue;
 
+        public static bool EnableSwagger(this ISettingsProvider provider) =>
+            provider.Get<bool?>(SettingEnum.EnableSwagger) ?? EnableSwaggerDefaultValue;
+
         public static bool EnableTheming(this ISettingsProvider provider) =>
             provider.Get<bool?>(SettingEnum.EnableTheming) ?? EnableThemingDefaultValue;
 

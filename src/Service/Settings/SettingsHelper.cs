@@ -65,6 +65,7 @@ namespace WebApp.Service.Settings
 
                     case SettingEnum.EnableLocalization:
                     case SettingEnum.EnableRegistration:
+                    case SettingEnum.EnableSwagger:
                     case SettingEnum.EnableTheming:
                         return bool.TryParse(value, out var _);
 

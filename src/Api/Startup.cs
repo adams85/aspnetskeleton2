@@ -10,6 +10,7 @@ using WebApp.Api.Infrastructure;
 using WebApp.Api.Infrastructure.ErrorHandling;
 using WebApp.Api.Infrastructure.UrlRewriting;
 using WebApp.Core.Infrastructure;
+using WebApp.Service.Settings;
 
 namespace WebApp.Api
 {
@@ -66,8 +67,7 @@ namespace WebApp.Api
         {
             ConfigureSecurityServices(services);
 
-            if (ApiOptions.EnableSwagger)
-                ConfigureSwaggerServices(services);
+            ConfigureSwaggerServices(services);
 
             ConfigureAppServicesPartial(services);
 
@@ -89,13 +89,14 @@ namespace WebApp.Api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
+            var settingsProvider = app.ApplicationServices.GetRequiredService<ISettingsProvider>();
+
             app.UseMiddleware<ApiErrorHandlerMiddleware>();
 
             if (!IsRunningBehindProxy)
                 app.UseHttpsRedirection();
 
-            if (ApiOptions.EnableSwagger)
-                ConfigureSwagger(app);
+            app.UseWhen(_ => settingsProvider.EnableSwagger(), ConfigureSwagger);
 
             app.UseRouting();
 

@@ -25,4 +25,11 @@
     <ProjectReference Include="..\Service.Templates.Razor\Service.Templates.Razor.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Translations\**\*.po;Translations\**\*.bak" />
+    <Content Include="Translations\*\*.po">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

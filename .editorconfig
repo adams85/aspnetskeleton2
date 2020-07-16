@@ -15,6 +15,9 @@ indent_size = 4
 max_line_length = off
 trim_trailing_whitespace = false
 
+[*.cmd]
+charset = utf-8
+
 ###############################
 # C# Code Style Rules         #
 ###############################

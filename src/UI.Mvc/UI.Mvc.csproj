@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyName>WebApp.UI</AssemblyName>
+    <AssemblyName>WebApp.UI.Mvc</AssemblyName>
     <RootNamespace>WebApp.UI</RootNamespace>
 
     <!-- set to true to enable pre-compilation or to false to enable runtime compilation of Razor views for release build -->

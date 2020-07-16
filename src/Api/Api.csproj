@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>WebApp.Api</AssemblyName>
     <RootNamespace>WebApp.Api</RootNamespace>
-    
+
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
@@ -14,7 +14,7 @@
       <ItemGroup>
         <ProjectReference Include="..\Service.Proxy\Service.Proxy.csproj" />
       </ItemGroup>
-      
+
       <ItemGroup>
         <None Remove="**\*.Monolithic.*" />
         <Content Remove="**\*.Monolithic.*" />
@@ -22,11 +22,15 @@
       </ItemGroup>
     </When>
     <Otherwise>
+      <PropertyGroup>
+        <ServiceHostFullPath>$([MSBuild]::NormalizePath('..\Service.Host'))</ServiceHostFullPath>
+      </PropertyGroup>
+
       <ItemGroup>
         <ProjectReference Include="..\Service\Service.csproj" />
         <ProjectReference Include="..\Service.Templates.Razor\Service.Templates.Razor.csproj" />
       </ItemGroup>
-      
+
       <ItemGroup>
         <Compile Include="..\Service.Host\Startup.Options.Service.cs" Link="%(Filename)%(Extension)" />
 
@@ -35,6 +39,11 @@
         </Content>
 
         <Content Include="..\Service.Host\appsettings.Service.*.json" Link="%(Filename)%(Extension)">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+
+        <None Include="..\Service.Host\Translations\**" Exclude="**\*.po;**\*.bak" Link="$([MSBuild]::MakeRelative('$(ServiceHostFullPath)', '%(Identity)'))" />
+        <Content Include="..\Service.Host\Translations\**\*.po" Link="$([MSBuild]::MakeRelative('$(ServiceHostFullPath)', '%(Identity)'))">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
 

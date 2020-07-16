@@ -24,8 +24,7 @@
       </ItemGroup>
 
       <ItemGroup>
-        <Content Remove="Templates\**\*.cshtml" />
-        <Content Include="Templates\**\*.cshtml">
+        <Content Update="Templates\**\*.cshtml">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
       </ItemGroup>

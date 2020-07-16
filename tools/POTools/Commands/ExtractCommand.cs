@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Karambolo.PO;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
+using POTools.Helpers;
 using POTools.Services.Extracting;
 
 namespace POTools.Commands
@@ -153,10 +154,11 @@ namespace POTools.Commands
             var catalog = new POCatalog();
 
             foreach (var groupById in groupsById)
+            {
+                var key = groupById.Key;
+
                 foreach (var (text, sourceFilePath) in groupById)
                 {
-                    var key = groupById.Key;
-
                     if (!catalog.TryGetValue(key, out var entry))
                     {
                         var state = "new";
@@ -197,6 +199,7 @@ namespace POTools.Commands
                     if (!NoComments && !string.IsNullOrEmpty(text.Comment))
                         entry.Comments.Add(new POExtractedComment { Text = text.Comment });
                 }
+            }
 
             if (originalCatalog != null)
                 foreach (var originalEntry in originalCatalog)
@@ -270,14 +273,32 @@ namespace POTools.Commands
             return catalog;
         }
 
-        private void WriteCatalog(TextWriter writer, POCatalog catalog, string language)
+        private void WriteCatalog(TextWriter writer, POCatalog catalog, CultureInfo? culture)
         {
             var now = DateTimeOffset.Now;
 
             try { catalog.Encoding = Encoding.GetEncoding(writer.Encoding.CodePage).BodyName; }
             catch (NotSupportedException) { catalog.Encoding = "(n/a)"; }
 
-            catalog.Language = language.Replace('-', '_');
+            if (culture != null)
+            {
+                catalog.Language = culture.Name.Replace('-', '_');
+
+                if (PluralFormHelper.TryGetPluralForm(culture, out var pluralFormCount, out var pluralFormSelector))
+                {
+                    (catalog.PluralFormCount, catalog.PluralFormSelector) = (pluralFormCount, pluralFormSelector);
+
+                    for (int i = 0, n = catalog.Count; i < n; i++)
+                        EnsureTranslationCount(catalog[i], pluralFormCount);
+                }
+
+                static void EnsureTranslationCount(IPOEntry entry, int pluralFormCount)
+                {
+                    if (entry is POPluralEntry pluralEntry && pluralEntry.Count > pluralFormCount)
+                        for (int i = pluralEntry.Count - 1; i >= pluralFormCount; i--)
+                            pluralEntry.RemoveAt(i);
+                }
+            }
 
             catalog.Headers = new Dictionary<string, string>
             {
@@ -287,14 +308,13 @@ namespace POTools.Commands
                 { POCatalog.PORevisionDateHeaderName, string.Empty },
                 { POCatalog.LastTranslatorHeaderName, string.Empty },
                 { POCatalog.LanguageTeamHeaderName, string.Empty },
-                { POCatalog.PluralFormsHeaderName, string.Empty },
             };
 
-            if (string.IsNullOrEmpty(language))
+            if (culture != null)
                 catalog.HeaderComments = new[]
                 {
-                        new POFlagsComment() { Flags = new HashSet<string> { "fuzzy" } }
-                    };
+                    new POFlagsComment() { Flags = new HashSet<string> { "fuzzy" } }
+                };
 
             var generator = new POGenerator(s_generatorSettings);
             generator.Generate(writer, catalog);
@@ -302,13 +322,13 @@ namespace POTools.Commands
             writer.Flush();
         }
 
-        private void SaveCatalog(string filePath, POCatalog catalog, string language)
+        private void SaveCatalog(string filePath, POCatalog catalog, CultureInfo? culture)
         {
             if (!NoBackup && File.Exists(filePath))
                 File.Copy(filePath, filePath + ".bak", overwrite: true);
 
             using (var writer = new StreamWriter(filePath, append: false))
-                WriteCatalog(writer, catalog, language);
+                WriteCatalog(writer, catalog, culture);
         }
 
         public Task<int> OnExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken)
@@ -318,7 +338,7 @@ namespace POTools.Commands
             var relativeSourceFilePaths = GetSourceFilePaths().Select(filePath => Path.GetRelativePath(_basePath, filePath));
             var templateFilePath = GetTemplateFilePath();
 
-            var normalizedLanguages = Languages?.Select(language => new CultureInfo(language).Name).ToArray() ?? Array.Empty<string>();
+            var cultures = Languages?.Select(language => CultureInfo.GetCultureInfo(language)).ToArray() ?? Array.Empty<CultureInfo>();
 
             // extracting texts
             _results = new Dictionary<string, ExtractResult>();
@@ -337,17 +357,17 @@ namespace POTools.Commands
 
                 if (templateFilePath != null)
                 {
-                    SaveCatalog(templateFilePath, templateCatalog, string.Empty);
+                    SaveCatalog(templateFilePath, templateCatalog, null);
 
-                    if (normalizedLanguages.Length > 0)
+                    if (cultures.Length > 0)
                     {
                         var templateDirPath = Path.GetDirectoryName(templateFilePath)!;
                         var fileName = Path.GetFileNameWithoutExtension(templateFilePath) + ".po";
 
-                        for (int i = 0, n = normalizedLanguages.Length; i < n; i++)
+                        for (int i = 0, n = cultures.Length; i < n; i++)
                         {
-                            var language = normalizedLanguages[i];
-                            var dirPath = Path.Combine(templateDirPath, language);
+                            var culture = cultures[i];
+                            var dirPath = Path.Combine(templateDirPath, culture.Name);
 
                             var filePath = Path.Combine(dirPath, fileName);
 
@@ -356,12 +376,12 @@ namespace POTools.Commands
                             if (!Directory.Exists(dirPath))
                                 Directory.CreateDirectory(dirPath);
 
-                            SaveCatalog(filePath, catalog, language);
+                            SaveCatalog(filePath, catalog, culture);
                         }
                     }
                 }
                 else
-                    WriteCatalog(_context.Console.Out, templateCatalog, string.Empty);
+                    WriteCatalog(_context.Console.Out, templateCatalog, null);
             }
 
             // displaying errors

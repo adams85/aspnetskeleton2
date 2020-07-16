@@ -74,11 +74,11 @@ namespace WebApp.UI.Controllers
         [AllowAnonymous]
         [AnonymousOnly]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginModel model, string? returnUrl = null, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Login(LoginModel model, string? returnUrl = null)
         {
             if (ModelState.IsValid)
             {
-                if (await LoginCoreAsync(model, cancellationToken))
+                if (await LoginCoreAsync(model, HttpContext.RequestAborted))
                     return RedirectToLocal(returnUrl);
 
                 // If we got this far, something failed, redisplay form
@@ -116,14 +116,14 @@ namespace WebApp.UI.Controllers
         [AllowAnonymous]
         [AnonymousOnly]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterModel model, CancellationToken cancellationToken)
+        public async Task<IActionResult> Register(RegisterModel model)
         {
             if (!_settingsProvider.EnableRegistration())
                 return NotFound();
 
             if (ModelState.IsValid)
             {
-                var (status, passwordRequirements) = await RegisterCoreAsync(model, cancellationToken);
+                var (status, passwordRequirements) = await RegisterCoreAsync(model, HttpContext.RequestAborted);
 
                 if (status == CreateUserStatus.Success)
                     return RedirectToAction(nameof(Verify));
@@ -157,12 +157,12 @@ namespace WebApp.UI.Controllers
         [HttpGet]
         [AllowAnonymous]
         [AnonymousOnly]
-        public async Task<IActionResult> Verify(string u, string v, CancellationToken cancellationToken)
+        public async Task<IActionResult> Verify(string u, string v)
         {
             bool? model;
 
             if (u != null && v != null)
-                model = await _accountManager.VerifyUserAsync(u, v, cancellationToken);
+                model = await _accountManager.VerifyUserAsync(u, v, HttpContext.RequestAborted);
             else
                 model = null;
 
@@ -187,11 +187,11 @@ namespace WebApp.UI.Controllers
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
         [AnonymousOnly]
-        public async Task<IActionResult> ResetPassword(ResetPasswordModel model, CancellationToken cancellationToken)
+        public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
         {
             if (ModelState.IsValid)
             {
-                var success = await _accountManager.ResetPasswordAsync(model, cancellationToken);
+                var success = await _accountManager.ResetPasswordAsync(model, HttpContext.RequestAborted);
                 return RedirectToAction(null, new { s = Convert.ToInt32(success) });
             }
 
@@ -216,11 +216,11 @@ namespace WebApp.UI.Controllers
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
         [AnonymousOnly]
-        public async Task<IActionResult> SetPassword(SetPasswordModel model, string u, string v, CancellationToken cancellationToken)
+        public async Task<IActionResult> SetPassword(SetPasswordModel model, string u, string v)
         {
             if (ModelState.IsValid)
             {
-                var (status, passwordRequirements) = await _accountManager.SetPasswordAsync(u, v, model, cancellationToken);
+                var (status, passwordRequirements) = await _accountManager.SetPasswordAsync(u, v, model, HttpContext.RequestAborted);
 
                 if (status != ChangePasswordStatus.InvalidNewPassword)
                     return RedirectToAction(null, new { s = Convert.ToInt32(status == ChangePasswordStatus.Success) });

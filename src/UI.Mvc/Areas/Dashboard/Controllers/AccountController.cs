@@ -38,13 +38,13 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index(ChangePasswordModel model, CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(ChangePasswordModel model)
         {
             bool success;
 
             if (ModelState.IsValid)
             {
-                var (status, passwordRequirements) = await _accountManager.ChangePasswordAsync(HttpContext.User.Identity.Name!, model, cancellationToken);
+                var (status, passwordRequirements) = await _accountManager.ChangePasswordAsync(HttpContext.User.Identity.Name!, model, HttpContext.RequestAborted);
 
                 if (status == ChangePasswordStatus.InvalidNewPassword)
                     AddModelError(ModelState, status, passwordRequirements);

@@ -18,6 +18,7 @@
     </PackageReference>
     <PackageReference Include="Grpc.Net.Client" Version="2.29.0" />
     <PackageReference Include="Karambolo.PO" Version="1.6.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.4" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="3.1.4" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.4" />
     <PackageReference Include="protobuf-net.Grpc" Version="1.0.37" />
@@ -38,6 +39,7 @@
     <Compile Include="..\Service\Infrastructure\Events\IEventListener.cs" Link="Infrastructure\Events\IEventListener.cs" />
     <Compile Include="..\Service\Infrastructure\ICommandDispatcher.cs" Link="Infrastructure\ICommandDispatcher.cs" />
     <Compile Include="..\Service\Infrastructure\IQueryDispatcher.cs" Link="Infrastructure\IQueryDispatcher.cs" />
+    <Compile Include="..\Service\Infrastructure\Hosting\HostExtensions.cs" Link="Infrastructure\Hosting\HostExtensions.cs" />
     <Compile Include="..\Service\Infrastructure\Localization\CompositeStringLocalizer.cs" Link="Infrastructure\Localization\CompositeStringLocalizer.cs" />
     <Compile Include="..\Service\Infrastructure\Localization\IExtendedStringLocalizer.cs" Link="Infrastructure\Localization\IExtendedStringLocalizer.cs" />
     <Compile Include="..\Service\Infrastructure\Localization\LocalizationHelper.cs" Link="Infrastructure\Localization\LocalizationHelper.cs" />

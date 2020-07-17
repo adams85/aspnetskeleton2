@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Karambolo.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WebApp.Core.Helpers;
-using WebApp.Core.Infrastructure;
 
 namespace WebApp.Api
 {
@@ -24,11 +20,7 @@ namespace WebApp.Api
         public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-
-            using (var scope = host.Services.CreateScope())
-                foreach (var initializer in scope.ServiceProvider.GetRequiredService<IEnumerable<IApplicationInitializer>>())
-                    await initializer.InitializeAsync(CancellationToken.None);
-
+            await host.InitializeApplicationAsync();
             await host.RunAsync();
         }
 

@@ -42,11 +42,6 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
 
-        <None Include="..\Service.Host\Translations\**" Exclude="**\*.po;**\*.bak" Link="$([MSBuild]::MakeRelative('$(ServiceHostFullPath)', '%(Identity)'))" />
-        <Content Include="..\Service.Host\Translations\**\*.po" Link="$([MSBuild]::MakeRelative('$(ServiceHostFullPath)', '%(Identity)'))">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-
         <None Remove="**\*.Distributed.*" />
         <Content Remove="**\*.Distributed.*" />
         <Compile Remove="**\*.Distributed.*" />

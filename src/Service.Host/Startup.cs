@@ -1,15 +1,12 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using ProtoBuf.Grpc.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using ProtoBuf.Grpc.Server;
-using WebApp.DataAccess;
+using WebApp.Service.Host.Infrastructure;
 using WebApp.Service.Host.Services;
-using WebApp.Service.Mailing;
+using WebApp.Service.Infrastructure;
 
 namespace WebApp.Service.Host
 {
@@ -31,13 +28,17 @@ namespace WebApp.Service.Host
             using (var optionsProvider = BuildImmediateOptionsProvider())
                 services.AddServiceLayer(optionsProvider);
 
+            services
+                .AddHttpContextAccessor()
+                .Replace(ServiceDescriptor.Singleton<IExecutionContextAccessor, HttpExecutionContextAccessor>());
+
             ConfigureOptions(services);
 
             services.AddMvcCore()
                 .AddRazorTemplating();
 
             // https://protobuf-net.github.io/protobuf-net.Grpc/gettingstarted
-            services.AddCodeFirstGrpc();
+            services.AddCodeFirstGrpc(options => options.Interceptors.Add<RestoreExecutionContextInterceptor>());
             services.AddSingleton(_ => ServiceHostContractSerializer.CreateBinderConfiguration());
         }
 

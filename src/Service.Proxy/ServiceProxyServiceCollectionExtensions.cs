@@ -33,6 +33,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddApplicationInitializers();
 
+            services.AddSingleton<IExecutionContextAccessor, DefaultExecutionContextAccessor>();
+
             services.AddSingleton<IServiceHostGrpcServiceFactory, ServiceHostGrpcServiceFactory>();
             services.AddSingleton<IQueryDispatcher, ServiceHostQueryDispatcher>();
             services.AddSingleton<ICommandDispatcher, ServiceHostCommandDispatcher>();

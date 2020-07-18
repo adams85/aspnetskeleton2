@@ -22,17 +22,13 @@
       </ItemGroup>
     </When>
     <Otherwise>
-      <PropertyGroup>
-        <ServiceHostFullPath>$([MSBuild]::NormalizePath('..\Service.Host'))</ServiceHostFullPath>
-      </PropertyGroup>
-
       <ItemGroup>
         <ProjectReference Include="..\Service\Service.csproj" />
         <ProjectReference Include="..\Service.Templates.Razor\Service.Templates.Razor.csproj" />
       </ItemGroup>
 
       <ItemGroup>
-        <Compile Include="..\Service.Host\Startup.Options.Service.cs" Link="%(Filename)%(Extension)" />
+        <Compile Include="..\Service.Host\Startup.Options.Service.cs" Link="Startup.Options.Service.cs" />
 
         <Content Include="..\Service.Host\appsettings.Service.json" Link="%(Filename)%(Extension)">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -59,6 +55,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Api.Contract\Api.Contract.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Service.Host\Infrastructure\HttpExecutionContext.cs" Link="Infrastructure\HttpExecutionContext.cs" />
+    <Compile Include="..\Service.Host\Infrastructure\HttpExecutionContextAccessor.cs" Link="Infrastructure\HttpExecutionContextAccessor.cs" />
   </ItemGroup>
 
 </Project>

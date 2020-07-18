@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using WebApp.DataAccess;
+using WebApp.Service.Infrastructure;
 
 namespace WebApp.Service
 {
@@ -36,11 +37,14 @@ namespace WebApp.Service
         public Type QueryType { get; }
         public Type ResultType { get; }
 
+        private IExecutionContextAccessor? _executionContextAccessor;
+        public virtual OperationExecutionContext ExecutionContext =>
+            LazyInitializer.EnsureInitialized(ref _executionContextAccessor, () => ScopedServices.GetRequiredService<IExecutionContextAccessor>())!.ExecutionContext;
+
         private DataContext? _dbContext;
         public virtual DataContext DbContext => LazyInitializer.EnsureInitialized(ref _dbContext, () => ScopedServices.GetRequiredService<ReadOnlyDataContext>())!;
 
         private IDictionary<object, object>? _properties;
         public virtual IDictionary<object, object> Properties => LazyInitializer.EnsureInitialized(ref _properties, () => new Dictionary<object, object>())!;
-
     }
 }

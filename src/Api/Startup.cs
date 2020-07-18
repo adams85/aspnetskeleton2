@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using WebApp.Api.Infrastructure;
 using WebApp.Api.Infrastructure.ErrorHandling;
 using WebApp.Api.Infrastructure.UrlRewriting;
 using WebApp.Core.Infrastructure;
+using WebApp.Service.Infrastructure;
 using WebApp.Service.Settings;
 
 namespace WebApp.Api
@@ -45,6 +47,10 @@ namespace WebApp.Api
             ApiOptions = optionsProvider.GetRequiredService<IOptions<ApiOptions>>().Value;
 
             services.AddServiceLayer(optionsProvider);
+
+            services
+                .AddHttpContextAccessor()
+                .Replace(ServiceDescriptor.Singleton<IExecutionContextAccessor, HttpExecutionContextAccessor>());
 
             ConfigureOptions(services);
 

@@ -55,6 +55,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddApplicationInitializers();
 
+            services.AddSingleton<IExecutionContextAccessor, DefaultExecutionContextAccessor>();
+
             services.AddSingleton<InterceptorConfiguration.ConfigureDispatcherOptions>();
 
             services.AddSingleton<ICommandDispatcher, CommandDispatcher>();

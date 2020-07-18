@@ -7,10 +7,10 @@ using WebApp.Service;
 using WebApp.Service.Infrastructure.Database;
 using WebApp.Service.Mailing;
 
-#if !DISTRIBUTED
-namespace WebApp.Api
-#else
+#if SERVICE_HOST
 namespace WebApp.Service.Host
+#else
+namespace WebApp.Api
 #endif
 {
     public partial class Startup

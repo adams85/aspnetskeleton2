@@ -26,11 +26,7 @@
   </Choose>
 
   <ItemGroup>
-    <Content Include="..\Api\appsettings.json" Link="%(Filename)%(Extension)">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-
-    <Content Include="..\Api\appsettings.*.json" Link="%(Filename)%(Extension)">
+    <Content Include="..\Api\appsettings.json;..\Api\appsettings.*.json" Exclude="**\appsettings.Service.json;**\appsettings.Service.*.json" Link="%(Filename)%(Extension)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -45,11 +41,7 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Content Include="..\Service.Host\appsettings.Service.json" Link="%(Filename)%(Extension)">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-
-        <Content Include="..\Service.Host\appsettings.Service.*.json" Link="%(Filename)%(Extension)">
+        <Content Include="..\Api\appsettings.Service.json;..\Api\appsettings.Service.*.json" Link="%(Filename)%(Extension)">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
 

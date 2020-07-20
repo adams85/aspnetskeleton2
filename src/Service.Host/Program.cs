@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WebApp.Core.Helpers;
@@ -38,11 +39,15 @@ namespace WebApp.Service.Host
 
             var env = context.HostingEnvironment;
 
+            var fileProvider = builder.GetFileProvider();
+            if (!fileProvider.GetFileInfo($"appsettings.{serviceSettingsTag}.json").Exists)
+                fileProvider = new PhysicalFileProvider(AppContext.BaseDirectory);
+
             int index = builder.Sources.Count;
             builder.Sources.RemoveAll((source, i) => source is JsonConfigurationSource ? (index = Math.Min(index, i), @true: true).@true : false);
 
-            builder.Sources.Insert(index++, new JsonConfigurationSource { Path = $"appsettings.{serviceSettingsTag}.json", Optional = true, ReloadOnChange = true });
-            builder.Sources.Insert(index++, new JsonConfigurationSource { Path = $"appsettings.{serviceSettingsTag}.{env.EnvironmentName}.json", Optional = true, ReloadOnChange = true });
+            builder.Sources.Insert(index++, new JsonConfigurationSource { FileProvider = fileProvider, Path = $"appsettings.{serviceSettingsTag}.json", Optional = true, ReloadOnChange = true });
+            builder.Sources.Insert(index++, new JsonConfigurationSource { FileProvider = fileProvider, Path = $"appsettings.{serviceSettingsTag}.{env.EnvironmentName}.json", Optional = true, ReloadOnChange = true });
             builder.Sources.Insert(index++, new JsonConfigurationSource { Path = "appsettings.json", Optional = true, ReloadOnChange = true });
             builder.Sources.Insert(index++, new JsonConfigurationSource { Path = $"appsettings.{env.EnvironmentName}.json", Optional = true, ReloadOnChange = true });
         }

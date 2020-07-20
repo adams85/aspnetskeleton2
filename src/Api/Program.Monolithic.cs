@@ -17,13 +17,9 @@ namespace WebApp.Api
 
             var env = context.HostingEnvironment;
 
-            var fileProvider = builder.GetFileProvider();
-            if (!fileProvider.GetFileInfo($"appsettings.{serviceSettingsTag}.json").Exists)
-                fileProvider = new PhysicalFileProvider(AppContext.BaseDirectory);
-
             // adding shared configuration files which are linked from Service.Host project
-            builder.Sources.Insert(index++, new JsonConfigurationSource { FileProvider = fileProvider, Path = $"appsettings.{serviceSettingsTag}.json", Optional = true, ReloadOnChange = true });
-            builder.Sources.Insert(index++, new JsonConfigurationSource { FileProvider = fileProvider, Path = $"appsettings.{serviceSettingsTag}.{env.EnvironmentName}.json", Optional = true, ReloadOnChange = true });
+            builder.Sources.Insert(index++, new JsonConfigurationSource { Path = $"appsettings.{serviceSettingsTag}.json", Optional = true, ReloadOnChange = true });
+            builder.Sources.Insert(index++, new JsonConfigurationSource { Path = $"appsettings.{serviceSettingsTag}.{env.EnvironmentName}.json", Optional = true, ReloadOnChange = true });
         }
     }
 }

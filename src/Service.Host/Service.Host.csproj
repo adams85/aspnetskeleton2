@@ -25,4 +25,14 @@
     <ProjectReference Include="..\Service.Templates.Razor\Service.Templates.Razor.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\Api\appsettings.Service.json;..\Api\appsettings.Service.*.json" Link="%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    
+    <Compile Include="..\Api\Infrastructure\HttpExecutionContext.cs" Link="Infrastructure\HttpExecutionContext.cs" />
+    <Compile Include="..\Api\Infrastructure\HttpExecutionContextAccessor.cs" Link="Infrastructure\HttpExecutionContextAccessor.cs" />
+    <Compile Include="..\Api\Startup.Options.Service.cs" Link="Startup.Options.Service.cs" />
+  </ItemGroup>
+
 </Project>

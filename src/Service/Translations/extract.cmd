@@ -4,7 +4,7 @@ SETLOCAL EnableDelayedExpansion
 
 SET ApplicationPrefix=WebApp.
 SET Languages=en-US
-SET Projects=Common;Service.Contract;Service;Api;UI.Mvc
+SET Projects=Common;Service.Contract;Service;Service.Templates.Razor;Api;UI.Mvc
 
 FOR %%L IN (%Languages%) DO (
   SET LanguageSwitches=!LanguageSwitches! -l %%L

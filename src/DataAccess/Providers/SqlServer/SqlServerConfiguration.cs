@@ -14,9 +14,9 @@ namespace WebApp.DataAccess.Providers.SqlServer
         protected override void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider) =>
             internalServices
                 .AddEntityFrameworkSqlServer()
-                .Replace(ServiceDescriptor.Singleton<IMigrationsAnnotationProvider, CustomSqlServerMigrationsAnnotationProvider>())
-                .Replace(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>())
-                .Replace(ServiceDescriptor.Singleton<IModelCustomizer, SqlServerModelCustomizer>())
+                .ReplaceLast(ServiceDescriptor.Singleton<IMigrationsAnnotationProvider, CustomSqlServerMigrationsAnnotationProvider>())
+                .ReplaceLast(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>())
+                .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, SqlServerModelCustomizer>())
                 .AddSingleton<IDbProperties>(new SqlServerProperties(Options.Database));
 
         protected override void ConfigureOptionsCore(DbContextOptionsBuilder optionsBuilder, IServiceProvider internalServiceProvider, IServiceProvider applicationServiceProvider)

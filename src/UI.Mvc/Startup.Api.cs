@@ -3,6 +3,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using WebApp.UI.Infrastructure.Hosting;
 
 namespace WebApp.UI
@@ -22,6 +23,12 @@ namespace WebApp.UI
             }
 
             public override Func<HttpContext, bool>? BranchPredicate { get; } = CreatePathPrefixBranchPredicate("/api");
+
+            protected override bool ShouldResolveFromRoot(ServiceDescriptor service) =>
+                // AddDataAnnotationsLocalization calls under the hood, that is, it adds base localization services,
+                // but those are already registered in the root container and we need those shared instances
+                // https://github.com/dotnet/aspnetcore/blob/v3.1.5/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L14
+                service.ServiceType == typeof(IStringLocalizerFactory) || service.ServiceType == typeof(IStringLocalizer<>);
 
             public override void ConfigureServices(IServiceCollection services) => _apiStartup.ConfigureAppServices(services);
 

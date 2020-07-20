@@ -49,8 +49,8 @@ namespace WebApp.Api
             services.AddServiceLayer(optionsProvider);
 
             services
-                .AddHttpContextAccessor()
-                .Replace(ServiceDescriptor.Singleton<IExecutionContextAccessor, HttpExecutionContextAccessor>());
+                .ReplaceLast(ServiceDescriptor.Singleton<IExecutionContextAccessor, HttpExecutionContextAccessor>())
+                .AddHttpContextAccessor();
 
             ConfigureOptions(services);
 

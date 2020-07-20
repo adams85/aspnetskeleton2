@@ -47,6 +47,8 @@ namespace WebApp.Service.Users
 
                 await _mailSenderService.EnqueueItemAsync(new PasswordResetMailModel
                 {
+                    Culture = context.ExecutionContext.Culture.Name,
+                    UICulture = context.ExecutionContext.UICulture.Name,
                     Name = userWithProfile.Profile?.FirstName,
                     UserName = user.UserName,
                     Email = user.Email,

@@ -14,8 +14,8 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
         protected override void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider) =>
             internalServices
                 .AddEntityFrameworkNpgsql()
-                .Replace(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomNpgsqlMigrationsSqlGenerator>())
-                .Replace(ServiceDescriptor.Singleton<IModelCustomizer, NpgsqlModelCustomizer>())
+                .ReplaceLast(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomNpgsqlMigrationsSqlGenerator>())
+                .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, NpgsqlModelCustomizer>())
                 .AddSingleton<IDbProperties>(new NpgsqlProperties(Options.Database));
 
         protected override void ConfigureOptionsCore(DbContextOptionsBuilder optionsBuilder, IServiceProvider internalServiceProvider, IServiceProvider applicationServiceProvider)

@@ -9,17 +9,17 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Localization;
-using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.ResponseCaching;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Localization;
 using Microsoft.Net.Http.Headers;
+using WebApp.Api.Infrastructure.Localization;
 using WebApp.Core.Helpers;
 using WebApp.Service.Settings;
 using WebApp.UI.Infrastructure.DataAnnotations;
 using WebApp.UI.Infrastructure.Hosting;
-using WebApp.UI.Infrastructure.Localization;
 using WebApp.UI.Infrastructure.Security;
 using WebApp.UI.Infrastructure.Theming;
 using WebApp.UI.Middlewares;
@@ -48,6 +48,12 @@ namespace WebApp.UI
             public UIOptions UIOptions { get; }
 
             public override Func<HttpContext, bool>? BranchPredicate => null;
+
+            protected override bool ShouldResolveFromRoot(ServiceDescriptor service) =>
+                // AddDataAnnotationsLocalization, AddViewLocalization calls AddLocalization under the hood, that is, it adds base localization services,
+                // but those are already registered in the root container and we need those shared instances
+                // https://github.com/dotnet/aspnetcore/blob/v3.1.5/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L14
+                service.ServiceType == typeof(IStringLocalizerFactory) || service.ServiceType == typeof(IStringLocalizer<>);
 
             partial void ConfigureMvcPartial(IMvcBuilder builder);
 
@@ -115,26 +121,25 @@ namespace WebApp.UI
 
                 #region MVC
 
-                var mvcBuilder = services.AddControllersWithViews()
+                var mvcBuilder = services.AddControllersWithViews();
+
+                _apiStartup.ConfigureDataAnnotationServices(mvcBuilder);
+
+                services.Configure<MvcViewOptions>(options => options.ClientModelValidatorProviders.Add(new DataAnnotationsClientLocalizationAdjuster()));
+
+                mvcBuilder
                     .ConfigureApplicationPartManager(manager =>
                     {
                         // ApplicationPartManager finds the Api assembly (as it is referenced), so we have to exclude it manually
                         // because we don't want the API controllers to be visible to the UI branch
                         // https://github.com/dotnet/aspnetcore/blob/v3.1.5/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L81
                         manager.ApplicationParts.RemoveAll((part, _) => part is AssemblyPart assemblyPart && assemblyPart.Assembly == typeof(Api.Startup).Assembly);
-                    });
+                    })
+                    .AddViewLocalization();
 
-                // we avoid AddViewLocalization here because it calls AddLocalization under the hood, that is, it would add base localization services,
-                // but those are already registered in the root container and we need to keep them shared
-                // https://github.com/dotnet/aspnetcore/blob/v3.1.5/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L36
-                services.Configure<RazorViewEngineOptions>(options => options.ViewLocationExpanders.Add(new LanguageViewLocationExpander(LanguageViewLocationExpanderFormat.Suffix)));
-                services.TryAdd(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>());
-                services.TryAdd(ServiceDescriptor.Transient(typeof(IHtmlLocalizer<>), typeof(HtmlLocalizer<>)));
-                services.TryAdd(ServiceDescriptor.Transient<IViewLocalizer, ViewLocalizer>());
-
-                _apiStartup.ConfigureDataAnnotationServices(mvcBuilder);
-
-                services.Configure<MvcViewOptions>(options => options.ClientModelValidatorProviders.Add(new DataAnnotationsClientLocalizationAdjuster()));
+                services
+                    .ReplaceLast(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>())
+                    .ReplaceLast(ServiceDescriptor.Singleton<IViewLocalizer, ExtendedViewLocalizer>());
 
 #if !RAZOR_PRECOMPILE
                 mvcBuilder.AddRazorRuntimeCompilation();

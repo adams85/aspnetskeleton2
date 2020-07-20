@@ -32,6 +32,9 @@
     
     <Compile Include="..\Api\Infrastructure\HttpExecutionContext.cs" Link="Infrastructure\HttpExecutionContext.cs" />
     <Compile Include="..\Api\Infrastructure\HttpExecutionContextAccessor.cs" Link="Infrastructure\HttpExecutionContextAccessor.cs" />
+    <Compile Include="..\Api\Infrastructure\Localization\ExtendedHtmlLocalizer.cs" Link="Infrastructure\Localization\ExtendedHtmlLocalizer.cs" />
+    <Compile Include="..\Api\Infrastructure\Localization\ExtendedHtmlLocalizerFactory.cs" Link="Infrastructure\Localization\ExtendedHtmlLocalizerFactory.cs" />
+    <Compile Include="..\Api\Infrastructure\Localization\ExtendedViewLocalizer.cs" Link="Infrastructure\Localization\ExtendedViewLocalizer.cs" />
     <Compile Include="..\Api\Startup.Options.Service.cs" Link="Startup.Options.Service.cs" />
   </ItemGroup>
 

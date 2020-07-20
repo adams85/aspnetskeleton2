@@ -20,6 +20,10 @@ namespace WebApp.Api
 
         private void ConfigureMvc(IMvcBuilder builder)
         {
+            builder.Services.ReplaceLast(ServiceDescriptor.Singleton<IModelMetadataProvider, CustomModelMetadataProvider>());
+
+            ConfigureDataAnnotationServices(builder);
+
             builder
                 .AddJsonOptions(options => options.JsonSerializerOptions.ConfigureApiDefaults())
                 .AddProtoBuf();
@@ -33,29 +37,20 @@ namespace WebApp.Api
                 options.SuppressModelStateInvalidFilter = true;
             });
 
-            builder.Services.Replace(ServiceDescriptor.Singleton<IModelMetadataProvider, CustomModelMetadataProvider>());
-
-            ConfigureDataAnnotationServices(builder);
-
             ConfigureMvcPartial(builder);
         }
 
         public void ConfigureDataAnnotationServices(IMvcBuilder builder)
         {
+            builder.Services.ReplaceLast(ServiceDescriptor.Singleton<IValidationAttributeAdapterProvider, CustomValidationAttributeAdapterProvider>());
+
             builder.Services.AddOptions<MvcOptions>()
-                .Configure<IServiceProvider>((options, sp) =>
-                {
-                    options.ModelValidatorProviders.Add(new DataAnnotationsLocalizationAdjuster(
-                        sp.GetRequiredService<IValidationAttributeAdapterProvider>(),
-                        sp.GetRequiredService<IOptions<MvcDataAnnotationsLocalizationOptions>>(),
-                        sp.GetService<IStringLocalizerFactory>()));
-                });
+                .Configure<IValidationAttributeAdapterProvider, IOptions<MvcDataAnnotationsLocalizationOptions>, IStringLocalizerFactory>(
+                    (options, validationAttributeAdapterProvider, localizationOptions, stringLocalizerFactory) =>
+                        options.ModelValidatorProviders.Add(new DataAnnotationsLocalizationAdjuster(validationAttributeAdapterProvider, localizationOptions, stringLocalizerFactory)));
 
-            builder.Services.Replace(ServiceDescriptor.Singleton<IValidationAttributeAdapterProvider, CustomValidationAttributeAdapterProvider>());
+            builder.AddDataAnnotationsLocalization();
 
-            // we avoid AddDataAnnotationsLocalization here because it calls AddLocalization under the hood, that is, it would add base localization services,
-            // but those must be resolved from the root container in a multi-tenant setup (like UI.Mvc)
-            // https://github.com/dotnet/aspnetcore/blob/v3.1.5/src/Mvc/Mvc.DataAnnotations/src/DataAnnotationsLocalizationServices.cs#L13
             builder.Services.AddOptions<MvcDataAnnotationsLocalizationOptions>()
                 .Configure<ILoggerFactory>((options, loggerFactory) => options.DataAnnotationLocalizerProvider = (type, stringLocalizerFactory) =>
                     new CompositeStringLocalizer(

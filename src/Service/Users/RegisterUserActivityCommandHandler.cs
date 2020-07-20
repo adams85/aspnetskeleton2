@@ -68,6 +68,8 @@ namespace WebApp.Service.Users
 
                     await _mailSenderService.EnqueueItemAsync(new UserLockedOutMailModel
                     {
+                        Culture = context.ExecutionContext.Culture.Name,
+                        UICulture = context.ExecutionContext.UICulture.Name,
                         Name = user.Profile?.FirstName,
                         UserName = user.UserName,
                         Email = user.Email,

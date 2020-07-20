@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Extensions.Localization;
 using WebApp.Common.Infrastructure.Localization;
@@ -22,8 +23,7 @@ namespace WebApp.Api.Infrastructure.Localization
 
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) => _stringLocalizer.GetAllStrings(includeParentCultures);
 
-#pragma warning disable CS0618 // Type or member is obsolete
+        [Obsolete("This method is obsolete. Use `CurrentCulture` and `CurrentUICulture` instead.")]
         public IStringLocalizer WithCulture(CultureInfo culture) => new StringLocalizerAdapter(_stringLocalizer.WithCulture(culture));
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

@@ -10,6 +10,7 @@ namespace WebApp.Core.Helpers
         private static readonly Assembly s_coreLibAssembly = typeof(object).Assembly;
 
         private static readonly ConcurrentDictionary<Type, string> s_fullNameCache = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<Type, string?> s_associatedAssemblyNameCache = new ConcurrentDictionary<Type, string?>();
 
         private static string? GetSimpleAssemblyName(Assembly assembly) =>
             assembly != s_coreLibAssembly ? assembly.GetName().Name : null;
@@ -27,5 +28,8 @@ namespace WebApp.Core.Helpers
 
             return fullName;
         }
+
+        public static string? GetAssociatedAssemblyName(this Type type) =>
+            s_associatedAssemblyNameCache.GetOrAdd(type, type => type.GetCustomAttribute<AssociatedAssemblyNameAttribute>(inherit: true)?.AssemblyName?.Name);
     }
 }

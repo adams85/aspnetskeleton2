@@ -3,7 +3,11 @@ using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.Extensions.Localization;
 using WebApp.Service.Infrastructure.Localization;
 
-namespace WebApp.UI.Infrastructure.Localization
+#if SERVICE_HOST
+namespace WebApp.Service.Host.Infrastructure.Localization
+#else
+namespace WebApp.Api.Infrastructure.Localization
+#endif
 {
     public sealed class ExtendedHtmlLocalizerFactory : IHtmlLocalizerFactory
     {

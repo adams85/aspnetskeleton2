@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ProtoBuf.Grpc.Server;
+using WebApp.Api.Infrastructure.Localization;
 using WebApp.Service.Host.Infrastructure;
+using WebApp.Service.Host.Infrastructure.Localization;
 using WebApp.Service.Host.Services;
 using WebApp.Service.Infrastructure;
 
@@ -29,13 +32,18 @@ namespace WebApp.Service.Host
                 services.AddServiceLayer(optionsProvider);
 
             services
-                .AddHttpContextAccessor()
-                .Replace(ServiceDescriptor.Singleton<IExecutionContextAccessor, HttpExecutionContextAccessor>());
+                .ReplaceLast(ServiceDescriptor.Singleton<IExecutionContextAccessor, HttpExecutionContextAccessor>())
+                .AddHttpContextAccessor();
 
             ConfigureOptions(services);
 
             services.AddMvcCore()
-                .AddRazorTemplating();
+                .AddRazorTemplating()
+                .AddViewLocalization();
+
+            services
+                .ReplaceLast(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>())
+                .ReplaceLast(ServiceDescriptor.Singleton<IViewLocalizer, ExtendedViewLocalizer>());
 
             // https://protobuf-net.github.io/protobuf-net.Grpc/gettingstarted
             services.AddCodeFirstGrpc(options => options.Interceptors.Add<RestoreExecutionContextInterceptor>());

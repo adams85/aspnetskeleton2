@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Karambolo.Common.Localization;
@@ -136,6 +137,7 @@ namespace WebApp.Service.Infrastructure.Localization
             while (includeParentCultures);
         }
 
+        [Obsolete("This method is obsolete. Use `CurrentCulture` and `CurrentUICulture` instead.")]
         public IStringLocalizer WithCulture(CultureInfo culture) =>
             new POStringLocalizer(_translationsProvider, _location, culture, _logger as ILogger<POStringLocalizer>);
     }

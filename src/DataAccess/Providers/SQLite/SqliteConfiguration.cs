@@ -19,7 +19,7 @@ namespace WebApp.DataAccess.Providers.Sqlite
 
             internalServices
                 .AddEntityFrameworkSqlite()
-                .Replace(ServiceDescriptor.Singleton<IModelCustomizer, SqliteModelCustomizer>())
+                .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, SqliteModelCustomizer>())
                 .AddSingleton<IDbProperties>(new SqliteProperties(Options.Database));
         }
 

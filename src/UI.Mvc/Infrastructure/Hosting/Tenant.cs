@@ -76,13 +76,13 @@ namespace WebApp.UI.Infrastructure.Hosting
                 // HACK: IWebHostEnvironment is registered in the root container but we need to register a temporary instance for the time of tenant services configuration
                 // because discovery of default application parts relies on IWebHostEnvironment.ApplicationName
                 // https://github.com/dotnet/aspnetcore/blob/v3.1.4/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L81
-                var dummyWebHostEnvironment = ServiceDescriptor.Singleton<IWebHostEnvironment>(new DummyWebHostEnvironment { ApplicationName = EntryAssembly?.GetName().Name });
+                var dummyWebHostEnvironmentService = ServiceDescriptor.Singleton<IWebHostEnvironment>(new DummyWebHostEnvironment { ApplicationName = EntryAssembly?.GetName().Name });
 
-                services.Add(dummyWebHostEnvironment);
+                services.Add(dummyWebHostEnvironmentService);
 
                 ConfigureServices(services);
 
-                services.RemoveAll((service, _) => service == dummyWebHostEnvironment || ShouldResolveFromRoot(service));
+                services.RemoveAll((service, _) => service == dummyWebHostEnvironmentService || ShouldResolveFromRoot(service));
 
                 builder.Populate(services);
             }));

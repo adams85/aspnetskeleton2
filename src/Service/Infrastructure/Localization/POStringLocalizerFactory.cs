@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using WebApp.Core.Helpers;
 using WebApp.Service.Translations;
 
 namespace WebApp.Service.Infrastructure.Localization
@@ -17,8 +18,10 @@ namespace WebApp.Service.Infrastructure.Localization
             _loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
         }
 
-        public IStringLocalizer Create(Type resourceSource) => Create(null, resourceSource.Assembly.GetName().Name);
+        public IStringLocalizer Create(Type resourceSource) =>
+            Create(null, resourceSource.GetAssociatedAssemblyName() ?? resourceSource.Assembly.GetName().Name);
 
-        public IStringLocalizer Create(string? baseName, string location) => new POStringLocalizer(_translationsProvider, location, logger: _loggerFactory.CreateLogger<POStringLocalizer>());
+        public IStringLocalizer Create(string? baseName, string location) =>
+            new POStringLocalizer(_translationsProvider, location, logger: _loggerFactory.CreateLogger<POStringLocalizer>());
     }
 }

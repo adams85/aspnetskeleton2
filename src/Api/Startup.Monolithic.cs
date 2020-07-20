@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Mvc.Localization;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using WebApp.Api.Infrastructure.Localization;
 
 namespace WebApp.Api
 {
@@ -10,7 +13,12 @@ namespace WebApp.Api
             {
                 // when running standalone in Monolithic configuration, Api must provide the services for Razor-based templating (e.g. mail content generation)
                 services.AddMvcCore()
-                    .AddRazorTemplating();
+                    .AddRazorTemplating()
+                    .AddViewLocalization();
+
+                services
+                    .ReplaceLast(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>())
+                    .ReplaceLast(ServiceDescriptor.Singleton<IViewLocalizer, ExtendedViewLocalizer>());
             }
         }
     }

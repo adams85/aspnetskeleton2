@@ -1,31 +1,35 @@
 ﻿@using Karambolo.Common
+@using WebApp.Service
 @using WebApp.Service.Mailing.Users
+
 @inherits WebApp.Service.Template<UserLockedOutMailModel>
 
+@inject Microsoft.Extensions.Options.IOptions<ApplicationOptions> ApplicationOptions
+
 @{
-    var url = UriUtils.BuildPath(GetUIBaseUrl(), "Account/ResetPassword");
+    var url = UriUtils.BuildPath(GetUIBaseUrl(ApplicationOptions), "Account/ResetPassword");
 }
 
 <!doctype html>
-<html lang="en">
+<html lang="@GetLanguageCode(System.Globalization.CultureInfo.CurrentUICulture)">
 <head>
     <meta charset="utf-8" />
-    <title>Account Lockout</title>
+    <title>@T["Account Lockout"]</title>
 </head>
 <body>
-    <h4>[THIS IS AN AUTOMATED MESSAGE - PLEASE DO NOT REPLY DIRECTLY TO THIS EMAIL]</h4>
+    <h4>@T["[THIS IS AN AUTOMATED MESSAGE - PLEASE DO NOT REPLY DIRECTLY TO THIS EMAIL]"]</h4>
     <p>
-        Dear @(Model.Name ?? Model.UserName),
+        @T["Dear {0},", Model.Name ?? Model.UserName]
     </p>
     <p>
-        Your account has been disabled due to too many unsuccessful login attempts.
+        @T["Your account has been disabled due to too many unsuccessful login attempts."]
     </p>
     <p>
-        In order to re-enable your account, you need to reset your password by visiting the link below:<br />
+        @T["In order to re-enable your account, you need to reset your password by visiting the link below:"]<br />
         <a href="@url">@url</a>
     </p>
     <p>
-        Best regards,<br />
+        @T["Best regards,"]<br />
         <!-- TODO -->
         Support
     </p>

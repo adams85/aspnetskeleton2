@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Karambolo.Common;
 using MimeKit;
 using MimeKit.Text;
 using WebApp.Service.Infrastructure.Templating;
@@ -22,44 +22,26 @@ namespace WebApp.Service.Mailing
 
         protected abstract string GenerateSubject(TModel model);
 
-        protected virtual string GetBodyTemplatePath(TModel model)
-        {
-            return $"Mails/{model.MailType}";
-        }
+        protected virtual string GetBodyTemplatePath(TModel model) => $"Mails/{model.MailType}";
 
         protected virtual Task<string> GenerateBodyAsync(TModel model, CancellationToken cancellationToken)
         {
             var templatePath = GetBodyTemplatePath(model);
 
-            return _templateRenderer.RenderAsync(templatePath, model).AsCancelable(cancellationToken);
+            return _templateRenderer.RenderAsync(templatePath, model, CultureInfo.GetCultureInfo(model.Culture), CultureInfo.GetCultureInfo(model.UICulture), cancellationToken);
         }
 
         protected abstract string GetSender(TModel model);
 
-        protected virtual string GetFrom(TModel model)
-        {
-            return GetSender(model);
-        }
+        protected virtual string GetFrom(TModel model) => GetSender(model);
 
         protected abstract IEnumerable<string> GetTo(TModel model);
 
-        protected virtual IEnumerable<string> GetCc(TModel model)
-        {
-            return Enumerable.Empty<string>();
-        }
+        protected virtual IEnumerable<string> GetCc(TModel model) => Enumerable.Empty<string>();
 
-        protected virtual IEnumerable<string> GetBcc(TModel model)
-        {
-            return Enumerable.Empty<string>();
-        }
+        protected virtual IEnumerable<string> GetBcc(TModel model) => Enumerable.Empty<string>();
 
         protected virtual bool IsBodyHtml => true;
-
-        private static void AddAddressesToCollection(InternetAddressList collection, IEnumerable<string> addresses)
-        {
-            foreach (var address in addresses)
-                collection.Add(MailboxAddress.Parse(address));
-        }
 
         public async Task<MimeMessage> ProduceAsync(MailModel model, CancellationToken cancellationToken)
         {
@@ -82,6 +64,12 @@ namespace WebApp.Service.Mailing
             };
 
             return result;
+
+            static void AddAddressesToCollection(InternetAddressList collection, IEnumerable<string> addresses)
+            {
+                foreach (var address in addresses)
+                    collection.Add(MailboxAddress.Parse(address));
+            }
         }
     }
 }

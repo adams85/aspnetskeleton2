@@ -58,7 +58,7 @@ namespace WebApp.Api
                 //options.GeneratePolymorphicSchemas(ApiContractSerializer.MetadataProvider.GetSubTypes, _ => ApiContractSerializer.JsonTypePropertyName);
             });
 
-            services.Replace(ServiceDescriptor.Transient<IDataContractResolver, CustomJsonSerializerDataContractResolver>());
+            services.ReplaceLast(ServiceDescriptor.Transient<IDataContractResolver, CustomJsonSerializerDataContractResolver>());
         }
 
         private void ConfigureSwagger(IApplicationBuilder app)

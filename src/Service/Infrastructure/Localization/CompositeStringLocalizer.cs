@@ -161,9 +161,8 @@ namespace WebApp.Service.Infrastructure.Localization
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) =>
             _stringLocalizers.SelectMany(localizer => localizer.GetAllStrings());
 
+        [Obsolete("This method is obsolete. Use `CurrentCulture` and `CurrentUICulture` instead.")]
         public IStringLocalizer WithCulture(CultureInfo culture) =>
-#pragma warning disable CS0618 // Type or member is obsolete
             new CompositeStringLocalizer(_stringLocalizers.Select(localizer => localizer.WithCulture(culture)), _culture, _logger as ILogger<CompositeStringLocalizer>);
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

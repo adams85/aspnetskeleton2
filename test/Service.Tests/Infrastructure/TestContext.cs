@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using WebApp.Core.Helpers;
 using WebApp.DataAccess;
 
 namespace WebApp.Service.Tests.Infrastructure
@@ -10,7 +12,7 @@ namespace WebApp.Service.Tests.Infrastructure
     /// Encapsulates context for test cases. Context is essentially a configured IoC container.
     /// (For complete isolation a dedicated IoC container is created for each test case.)
     /// </summary>
-    public class TestContext : IDisposable
+    public class TestContext : IDisposable, IAsyncDisposable
     {
         public static readonly string BasePath = GetBasePath();
 
@@ -34,7 +36,17 @@ namespace WebApp.Service.Tests.Infrastructure
         public void Dispose()
         {
             _scope.Dispose();
-            (_services as IDisposable)?.Dispose();
+
+            if (_services is IDisposable servicesDisposable)
+                servicesDisposable.Dispose();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await DisposableAdapter.From(_scope).DisposeAsync();
+
+            if (_services is IDisposable servicesDisposable)
+                await DisposableAdapter.From(servicesDisposable).DisposeAsync();
         }
 
         public IServiceProvider Services => _scope.ServiceProvider;

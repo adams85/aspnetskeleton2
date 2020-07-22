@@ -17,7 +17,7 @@ namespace WebApp.Service.Users
                     .SeedDefaults()
                     .SeedDataset(Datasets.Dataset1));
 
-            using var testContext = await testContextBuilder.BuildAsync();
+            await using var testContext = await testContextBuilder.BuildAsync();
 
             var query = new ListUsersQuery { };
 
@@ -42,7 +42,7 @@ namespace WebApp.Service.Users
                     .SeedDefaults()
                     .SeedDataset(Datasets.Dataset1));
 
-            using var testContext = await testContextBuilder.BuildAsync();
+            await using var testContext = await testContextBuilder.BuildAsync();
 
             var query = new ListUsersQuery
             {

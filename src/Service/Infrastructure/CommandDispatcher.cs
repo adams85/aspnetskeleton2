@@ -31,7 +31,7 @@ namespace WebApp.Service.Infrastructure
 
         public async Task DispatchAsync(ICommand command, CancellationToken cancellationToken)
         {
-            using (var context = new CommandContext(command, _serviceProvider))
+            await using (var context = new CommandContext(command, _serviceProvider))
             {
                 var interceptorChain = _interceptorChains.GetOrAdd(context.CommandType, _cachedInterceptorChainFactory);
 

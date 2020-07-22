@@ -16,7 +16,7 @@ namespace WebApp.Service.Infrastructure
                 .AddServices(services => services.AddServiceLayer(TestContextBuilder.DefaultOptionsProvider))
                 .AddDatabase(addDataAccessServices: false));
 
-            using var testContext = await testContextBuilder.BuildAsync();
+            await using var testContext = await testContextBuilder.BuildAsync();
 
             var command = new AddUsersToRolesCommand { UserNames = new string[] { }, RoleNames = new string[] { "x" } };
 
@@ -36,7 +36,7 @@ namespace WebApp.Service.Infrastructure
                 .AddServices(services => services.AddServiceLayer(TestContextBuilder.DefaultOptionsProvider))
                 .AddDatabase(addDataAccessServices: false));
 
-            using var testContext = await testContextBuilder.BuildAsync();
+            await using var testContext = await testContextBuilder.BuildAsync();
 
             var query = new GetUserQuery { };
 

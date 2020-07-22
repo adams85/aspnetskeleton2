@@ -2,12 +2,14 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Karambolo.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using WebApp.Core.Helpers;
 
 namespace WebApp.DataAccess
 {
@@ -71,7 +73,7 @@ namespace WebApp.DataAccess
             ConfigureOptionsCore(optionsBuilder, internalServiceProvider, applicationServiceProvider);
         }
 
-        private sealed class InternalServiceProviderRegistry : IDisposable
+        private sealed class InternalServiceProviderRegistry : IDisposable, IAsyncDisposable
         {
             private readonly IServiceProvider _applicationServiceProvider;
             private readonly ConcurrentDictionary<EFCoreConfiguration, IServiceProvider> _internalServiceProviders;
@@ -85,7 +87,15 @@ namespace WebApp.DataAccess
             public void Dispose()
             {
                 foreach (var serviceProvider in _internalServiceProviders.Values)
-                    (serviceProvider as IDisposable)?.Dispose();
+                    if (serviceProvider is IDisposable disposable)
+                        disposable.Dispose();
+            }
+
+            public async ValueTask DisposeAsync()
+            {
+                foreach (var serviceProvider in _internalServiceProviders.Values)
+                    if (serviceProvider is IDisposable disposable)
+                        await DisposableAdapter.From(disposable).DisposeAsync().ConfigureAwait(false);
             }
 
             public IServiceProvider GetOrCreateServiceProvider(EFCoreConfiguration configuration) =>

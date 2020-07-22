@@ -31,7 +31,7 @@ namespace WebApp.Service.Infrastructure
 
         public async Task<object?> DispatchAsync(IQuery query, CancellationToken cancellationToken)
         {
-            using (var context = new QueryContext(query, _serviceProvider))
+            await using (var context = new QueryContext(query, _serviceProvider))
             {
                 var interceptorChain = _interceptorChains.GetOrAdd(context.QueryType, _cachedInterceptorChainFactory);
 

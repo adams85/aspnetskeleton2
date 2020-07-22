@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -341,15 +342,16 @@ namespace WebApp.Service.Mailing
 
         private async Task ProcessAsync(CancellationToken cancellationToken)
         {
-            using (var scope = _serviceScopeFactory.CreateScope())
-            using (var dbContext = scope.ServiceProvider.GetRequiredService<WritableDataContext>())
+            await using (var scope = DisposableAdapter.From(_serviceScopeFactory.CreateScope()))
             {
+                var dbContext = scope.Value.ServiceProvider.GetRequiredService<WritableDataContext>();
+
                 IReadOnlyList<Task<Mail>> produceMailTasks;
                 do
                 {
                     var queueItems = PeekItems(dbContext);
 
-                    produceMailTasks = await ProduceMailsAsync(queueItems, scope.ServiceProvider, cancellationToken).ConfigureAwait(false);
+                    produceMailTasks = await ProduceMailsAsync(queueItems, scope.Value.ServiceProvider, cancellationToken).ConfigureAwait(false);
 
                     if (produceMailTasks.Count > 0)
                         await SendMailsAsync(produceMailTasks, dbContext, cancellationToken).ConfigureAwait(false);
@@ -364,41 +366,38 @@ namespace WebApp.Service.Mailing
         // TODO: revise this workaround when upgrading to .NET 5 (https://github.com/dotnet/runtime/issues/36063)
         protected override Task ExecuteAsync(CancellationToken stoppingToken) => Task.Run(async () =>
         {
+            // TODO: revise this approach when https://github.com/dotnet/runtime/issues/35962 gets resolved
             using (var wakeEvent = new AutoResetEvent(false))
-            {
-                void HandleEnqueued(object s, EventArgs e)
+            using (Observable
+                .FromEventPattern(handler => Enqueued += handler, handler => Enqueued -= handler)
+                .Subscribe(_ =>
                 {
                     try { wakeEvent.Set(); }
                     catch (ObjectDisposedException) { /* ObjectDisposedException can safely be swallowed here */ }
-                }
+                }))
+            {
+                Exception? previousException = null;
+                for (; ; )
+                    try
+                    {
+                        await ProcessAsync(stoppingToken).ConfigureAwait(false);
 
-                Enqueued += HandleEnqueued;
-                try
-                {
-                    Exception? previousException = null;
-                    for (; ; )
-                        try
-                        {
-                            await ProcessAsync(stoppingToken).ConfigureAwait(false);
+                        // when queue gets empty, we wait for wake event (firing when an item is added to the queue),
+                        // but for maximum safety we check the queue periodically anyway
+                        await wakeEvent.WaitAsync(_maxSleepTime, stoppingToken).ConfigureAwait(false);
 
-                            // when queue gets empty, we wait for wake event (firing when an item is added to the queue),
-                            // but for maximum safety we check the queue periodically anyway
-                            await wakeEvent.WaitAsync(_maxSleepTime, stoppingToken).ConfigureAwait(false);
+                        previousException = null;
+                    }
+                    catch (Exception ex) when (!(ex is OperationCanceledException))
+                    {
+                        // basic protection against littering the log with identical, recurring exceptions (e.g. db connection errors, etc.)
+                        if (previousException?.ToString() != ex.ToString())
+                            _logger.LogError(ex, $"Unexpected error occurred in the mail sender background service.");
 
-                            previousException = null;
-                        }
-                        catch (Exception ex) when (!(ex is OperationCanceledException))
-                        {
-                            // basic protection against littering the log with identical, recurring exceptions (e.g. db connection errors, etc.)
-                            if (previousException?.ToString() != ex.ToString())
-                                _logger.LogError(ex, $"Unexpected error occurred in the mail sender background service.");
+                        previousException = ex;
 
-                            previousException = ex;
-
-                            await Task.Delay(_delayOnUnexpectedError).ConfigureAwait(false);
-                        }
-                }
-                finally { Enqueued -= HandleEnqueued; }
+                        await Task.Delay(_delayOnUnexpectedError).ConfigureAwait(false);
+                    }
             }
         }, stoppingToken);
 

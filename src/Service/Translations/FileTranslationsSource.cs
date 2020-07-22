@@ -157,7 +157,7 @@ namespace WebApp.Service.Translations
             catch (Exception ex) when (ex is DirectoryNotFoundException || ex is FileNotFoundException) { return null; }
 
             POParseResult parseResult;
-            using (fileStream)
+            await using (fileStream)
             using (var memoryStream = new MemoryStream())
             {
                 await fileStream.CopyToAsync(memoryStream, cancellationToken).ConfigureAwait(false);

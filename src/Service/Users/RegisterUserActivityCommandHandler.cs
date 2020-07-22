@@ -62,7 +62,7 @@ namespace WebApp.Service.Users
             if (lockedOut)
             {
                 using (var committedCts = new CancellationTokenSource())
-                using (var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+                await using (var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
                 {
                     await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

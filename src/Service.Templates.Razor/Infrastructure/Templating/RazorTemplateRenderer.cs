@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using WebApp.Core.Helpers;
 
 namespace WebApp.Service.Infrastructure.Templating
 {
@@ -71,14 +72,14 @@ namespace WebApp.Service.Infrastructure.Templating
 
         public async Task<string> RenderAsync<TModel>(string templateName, TModel model, CultureInfo? culture = null, CultureInfo? uiCulture = null, CancellationToken cancellationToken = default)
         {
-            using (var scope = _serviceScopeFactory.CreateScope())
+            await using (var scope = DisposableAdapter.From(_serviceScopeFactory.CreateScope()))
             {
                 culture ??= CultureInfo.CurrentCulture;
                 uiCulture ??= CultureInfo.CurrentUICulture;
 
                 var templateView = FindTemplateView(templateName);
 
-                var httpContext = new DefaultHttpContext { RequestServices = scope.ServiceProvider };
+                var httpContext = new DefaultHttpContext { RequestServices = scope.Value.ServiceProvider };
                 var actionContext = new ActionContext(httpContext, s_routeData, s_actionDescriptor);
 
                 using (var writer = new StringWriter())

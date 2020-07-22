@@ -19,7 +19,7 @@ namespace WebApp.Service.Tests.UnitTests.Users
                     .SeedDefaults()
                     .SeedDataset(Datasets.Dataset1));
 
-            using var testContext = await testContextBuilder.BuildAsync();
+            await using var testContext = await testContextBuilder.BuildAsync();
 
             var command = new AddUsersToRolesCommand
             {
@@ -33,7 +33,7 @@ namespace WebApp.Service.Tests.UnitTests.Users
 
             await handler.HandleAsync(command, commandContext, default);
 
-            using (var dbContext = testContext.CreateReadOnlyDbContext())
+            await using (var dbContext = testContext.CreateReadOnlyDbContext())
             {
                 var user = await dbContext.Users
                     .Include(user => user.Roles).ThenInclude(userRole => userRole.Role)

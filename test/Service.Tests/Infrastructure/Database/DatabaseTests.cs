@@ -16,15 +16,15 @@ namespace WebApp.Service.Tests.Infrastructure.Database
             var testContextBuilder = new TestContextBuilder();
             testContextBuilder.AddDatabase();
 
-            using (var testContext = await testContextBuilder.BuildAsync())
+            await using (var testContext = await testContextBuilder.BuildAsync())
             {
-                using (var dbContext = testContext.CreateWritableDbContext())
+                await using (var dbContext = testContext.CreateWritableDbContext())
                 {
                     dbContext.Roles.Add(new Role { RoleName = "X" });
                     await dbContext.SaveChangesAsync();
                 }
 
-                using (var dbContext = testContext.CreateReadOnlyDbContext())
+                await using (var dbContext = testContext.CreateReadOnlyDbContext())
                 {
                     Assert.Equal(1, await dbContext.Roles.CountAsync(role => role.RoleName == "X"));
                     Assert.Equal(1, await dbContext.Roles.CountAsync());
@@ -38,15 +38,15 @@ namespace WebApp.Service.Tests.Infrastructure.Database
             var testContextBuilder = new TestContextBuilder();
             testContextBuilder.AddDatabase();
 
-            using (var testContext = await testContextBuilder.BuildAsync())
+            await using (var testContext = await testContextBuilder.BuildAsync())
             {
-                using (var dbContext = testContext.CreateWritableDbContext())
+                await using (var dbContext = testContext.CreateWritableDbContext())
                 {
                     dbContext.Roles.Add(new Role { RoleName = "Y" });
                     await dbContext.SaveChangesAsync();
                 }
 
-                using (var dbContext = testContext.CreateReadOnlyDbContext())
+                await using (var dbContext = testContext.CreateReadOnlyDbContext())
                 {
                     Assert.Equal(1, await dbContext.Roles.CountAsync(role => role.RoleName == "Y"));
                     Assert.Equal(1, await dbContext.Roles.CountAsync());
@@ -61,9 +61,9 @@ namespace WebApp.Service.Tests.Infrastructure.Database
             testContextBuilder.AddDatabase()
                 .SeedDefaults();
 
-            using (var testContext = await testContextBuilder.BuildAsync())
+            await using (var testContext = await testContextBuilder.BuildAsync())
             {
-                using (var dbContext = testContext.CreateReadOnlyDbContext())
+                await using (var dbContext = testContext.CreateReadOnlyDbContext())
                 {
                     Assert.True(await dbContext.Roles.CountAsync() > 0);
 
@@ -86,9 +86,9 @@ namespace WebApp.Service.Tests.Infrastructure.Database
                 .SeedDefaults()
                 .SeedDataset(Datasets.Dataset1);
 
-            using (var testContext = await testContextBuilder.BuildAsync())
+            await using (var testContext = await testContextBuilder.BuildAsync())
             {
-                using (var dbContext = testContext.CreateReadOnlyDbContext())
+                await using (var dbContext = testContext.CreateReadOnlyDbContext())
                 {
                     Assert.True(await dbContext.Roles.CountAsync() > 0);
 

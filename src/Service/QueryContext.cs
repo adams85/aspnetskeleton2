@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using WebApp.Core.Helpers;
 using WebApp.DataAccess;
 using WebApp.Service.Infrastructure;
 
 namespace WebApp.Service
 {
-    internal partial class QueryContext : IDisposable
+    internal partial class QueryContext : IDisposable, IAsyncDisposable
     {
         private readonly IServiceScope _serviceScope;
 
@@ -29,6 +31,11 @@ namespace WebApp.Service
         public void Dispose()
         {
             _serviceScope.Dispose();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return DisposableAdapter.From(_serviceScope).DisposeAsync();
         }
 
         public IServiceProvider ScopedServices => _serviceScope.ServiceProvider;

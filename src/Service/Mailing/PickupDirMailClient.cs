@@ -106,7 +106,7 @@ namespace WebApp.Service.Mailing
                 try { fs = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.Read, 1024, useAsync: true); }
                 catch when (--retryCount >= 0) { continue; }
 
-                using (fs)
+                await using (fs)
                 {
                     await message.WriteToAsync(format, fs, cancellationToken).ConfigureAwait(false);
 

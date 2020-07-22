@@ -22,7 +22,7 @@ namespace WebApp.Service.Infrastructure.Events
             _subject = new Subject<Event>();
 
             // when subject completes, IsActive should complete as well
-            IsActive = _subject.Where(_ => false).Cast<bool>().StartWith(true);
+            IsActive = _subject.IgnoreElements().Cast<bool>().StartWith(true);
 
             const string subscriberErrorFormat = "Error occurred in a listener's {0} handler.";
 

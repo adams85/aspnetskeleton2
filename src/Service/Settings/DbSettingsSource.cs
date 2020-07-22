@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.DataAccess;
 using WebApp.Service.Infrastructure.Events;
@@ -64,9 +65,10 @@ namespace WebApp.Service.Settings
 
         private Task<SettingsChangedEvent> LoadAsync(CancellationToken cancellationToken) => Task.Run(async () =>
         {
-            using (var scope = _serviceScopeFactory.CreateScope())
-            using (var dbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDataContext>())
+            await using (var scope = DisposableAdapter.From(_serviceScopeFactory.CreateScope()))
             {
+                var dbContext = scope.Value.ServiceProvider.GetRequiredService<ReadOnlyDataContext>();
+
                 var linq = dbContext.Settings;
 
                 return new SettingsChangedEvent

@@ -16,38 +16,40 @@ namespace WebApp.DataAccess
     {
         public static IDbProperties GetDbProperties(this DbContext context)
         {
-            return context.GetService<IDbProperties>();
+            return context.GetInfrastructure().GetRequiredService<IDbProperties>();
         }
 
         public static ISqlGenerationHelper GetSqlGenerationHelper(this DbContext context)
         {
-            return context.GetService<ISqlGenerationHelper>();
+            return context.GetInfrastructure().GetRequiredService<ISqlGenerationHelper>();
         }
 
         private static IReadOnlyList<MigrationCommand> GenerateMigrationCommands(this DatabaseFacade database, IReadOnlyList<MigrationOperation> operations, IModel model)
         {
-            var sqlGenerator = database.GetService<IMigrationsSqlGenerator>();
+            var sqlGenerator = database.GetInfrastructure().GetRequiredService<IMigrationsSqlGenerator>();
             return sqlGenerator.Generate(operations, model);
         }
 
         public static IReadOnlyList<MigrationCommand> GenerateMigrationCommands(this DatabaseFacade database, IEnumerable<MigrationOperation> operations)
         {
-            var model = database.GetService<IModel>();
+            var model = database.GetInfrastructure().GetRequiredService<IModel>();
             return database.GenerateMigrationCommands(operations.ToArray(), model);
         }
 
         public static IReadOnlyList<MigrationCommand> GenerateAllMigrationCommands(this DatabaseFacade database)
         {
-            var model = database.GetService<IModel>();
-            var modelDiffer = database.GetService<IMigrationsModelDiffer>();
+            var infrastructure = database.GetInfrastructure();
+            var model = infrastructure.GetRequiredService<IModel>();
+            var modelDiffer = infrastructure.GetRequiredService<IMigrationsModelDiffer>();
             var operations = modelDiffer.GetDifferences(null, model);
             return database.GenerateMigrationCommands(operations.ToArray(), model);
         }
 
         public static Task ExecuteMigrationCommandsAsync(this DatabaseFacade database, IEnumerable<MigrationCommand> commands, CancellationToken cancellationToken)
         {
-            var commandExecutor = database.GetService<IMigrationCommandExecutor>();
-            var connection = database.GetService<IRelationalConnection>();
+            var infrastructure = database.GetInfrastructure();
+            var commandExecutor = infrastructure.GetRequiredService<IMigrationCommandExecutor>();
+            var connection = infrastructure.GetRequiredService<IRelationalConnection>();
             return commandExecutor.ExecuteNonQueryAsync(commands, connection, cancellationToken);
         }
     }

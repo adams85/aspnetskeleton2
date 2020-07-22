@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
@@ -109,7 +110,7 @@ namespace WebApp.Service.Infrastructure
         }
 
         [Fact]
-        public void ServiceValidationAttribute_ServiceAvailable_ComplexityRequirementsMet()
+        public async Task ServiceValidationAttribute_ServiceAvailable_ComplexityRequirementsMet()
         {
             var services = new ServiceCollection();
 
@@ -130,13 +131,13 @@ namespace WebApp.Service.Infrastructure
                 NewPassword = "12345+Z",
             };
 
-            using var sp = services.BuildServiceProvider();
+            await using var sp = services.BuildServiceProvider();
 
             DataAnnotationsValidator.Validate(command);
         }
 
         [Fact]
-        public void ServiceValidationAttribute_ServiceAvailable_ComplexityRequirementsNotMet()
+        public async Task ServiceValidationAttribute_ServiceAvailable_ComplexityRequirementsNotMet()
         {
             var services = new ServiceCollection();
 
@@ -159,7 +160,7 @@ namespace WebApp.Service.Infrastructure
                 NewPassword = "12345",
             };
 
-            using var sp = services.BuildServiceProvider();
+            await using var sp = services.BuildServiceProvider();
 
             var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command, sp));
 

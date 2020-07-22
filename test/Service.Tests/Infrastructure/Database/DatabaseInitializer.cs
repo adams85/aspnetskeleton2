@@ -15,7 +15,7 @@ namespace WebApp.Service.Tests.Infrastructure.Database
 
         public async Task InitializeAsync(TestContext context, CancellationToken cancellationToken = default)
         {
-            using (var dbContext = context.CreateWritableDbContext())
+            await using (var dbContext = context.CreateWritableDbContext())
                 foreach (var seeder in _seeders)
                     await seeder.SeedAsync(dbContext, cancellationToken);
         }

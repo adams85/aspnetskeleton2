@@ -23,7 +23,7 @@ namespace WebApp.Api
         {
             options.Converters.Add(new JsonStringEnumConverter());
 
-            // TODO: remove when https://github.com/dotnet/runtime/issues/29932 gets resolved
+            // TODO: remove the custom converter when https://github.com/dotnet/runtime/issues/29932 gets resolved
             options.Converters.Add(new DelegatedStringJsonConverter<TimeSpan>(
                 value => TimeSpan.Parse(value, CultureInfo.InvariantCulture),
                 value => value.ToString(null, CultureInfo.InvariantCulture)));

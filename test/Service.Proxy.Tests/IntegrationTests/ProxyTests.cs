@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WebApp.Core;
+using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.Service.Infrastructure;
 using WebApp.Service.Proxy.Tests.IntegrationTests;
@@ -26,9 +28,7 @@ namespace WebApp.Service
 
             var sp = services.BuildServiceProvider();
 
-            using (var scope = sp.CreateScope())
-                foreach (var initializer in scope.ServiceProvider.GetRequiredService<IEnumerable<IApplicationInitializer>>())
-                    initializer.InitializeAsync(default).GetAwaiter().GetResult();
+            sp.InitializeApplicationAsync(default).GetAwaiter().GetResult();
 
             return sp;
         }
@@ -38,7 +38,7 @@ namespace WebApp.Service
         [Fact]
         public async Task DispatchCommandExpectingSuccess()
         {
-            using var scope = s_proxyServices.CreateScope();
+            await using var scope = DisposableAdapter.From(s_proxyServices.CreateScope());
 
             // this operation should be a no-op
             var command = new RegisterUserActivityCommand
@@ -49,7 +49,7 @@ namespace WebApp.Service
 
             };
 
-            var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+            var commandDispatcher = scope.Value.ServiceProvider.GetRequiredService<ICommandDispatcher>();
 
             await commandDispatcher.DispatchAsync(command, default);
         }
@@ -57,7 +57,7 @@ namespace WebApp.Service
         [Fact]
         public async Task DispatchCommandExpectingFailure()
         {
-            using var scope = s_proxyServices.CreateScope();
+            await using var scope = DisposableAdapter.From(s_proxyServices.CreateScope());
 
             // this operation should be a no-op
             var command = new RegisterUserActivityCommand
@@ -68,7 +68,7 @@ namespace WebApp.Service
 
             };
 
-            var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+            var commandDispatcher = scope.Value.ServiceProvider.GetRequiredService<ICommandDispatcher>();
 
             var ex = await Assert.ThrowsAsync<ServiceErrorException>(async () => await commandDispatcher.DispatchAsync(command, default));
 
@@ -79,14 +79,14 @@ namespace WebApp.Service
         [Fact]
         public async Task DispatchQueryExpectingSuccess()
         {
-            using var scope = s_proxyServices.CreateScope();
+            await using var scope = DisposableAdapter.From(s_proxyServices.CreateScope());
 
             var query = new ListUsersQuery
             {
                 UserNamePattern = ApplicationConstants.BuiltInRootUserName,
             };
 
-            var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+            var queryDispatcher = scope.Value.ServiceProvider.GetRequiredService<IQueryDispatcher>();
 
             var result = await queryDispatcher.DispatchAsync(query, default);
 
@@ -97,11 +97,11 @@ namespace WebApp.Service
         [Fact]
         public async Task DispatchQueryExpectingFailure()
         {
-            using var scope = s_proxyServices.CreateScope();
+            await using var scope = DisposableAdapter.From(s_proxyServices.CreateScope());
 
             var query = new GetUserQuery { };
 
-            var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+            var queryDispatcher = scope.Value.ServiceProvider.GetRequiredService<IQueryDispatcher>();
 
             var ex = await Assert.ThrowsAsync<ServiceErrorException>(async () => await queryDispatcher.DispatchAsync(query, default));
 

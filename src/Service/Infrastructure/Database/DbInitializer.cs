@@ -97,7 +97,7 @@ namespace WebApp.Service.Infrastructure.Database
             if (ShouldSeedObjects(DbSeedObjects.DbObjects))
                 await SeedDbObjectsAsync(cancellationToken).ConfigureAwait(false);
 
-            using (var transaction = await _context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+            await using (var transaction = await _context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (ShouldSeedObjects(DbSeedObjects.BaseData))
                 {

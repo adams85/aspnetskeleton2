@@ -41,7 +41,7 @@ namespace WebApp.Service.Users
             user.PasswordVerificationTokenExpirationDate = _clock.UtcNow + command.TokenExpirationTimeSpan;
 
             using (var committedCts = new CancellationTokenSource())
-            using (var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+            await using (var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
             {
                 await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

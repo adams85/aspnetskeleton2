@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using WebApp.Core;
 using WebApp.DataAccess.Entities;
-using WebApp.Service.Infrastructure.Database;
 using WebApp.Service.Tests.TestData;
 using Xunit;
 

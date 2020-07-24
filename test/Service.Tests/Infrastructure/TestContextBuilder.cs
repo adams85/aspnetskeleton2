@@ -20,19 +20,6 @@ namespace WebApp.Service.Tests.Infrastructure
     /// </summary>
     public class TestContextBuilder
     {
-        public static readonly DataAccessOptions DefaultDataAccessOptions = new DataAccessOptions
-        {
-            Database = new DbOptions
-            {
-                Provider = SqliteProperties.ProviderName,
-                ConnectionString = new SqliteConnectionStringBuilder { DataSource = SqliteProperties.InMemoryDataSource }.ToString(),
-            },
-            DbContextLifetime = ServiceLifetime.Transient,
-            EnableSqlLogging = true
-        };
-
-        public static readonly OptionsProvider DefaultOptionsProvider = new OptionsProvider(DefaultDataAccessOptions);
-
         public static TestContextBuilder CreateDefault(Action<TestContextBuilder>? configure = null)
         {
             var builder = new TestContextBuilder()
@@ -42,6 +29,8 @@ namespace WebApp.Service.Tests.Infrastructure
 
             return builder;
         }
+
+        private readonly Guid _id = Guid.NewGuid();
 
         private Dictionary<string, string?>? _configurationValues;
         private Action<IConfigurationBuilder>? _onConfiguring;
@@ -95,10 +84,24 @@ namespace WebApp.Service.Tests.Infrastructure
             return this;
         }
 
+        public DataAccessOptions CreateDataAccessOptions()
+        {
+            return new DataAccessOptions
+            {
+                Database = new DbOptions
+                {
+                    Provider = SqliteProperties.ProviderName,
+                    ConnectionString = new SqliteConnectionStringBuilder { DataSource = $"TestContext${_id}", Mode = SqliteOpenMode.Memory, Cache = SqliteCacheMode.Shared }.ToString(),
+                },
+                DbContextLifetime = ServiceLifetime.Transient,
+                EnableSqlLogging = true
+            };
+        }
+
         public TestDatabaseBuilder AddDatabase(bool addDataAccessServices = true)
         {
             if (addDataAccessServices)
-                Services.AddDataAccess(DefaultOptionsProvider);
+                Services.AddDataAccess(new OptionsProvider(CreateDataAccessOptions()));
 
             Services.Configure<DbInitializerOptions>(options => options.Seed = DbSeedObjects.DbObjects | DbSeedObjects.BaseData);
 
@@ -133,7 +136,7 @@ namespace WebApp.Service.Tests.Infrastructure
 
             var services = Services.BuildServiceProvider();
 
-            var context = new TestContext(services);
+            var context = new TestContext(_id, services);
 
             var initializers = context.Services.GetRequiredService<IEnumerable<ITestInitializer>>();
             foreach (var initializer in initializers)

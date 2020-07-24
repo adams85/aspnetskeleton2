@@ -37,7 +37,7 @@ namespace WebApp.DataAccess
 
         protected abstract void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider);
 
-        protected IServiceProvider CreateInternalServiceProvider(IServiceProvider applicationServiceProvider)
+        protected virtual IServiceProvider CreateInternalServiceProvider(IServiceProvider applicationServiceProvider)
         {
             var internalServices = new ServiceCollection();
             ConfigureInternalServices(internalServices, applicationServiceProvider);

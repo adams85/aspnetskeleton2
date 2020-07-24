@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -14,7 +15,7 @@ namespace WebApp.DataAccess.Providers.Sqlite
         protected override void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider)
         {
             var connectionStringBuilder = new SqliteConnectionStringBuilder(Options.Database.ConnectionString);
-            if (":memory:".Equals(connectionStringBuilder.DataSource, StringComparison.OrdinalIgnoreCase))
+            if (connectionStringBuilder.Mode == SqliteOpenMode.Memory && connectionStringBuilder.Cache == SqliteCacheMode.Shared)
                 internalServices.AddSingleton(_ => new InMemoryConnectionWrapper(Options.Database));
 
             internalServices
@@ -23,30 +24,36 @@ namespace WebApp.DataAccess.Providers.Sqlite
                 .AddSingleton<IDbProperties>(new SqliteProperties(Options.Database));
         }
 
+        protected override IServiceProvider CreateInternalServiceProvider(IServiceProvider applicationServiceProvider)
+        {
+            var internalServiceProvider = base.CreateInternalServiceProvider(applicationServiceProvider);
+
+            // by resolving the connection wrapper (in case it's been registered), we ensure the connection which is responsible for keeping alive the shared in-memory DB instance:
+            // "The database persists as long as at least one connection to it remains open."
+            // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases#shareable-in-memory-databases
+            internalServiceProvider.GetService<InMemoryConnectionWrapper>();
+
+            return internalServiceProvider;
+        }
+
         protected override void ConfigureOptionsCore(DbContextOptionsBuilder optionsBuilder, IServiceProvider internalServiceProvider, IServiceProvider applicationServiceProvider)
         {
             optionsBuilder.AddInterceptors(new SqliteConnectionInterceptor());
 
-            var connectionWrapper = internalServiceProvider.GetService<InMemoryConnectionWrapper>();
-            if (connectionWrapper == null)
-                optionsBuilder.UseSqlite(Options.Database.ConnectionString);
-            else
-                optionsBuilder.UseSqlite(connectionWrapper.Connection);
+            optionsBuilder.UseSqlite(Options.Database.ConnectionString);
         }
 
-        private sealed class InMemoryConnectionWrapper : IDisposable
+        private sealed class InMemoryConnectionWrapper : IDisposable, IAsyncDisposable
         {
             public InMemoryConnectionWrapper(DbOptions dbOptions)
             {
                 Connection = new SqliteConnection(dbOptions.ConnectionString);
                 Connection.Open();
-                SqliteConnectionInterceptor.CreateCustomObjects(Connection);
             }
 
-            public void Dispose()
-            {
-                Connection.Dispose();
-            }
+            public void Dispose() => Connection.Dispose();
+
+            public ValueTask DisposeAsync() => Connection.DisposeAsync();
 
             public SqliteConnection Connection { get; }
         }

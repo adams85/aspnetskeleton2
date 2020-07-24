@@ -27,8 +27,9 @@ namespace WebApp.Service.Tests.Infrastructure
         private readonly IServiceProvider _services;
         private readonly IServiceScope _scope;
 
-        public TestContext(IServiceProvider services)
+        public TestContext(Guid id, IServiceProvider services)
         {
+            Id = id;
             _services = services;
             _scope = services.CreateScope();
         }
@@ -48,6 +49,8 @@ namespace WebApp.Service.Tests.Infrastructure
             if (_services is IDisposable servicesDisposable)
                 await DisposableAdapter.From(servicesDisposable).DisposeAsync();
         }
+
+        public Guid Id { get; }
 
         public IServiceProvider Services => _scope.ServiceProvider;
 

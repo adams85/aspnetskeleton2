@@ -9,7 +9,7 @@ namespace WebApp.DataAccess.Providers.Sqlite
 {
     internal sealed class SqliteConnectionInterceptor : DbConnectionInterceptor
     {
-        internal static void CreateCustomObjects(SqliteConnection connection)
+        private static void CreateCustomObjects(SqliteConnection connection)
         {
             connection.CreateCollation(SqliteProperties.DefaultCaseSensitiveCollationName, StringComparer.InvariantCulture.Compare);
             connection.CreateCollation(SqliteProperties.DefaultCaseInsensitiveCollationName, StringComparer.InvariantCultureIgnoreCase.Compare);

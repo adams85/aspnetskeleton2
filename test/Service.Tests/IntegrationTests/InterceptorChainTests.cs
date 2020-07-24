@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using WebApp.Service.Roles;
 using WebApp.Service.Tests.Infrastructure;
 using WebApp.Service.Users;
+using WebApp.Tests.Helpers;
 using Xunit;
 
 namespace WebApp.Service.Infrastructure
@@ -13,7 +14,7 @@ namespace WebApp.Service.Infrastructure
         public async Task CommandDataAnnotationsValidatorInterceptorTest()
         {
             var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
-                .AddServices(services => services.AddServiceLayer(TestContextBuilder.DefaultOptionsProvider))
+                .AddServices(services => services.AddServiceLayer(new OptionsProvider(builder.CreateDataAccessOptions())))
                 .AddDatabase(addDataAccessServices: false));
 
             await using var testContext = await testContextBuilder.BuildAsync();
@@ -33,7 +34,7 @@ namespace WebApp.Service.Infrastructure
         public async Task QueryDataAnnotationsValidatorInterceptorTest()
         {
             var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
-                .AddServices(services => services.AddServiceLayer(TestContextBuilder.DefaultOptionsProvider))
+                .AddServices(services => services.AddServiceLayer(new OptionsProvider(builder.CreateDataAccessOptions())))
                 .AddDatabase(addDataAccessServices: false));
 
             await using var testContext = await testContextBuilder.BuildAsync();

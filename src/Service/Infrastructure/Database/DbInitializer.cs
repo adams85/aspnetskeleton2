@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -17,7 +16,7 @@ namespace WebApp.Service.Infrastructure.Database
 {
     public sealed partial class DbInitializer : IApplicationInitializer
     {
-        private readonly DataContext _context;
+        private readonly WritableDataContext _context;
         private readonly IClock _clock;
         private readonly IDbProperties _dbProperties;
 

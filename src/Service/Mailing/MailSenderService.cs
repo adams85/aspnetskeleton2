@@ -117,7 +117,7 @@ namespace WebApp.Service.Mailing
 
         private void WakeProcessor() => Enqueued?.Invoke(this, EventArgs.Empty);
 
-        public async Task EnqueueItemAsync(MailModel model, DataContext dbContext, CancellationToken cancellationToken)
+        public async Task EnqueueItemAsync(MailModel model, WritableDataContext dbContext, CancellationToken cancellationToken)
         {
             var mailTypeDefinition = _mailTypeCatalog.GetDefinition(model.MailType, throwIfNotFound: true)!;
 
@@ -138,7 +138,7 @@ namespace WebApp.Service.Mailing
                 WakeProcessor();
         }
 
-        private IAsyncEnumerable<MailQueueItem> PeekItems(DataContext dbContext)
+        private IAsyncEnumerable<MailQueueItem> PeekItems(WritableDataContext dbContext)
         {
             var utcNow = _clock.UtcNow;
 

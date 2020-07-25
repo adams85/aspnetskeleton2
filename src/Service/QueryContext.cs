@@ -48,8 +48,8 @@ namespace WebApp.Service
         public virtual OperationExecutionContext ExecutionContext =>
             LazyInitializer.EnsureInitialized(ref _executionContextAccessor, () => ScopedServices.GetRequiredService<IExecutionContextAccessor>())!.ExecutionContext;
 
-        private DataContext? _dbContext;
-        public virtual DataContext DbContext => LazyInitializer.EnsureInitialized(ref _dbContext, () => ScopedServices.GetRequiredService<ReadOnlyDataContext>())!;
+        private ReadOnlyDataContext? _dbContext;
+        public virtual ReadOnlyDataContext DbContext => LazyInitializer.EnsureInitialized(ref _dbContext, () => ScopedServices.GetRequiredService<ReadOnlyDataContext>())!;
 
         private IDictionary<object, object>? _properties;
         public virtual IDictionary<object, object> Properties => LazyInitializer.EnsureInitialized(ref _properties, () => new Dictionary<object, object>())!;

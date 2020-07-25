@@ -10,6 +10,6 @@ namespace WebApp.Service.Mailing
             : base(getBaseMemberPath) { }
 
         public MailModel Model { get; set; } = null!;
-        public DataContext DbContext { get; set; } = null!;
+        public WritableDataContext DbContext { get; set; } = null!;
     }
 }

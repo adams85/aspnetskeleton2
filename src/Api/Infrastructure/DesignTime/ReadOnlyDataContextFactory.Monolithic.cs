@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Design;
 using WebApp.DataAccess;
 
-namespace WebApp.Service.Host.Infrastructure.EFCore
+namespace WebApp.Api.Infrastructure.DesignTime
 {
     internal class ReadOnlyDataContextFactory : IDesignTimeDbContextFactory<ReadOnlyDataContext>
     {

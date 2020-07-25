@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using WebApp.DataAccess;
 using WebApp.Service.Infrastructure.Database;
 
-namespace WebApp.Service.Host.Infrastructure.EFCore
+namespace WebApp.Api.Infrastructure.DesignTime
 {
     internal class WritableDataContextFactory : IDesignTimeDbContextFactory<WritableDataContext>
     {

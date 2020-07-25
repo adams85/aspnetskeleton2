@@ -26,7 +26,7 @@
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
 
-  <!-- DbProvider is set in Directory.props -->
+  <!-- DbProvider is set in Directory.Build.props -->
   <ItemGroup Condition="'$(DbProvider)' != ''">
     <Compile Remove="Providers\*\**\*.cs" />
     <Compile Include="Providers\$(DbProvider)\**\*.cs" />

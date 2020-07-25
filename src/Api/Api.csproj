@@ -18,13 +18,17 @@
       <ItemGroup>
         <Content Remove="appsettings.Service.json;appsettings.Service.*.json" />
         <Compile Remove="Startup.Options.Service.cs" />
-        
+
         <None Remove="**\*.Monolithic.*" />
         <Content Remove="**\*.Monolithic.*" />
         <Compile Remove="**\*.Monolithic.*" />
       </ItemGroup>
     </When>
     <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.4" />
+      </ItemGroup>
+
       <ItemGroup>
         <ProjectReference Include="..\Service\Service.csproj" />
         <ProjectReference Include="..\Service.Templates.Razor\Service.Templates.Razor.csproj" />

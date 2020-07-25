@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Karambolo.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using WebApp.Core.Helpers;
+using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess
 {
@@ -36,6 +40,19 @@ namespace WebApp.DataAccess
         }
 
         protected abstract void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider);
+
+        protected IServiceCollection ReplaceDefaultRelationalTransactionFactory(IServiceCollection internalServices)
+        {
+            internalServices.ReplaceLast(ServiceDescriptor.Singleton<IRelationalTransactionFactory, ExtendedRelationalTransactionFactory>(), out var replacedDescriptor);
+
+            Debug.Assert(replacedDescriptor != null &&
+                (replacedDescriptor.ImplementationType ??
+                 replacedDescriptor.ImplementationInstance?.GetType() ??
+                 replacedDescriptor.ImplementationFactory?.GetType().GenericTypeArguments[1]) == typeof(RelationalTransactionFactory),
+                 $"{Options.Database.Provider} doesn't use the default {nameof(IRelationalTransactionFactory)}.");
+
+            return internalServices;
+        }
 
         protected virtual IServiceProvider CreateInternalServiceProvider(IServiceProvider applicationServiceProvider)
         {

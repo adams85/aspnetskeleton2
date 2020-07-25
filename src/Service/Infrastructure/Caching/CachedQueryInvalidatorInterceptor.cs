@@ -1,19 +1,29 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Karambolo.Common;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace WebApp.Service.Infrastructure.Caching
 {
     internal class CachedQueryInvalidatorInterceptor : ICommandInterceptor
     {
         private readonly CommandExecutionDelegate _next;
+        private readonly IHostApplicationLifetime _applicationLifetime;
         private readonly Type[] _queryTypes;
+        private readonly ILogger _logger;
 
-        public CachedQueryInvalidatorInterceptor(CommandExecutionDelegate next, ICache cache, Type[]? queryTypes)
+        public CachedQueryInvalidatorInterceptor(CommandExecutionDelegate next, IHostApplicationLifetime applicationLifetime, ICache cache, Type[]? queryTypes,
+            ILogger<CachedQueryInvalidatorInterceptor>? logger)
         {
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+            _applicationLifetime = applicationLifetime ?? throw new ArgumentNullException(nameof(applicationLifetime));
             Cache = cache ?? throw new ArgumentNullException(nameof(cache));
-            _next = next;
             _queryTypes = queryTypes ?? Type.EmptyTypes;
+            _logger = logger ?? (ILogger)NullLogger.Instance;
         }
 
         protected ICache Cache { get; }
@@ -23,14 +33,21 @@ namespace WebApp.Service.Infrastructure.Caching
             return Cache.RemoveScopeAsync(QueryCacherInterceptor.GetCacheScope(queryType), cancellationToken);
         }
 
+        private void InvalidateQueryCache(CommandContext context)
+        {
+            var tasks = Array.ConvertAll(_queryTypes, qt => InvalidateQueryCacheAsync(context, qt, _applicationLifetime.ApplicationStopping));
+
+            Task.WhenAll(tasks).FireAndForget(ex => _logger.LogError(ex, "{COMMAND_TYPE} was unable to invalidate cache of {QUERY_TYPES}.",
+                context.CommandType,
+                string.Join(", ", (object[])_queryTypes)));
+        }
+
         public async Task InvokeAsync(CommandContext context, CancellationToken cancellationToken)
         {
             await _next(context, cancellationToken).ConfigureAwait(false);
 
-            // cancellationToken: default -> if execution was successful, cache invalidation shouldn't be interrupted
-            var tasks = Array.ConvertAll(_queryTypes, qt => InvalidateQueryCacheAsync(context, qt, default));
-
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            if (!context.DbContext.Database.TryRegisterForPendingTransactionCommit(() => InvalidateQueryCache(context)))
+                InvalidateQueryCache(context);
         }
     }
 }

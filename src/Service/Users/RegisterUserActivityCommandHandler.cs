@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
 using WebApp.Core.Infrastructure;
 using WebApp.Service.Mailing;
 using WebApp.Service.Mailing.Users;
@@ -61,8 +61,7 @@ namespace WebApp.Service.Users
 
             if (lockedOut)
             {
-                using (var committedCts = new CancellationTokenSource())
-                await using (var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+                await using (var transaction = await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false))
                 {
                     await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -73,10 +72,10 @@ namespace WebApp.Service.Users
                         Name = user.Profile?.FirstName,
                         UserName = user.UserName,
                         Email = user.Email,
-                    }, context.DbContext, new CancellationChangeToken(committedCts.Token), cancellationToken).ConfigureAwait(false);
+                    }, context.DbContext, cancellationToken).ConfigureAwait(false);
 
-                    await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-                    committedCts.Cancel();
+                    if (transaction != null)
+                        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
             else

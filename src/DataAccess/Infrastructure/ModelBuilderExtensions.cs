@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace WebApp.DataAccess
+namespace Microsoft.EntityFrameworkCore
 {
     public static class ModelBuilderExtensions
     {

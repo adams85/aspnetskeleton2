@@ -3,8 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.Sqlite
 {
@@ -18,8 +20,10 @@ namespace WebApp.DataAccess.Providers.Sqlite
             if (connectionStringBuilder.Mode == SqliteOpenMode.Memory && connectionStringBuilder.Cache == SqliteCacheMode.Shared)
                 internalServices.AddSingleton(_ => new InMemoryConnectionWrapper(Options.Database));
 
-            internalServices
-                .AddEntityFrameworkSqlite()
+            internalServices.AddEntityFrameworkSqlite();
+
+            ReplaceDefaultRelationalTransactionFactory(internalServices)
+                .ReplaceLast(ServiceDescriptor.Scoped<ISqliteRelationalConnection, CustomSqliteRelationalConnection>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, SqliteModelCustomizer>())
                 .AddSingleton<IDbProperties>(new SqliteProperties(Options.Database));
         }
@@ -38,8 +42,6 @@ namespace WebApp.DataAccess.Providers.Sqlite
 
         protected override void ConfigureOptionsCore(DbContextOptionsBuilder optionsBuilder, IServiceProvider internalServiceProvider, IServiceProvider applicationServiceProvider)
         {
-            optionsBuilder.AddInterceptors(new SqliteConnectionInterceptor());
-
             optionsBuilder.UseSqlite(Options.Database.ConnectionString);
         }
 

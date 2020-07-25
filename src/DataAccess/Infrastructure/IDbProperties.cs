@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 
-namespace WebApp.DataAccess
+namespace WebApp.DataAccess.Infrastructure
 {
     public interface IDbProperties
     {

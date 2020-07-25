@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using WebApp.Core.Infrastructure;
 using WebApp.DataAccess;
+using WebApp.DataAccess.Infrastructure;
 using WebApp.DataAccess.Migrations;
 
 namespace WebApp.Service.Infrastructure.Database

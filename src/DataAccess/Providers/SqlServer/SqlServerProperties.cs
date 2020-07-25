@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Karambolo.Common;
+using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.SqlServer
 {

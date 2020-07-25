@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Primitives;
 using WebApp.Core.Infrastructure;
 using WebApp.Service.Helpers;
 using WebApp.Service.Mailing;
@@ -40,8 +39,7 @@ namespace WebApp.Service.Users
             user.PasswordVerificationToken = SecurityHelper.GenerateToken(_guidProvider);
             user.PasswordVerificationTokenExpirationDate = _clock.UtcNow + command.TokenExpirationTimeSpan;
 
-            using (var committedCts = new CancellationTokenSource())
-            await using (var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+            await using (var transaction = await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false))
             {
                 await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -54,10 +52,10 @@ namespace WebApp.Service.Users
                     Email = user.Email,
                     VerificationToken = user.PasswordVerificationToken,
                     VerificationTokenExpirationDate = user.PasswordVerificationTokenExpirationDate.Value,
-                }, context.DbContext, new CancellationChangeToken(committedCts.Token), cancellationToken).ConfigureAwait(false);
+                }, context.DbContext, cancellationToken).ConfigureAwait(false);
 
-                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-                committedCts.Cancel();
+                if (transaction != null)
+                    await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

@@ -21,9 +21,9 @@ namespace WebApp.Service.Infrastructure.Caching
 
         public QueryCacherInterceptor(QueryExecutionDelegate next, ICache cache, QueryCachingOptions options)
         {
+            _next = next ?? throw new ArgumentNullException(nameof(next));
             Cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            _next = next;
         }
 
         protected ICache Cache { get; }

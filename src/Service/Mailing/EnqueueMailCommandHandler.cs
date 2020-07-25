@@ -32,7 +32,7 @@ namespace WebApp.Service.Mailing
             if (validationContext.ErrorCode != null)
                 new ServiceErrorException(validationContext.ErrorCode.Value, validationContext.ErrorArgsFactory?.Invoke());
 
-            await _mailSenderService.EnqueueItemAsync(command.Model, context.DbContext, null, cancellationToken).ConfigureAwait(false);
+            await _mailSenderService.EnqueueItemAsync(command.Model, context.DbContext, cancellationToken).ConfigureAwait(false);
         }
     }
 }

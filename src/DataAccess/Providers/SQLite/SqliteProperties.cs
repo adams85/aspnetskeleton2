@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.Sqlite
 {

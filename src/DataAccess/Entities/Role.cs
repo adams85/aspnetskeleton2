@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -26,6 +27,8 @@ namespace WebApp.DataAccess.Entities
         {
             public void Configure(EntityTypeBuilder<Role> builder)
             {
+                builder.Property(e => e.Id).ValueGeneratedNever();
+
                 builder.HasIndex(e => e.RoleName).IsUnique();
             }
         }

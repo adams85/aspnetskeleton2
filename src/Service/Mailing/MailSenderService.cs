@@ -12,6 +12,7 @@ using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -114,12 +115,10 @@ namespace WebApp.Service.Mailing
 
         private event EventHandler? Enqueued;
 
-        public async Task EnqueueItemAsync(MailModel model, DataContext dbContext, IChangeToken? transactionCommittedToken, CancellationToken cancellationToken)
-        {
-            var isTransactionPresent = dbContext.Database.CurrentTransaction != null || Transaction.Current != null;
-            if (isTransactionPresent && transactionCommittedToken == null)
-                throw new ArgumentNullException(nameof(transactionCommittedToken), "A change token signalling on successful commit must be supplied when a transaction is present.");
+        private void WakeProcessor() => Enqueued?.Invoke(this, EventArgs.Empty);
 
+        public async Task EnqueueItemAsync(MailModel model, DataContext dbContext, CancellationToken cancellationToken)
+        {
             var mailTypeDefinition = _mailTypeCatalog.GetDefinition(model.MailType, throwIfNotFound: true)!;
 
             var serializedMailModel = mailTypeDefinition.SerializeModel(model);
@@ -135,11 +134,8 @@ namespace WebApp.Service.Mailing
 
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            var transaction = dbContext.Database.CurrentTransaction;
-            if (isTransactionPresent)
-                transactionCommittedToken!.RegisterChangeCallback(state => ((MailSenderService)state).Enqueued?.Invoke(this, EventArgs.Empty), this);
-            else
-                Enqueued?.Invoke(this, EventArgs.Empty);
+            if (!dbContext.Database.TryRegisterForPendingTransactionCommit(WakeProcessor))
+                WakeProcessor();
         }
 
         private IAsyncEnumerable<MailQueueItem> PeekItems(DataContext dbContext)

@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Karambolo.Common;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using WebApp.Service.Infrastructure;
 using WebApp.Service.Infrastructure.Caching;
 using WebApp.Service.Roles;
@@ -10,8 +12,9 @@ namespace WebApp.Service.Users
 {
     internal sealed class GetCachedUserInfoQueryInvalidatorInterceptor : CachedQueryInvalidatorInterceptor
     {
-        public GetCachedUserInfoQueryInvalidatorInterceptor(CommandExecutionDelegate next, ICache cache, Type[]? queryTypes)
-            : base(next, cache, queryTypes) { }
+        public GetCachedUserInfoQueryInvalidatorInterceptor(CommandExecutionDelegate next, IHostApplicationLifetime applicationLifetime, ICache cache, Type[]? queryTypes,
+            ILogger<CachedQueryInvalidatorInterceptor>? logger)
+            : base(next, applicationLifetime, cache, queryTypes, logger) { }
 
         private string[]? GetAffectedUserNames(CommandContext context) => context.Command switch
         {

@@ -2,8 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.SqlServer
 {
@@ -11,13 +13,17 @@ namespace WebApp.DataAccess.Providers.SqlServer
     {
         private SqlServerConfiguration(DataAccessOptions options) : base(options) { }
 
-        protected override void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider) =>
-            internalServices
-                .AddEntityFrameworkSqlServer()
+        protected override void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider)
+        {
+            internalServices.AddEntityFrameworkSqlServer();
+
+            ReplaceDefaultRelationalTransactionFactory(internalServices)
+                .ReplaceLast(ServiceDescriptor.Scoped<ISqlServerConnection, CustomSqlServerRelationalConnection>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IMigrationsAnnotationProvider, CustomSqlServerMigrationsAnnotationProvider>())
                 .ReplaceLast(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, SqlServerModelCustomizer>())
                 .AddSingleton<IDbProperties>(new SqlServerProperties(Options.Database));
+        }
 
         protected override void ConfigureOptionsCore(DbContextOptionsBuilder optionsBuilder, IServiceProvider internalServiceProvider, IServiceProvider applicationServiceProvider)
         {

@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using WebApp.Service.Roles;
+using WebApp.Service.Tests.Helpers;
 using WebApp.Service.Tests.Infrastructure;
 using WebApp.Service.Users;
 using WebApp.Tests.Helpers;
@@ -14,7 +16,11 @@ namespace WebApp.Service.Infrastructure
         public async Task CommandDataAnnotationsValidatorInterceptorTest()
         {
             var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
-                .AddServices(services => services.AddServiceLayer(new OptionsProvider(builder.CreateDataAccessOptions())))
+                .AddServices(services =>
+                {
+                    services.AddSingleton<IHostApplicationLifetime>(NullHostApplicationLifetime.Instance);
+                    services.AddServiceLayer(new OptionsProvider(builder.CreateDataAccessOptions()));
+                })
                 .AddDatabase(addDataAccessServices: false));
 
             await using var testContext = await testContextBuilder.BuildAsync();
@@ -34,7 +40,11 @@ namespace WebApp.Service.Infrastructure
         public async Task QueryDataAnnotationsValidatorInterceptorTest()
         {
             var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
-                .AddServices(services => services.AddServiceLayer(new OptionsProvider(builder.CreateDataAccessOptions())))
+                .AddServices(services =>
+                {
+                    services.AddSingleton<IHostApplicationLifetime>(NullHostApplicationLifetime.Instance);
+                    services.AddServiceLayer(new OptionsProvider(builder.CreateDataAccessOptions()));
+                })
                 .AddDatabase(addDataAccessServices: false));
 
             await using var testContext = await testContextBuilder.BuildAsync();

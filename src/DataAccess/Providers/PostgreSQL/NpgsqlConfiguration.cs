@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
+using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.PostgreSQL
 {
@@ -11,12 +13,16 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
     {
         private NpgsqlConfiguration(DataAccessOptions options) : base(options) { }
 
-        protected override void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider) =>
-            internalServices
-                .AddEntityFrameworkNpgsql()
+        protected override void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider)
+        {
+            internalServices.AddEntityFrameworkNpgsql();
+
+            ReplaceDefaultRelationalTransactionFactory(internalServices)
+                .ReplaceLast(ServiceDescriptor.Scoped<INpgsqlRelationalConnection, CustomNpgsqlRelationalConnection>())
                 .ReplaceLast(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomNpgsqlMigrationsSqlGenerator>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, NpgsqlModelCustomizer>())
                 .AddSingleton<IDbProperties>(new NpgsqlProperties(Options.Database));
+        }
 
         protected override void ConfigureOptionsCore(DbContextOptionsBuilder optionsBuilder, IServiceProvider internalServiceProvider, IServiceProvider applicationServiceProvider)
         {

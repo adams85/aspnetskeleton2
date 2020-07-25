@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Karambolo.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.Sqlite
 {

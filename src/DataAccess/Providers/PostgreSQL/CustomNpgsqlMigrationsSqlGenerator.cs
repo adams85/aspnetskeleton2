@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Operations;
+using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.PostgreSQL
 {

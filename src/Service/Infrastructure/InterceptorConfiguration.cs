@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using WebApp.Core.Infrastructure;
 using WebApp.Service.Infrastructure.Caching;
 using WebApp.Service.Infrastructure.Logging;
 using WebApp.Service.Infrastructure.Validation;
@@ -15,7 +16,7 @@ namespace WebApp.Service.Infrastructure
         {
             // order matters: the earlier an interceptor is registered, the earlier it runs during execution
 
-            builder.AddInterceptorFor<ICommand>((sp, next) => new CommandPerformanceLoggerInterceptor(next, sp.GetRequiredService<ILoggerFactory>()));
+            builder.AddInterceptorFor<ICommand>((sp, next) => new CommandPerformanceLoggerInterceptor(next, sp.GetRequiredService<IGuidProvider>(), sp.GetRequiredService<ILogger<CommandPerformanceLoggerInterceptor>>()));
 
             builder.AddInterceptorFor<ICommand>((sp, next) => new CommandDataAnnotationsValidatorInterceptor(next));
 
@@ -32,7 +33,7 @@ namespace WebApp.Service.Infrastructure
             // query cacher interceptors should be as close to the caller as possible!
             addQueryCacherInterceptors?.Invoke(builder);
 
-            builder.AddInterceptorFor<IQuery>((sp, next) => new QueryPerformanceLoggerInterceptor(next, sp.GetRequiredService<ILoggerFactory>()));
+            builder.AddInterceptorFor<IQuery>((sp, next) => new QueryPerformanceLoggerInterceptor(next, sp.GetRequiredService<IGuidProvider>(), sp.GetRequiredService<ILogger<QueryPerformanceLoggerInterceptor>>()));
 
             builder.AddInterceptorFor<IQuery>((sp, next) => new QueryDataAnnotationsValidatorInterceptor(next));
 

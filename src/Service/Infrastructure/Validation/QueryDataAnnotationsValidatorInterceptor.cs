@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,7 +11,7 @@ namespace WebApp.Service.Infrastructure.Validation
 
         public QueryDataAnnotationsValidatorInterceptor(QueryExecutionDelegate next)
         {
-            _next = next;
+            _next = next ?? throw new ArgumentNullException(nameof(next));
         }
 
         public Task<object?> InvokeAsync(QueryContext context, CancellationToken cancellationToken)

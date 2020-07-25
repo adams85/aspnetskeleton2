@@ -7,7 +7,7 @@
 
     <!-- set to true to enable pre-compilation or to false to enable runtime compilation of Razor templates for release build -->
     <RazorCompileOnBuild>true</RazorCompileOnBuild>
-    <RazorCompileOnBuild Condition="'$(Configuration)' == 'Debug'">false</RazorCompileOnBuild>
+    <RazorCompileOnBuild Condition="'$(Configuration)' == 'Debug'">true</RazorCompileOnBuild>
     <RazorCompileOnPublish>$(RazorCompileOnBuild)</RazorCompileOnPublish>
   </PropertyGroup>
 

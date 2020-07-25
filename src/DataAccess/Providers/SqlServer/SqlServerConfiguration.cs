@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using WebApp.DataAccess.Infrastructure;
@@ -17,7 +18,7 @@ namespace WebApp.DataAccess.Providers.SqlServer
         {
             internalServices.AddEntityFrameworkSqlServer();
 
-            ReplaceDefaultRelationalTransactionFactory(internalServices)
+            ReplaceRelationalTransactionFactory<RelationalTransactionFactory, ExtendedRelationalTransactionFactory>(internalServices)
                 .ReplaceLast(ServiceDescriptor.Scoped<ISqlServerConnection, CustomSqlServerRelationalConnection>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IMigrationsAnnotationProvider, CustomSqlServerMigrationsAnnotationProvider>())
                 .ReplaceLast(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>())

@@ -41,15 +41,17 @@ namespace WebApp.DataAccess
 
         protected abstract void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider);
 
-        protected IServiceCollection ReplaceDefaultRelationalTransactionFactory(IServiceCollection internalServices)
+        protected IServiceCollection ReplaceRelationalTransactionFactory<TDefaultFactory, TExtendedFactory>(IServiceCollection internalServices)
+            where TDefaultFactory : class, IRelationalTransactionFactory
+            where TExtendedFactory : class, IRelationalTransactionFactory
         {
-            internalServices.ReplaceLast(ServiceDescriptor.Singleton<IRelationalTransactionFactory, ExtendedRelationalTransactionFactory>(), out var replacedDescriptor);
+            internalServices.ReplaceLast(ServiceDescriptor.Singleton<IRelationalTransactionFactory, TExtendedFactory>(), out var replacedDescriptor);
 
             Debug.Assert(replacedDescriptor != null &&
                 (replacedDescriptor.ImplementationType ??
                  replacedDescriptor.ImplementationInstance?.GetType() ??
-                 replacedDescriptor.ImplementationFactory?.GetType().GenericTypeArguments[1]) == typeof(RelationalTransactionFactory),
-                 $"{Options.Database.Provider} doesn't use the default {nameof(IRelationalTransactionFactory)}.");
+                 replacedDescriptor.ImplementationFactory?.GetType().GenericTypeArguments[1]) == typeof(TDefaultFactory),
+                 $"{Options.Database.Provider} doesn't use the expected transaction factory of type {typeof(TDefaultFactory)}.");
 
             return internalServices;
         }

@@ -11,6 +11,8 @@ namespace WebApp.DataAccess.Infrastructure
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
+            CharacterEncoding = options.CharacterEncoding ?? DefaultCharacterEncoding;
+
             CaseSensitiveCollation = options.CaseSensitiveCollation ?? DefaultCaseSensitiveCollation;
             CaseSensitiveComparer = CreateCaseSensitiveComparer(CaseSensitiveCollation);
 
@@ -21,6 +23,9 @@ namespace WebApp.DataAccess.Infrastructure
         public abstract string Provider { get; }
 
         public virtual IsolationLevel SnaphsotIsolationLevel => IsolationLevel.Snapshot;
+
+        protected virtual string? DefaultCharacterEncoding => null;
+        public string? CharacterEncoding { get; }
 
         protected abstract string DefaultCaseSensitiveCollation { get; }
         public string CaseSensitiveCollation { get; }

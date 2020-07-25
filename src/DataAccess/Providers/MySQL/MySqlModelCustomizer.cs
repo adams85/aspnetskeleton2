@@ -3,25 +3,23 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Karambolo.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
+using Pomelo.EntityFrameworkCore.MySql.Extensions;
+using WebApp.DataAccess.Infrastructure;
 
-namespace WebApp.DataAccess.Providers.PostgreSQL
+namespace WebApp.DataAccess.Providers.MySQL
 {
-    internal sealed class NpgsqlModelCustomizer : RelationalModelCustomizer
+    internal sealed class MySqlModelCustomizer : RelationalModelCustomizer
     {
-        private readonly Version? _postgresVersion;
+        private readonly IDbProperties _dbProperties;
 
-        public NpgsqlModelCustomizer(ModelCustomizerDependencies dependencies, INpgsqlOptions npgsqlOptions) : base(dependencies)
+        public MySqlModelCustomizer(ModelCustomizerDependencies dependencies, IDbProperties dbProperties) : base(dependencies)
         {
-            _postgresVersion = npgsqlOptions.PostgresVersion;
+            _dbProperties = dbProperties ?? throw new ArgumentNullException(nameof(dbProperties));
         }
 
         public override void Customize(ModelBuilder modelBuilder, DbContext context)
         {
             base.Customize(modelBuilder, context);
-
-            // enabling case insensitive texts:
-            // https://github.com/npgsql/efcore.pg/issues/406#issuecomment-561367654
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
                 foreach (var property in entityType.GetProperties())
@@ -31,14 +29,9 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
                         {
                             var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
                             var caseInsensitive = annotation != null || property.PropertyInfo.HasAttribute<CaseInsensitiveAttribute>();
-                            if (caseInsensitive)
-                                property.SetColumnType("citext");
+                            property.SetCollation(caseInsensitive ? _dbProperties.CaseInsensitiveCollation :  _dbProperties.CaseSensitiveCollation);
                         }
                     }
-
-            // NOTE: prior to v9.1 citext must be enabled manually (preferably, on template1, otherwise the initial migration will fail)
-            if (_postgresVersion == null || _postgresVersion >= new Version(9, 1))
-                modelBuilder.HasPostgresExtension("citext");
         }
     }
 }

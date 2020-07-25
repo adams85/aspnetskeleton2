@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
@@ -17,7 +18,7 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
         {
             internalServices.AddEntityFrameworkNpgsql();
 
-            ReplaceDefaultRelationalTransactionFactory(internalServices)
+            ReplaceRelationalTransactionFactory<RelationalTransactionFactory, ExtendedRelationalTransactionFactory>(internalServices)
                 .ReplaceLast(ServiceDescriptor.Scoped<INpgsqlRelationalConnection, CustomNpgsqlRelationalConnection>())
                 .ReplaceLast(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomNpgsqlMigrationsSqlGenerator>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, NpgsqlModelCustomizer>())
@@ -31,7 +32,11 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
                 Version.Parse(Options.Database.ServerVersion) :
                 null;
 
-            optionsBuilder.UseNpgsql(Options.Database.ConnectionString, options => options.SetPostgresVersion(serverVersion));
+            optionsBuilder.UseNpgsql(Options.Database.ConnectionString, options =>
+            {
+                if (serverVersion != null)
+                    options.SetPostgresVersion(serverVersion);
+            });
         }
 
         public sealed class Factory : IConfigurationFactory

@@ -10,7 +10,8 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
 {
     internal sealed class CustomNpgsqlMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerator
     {
-        private readonly string _collation;
+        private readonly string _dbEncoding;
+        private readonly string _dbCollation;
 
         public CustomNpgsqlMigrationsSqlGenerator(IDbProperties dbProperties, MigrationsSqlGeneratorDependencies dependencies, IMigrationsAnnotationProvider migrationsAnnotations, INpgsqlOptions npgsqlOptions)
             : base(dependencies, migrationsAnnotations, npgsqlOptions)
@@ -18,13 +19,13 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
             if (dbProperties == null)
                 throw new ArgumentNullException(nameof(dbProperties));
 
-            _collation = dbProperties.CaseSensitiveCollation;
+            _dbEncoding = dbProperties.CharacterEncoding ?? NpgsqlProperties.DefaultCharacterEncodingName;
+            _dbCollation = dbProperties.CaseSensitiveCollation;
         }
 
-        protected override void Generate(NpgsqlCreateDatabaseOperation operation, IModel model, MigrationCommandListBuilder builder)
+        // based on: https://github.com/npgsql/efcore.pg/blob/v3.1.3/src/EFCore.PG/Migrations/NpgsqlMigrationsSqlGenerator.cs#L731
+        protected override void Generate(NpgsqlCreateDatabaseOperation operation, IModel? model, MigrationCommandListBuilder builder)
         {
-            // original code: https://github.com/npgsql/efcore.pg/blob/v3.1.3/src/EFCore.PG/Migrations/NpgsqlMigrationsSqlGenerator.cs#L731
-
             if (operation == null)
                 throw new ArgumentNullException(nameof(operation));
 
@@ -51,15 +52,15 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
 
             builder
                 .Append(" ENCODING ")
-                .Append('\'').Append("UTF8").Append('\'');
+                .Append('\'').Append(_dbEncoding).Append('\'');
 
             builder
                 .Append(" LC_COLLATE ")
-                .Append('\'').Append(_collation).Append('\'');
+                .Append('\'').Append(_dbCollation).Append('\'');
 
             builder
                 .Append(" LC_CTYPE ")
-                .Append('\'').Append(_collation).Append('\'');
+                .Append('\'').Append(_dbCollation).Append('\'');
 
             builder.AppendLine(';');
 

@@ -22,6 +22,7 @@ namespace WebApp.DataAccess.Providers.SqlServer
             _caseInsensitiveCollation = dbProperties.CaseInsensitiveCollation;
         }
 
+        // based on: https://github.com/dotnet/efcore/blob/v3.1.6/src/EFCore.SqlServer/Migrations/SqlServerMigrationsSqlGenerator.cs#L777
         protected override void Generate(SqlServerCreateDatabaseOperation operation, IModel? model, MigrationCommandListBuilder builder)
         {
             base.Generate(operation, model, builder);

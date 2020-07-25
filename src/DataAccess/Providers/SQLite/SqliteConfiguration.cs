@@ -4,6 +4,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using WebApp.DataAccess.Infrastructure;
@@ -22,7 +23,7 @@ namespace WebApp.DataAccess.Providers.Sqlite
 
             internalServices.AddEntityFrameworkSqlite();
 
-            ReplaceDefaultRelationalTransactionFactory(internalServices)
+            ReplaceRelationalTransactionFactory<RelationalTransactionFactory, ExtendedRelationalTransactionFactory>(internalServices)
                 .ReplaceLast(ServiceDescriptor.Scoped<ISqliteRelationalConnection, CustomSqliteRelationalConnection>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, SqliteModelCustomizer>())
                 .AddSingleton<IDbProperties>(new SqliteProperties(Options.Database));

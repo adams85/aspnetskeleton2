@@ -9,6 +9,8 @@ namespace WebApp.DataAccess.Infrastructure
 
         IsolationLevel SnaphsotIsolationLevel { get; }
 
+        string? CharacterEncoding { get; }
+
         string CaseSensitiveCollation { get; }
         IEqualityComparer<string> CaseSensitiveComparer { get; }
 

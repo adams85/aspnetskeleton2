@@ -21,7 +21,7 @@ namespace WebApp.Api
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             // null tokens are handled by the framework except when the expected type is a non-nullable value type
-            // https://github.com/dotnet/corefx/blob/v3.1.4/src/System.Text.Json/src/System/Text/Json/Serialization/JsonSerializer.Read.HandleNull.cs#L58
+            // https://github.com/dotnet/corefx/blob/v3.1.6/src/System.Text.Json/src/System/Text/Json/Serialization/JsonSerializer.Read.HandleNull.cs#L58
             if (!s_typeAllowsNull && reader.TokenType == JsonTokenType.Null)
                 throw new JsonException($"{typeof(T)} does not accept null values.");
 

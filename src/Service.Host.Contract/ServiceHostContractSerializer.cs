@@ -14,7 +14,7 @@ namespace WebApp.Service.Host
 
         private sealed class ProtoBufSerializer : SerializerBase.StreamBased
         {
-            internal static readonly RuntimeTypeModel TypeModel = ProtoBuf.Meta.TypeModel.Create().ConfigureServiceHostDefaults();
+            internal static readonly RuntimeTypeModel TypeModel = RuntimeTypeModel.Create().ConfigureServiceHostDefaults();
 
             public override void Serialize(Stream stream, object? obj, Type type) => TypeModel.Serialize(stream, obj);
             public override void Serialize<T>(Stream stream, T obj) => TypeModel.Serialize(stream, obj);

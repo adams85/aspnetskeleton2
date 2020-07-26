@@ -2,7 +2,7 @@
 
 namespace System.ComponentModel.DataAnnotations
 {
-    // based on: https://github.com/dotnet/corefx/blob/v3.1.3/src/System.ComponentModel.Annotations/src/Resources/Strings.resx
+    // based on: https://github.com/dotnet/corefx/blob/v3.1.6/src/System.ComponentModel.Annotations/src/Resources/Strings.resx
     public static class ValidationErrorMessages
     {
         #region Built-in validation attributes

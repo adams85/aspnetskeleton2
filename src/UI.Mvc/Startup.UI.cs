@@ -52,7 +52,7 @@ namespace WebApp.UI
             protected override bool ShouldResolveFromRoot(ServiceDescriptor service) =>
                 // AddDataAnnotationsLocalization, AddViewLocalization calls AddLocalization under the hood, that is, it adds base localization services,
                 // but those are already registered in the root container and we need those shared instances
-                // https://github.com/dotnet/aspnetcore/blob/v3.1.5/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L14
+                // https://github.com/dotnet/aspnetcore/blob/v3.1.6/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L14
                 service.ServiceType == typeof(IStringLocalizerFactory) || service.ServiceType == typeof(IStringLocalizer<>);
 
             partial void ConfigureMvcPartial(IMvcBuilder builder);
@@ -132,7 +132,7 @@ namespace WebApp.UI
                     {
                         // ApplicationPartManager finds the Api assembly (as it is referenced), so we have to exclude it manually
                         // because we don't want the API controllers to be visible to the UI branch
-                        // https://github.com/dotnet/aspnetcore/blob/v3.1.5/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L81
+                        // https://github.com/dotnet/aspnetcore/blob/v3.1.6/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L81
                         manager.ApplicationParts.RemoveAll((part, _) => part is AssemblyPart assemblyPart && assemblyPart.Assembly == typeof(Api.Startup).Assembly);
                     })
                     .AddViewLocalization();

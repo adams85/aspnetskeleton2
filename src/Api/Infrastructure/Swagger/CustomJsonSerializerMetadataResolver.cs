@@ -18,7 +18,7 @@ namespace WebApp.Api.Infrastructure.Swagger
     /// <remarks>
     /// Together with <see cref="CustomModelMetadataProvider"/>, this class is necessary for correct Swagger JSON generation.
     /// </remarks>
-    // based on: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/v5.4.1/src/Swashbuckle.AspNetCore.SwaggerGen/SchemaGenerator/JsonSerializerDataContractResolver.cs
+    // based on: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/v5.5.1/src/Swashbuckle.AspNetCore.SwaggerGen/SchemaGenerator/JsonSerializerDataContractResolver.cs
     public sealed class CustomJsonSerializerDataContractResolver : IDataContractResolver
     {
         private readonly JsonSerializerOptions _serializerOptions;
@@ -77,6 +77,13 @@ namespace WebApp.Api.Infrastructure.Swagger
                     dataType: DataType.Array,
                     underlyingType: underlyingType,
                     arrayItemType: itemType);
+            }
+
+            if (underlyingType.IsOneOf(typeof(JsonDocument), typeof(JsonElement)))
+            {
+                return new DataContract(
+                    dataType: DataType.Unknown,
+                    underlyingType: underlyingType);
             }
 
             return new DataContract(

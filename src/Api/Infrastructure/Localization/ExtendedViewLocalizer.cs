@@ -14,7 +14,7 @@ using WebApp.Core.Helpers;
 
 namespace WebApp.Api.Infrastructure.Localization
 {
-    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.3/src/Mvc/Mvc.Localization/src/ViewLocalizer.cs
+    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.6/src/Mvc/Mvc.Localization/src/ViewLocalizer.cs
     public sealed class ExtendedViewLocalizer : IViewLocalizer, IViewContextAware
     {
         private readonly IHtmlLocalizerFactory _localizerFactory;

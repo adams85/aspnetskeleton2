@@ -23,7 +23,7 @@ namespace WebApp.DataAccess.Providers.MySQL
             _dbCollation = dbProperties.CaseSensitiveCollation;
         }
 
-        // TODO: revise this approach when https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/issues/61 gets resolved
+        // TODO: revise this approach when https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/issues/618 gets resolved
         // based on: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/blob/3.1.2/src/EFCore.MySql/Migrations/MySqlMigrationsSqlGenerator.cs#L373
         protected override void Generate(MySqlCreateDatabaseOperation operation, IModel? model, MigrationCommandListBuilder builder)
         {

@@ -10,7 +10,7 @@ using WebApp.Service.Infrastructure.Validation;
 
 namespace WebApp.Service.Infrastructure
 {
-    internal static class InterceptorConfiguration 
+    internal static class InterceptorConfiguration
     {
         public static CommandExecutionBuilder ConfigureInterceptors(this CommandExecutionBuilder builder, Action<CommandExecutionBuilder>? addCachedQueryInvalidatorInterceptors)
         {

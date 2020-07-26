@@ -29,7 +29,7 @@ namespace WebApp.DataAccess.Providers.MySQL
                         {
                             var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
                             var caseInsensitive = annotation != null || property.PropertyInfo.HasAttribute<CaseInsensitiveAttribute>();
-                            property.SetCollation(caseInsensitive ? _dbProperties.CaseInsensitiveCollation :  _dbProperties.CaseSensitiveCollation);
+                            property.SetCollation(caseInsensitive ? _dbProperties.CaseInsensitiveCollation : _dbProperties.CaseSensitiveCollation);
                         }
                     }
         }

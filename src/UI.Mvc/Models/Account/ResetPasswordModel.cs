@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using WebApp.Common.Infrastructure.Localization;
+﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using WebApp.Common.Infrastructure.Localization;
 using WebApp.Service.Users;
-using System;
 
 namespace WebApp.UI.Models.Account
 {

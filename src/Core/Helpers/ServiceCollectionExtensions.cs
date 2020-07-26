@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-
-namespace Microsoft.Extensions.DependencyInjection.Extensions
+﻿namespace Microsoft.Extensions.DependencyInjection.Extensions
 {
     public static class ServiceCollectionExtensions
     {

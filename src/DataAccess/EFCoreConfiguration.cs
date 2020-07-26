@@ -7,13 +7,11 @@ using System.Threading.Tasks;
 using Karambolo.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using WebApp.Core.Helpers;
-using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess
 {

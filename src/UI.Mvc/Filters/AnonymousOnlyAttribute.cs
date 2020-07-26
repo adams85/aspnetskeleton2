@@ -1,6 +1,6 @@
-﻿using WebApp.UI.Areas.Dashboard.Controllers;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using WebApp.UI.Areas.Dashboard.Controllers;
 
 namespace WebApp.UI.Filters
 {

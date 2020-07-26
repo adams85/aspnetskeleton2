@@ -1,6 +1,4 @@
-﻿using WebApp.Service.Infrastructure.Validation;
-
-namespace WebApp.UI.Infrastructure.Security
+﻿namespace WebApp.UI.Infrastructure.Security
 {
     public enum ChangePasswordStatus
     {

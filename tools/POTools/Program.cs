@@ -2,8 +2,8 @@
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using POTools.Commands;
 using McMaster.Extensions.CommandLineUtils;
+using POTools.Commands;
 
 namespace POTools
 {

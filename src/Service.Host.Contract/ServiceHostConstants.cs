@@ -1,5 +1,4 @@
 ﻿using Grpc.Core;
-using ProtoBuf.Grpc;
 
 namespace WebApp.Service.Host
 {

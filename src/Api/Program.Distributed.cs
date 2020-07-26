@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
-using Microsoft.Extensions.Hosting;
-using WebApp.Core;
-using WebApp.Core.Helpers;
+﻿using WebApp.Core;
 
 namespace WebApp.Api
 {

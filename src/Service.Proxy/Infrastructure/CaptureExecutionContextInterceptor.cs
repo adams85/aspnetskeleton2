@@ -13,7 +13,7 @@ namespace WebApp.Service.Infrastructure
 
         public CaptureExecutionContextInterceptor(IExecutionContextAccessor executionContextAccessor)
         {
-            _executionContextAccessor = executionContextAccessor ?? throw new ArgumentNullException(nameof(executionContextAccessor));;
+            _executionContextAccessor = executionContextAccessor ?? throw new ArgumentNullException(nameof(executionContextAccessor));
         }
 
         private Metadata EnsureHeaders<TRequest, TResponse>(ref ClientInterceptorContext<TRequest, TResponse> context)

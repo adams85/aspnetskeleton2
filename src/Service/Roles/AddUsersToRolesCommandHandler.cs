@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Karambolo.Common;
 using Microsoft.EntityFrameworkCore;
-using WebApp.DataAccess;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Users;
 

@@ -3,4 +3,8 @@
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <DotNetRuntimeVersion>3.1.6</DotNetRuntimeVersion>
+  </PropertyGroup>
 </Project>

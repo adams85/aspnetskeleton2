@@ -26,7 +26,7 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(DotNetRuntimeVersion)" />
       </ItemGroup>
 
       <ItemGroup>
@@ -44,9 +44,9 @@
 
   <ItemGroup>
     <PackageReference Include="Karambolo.Extensions.Logging.File" Version="3.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="3.1.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(DotNetRuntimeVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="$(DotNetRuntimeVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
   </ItemGroup>
 

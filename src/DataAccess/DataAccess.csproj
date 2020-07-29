@@ -13,12 +13,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(DotNetRuntimeVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.6" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SQLite'" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.6" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SqlServer'" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SQLite'" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SqlServer'" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.4" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'PostgreSQL'" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.1.2" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'MySQL'" />
   </ItemGroup>

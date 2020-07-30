@@ -4,12 +4,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using WebApp.Core.Helpers;
 using WebApp.UI.Infrastructure.Hosting;
 
 namespace WebApp.UI
@@ -46,15 +43,7 @@ namespace WebApp.UI
 
             // The services defined here go into the root DI container and are accessible to the nested (tenant) containers.
 
-            // 1. we need to remove the routing-related services because we don't want them to be shared between the tenants
-            // (we don't have to retain the removed services because AddControllers, etc. will re-add them to the tenant containers eventually)
-            var routingServices = new ServiceCollection();
-            var routingAbstractionsAssembly = typeof(IRouter).Assembly;
-            var routingAssembly = typeof(RouteBase).Assembly;
-            services.RemoveAll((service, _) => service.ServiceType.Assembly == routingAbstractionsAssembly || service.ServiceType.Assembly == routingAssembly);
-
-            // 2. register other shared services and obtain options necessary for DI configuration
-
+            // 1. register shared services and obtain options necessary for DI configuration
             using (var optionsProvider = ApiStartup.BuildImmediateOptionsProvider(ConfigureImmediateOptions))
             {
                 ApiStartup.ConfigureBaseServices(services, optionsProvider);
@@ -65,12 +54,12 @@ namespace WebApp.UI
 
             ConfigureServicesPartial(services);
 
-            // 3. then register the tenants
+            // 2. register the tenants
             services.AddSingleton(new Tenants(
                 new ApiTenant(ApiTenantId, this, typeof(Api.Startup).Assembly),
                 new UITenant(UITenantId, this, typeof(Startup).Assembly)));
 
-            // 4. finally register a startup filter which ensures that the main branch is set up before any other middleware added
+            // 3. finally register a startup filter which ensures that the main branch is set up before any other middleware added
             services.Insert(0, ServiceDescriptor.Transient<IStartupFilter, MainBranchSetupFilter>());
         }
 

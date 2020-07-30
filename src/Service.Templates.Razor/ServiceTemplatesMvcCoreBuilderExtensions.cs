@@ -1,24 +1,33 @@
-﻿using WebApp.Service.Infrastructure.Templating;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.FileProviders;
+using WebApp.Service.Infrastructure.Templating;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-#if !RAZOR_PRECOMPILE
-    using System;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
-    using Microsoft.Extensions.FileProviders;
-#endif
-
-    // Set RazorCompileOnBuild property to true in the csproj file to enable precompilation of templates.
-
     public static class ServiceTemplatesServiceCollectionExtensions
     {
         private static IServiceCollection AddRazorTemplating(this IServiceCollection services)
         {
-#if !RAZOR_PRECOMPILE
-            services.AddOptions<MvcRazorRuntimeCompilationOptions>()
-                .Configure<IWebHostEnvironment>((options, env) => options.FileProviders.Add(new PhysicalFileProvider(AppContext.BaseDirectory)));
-#endif
+            services.PostConfigure<MvcRazorRuntimeCompilationOptions>(options =>
+            {
+                // the templates are copied to the output directory, so we need to make sure that the Razor engine finds them
+
+                var appBaseDirectoryNormalizedPath = Path.GetFullPath(AppBaseDirectoryFileProvider.Instance.Root);
+                var pathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+                if (!options.FileProviders.Any(fileProvider =>
+                    fileProvider is PhysicalFileProvider physicalFileProvider &&
+                    Path.TrimEndingDirectorySeparator(Path.GetFullPath(physicalFileProvider.Root).AsSpan())
+                        .Equals(Path.TrimEndingDirectorySeparator(appBaseDirectoryNormalizedPath.AsSpan()), pathComparer)))
+                {
+                    options.FileProviders.Add(AppBaseDirectoryFileProvider.Instance);
+                }
+            });
 
             services.AddTransient<ITemplateRenderer, RazorTemplateRenderer>();
 
@@ -28,10 +37,6 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IMvcCoreBuilder AddRazorTemplating(this IMvcCoreBuilder builder)
         {
             builder.AddRazorViewEngine();
-
-#if !RAZOR_PRECOMPILE
-            builder.AddRazorRuntimeCompilation();
-#endif
 
             builder.Services.AddRazorTemplating();
 
@@ -44,13 +49,16 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </remarks>
         public static IMvcBuilder AddRazorTemplating(this IMvcBuilder builder)
         {
-#if !RAZOR_PRECOMPILE
-            builder.AddRazorRuntimeCompilation();
-#endif
-
             builder.Services.AddRazorTemplating();
 
             return builder;
+        }
+
+        private sealed class AppBaseDirectoryFileProvider : PhysicalFileProvider
+        {
+            public static readonly AppBaseDirectoryFileProvider Instance = new AppBaseDirectoryFileProvider();
+
+            private AppBaseDirectoryFileProvider() : base(AppContext.BaseDirectory) { }
         }
     }
 }

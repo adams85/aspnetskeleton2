@@ -141,9 +141,8 @@ namespace WebApp.UI
                     .ReplaceLast(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>())
                     .ReplaceLast(ServiceDescriptor.Singleton<IViewLocalizer, ExtendedViewLocalizer>());
 
-#if !RAZOR_PRECOMPILE
-                mvcBuilder.AddRazorRuntimeCompilation();
-#endif
+                if (UIOptions.EnableRazorRuntimeCompilation)
+                    mvcBuilder.AddRazorRuntimeCompilation();
 
                 #endregion
 

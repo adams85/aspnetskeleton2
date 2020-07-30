@@ -1,14 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Karambolo.Common;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using WebApp.Core.Helpers;
 using WebApp.UI.Infrastructure.Hosting;
 
@@ -31,12 +39,114 @@ namespace WebApp.UI
                 .UseServiceProviderFactory(new MultitenantServiceProviderFactory())
                 .ConfigureAppConfiguration(ConfigureAppConfiguration)
                 .ConfigureLogging(ConfigureLogging)
-                .ConfigureWebHostDefaults(webBuilder =>
+                .ConfigureWebHost(webBuilder =>
                 {
+                    ConfigureWebDefaults(webBuilder);
+                    FixHostingStartupAssemblies(webBuilder);
                     webBuilder.UseStartup<Startup>();
                 })
                 .UseWindowsService()
                 .UseSystemd();
+
+        /// <remarks>
+        /// This method should be identical to <see cref="WebHost"/>'s internal ConfigureWebDefaults method except that
+        /// the call to <see cref="RoutingServiceCollectionExtensions.AddRouting(IServiceCollection)"/> must be removed as
+        /// we need to prevent routing services from being added to the root container (see <seealso cref="Startup.ConfigureServices(IServiceCollection)"/> for details).
+        /// </remarks>
+        // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.6/src/DefaultBuilder/src/WebHost.cs
+        private static void ConfigureWebDefaults(IWebHostBuilder builder)
+        {
+            builder
+                .ConfigureAppConfiguration((ctx, cb) =>
+                {
+                    if (ctx.HostingEnvironment.IsDevelopment())
+                    {
+                        StaticWebAssetsLoader.UseStaticWebAssets(ctx.HostingEnvironment, ctx.Configuration);
+                    }
+                });
+
+            builder
+                .UseKestrel((builderContext, options) =>
+                {
+                    options.Configure(builderContext.Configuration.GetSection("Kestrel"));
+                })
+                .ConfigureServices((hostingContext, services) =>
+                {
+                    // Fallback
+                    services.PostConfigure<HostFilteringOptions>(options =>
+                    {
+                        if (options.AllowedHosts == null || options.AllowedHosts.Count == 0)
+                        {
+                            // "AllowedHosts": "localhost;127.0.0.1;[::1]"
+                            var hosts = hostingContext.Configuration["AllowedHosts"]?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                            // Fall back to "*" to disable.
+                            options.AllowedHosts = (hosts?.Length > 0 ? hosts : new[] { "*" });
+                        }
+                    });
+                    // Change notification
+                    services.AddSingleton<IOptionsChangeTokenSource<HostFilteringOptions>>(new ConfigurationChangeTokenSource<HostFilteringOptions>(hostingContext.Configuration));
+
+                    var webHostAssembly = typeof(WebHost).Assembly;
+                    var hostFilteringStartupFilterType = Type.GetType("Microsoft.AspNetCore.HostFilteringStartupFilter, " + webHostAssembly.FullName, throwOnError: true);
+                    services.AddTransient(typeof(IStartupFilter), hostFilteringStartupFilterType);
+
+                    if (string.Equals("true", hostingContext.Configuration["ForwardedHeaders_Enabled"], StringComparison.OrdinalIgnoreCase))
+                    {
+                        services.Configure<ForwardedHeadersOptions>(options =>
+                        {
+                            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                            // Only loopback proxies are allowed by default. Clear that restriction because forwarders are
+                            // being enabled by explicit configuration.
+                            options.KnownNetworks.Clear();
+                            options.KnownProxies.Clear();
+                        });
+
+                        var forwardedHeadersStartupFilterType = Type.GetType("Microsoft.AspNetCore.ForwardedHeadersStartupFilter, " + webHostAssembly.FullName, throwOnError: true);
+                        services.AddTransient(typeof(IStartupFilter), forwardedHeadersStartupFilterType);
+                    }
+                })
+                .UseIIS()
+                .UseIISIntegration();
+        }
+
+        /// <remarks>
+        /// The <see href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/platform-specific-configuration?view=aspnetcore-3.1">hosting startup assemblies</see> feature
+        /// does not play well with the project's multi-tenant, isolated IoC container setup in every case because configuration done by startup assemblies affects the root container.
+        /// When this is not desirable (like in the case of Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation), we have to do the configuration manually.
+        /// </remarks>
+        private static void FixHostingStartupAssemblies(IWebHostBuilder builder)
+        {
+            var hostingStartupAssemblies = SplitAssemblyList(builder.GetSetting(WebHostDefaults.HostingStartupAssembliesKey))
+                .ToLookup(value => new AssemblyName(value).Name, Identity<string>.Func, StringComparer.OrdinalIgnoreCase);
+
+            IEnumerable<string> assembliesToExclude = Enumerable.Empty<string>();
+
+            var assemblies = hostingStartupAssemblies["Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation"];
+            if (assemblies.Any())
+            {
+                assembliesToExclude = assembliesToExclude.Concat(assemblies);
+                builder.UseSetting(UIOptions.DefaultSectionName + ":" + nameof(UIOptions.EnableRazorRuntimeCompilation), bool.TrueString);
+            }
+
+            if (assembliesToExclude.Any())
+            {
+                assembliesToExclude = assembliesToExclude.Append(builder.GetSetting(WebHostDefaults.HostingStartupExcludeAssembliesKey));
+                builder.UseSetting(WebHostDefaults.HostingStartupExcludeAssembliesKey, string.Join(';', assembliesToExclude));
+            }
+
+            static IEnumerable<string> SplitAssemblyList(string value)
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    yield break;
+
+                foreach (var part in value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var trimmedPart = part;
+                    if (!string.IsNullOrEmpty(trimmedPart))
+                        yield return trimmedPart;
+                }
+            }
+        }
 
         static partial void ConfigureAppConfigurationPartial(HostBuilderContext context, IConfigurationBuilder builder, IFileProvider fileProvider, ref int index);
 

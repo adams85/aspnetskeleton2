@@ -4,26 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>WebApp.UI.Mvc</AssemblyName>
     <RootNamespace>WebApp.UI</RootNamespace>
-
-    <!-- set to true to enable pre-compilation or to false to enable runtime compilation of Razor views for release build -->
-    <RazorCompileOnBuild>true</RazorCompileOnBuild>
-    <RazorCompileOnBuild Condition="'$(Configuration)' == 'Debug'">true</RazorCompileOnBuild>
-    <RazorCompileOnPublish>$(RazorCompileOnBuild)</RazorCompileOnPublish>
   </PropertyGroup>
-
-  <Choose>
-    <When Condition="'$(RazorCompileOnBuild)' == 'true'">
-      <PropertyGroup>
-        <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-        <DefineConstants>$(DefineConstants);RAZOR_PRECOMPILE</DefineConstants>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(DotNetRuntimeVersion)" />
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
 
   <ItemGroup>
     <Content Include="..\Api\appsettings.json;..\Api\appsettings.*.json" Exclude="**\appsettings.Service.json;**\appsettings.Service.*.json" Link="%(Filename)%(Extension)">
@@ -33,6 +14,10 @@
 
   <Choose>
     <When Condition="'$(ApplicationArchitecture)' == 'Distributed'">
+      <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(DotNetRuntimeVersion)" />
+      </ItemGroup>
+
       <ItemGroup>
         <None Remove="**\*.Monolithic.*" />
         <Content Remove="**\*.Monolithic.*" />

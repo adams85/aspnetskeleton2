@@ -16,6 +16,8 @@ namespace WebApp.UI
 
         public static readonly TimeSpan DefaultCacheHeaderMaxAge = TimeSpan.FromDays(7);
 
+        public bool EnableRazorRuntimeCompilation { get; set; }
+
         public StaticFileOptions StaticFiles { get; } = new StaticFileOptions();
         public BundleOptions Bundles { get; } = new BundleOptions();
         public ViewOptions Views { get; } = new ViewOptions();

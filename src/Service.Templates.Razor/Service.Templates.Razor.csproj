@@ -5,31 +5,8 @@
     <AssemblyName>WebApp.Service.Templates.Razor</AssemblyName>
     <RootNamespace>WebApp.Service</RootNamespace>
 
-    <!-- set to true to enable pre-compilation or to false to enable runtime compilation of Razor templates for release build -->
-    <RazorCompileOnBuild>true</RazorCompileOnBuild>
-    <RazorCompileOnBuild Condition="'$(Configuration)' == 'Debug'">true</RazorCompileOnBuild>
-    <RazorCompileOnPublish>$(RazorCompileOnBuild)</RazorCompileOnPublish>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
   </PropertyGroup>
-
-  <Choose>
-    <When Condition="'$(RazorCompileOnBuild)' == 'true'">
-      <PropertyGroup>
-        <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-        <DefineConstants>$(DefineConstants);RAZOR_PRECOMPILE</DefineConstants>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(DotNetRuntimeVersion)" />
-      </ItemGroup>
-
-      <ItemGroup>
-        <Content Update="Templates\**\*.cshtml">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
@@ -40,10 +17,17 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(DotNetRuntimeVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Service\Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Templates\**\*.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

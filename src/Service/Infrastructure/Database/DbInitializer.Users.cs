@@ -30,7 +30,7 @@ namespace WebApp.Service.Infrastructure.Database
                 userName: ApplicationConstants.BuiltInRootUserName,
                 password: "admin",
                 email: "admin@localhost",
-                firstName: "Built-in Local Adminstrator",
+                firstName: "Built-in Local Administrator",
                 lastName: null,
                 isApproved: true,
                 roles: new[] { adminRole },

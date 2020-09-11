@@ -1,0 +1,40 @@
+﻿@using WebApp.UI.Areas.Dashboard.Models.Layout
+
+@model WebApp.UI.Models.Layout.ILayoutModelProvider<DashboardPageLayoutModel>
+
+@{
+    Layout = "_Layout";
+}
+
+@section Metas {
+    @RenderSection("Metas", required: false)
+}
+
+@section Stylesheets {
+    @RenderSection("Stylesheets", required: false)
+}
+
+@section ScriptsHead {
+    @RenderSection("ScriptsHead", required: false)
+}
+
+<vc:dashboard-sidebar model="@Model.Layout"></vc:dashboard-sidebar>
+
+<div class="c-wrapper c-fixed-components">
+    <vc:dashboard-header model="@Model.Layout"></vc:dashboard-header>
+
+    <div class="c-body">
+        <main class="c-main">
+            <div class="container-fluid">
+                <div>
+                    @RenderBody()
+                </div>
+            </div>
+        </main>
+        <vc:dashboard-footer model="@Model.Layout"></vc:dashboard-footer>
+    </div>
+</div>
+
+@section ScriptsBody {
+    @RenderSection("ScriptsBody", required: false)
+}

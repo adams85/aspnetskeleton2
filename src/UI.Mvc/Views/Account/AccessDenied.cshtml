@@ -1,8 +1,17 @@
-﻿@{
-    ViewData["Title"] = "Access denied";
+﻿@model WebApp.UI.Models.PageModel
+
+@section Header {
+    <h3 class="mb-0">@Model.Layout.Title</h3>
 }
 
-<header>
-    <h2 class="text-danger">@ViewData["Title"]</h2>
-    <p class="text-danger">@T["You do not have access to this resource."]</p>
-</header>
+<p class="lead mb-0">
+    <strong>@T["You do not have access to this resource."]</strong>
+</p>
+
+@section Footer {
+    <div class="text-center">
+        <a asp-action="@nameof(WebApp.UI.Areas.Dashboard.Controllers.HomeController.Index)"
+           asp-controller="@(MvcHelper.GetControllerName<WebApp.UI.Areas.Dashboard.Controllers.HomeController>())"
+           asp-area="@UIConstants.DashboardAreaName">@T["Back to Dashboard"]</a>
+    </div>
+}

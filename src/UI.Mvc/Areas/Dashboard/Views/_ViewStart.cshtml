@@ -1,3 +1,14 @@
-﻿@{
-    Layout = "~/Areas/Dashboard/Views/Shared/_Layout.cshtml";
+﻿@using WebApp.UI.Models.Layout
+
+@model ILayoutModelProvider<LayoutModel>
+
+@{
+    Layout = "~/Areas/Dashboard/Views/Shared/_DashboardPageLayout.cshtml";
+
+    Model.Layout.PageInfo ??= DashboardPageHelper.GetPageByRoute(ViewContext.HttpContext);
+
+    if (Model.Layout.PageInfo != null)
+    {
+        Model.Layout.Title ??= Model.Layout.PageInfo.GetDefaultTitle(ViewContext.HttpContext, T);
+    }
 }

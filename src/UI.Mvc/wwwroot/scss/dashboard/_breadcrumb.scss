@@ -1,0 +1,22 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/_breadcrumb.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+ .breadcrumb {
+  @include borders($breadcrumb-borders);
+  border-color: $breadcrumb-border-color;
+}
+
+.breadcrumb-item {
+  display: flex;
+
+  + .breadcrumb-item {
+    &::before {
+      color: $breadcrumb-divider-color;
+    }
+  }
+}

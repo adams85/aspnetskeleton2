@@ -1,25 +1,54 @@
-﻿@inject WebApp.UI.Infrastructure.Theming.IThemeManager ThemeManager
+﻿@using WebApp.UI.Models.Layout
+
+@model ILayoutModelProvider<LayoutModel>
+
+@inject WebApp.UI.Infrastructure.Theming.IThemeManager ThemeManager
 
 @{
-    var title = (string)ViewData["Title"];
-    title = !string.IsNullOrEmpty(title) ? " - " + title : null;
-    var activeMenuItem = (string)ViewData["ActiveMenuItem"];
+    var title = Model.Layout.Title;
 
+    var currentLanguage = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
     var currentTheme = await ThemeManager.GetCurrentThemeAsync(ViewContext.HttpContext);
+
+    var bodyCssClasses = 
+        Model.Layout.BodyCssClasses is IEnumerable<string> bodyCssClassesEnumerable ?
+        string.Join(" ", bodyCssClassesEnumerable) :
+        Model.Layout.BodyCssClasses?.ToString();
+    bodyCssClasses = "c-app" + (!string.IsNullOrEmpty(bodyCssClasses) ? " " + bodyCssClasses : null);
 }
 
 <!DOCTYPE html>
-<html>
+<html lang="@currentLanguage">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+
+    <meta name="author" content="Adam Simon" />
+    <meta name="description" content="A foundation for building robust ASP.NET Core applications." />
+    <meta name="keywords" content="asp.net core" />
+
     @RenderSection("Metas", required: false)
 
-    <title>AspNetSkeleton@(title)</title>
+    <title>@Model.Layout.ApplicationName@(title != null ? " - " : null)@title</title>
     <link rel="icon" type="image/png" href="@Url.Content("~/favicon.ico")" />
 
     @* stylesheets *@
-    <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/bootstrap.css" />
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.css" />
+        <link rel="stylesheet" href="~/lib/perfect-scrollbar/css/perfect-scrollbar.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"
+              asp-fallback-href="~/lib/font-awesome/css/font-awesome.min.css"
+              asp-fallback-test-class="fa" asp-fallback-test-property="display" asp-fallback-test-value="inline-block"
+              integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+        <link href="https://cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.0/css/perfect-scrollbar.min.css" rel="stylesheet"
+              asp-fallback-href="~/lib/perfect-scrollbar/css/perfect-scrollbar.min.css"
+              asp-fallback-test-class="ps" asp-fallback-test-property="overflow" asp-fallback-test-value="hidden"
+              integrity="sha256-q65N03iTO2DDls5VNZ6/7oZ/4lo2KxwNGDDQLKjMeDg=" crossorigin="anonymous">
+    </environment>
+
     <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/site.css" />
 
     @RenderSection("Stylesheets", required: false)
@@ -27,75 +56,45 @@
     @* scripts *@
     @RenderSection("ScriptsHead", required: false)
 </head>
-<body>
-    <div id="page-wrapper">
-        @* header *@
-        <div id="page-header" class="navbar navbar-inverse navbar-fixed-top">
-            <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-main-navbar-collapse" aria-expanded="false">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-
-                    <img src="@Url.Content("~/images/logo.png")" alt="Logo" class="navbar-logo pull-left" />
-                    <a href="@Url.Action("Index", "Home", new { area = "" })" class="navbar-brand">AspNetSkeleton</a>
-                </div>
-
-                <div class="collapse navbar-collapse" id="bs-main-navbar-collapse">
-                    <ul class="nav navbar-nav navbar-left">
-                        <li class="@(activeMenuItem == "Page1" ? "active" : null)"><a href="javascript:void(0)">@T["Page 1"]</a></li>
-                        <li class="@(activeMenuItem == "Page2" ? "active" : null)"><a href="javascript:void(0)">@T["Page 2"]</a></li>
-                    </ul>
-
-                    @* TODO: donut caching? *@
-                    @await Html.PartialAsync("Partials/_VaryingMenu", activeMenuItem)
-                </div>
-            </div>
-        </div>
-        @* content *@
-        <section id="page-content" class="container">
-            @RenderBody()
-        </section>
-        @* footer *@
-        <footer id="page-footer">
-            <div class="container">
-                <div class="col-xs-6 text-left">
-                    © 2020 Adam Simon
-                </div>
-                <div class="col-xs-6 text-right">
-                </div>
-            </div>
-        </footer>
-    </div>
-
-    <div class="overlay"></div>
+<body class="@bodyCssClasses">
+    @RenderBody()
 
     @* scripts *@
     <environment include="Development">
-        <script src="~/lib/jquery/jquery.js"></script>
-        <script src="~/lib/bootstrap/assets/javascripts/bootstrap.js"></script>
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js"></script>
+        <script src="~/lib/perfect-scrollbar/dist/perfect-scrollbar.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
     </environment>
     <environment exclude="Development">
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"
-                asp-fallback-src="~/js/jquery/jquery.min.js" asp-fallback-test="window.jQuery"
-                integrity="sha512-bnIvzh6FU75ZKxp0GXLH9bewza/OIw6dLVh9ICg0gogclmYGguQJWl8U30WpbsGTqbIiAwxTsbe76DErLq5EDQ==" crossorigin="anonymous">
+        <script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous">
         </script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"
-                asp-fallback-src="~/js/bootstrap/bootstrap.min.js" asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
-                integrity="sha512-oBTprMeNEKCnqfuqKd6sbvFzmFQtlXS3e0C/RGFV0hD6QzhHV+ODfaQbAlmY6/q0ubbwlAM/nCJjkrgA3waLzg==" crossorigin="anonymous">
+        <script src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.min.js"
+                asp-fallback-src="~/lib/jquery-validation/dist/jquery.validate.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.validator"
+                integrity="sha256-+BEKmIvQ6IsL8sHcvidtDrNOdZO3C9LtFPtF2H0dOHI=" crossorigin="anonymous">
         </script>
+        <script src="//cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.11/dist/jquery.validate.unobtrusive.min.js"
+                asp-fallback-src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.validator && window.jQuery.validator.unobtrusive"
+                integrity="sha256-9GycpJnliUjJDVDqP0UEu/bsm9U+3dnQUH8+3W10vkY=" crossorigin="anonymous">
+        </script>
+        <script src="//cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.0/dist/perfect-scrollbar.min.js"
+                asp-fallback-src="~/lib/perfect-scrollbar/dist/perfect-scrollbar.min.js"
+                asp-fallback-test="window.PerfectScrollbar"
+                integrity="sha256-j/qnOBgDhyaxF4wY5NBiWdmntJy4iDCUbc5Ba2XJKEA=" crossorigin="anonymous"></script>
+        <script src="//cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
+                asp-fallback-test="window.bootstrap"
+                integrity="sha256-9nt4LsWmLI/O24lTW89IzAKuBqEZ47l/4rh1+tH/NY8=" crossorigin="anonymous"></script>
     </environment>
 
     <script src="~/bundles/js/site.js"></script>
 
     @RenderSection("ScriptsBody", required: false)
-
-    <script type="text/javascript">
-        page.confirmDeleteMessage = '@T["Do you really want to delete this item?"]';
-        page.errorText = '@T["Error"]';
-    </script>
 </body>
 </html>

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Localization;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.ResponseCaching;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -22,6 +23,7 @@ using WebApp.UI.Infrastructure.DataAnnotations;
 using WebApp.UI.Infrastructure.Hosting;
 using WebApp.UI.Infrastructure.Security;
 using WebApp.UI.Infrastructure.Theming;
+using WebApp.UI.Infrastructure.ViewFeatures;
 using WebApp.UI.Middlewares;
 using WebMarkupMin.AspNetCore3;
 
@@ -134,7 +136,11 @@ namespace WebApp.UI
                         // because we don't want the API controllers to be visible to the UI branch
                         // https://github.com/dotnet/aspnetcore/blob/v3.1.6/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L81
                         manager.ApplicationParts.RemoveAll((part, _) => part is AssemblyPart assemblyPart && assemblyPart.Assembly == typeof(Api.Startup).Assembly);
-                    })
+                    });
+
+                services.ReplaceLast(ServiceDescriptor.Singleton<IHtmlGenerator, CustomHtmlGenerator>());
+
+                mvcBuilder
                     .AddViewLocalization();
 
                 services

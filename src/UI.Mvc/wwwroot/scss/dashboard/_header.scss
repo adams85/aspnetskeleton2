@@ -1,0 +1,224 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/_header.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+ .c-header {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  min-height: $header-height;
+
+  &[class*="bg-"]  {
+    border-color: rgba($black, .1);
+  }
+
+  &.c-header-fixed {
+    position: fixed;
+    right: 0;
+    left: 0;
+    z-index: $zindex-fixed - 1;
+  }
+
+  .c-subheader {
+    border-bottom: 0;
+  }
+}
+
+.c-header-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: $header-brand-width;
+  min-height: $header-height;
+  transition: width $layout-transition-speed;
+
+  &.c-header-brand-center {
+    position: absolute;
+    top: $header-height;
+    transform: translate(-50%, -100%);
+    left: 50%;
+  }
+
+  @each $breakpoint in map-keys($grid-breakpoints) {
+    @include media-breakpoint-down($breakpoint) {
+      &.c-header-brand-#{$breakpoint}-down-center {
+        position: absolute;
+        top: $header-height;
+        transform: translate(-50%, -100%);
+        left: 50%;
+      }
+    }
+    @include media-breakpoint-up($breakpoint) {
+      &.c-header-brand-#{$breakpoint}-up-center {
+        position: absolute;
+        top: $header-height;
+        transform: translate(-50%, -100%);
+        left: 50%;
+      }
+    }
+  }
+}
+
+.c-header-toggler {
+  min-width: 50px;
+  font-size: $header-toggler-font-size;
+  background-color: $header-toggler-bg;
+  border: 0; // remove default button style
+  @include borders($header-toggler-border);
+  @include border-radius($header-toggler-border-radius);
+
+  @include hover-focus {
+    text-decoration: none;
+  }
+
+  // Opinionated: add "hand" cursor to non-disabled .navbar-toggler elements
+  &:not(:disabled):not(.c-disabled) {
+    cursor: pointer;
+  }
+
+  // Remove focus rectangle
+  &:focus {
+      outline: 0;
+  }
+}
+
+.c-header-toggler-icon {
+  display: block;
+  height: $header-toggler-font-size * 1.25;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 100% 100%;
+}
+
+.c-header-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: $header-height;
+  padding: 0;
+  margin-bottom: 0;
+  list-style: none;
+
+  .c-header-nav-item {
+    position: relative;
+  }
+
+  .c-header-nav-btn {
+    background-color: transparent;
+    border: $btn-border-width solid transparent;
+  }
+
+  .c-header-nav-link,
+  .c-header-nav-btn {
+    display: flex;
+    align-items: center;
+    padding-right: $header-nav-link-padding-x;
+    padding-left: $header-nav-link-padding-x;
+
+    .badge {
+      position: absolute;
+      top: 50%;
+      margin-top: -16px;
+      left: 50%;
+      margin-left: 0;
+    }
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .dropdown-item {
+    min-width: 180px;
+  }
+}
+
+//
+// Header variants
+//
+
+@each $variant, $variant-map in $header-variants-map {
+  $parent-element: ".c-header";
+  @if $variant != $header-default-variant {
+    $parent-element: $parent-element + $parent-element + "-" + $variant;
+  }
+
+  #{$parent-element} {
+    background: map-get($variant-map, "header-bg");
+    @include borders(map-get($variant-map, "header-border"));
+  
+    .c-subheader {
+      margin-top: -1px;
+      border-top: map-get($variant-map, "subheader-separator");
+    }
+  
+    .c-header-brand {
+      color: map-get($variant-map, "header-brand-color");
+      background-color: map-get($variant-map, "header-brand-bg");
+      @include borders(map-get($variant-map, "header-brand-border"));
+  
+      @include hover-focus {
+        color: map-get($variant-map, "header-brand-hover-color");
+      }
+    }
+  
+    .c-header-nav {
+      .c-header-nav-link,
+      .c-header-nav-btn {
+        color: map-get($variant-map, "header-color");
+  
+        @include hover-focus {
+          color: map-get($variant-map, "header-hover-color");
+        }
+  
+        &.c-disabled {
+          color: map-get($variant-map, "header-disabled-color");
+        }
+      }
+  
+      .c-show > .c-header-nav-link,
+      .c-active > .c-header-nav-link,
+      .c-header-nav-link.c-show,
+      .c-header-nav-link.c-active {
+        color: map-get($variant-map, "header-active-color");
+      }
+    }
+  
+    .c-header-toggler {
+      color: map-get($variant-map, "header-color");
+      border-color: map-get($variant-map, "header-toggler-border-color");
+    }
+  
+    .c-header-toggler-icon {
+      background-image: map-get($variant-map, "header-toggler-icon-bg");
+  
+      &:hover {
+        background-image: map-get($variant-map, "header-toggler-hover-icon-bg");
+      }
+    }
+  
+    .c-header-text {
+      color: map-get($variant-map, "header-color");
+      a {
+        color: map-get($variant-map, "header-active-color");
+  
+        @include hover-focus {
+          color: map-get($variant-map, "header-active-color");
+        }
+      }
+    }  
+  }
+}
+
+// Shadow
+
+.c-header:not(.c-header-dark).c-header-fixed {
+  border: 0;
+  box-shadow: 0 2px 2px 0 rgba(60,75,100,.14), 0 3px 1px -2px rgba(60,75,100,.12), 0 1px 5px 0 rgba(60,75,100,.2);
+}

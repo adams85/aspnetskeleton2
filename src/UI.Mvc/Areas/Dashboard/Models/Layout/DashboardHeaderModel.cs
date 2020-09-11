@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Localization;
+using WebApp.UI.Models;
+
+namespace WebApp.UI.Areas.Dashboard.Models.Layout
+{
+    public class DashboardHeaderModel
+    {
+        public List<DropDownMenuItemBase>? UserMenu { get; set; }
+
+        public abstract class DropDownMenuItemBase
+        {
+            public Func<HttpContext, bool>? IsVisible { get; set; }
+        }
+
+        public class DropDownMenuItem : DropDownMenuItemBase
+        {
+            public DropDownMenuItem() { }
+
+            public DropDownMenuItem(PageInfo page)
+            {
+                IsVisible = page.IsAccessAllowed;
+                GetTitle = page.GetDefaultTitle;
+                GetUrl = urlHelper => urlHelper.Action(page.RouteValues.Action, page.RouteValues.Controller, new { area = page.RouteValues.Area });
+            }
+
+            public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; set; } = null!;
+            public Func<IUrlHelper, string> GetUrl { get; set; } = null!;
+            public string? IconClassName { get; set; }
+        }
+
+        public class DropDownMenuHeader : DropDownMenuItemBase
+        {
+            public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; set; } = null!;
+        }
+
+        public class DropDownMenuDivider : DropDownMenuItemBase { }
+    }
+}

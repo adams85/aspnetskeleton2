@@ -1,0 +1,58 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/utilities/_display.scss
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/utilities/_spacing.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+//
+// Utilities for common `display` values
+//
+
+@each $breakpoint in map-keys($grid-breakpoints) {
+  @include media-breakpoint-down($breakpoint) {
+    $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+    .d#{$infix}-down-none { display: none !important; }
+  }
+}
+
+// Margin and Padding
+
+@each $breakpoint in map-keys($grid-breakpoints) {
+  @include media-breakpoint-up($breakpoint) {
+    $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+
+    @each $prop, $abbrev in (margin: m, padding: p) {
+      @each $size, $length in $spacers {
+        .#{$abbrev}fs#{$infix}-#{$size} {
+          #{$prop}-left: $length !important;
+        }
+        .#{$abbrev}fe#{$infix}-#{$size} {
+          #{$prop}-right: $length !important;
+        }
+      }
+    }
+
+    // Negative margins (e.g., where `.mb-n1` is negative version of `.mb-1`)
+    @each $size, $length in $spacers {
+      @if $size != 0 {
+        .mfs#{$infix}-n#{$size} {
+          margin-left: -$length !important;
+        }
+        .mfe#{$infix}-n#{$size} {
+          margin-right: -$length !important;
+        }
+      }
+    }
+
+    // Some special margin utils for flex, work only with flex-direction: row
+    .mfs#{$infix}-auto {
+      margin-left: auto !important;
+    }
+    .mfe#{$infix}-auto {
+      margin-right: auto !important;
+    }
+  }
+}

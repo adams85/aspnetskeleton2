@@ -1,0 +1,18 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/mixins/_avatars.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+ @mixin avatar($width, $status-width) {
+  width: $width;
+  height: $width;
+  font-size: $width / 2.5;
+
+  .c-avatar-status {
+    width: $status-width;
+    height: $status-width;
+  }
+}

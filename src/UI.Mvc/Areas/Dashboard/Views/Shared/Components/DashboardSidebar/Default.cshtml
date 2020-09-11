@@ -1,0 +1,112 @@
+﻿@using static WebApp.UI.Areas.Dashboard.Models.Layout.DashboardSidebarModel
+
+@model WebApp.UI.Areas.Dashboard.Models.Layout.DashboardPageLayoutModel
+
+@{
+    var routeValues = ViewContext.HttpContext.GetCurrentRouteValues();
+}
+
+<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+    <div class="c-sidebar-brand">
+        <div class="c-sidebar-brand-full">
+            <div class="logo-wrapper d-flex flex-row">
+                <div class="logo-text flex-grow-1 text-center">
+                    <span>AspNet</span><br /><strong>Skeleton</strong>
+                </div>
+            </div>
+        </div>
+        <div class="c-sidebar-brand-minimized">
+            <img class="logo-img" src="~/images/logo-dark.png" alt="Logo" />
+        </div>
+    </div>
+
+    <ul class="c-sidebar-nav">
+        @{ RenderSidebarNavGroups(Model.Sidebar.Groups ?? s_defaultGroups, routeValues); }
+    </ul>
+    <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent" data-class="c-sidebar-minimized"></button>
+</div>
+
+@functions {
+    private static readonly List<NavigationGroup> s_defaultGroups = new List<NavigationGroup>
+    {
+#pragma warning disable IDE1006 // Naming Styles
+        new NavigationGroup
+        {
+            Items =
+            {
+                new NavigationItem(OverviewPage) { IconClassName = "fa-tachometer" },
+            }
+        }
+#pragma warning restore IDE1006 // Naming Styles
+    };
+
+    void RenderSidebarNavGroups(List<NavigationGroup> groups, (string, string, string) routeValues)
+    {
+        @for (int i = 0, n = groups.Count; i < n; i++)
+        {
+            var group = groups[i];
+
+            if (group.IsVisible != null && !group.IsVisible(ViewContext.HttpContext))
+                continue;
+
+            @if (group.GetTitle != null)
+            {
+                <li class="c-sidebar-nav-title">@group.GetTitle(ViewContext.HttpContext, T)</li>
+            }
+
+            RenderSidebarNavItems(group.Items, routeValues);
+        }
+    }
+
+    void RenderSidebarNavItems(List<NavigationItemBase> items, (string, string, string) routeValues)
+    {
+        for (int i = 0, n = items.Count; i < n; i++)
+        {
+            var itemBase = items[i];
+
+            if (itemBase.IsVisible != null && !itemBase.IsVisible(ViewContext.HttpContext))
+                continue;
+
+            if (itemBase is NavigationItem item)
+            {
+                RenderSidebarNavItem(item, routeValues);
+            }
+            else if (itemBase is NavigationDropDownItem dropDownItem)
+            {
+                RenderSidebarNavDropDown(dropDownItem, routeValues);
+            }
+        }
+    }
+
+    void RenderSidebarNavItem(NavigationItem item, (string, string, string) routeValues)
+    {
+        var isActive = item.IsActive(ViewContext.HttpContext, routeValues);
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link @(isActive ? "c-active" : null)" href="@item.GetUrl(Url)">
+                @if (item.IconClassName != null)
+                {
+                    <i class="fa @item.IconClassName c-sidebar-nav-icon" aria-hidden="true"></i>
+                }
+                @item.GetTitle(ViewContext.HttpContext, T)
+            </a>
+        </li>
+    }
+
+    void RenderSidebarNavDropDown(NavigationDropDownItem item, (string, string, string) routeValues)
+    {
+        var isShown = item.IsShown(ViewContext.HttpContext, routeValues);
+        <li class="c-sidebar-nav-item c-sidebar-nav-dropdown @(isShown ? "c-show" : null)">
+            <a class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
+                @if (item.IconClassName != null)
+                {
+                    <i class="fa @item.IconClassName c-sidebar-nav-icon" aria-hidden="true"></i>
+                }
+                @item.GetTitle(ViewContext.HttpContext, T)
+            </a>
+
+            <ul class="c-sidebar-nav-dropdown-items">
+                @{ RenderSidebarNavItems(item.Items, routeValues); }
+            </ul>
+        </li>
+    }
+}

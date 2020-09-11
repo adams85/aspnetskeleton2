@@ -1,0 +1,18 @@
+﻿.input-group-text {
+  i.fa {
+    width: $spacer;
+    text-align: center;
+  }
+}
+
+// MVC validation
+
+.validation-summary-errors {
+  @extend .alert, .alert-danger;
+
+  ul {
+    margin-bottom: 0;
+    list-style: none;
+    padding: 0;
+  }
+}

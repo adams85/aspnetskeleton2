@@ -1,0 +1,21 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/_app.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+.c-app {
+  overflow-x: hidden;
+
+  $app-color: $gray-base;
+  color: $app-color;
+  background-color: $body-bg;
+
+  --color: #{$app-color};
+
+  @each $color, $value in $theme-colors {
+    --#{$color}: #{$value};
+  } 
+}

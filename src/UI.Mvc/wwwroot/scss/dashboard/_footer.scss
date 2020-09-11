@@ -1,0 +1,41 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/_footer.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+ .c-footer {
+  display: flex;
+  flex: 0 0 $footer-height;
+  flex-wrap: wrap;
+  align-items: center;
+  height: $footer-height;
+  padding: 0 $spacer;
+
+  &[class*="bg-"] {
+    border-color: rgba($black, .1);
+  }
+
+  &.c-footer-fixed {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: $zindex-fixed;
+  }
+}
+
+@each $variant, $variant-map in $footer-variants-map {
+  $parent-element: ".c-footer";
+  @if $variant != $header-default-variant {
+    $parent-element: $parent-element + $parent-element + "-" + $variant;
+  }
+
+  #{$parent-element} {
+    color: map-get($variant-map, "footer-color");
+    background: map-get($variant-map, "footer-bg");
+    @include borders(map-get($variant-map, "footer-borders"));
+  }
+}

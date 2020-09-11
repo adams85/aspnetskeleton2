@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using WebApp.UI.Helpers;
 using WebApp.UI.Models.Home;
 
 namespace WebApp.UI.Controllers
@@ -8,7 +9,10 @@ namespace WebApp.UI.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction(
+                nameof(Areas.Dashboard.Controllers.HomeController.Index),
+                MvcHelper.GetControllerName<Areas.Dashboard.Controllers.HomeController>(),
+                new { area = UIConstants.DashboardAreaName, id = (object?)null });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

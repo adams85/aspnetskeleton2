@@ -1,0 +1,96 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/layouts/_default.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+.c-app {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
+
+// IE10&11 Flexbox fix
+@media all and (-ms-high-contrast: none) {
+  html {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.c-wrapper {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+
+  &:not(.c-wrapper-fluid) {
+
+    .c-subheader-fixed {
+      position: relative;
+    }
+
+    .c-header-fixed {
+      position: sticky;
+      top: 0;
+
+      @media all and (-ms-high-contrast: none) {
+        position: fixed;
+        margin: inherit;
+
+        ~ .c-body {
+          margin-top: 104px;
+        }
+      }
+    }
+
+    .c-footer-fixed {
+      position: sticky;
+      bottom: 0;
+
+      @media all and (-ms-high-contrast: none) {
+        position: fixed;
+        margin: inherit;
+
+        ~ .c-body {
+          margin-bottom: 49px;
+        }
+      }
+    }
+
+    .c-body {
+      // deprecate v4
+      // fix footer position to avoid breaking change.
+      display: flex;
+      flex-direction: column;
+      // ---
+      flex-grow: 1;
+    }
+  }
+  // deprecate v4
+  &.c-wrapper-fluid {
+    min-height: 100vh;
+
+    .c-header-fixed {
+      margin: inherit;
+    }
+  }
+}
+
+.c-main {
+  flex-basis: auto;
+  flex-shrink: 0;
+  flex-grow: 1;
+  min-width: 0;
+  padding-top: 2 * $spacer;
+
+  > .container-fluid {
+    @include media-breakpoint-up(md) {
+      padding-right: $grid-gutter-width;
+      padding-left: $grid-gutter-width;
+    }
+  }
+}

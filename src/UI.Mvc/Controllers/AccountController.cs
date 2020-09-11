@@ -15,6 +15,7 @@ using WebApp.Service.Users;
 using WebApp.UI.Filters;
 using WebApp.UI.Infrastructure.Localization;
 using WebApp.UI.Infrastructure.Security;
+using WebApp.UI.Models;
 using WebApp.UI.Models.Account;
 
 namespace WebApp.UI.Controllers
@@ -65,9 +66,9 @@ namespace WebApp.UI.Controllers
         [AnonymousOnly]
         public IActionResult Login(string? returnUrl = null)
         {
-            ViewData["ReturnUrl"] = returnUrl;
-            ViewData["ActiveMenuItem"] = "Login";
-            return View();
+            var model = new LoginModel { ReturnUrl = returnUrl };
+
+            return View(model);
         }
 
         [HttpPost]
@@ -85,8 +86,8 @@ namespace WebApp.UI.Controllers
                 ModelState.AddModelError("", T["Incorrect e-mail address or password."]);
             }
 
-            ViewData["ReturnUrl"] = returnUrl;
-            ViewData["ActiveMenuItem"] = "Login";
+            model.ReturnUrl = returnUrl;
+
             return View(model);
         }
 
@@ -108,8 +109,10 @@ namespace WebApp.UI.Controllers
         [AnonymousOnly]
         public IActionResult Register()
         {
-            ViewData["ActiveMenuItem"] = "Register";
-            return View();
+            if (!_settingsProvider.EnableRegistration())
+                return NotFound();
+
+            return View(new RegisterModel());
         }
 
         [HttpPost]
@@ -131,7 +134,6 @@ namespace WebApp.UI.Controllers
                 AddModelError(ModelState, status, passwordRequirements);
             }
 
-            ViewData["ActiveMenuItem"] = "Register";
             return View(model);
 
             void AddModelError(ModelStateDictionary modelState, CreateUserStatus status, PasswordRequirementsData? passwordRequirements)
@@ -159,14 +161,13 @@ namespace WebApp.UI.Controllers
         [AnonymousOnly]
         public async Task<IActionResult> Verify(string u, string v)
         {
-            bool? model;
+            var model = new SingleValuePageModel<bool?>();
 
             if (u != null && v != null)
-                model = await _accountManager.VerifyUserAsync(u, v, HttpContext.RequestAborted);
+                model.Value = await _accountManager.VerifyUserAsync(u, v, HttpContext.RequestAborted);
             else
-                model = null;
+                model.Value = null;
 
-            ViewData["ActiveMenuItem"] = "Verification";
             return View(model);
         }
 
@@ -179,7 +180,6 @@ namespace WebApp.UI.Controllers
             if (s != null)
                 model.Success = Convert.ToBoolean(int.Parse(s));
 
-            ViewData["ActiveMenuItem"] = "Password Reset";
             return View(model);
         }
 
@@ -195,7 +195,6 @@ namespace WebApp.UI.Controllers
                 return RedirectToAction(null, new { s = Convert.ToInt32(success) });
             }
 
-            ViewData["ActiveMenuItem"] = "Password Reset";
             return View(model);
         }
 
@@ -208,7 +207,6 @@ namespace WebApp.UI.Controllers
             if (s != null)
                 model.Success = Convert.ToBoolean(int.Parse(s));
 
-            ViewData["ActiveMenuItem"] = "New Password";
             return View(model);
         }
 
@@ -225,18 +223,17 @@ namespace WebApp.UI.Controllers
                 if (status != ChangePasswordStatus.InvalidNewPassword)
                     return RedirectToAction(null, new { s = Convert.ToInt32(status == ChangePasswordStatus.Success) });
 
-                AddModelError(ModelState, status, passwordRequirements);
+                AddModelError(status, passwordRequirements);
             }
 
-            ViewData["ActiveMenuItem"] = "New Password";
             return View(model);
 
-            void AddModelError(ModelStateDictionary modelState, ChangePasswordStatus status, PasswordRequirementsData? passwordRequirements)
+            void AddModelError(ChangePasswordStatus status, PasswordRequirementsData? passwordRequirements)
             {
                 switch (status)
                 {
                     case ChangePasswordStatus.InvalidNewPassword:
-                        modelState.AddModelError(nameof(SetPasswordModel.NewPassword), T.LocalizePasswordRequirements(passwordRequirements));
+                        ModelState.AddModelError(nameof(SetPasswordModel.NewPassword), T.LocalizePasswordRequirements(passwordRequirements));
                         return;
                 }
             }
@@ -245,7 +242,7 @@ namespace WebApp.UI.Controllers
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {
-            return View();
+            return View(new PageModel());
         }
 
         #region Helpers

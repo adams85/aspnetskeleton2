@@ -1,73 +1,83 @@
 ﻿@model WebApp.UI.Models.Account.RegisterModel
 
-@inject ISettingsProvider SettingsProvider
-
-<div class="page-header">
-<h1>@T["Create an Account"]</h1>
-</div>
-<div>
-@if (SettingsProvider.EnableRegistration())
-{
-    <form method="post" class="form-horizontal" role="form">
-        <div class="row">
-            <div class="col-sm-offset-2 col-sm-4" asp-validation-summary="ModelOnly"></div>
-        </div>
-
-        <div class="row form-group">
-            <label asp-for="FirstName" class="col-sm-2 control-label"></label>
-            <div class="col-sm-4">
-                <input type="text" asp-for="FirstName" class="form-control" autofocus />
-                <span asp-validation-for="FirstName"></span>
-            </div>
-        </div>
-
-        <div class="row form-group">
-            <label asp-for="LastName" class="col-sm-2 control-label"></label>
-            <div class="col-sm-4">
-                <input type="text" asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName"></span>
-            </div>
-        </div>
-
-        <div class="row form-group">
-            <label asp-for="UserName" class="col-sm-2 control-label"></label>
-            <div class="col-sm-4">
-                <input type="text" asp-for="UserName" class="form-control" />
-                <span asp-validation-for="UserName"></span>
-            </div>
-        </div>
-
-        <div class="row form-group">
-            <label asp-for="Password" class="col-sm-2 control-label"></label>
-            <div class="col-sm-4">
-                <input type="password" asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password"></span>
-            </div>
-        </div>
-
-        <div class="row form-group">
-            <label asp-for="ConfirmPassword" class="col-sm-2 control-label"></label>
-            <div class="col-sm-4">
-                <input type="password" asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword"></span>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-primary">@T["Create account"]</button>
-            </div>
-        </div>    
-    </form>
+@section Header {
+    <h3 class="mb-0">@Model.Layout.Title</h3>
 }
-else
-{
-    <p class="lead text-warning">
-        @T["Sorry, registration is closed currently."]
-    </p>
-}
-</div>
 
-@section ScriptsBody {
-    @await Html.PartialAsync("Partials/_ValidationScripts")
+<form class="needs-validation" method="post" novalidate>
+    <p class="text-muted">@T["Fill in the following form to create a user account in the application"]</p>
+
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-id-card-o" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="FirstName" type="text" placeholder="@Html.DisplayNameFor(m => m.FirstName)" autofocus />
+        <div class="invalid-feedback">
+            <span asp-validation-for="FirstName"></span>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-id-card-o" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="LastName" type="text" placeholder="@Html.DisplayNameFor(m => m.LastName)" />
+        <div class="invalid-feedback">
+            <span asp-validation-for="LastName"></span>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-envelope-o" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="UserName" type="text" placeholder="@Html.DisplayNameFor(m => m.UserName)" />
+        <div class="invalid-feedback">
+            <span asp-validation-for="UserName"></span>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="Password" type="password" placeholder="@Html.DisplayNameFor(m => m.Password)" />
+        <div class="invalid-feedback">
+            <span asp-validation-for="Password"></span>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="ConfirmPassword" type="password" placeholder="@Html.DisplayNameFor(m => m.ConfirmPassword)" />
+        <div class="invalid-feedback">
+            <span asp-validation-for="ConfirmPassword"></span>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-6">
+            <button class="btn btn-primary px-4" type="submit">@T["Create account"]</button>
+        </div>
+    </div>
+</form>
+
+@section Footer {
+    <div class="text-center">
+        <a asp-action="@LoginPage.Action" asp-controller="@LoginPage.Controller" asp-area="@LoginPage.Area">@T["Back to Login"]</a>
+    </div>
 }

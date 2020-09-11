@@ -1,48 +1,62 @@
 ﻿@model WebApp.UI.Models.Account.LoginModel
 
-<div class="page-header">
-    <h1>@T["Login to Your Account"]</h1>
-</div>
-<div>
-    <form asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal" role="form">
-        <div class="row">
-            <div class="col-sm-offset-2 col-sm-4" asp-validation-summary="ModelOnly"></div>
-        </div>
+@inject ISettingsProvider SettingsProvider
 
-        <div class="row form-group">
-            <label asp-for="UserName" class="col-sm-2 control-label"></label>
-            <div class="col-sm-4">
-                <input asp-for="UserName" type="text" class="form-control" autofocus />
-                <span asp-validation-for="UserName"></span>
-            </div>
-        </div>
+@section Header {
+    <h3 class="mb-0">@Model.Layout.Title</h3>
+}
 
-        <div class="row form-group">
-            <label asp-for="Password" class="col-sm-2 control-label"></label>
-            <div class="col-sm-4">
-                <input asp-for="Password" type="password" class="form-control" />
-                <span asp-validation-for="Password"></span>
-            </div>
-            <div class="col-sm-6 form-text">
-                <a asp-action="ResetPassword">@T["Forgot your password?"]</a>
-            </div>
-        </div>
+<form class="needs-validation" method="post" asp-route-returnUrl="@Model.ReturnUrl" novalidate>
+    <p class="text-muted">@T["Sign in to your account"]</p>
 
-        <div class="row form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <input asp-for="RememberMe" type="checkbox" />
-                <label asp-for="RememberMe"></label>
-            </div>
-        </div>
+    <div asp-validation-summary="ModelOnly"></div>
 
-        <div class="row form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-primary">@T["Login"]</button>
-            </div>
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-envelope-o" aria-hidden="true"></i>
+            </span>
         </div>
-    </form>
-</div>
+        <input class="form-control rounded-right" asp-for="UserName" type="text" placeholder="@Html.DisplayNameFor(m => m.UserName)" autofocus />
+        <div class="invalid-feedback">
+            <span asp-validation-for="UserName"></span>
+        </div>
+    </div>
 
-@section ScriptsBody {
-    @await Html.PartialAsync("Partials/_ValidationScripts")
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="Password" type="password" placeholder="@Html.DisplayNameFor(m => m.Password)" />
+        <div class="invalid-feedback">
+            <span asp-validation-for="Password"></span>
+        </div>
+    </div>
+
+    <div class="form-group mb-3">
+        <div class="form-check">
+            <input class="form-check-input" asp-for="RememberMe" type="checkbox" />
+            <label class="form-check-label" asp-for="RememberMe"></label>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-6">
+            <button class="btn btn-primary px-4" type="submit">@T["Login"]</button>
+        </div>
+        <div class="col-6 text-right">
+            <a class="btn btn-link px-0" asp-action="@ResetPasswordPage.Action" asp-controller="@ResetPasswordPage.Controller" asp-area="@ResetPasswordPage.Area">@T["Forgot your password?"]</a>
+        </div>
+    </div>
+</form>
+
+@if (SettingsProvider.EnableRegistration())
+{
+    @section Footer {
+        <div class="text-center">
+            <a asp-action="@RegisterPage.Action" asp-controller="@RegisterPage.Controller" asp-area="@RegisterPage.Area">@T["Don't you have an account yet?"]</a>
+        </div>
+    }
 }

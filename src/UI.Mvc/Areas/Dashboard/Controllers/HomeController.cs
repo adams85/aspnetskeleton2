@@ -7,7 +7,7 @@ using WebApp.UI.Areas.Dashboard.Models.Home;
 namespace WebApp.UI.Areas.Dashboard.Controllers
 {
     [Authorize]
-    [Area("Dashboard")]
+    [Area(UIConstants.DashboardAreaName)]
     public class HomeController : Controller
     {
         private readonly IClock _clock;
@@ -19,15 +19,15 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
 
         public IActionResult Index()
         {
-            var model = new HomeIndexModel();
+            var utcNow = _clock.UtcNow;
+            var midnight = utcNow.Date + TimeSpan.FromDays(1);
 
-            var now = _clock.UtcNow.ToLocalTime();
-            var midnight = now.Date + TimeSpan.FromDays(1);
+            var model = new IndexModel
+            {
+                UtcNow = utcNow,
+                TimeToMidnight = midnight - utcNow
+            };
 
-            model.TimeToMidnight = midnight - now;
-
-            ViewData["ActiveMenuItem"] = "Dashboard";
-            ViewData["ActiveSubMenuItem"] = "Overview";
             return View(model);
         }
     }

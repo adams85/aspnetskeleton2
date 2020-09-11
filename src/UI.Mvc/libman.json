@@ -4,26 +4,33 @@
   "libraries": [
     {
       "provider": "jsdelivr",
-      "library": "bootstrap-sass@3.4.1",
-      "destination": "wwwroot/lib/bootstrap/"
-    },
-    {
       "library": "jquery@3.5.1",
       "destination": "wwwroot/lib/jquery/"
     },
     {
-      "library": "jquery-validate@1.19.1",
-      "destination": "wwwroot/lib/jquery-validation/",
-      "files": [
-        "additional-methods.js",
-        "additional-methods.min.js",
-        "jquery.validate.js",
-        "jquery.validate.min.js"
-      ]
+      "provider": "jsdelivr",
+      "library": "jquery-validation@1.19.2",
+      "destination": "wwwroot/lib/jquery-validation/"
     },
     {
+      "provider": "jsdelivr",
       "library": "jquery-validation-unobtrusive@3.2.11",
       "destination": "wwwroot/lib/jquery-validation-unobtrusive/"
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "bootstrap@4.5.2",
+      "destination": "wwwroot/lib/bootstrap/"
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "font-awesome@4.7.0",
+      "destination": "wwwroot/lib/font-awesome/"
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "perfect-scrollbar@1.5.0",
+      "destination": "wwwroot/lib/perfect-scrollbar/"
     }
   ]
 }

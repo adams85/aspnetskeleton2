@@ -1,0 +1,18 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/variables/components/_breadcrumb.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+// Breadcrumbs
+$breadcrumb-margin-bottom:  1.5rem !default;
+
+$breadcrumb-border-radius:  0 !default;
+
+$breadcrumb-borders:  ( bottom: 1px solid ) !default;
+
+// Default theme
+$breadcrumb-bg:             transparent !default;
+$breadcrumb-border-color:   $border-color !default;

@@ -1,0 +1,748 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/_sidebar.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+// stylelint-disable selector-max-class, declaration-no-important, selector-max-compound-selectors, function-url-quotes, selector-max-combinators
+.c-sidebar {
+  display: flex;
+  // $sidebar-width is the width of the columns
+  flex: 0 0 $sidebar-width;
+  flex-direction: column;
+  // put the nav on the left
+  order: -1;
+  width: $sidebar-width;
+  padding: $sidebar-padding;
+  box-shadow: none;
+
+  @include media-breakpoint-down(breakpoint-before($mobile-breakpoint)) {
+    // Some of our components use this property to detect if the sidebar has mobile behavior.
+    --is-mobile: true;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: $zindex-fixed + 1;
+  }
+
+  &:not(.c-sidebar-right){
+    margin-left: - $sidebar-width;
+  }
+  &.c-sidebar-right {
+    order: 99;
+    margin-right: - $sidebar-width;
+  }
+
+  &[class*="bg-"]  {
+    border-color: rgba($black, .1);
+  }
+
+  @each $width, $value in $sidebar-widths {
+    &.c-sidebar-#{$width} {
+      flex: 0 0 $value;
+      width: $value;
+
+      &:not(.c-sidebar-right){
+        margin-left: - $value;
+      }
+      &.c-sidebar-right {
+        margin-right: - $value;
+      }
+    }
+  }
+
+  &.c-sidebar-fixed {
+    @include media-breakpoint-up($mobile-breakpoint) {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      z-index: $zindex-fixed;
+
+      &:not(.c-sidebar-right) {
+        left: 0;
+      }
+
+      &.c-sidebar-right {
+        right: 0;
+      }
+    }
+  }
+
+  &.c-sidebar-overlaid {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: $zindex-fixed + 2;
+
+    &:not(.c-sidebar-right) {
+      left: 0;
+    }
+
+    &.c-sidebar-right {
+      right: 0;
+    }
+  }
+}
+
+//
+// Sidebar components
+//
+
+.c-sidebar-close {
+  position: absolute;
+  width: $sidebar-brand-height;
+  height: $sidebar-brand-height;
+  background: transparent;
+  border: 0;
+  right: 0;
+}
+
+.c-sidebar-brand {
+  display: flex;
+  flex: 0 0 $sidebar-brand-height;
+  align-items: center;
+  justify-content: center;
+
+  .c-sidebar-brand-minimized {
+    display: none;
+  }
+}
+
+.c-sidebar-header {
+  flex: 0 0 $sidebar-header-height;
+  padding: $sidebar-header-padding-y $sidebar-header-padding-x;
+  text-align: center;
+  transition: $layout-transition-speed;
+}
+
+// Sidebar navigation
+
+.c-sidebar-nav {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 0;
+  margin-bottom: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  list-style: none;
+
+  // Scrollbar
+
+  &.ps {
+    // Firefox
+    overflow: -moz-scrollbars-none;
+    // IE 10+
+    -ms-overflow-style: none;
+    // Chrome, Edge, Safari, Opera
+    &::-webkit-scrollbar {
+      width: 0 !important;
+    }
+  }
+}
+
+.c-sidebar-nav-title {
+  padding: $sidebar-nav-title-padding-y $sidebar-nav-title-padding-x;
+  margin-top: $sidebar-nav-title-margin-top;
+  font-size: 80%;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: $layout-transition-speed;
+}
+
+.c-sidebar-nav-divider {
+  height: 10px;
+  transition: height $layout-transition-speed;
+}
+
+.c-sidebar-nav-item {
+  width: inherit;
+}
+
+.c-sidebar-nav-link {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  padding: $sidebar-nav-link-padding-y $sidebar-nav-link-padding-x;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background $layout-transition-speed, color $layout-transition-speed;
+  @if $enable-sidebar-nav-rounded {
+    border-radius: $border-radius;
+  }
+
+  .badge {
+    margin-left: auto;
+  }
+
+  &.c-disabled {
+    cursor: $cursor-disabled;
+  }
+  @media (hover: hover), (-ms-high-contrast: none) {
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+.c-sidebar-nav-icon {
+  flex: 0 0 $sidebar-nav-icon-width;
+  height: ($font-size-base * 1.25);
+  font-size: ($font-size-base * 1.25);
+  text-align: center;
+  transition: $layout-transition-speed;
+  fill: currentColor;
+
+  &:first-child {
+    margin-left: - $sidebar-nav-link-padding-x;
+  }
+}
+
+.c-sidebar-nav-dropdown {
+  position: relative;
+  transition: background $layout-transition-speed ease-in-out;
+
+  &.c-show {
+    @if $enable-sidebar-nav-rounded {
+      border-radius: $border-radius;
+    }
+    > .c-sidebar-nav-dropdown-items {
+      max-height: 1500px;
+    }
+
+    > .c-sidebar-nav-dropdown-toggle::after {
+      transform: rotate(-90deg);
+    }
+
+    + .c-sidebar-nav-dropdown.c-show {
+      margin-top: 1px;
+    }
+  }
+}
+
+.c-sidebar-nav-dropdown-toggle {
+  @extend .c-sidebar-nav-link;
+  cursor: pointer;
+
+  &::after {
+    display: block;
+    flex: 0 8px;
+    height: 8px;
+    content: "";
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform $layout-transition-speed;
+
+    margin-left: auto;
+  }
+
+  .badge {
+    margin-right: $sidebar-nav-link-padding-x;
+  }
+}
+
+.c-sidebar-nav-dropdown-items {
+  max-height: 0;
+  padding: 0;
+  overflow-y: hidden;
+  list-style: none;
+  transition: max-height $layout-transition-speed ease-in-out;
+
+  .c-sidebar-nav-link {
+    padding-left: $sidebar-nav-icon-width;
+
+    .c-sidebar-nav-icon {
+      margin-left: - $sidebar-nav-icon-width;
+    }
+  }
+}
+
+.c-sidebar-nav-label {
+  display: flex;
+  padding: ($sidebar-nav-link-padding-y / 4) $sidebar-nav-link-padding-x;
+  transition: $layout-transition-speed;
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  .c-sidebar-nav-icon {
+    margin-top: 1px;
+  }
+}
+
+.c-sidebar-footer {
+  flex: 0 0 $sidebar-footer-height;
+  padding: $sidebar-footer-padding-y $sidebar-footer-padding-x;
+  transition: $layout-transition-speed;
+}
+
+.c-sidebar-minimizer {
+  display: flex;
+  flex: 0 0 $sidebar-minimizer-height;
+  justify-content: flex-end;
+  width: inherit;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+
+  @include media-breakpoint-down(breakpoint-before($mobile-breakpoint)) {
+    display: none;
+  }
+
+  &::before {
+    display: block;
+    width: $sidebar-minimizer-height;
+    height: $sidebar-minimizer-height;
+    content: "";
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: $sidebar-minimizer-height / 4;
+    transition: $layout-transition-speed;
+  }
+
+  &:focus,
+  &.c-focus {
+    outline: 0;
+  }
+
+  .c-sidebar-right & {
+    justify-content: flex-start;
+    &::before {
+      transform: rotate(-180deg);
+    }
+  }
+}
+
+// Modal background
+.c-sidebar-backdrop {
+  @include media-breakpoint-down(breakpoint-before($mobile-breakpoint)) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: $zindex-fixed;
+    width: 100vw;
+    height: 100vh;
+    background-color: $sidebar-backdrop-bg;
+    transition: $layout-transition-speed;
+
+    // Fade for backdrop
+    &.c-fade { opacity: 0; }
+    &.c-show { opacity: $sidebar-backdrop-opacity; }
+  }
+}
+
+// Minimized Sidebar
+
+.c-sidebar-minimized {
+  @include media-breakpoint-up($mobile-breakpoint) {
+    z-index: $zindex-fixed + 1;
+    flex: 0 0 $sidebar-minimized-width;
+
+    &.c-sidebar-fixed {
+      z-index: $zindex-fixed + 1;
+      width: $sidebar-minimized-width;
+    }
+
+    &:not(.c-sidebar-right){
+      margin-left: - $sidebar-minimized-width;
+    }
+    &.c-sidebar-right {
+      margin-right: - $sidebar-minimized-width;
+    }
+
+    .c-sidebar-brand-full {
+      display: none;
+    }
+
+    .c-sidebar-brand-minimized {
+      display: block;
+    }
+
+    .c-sidebar-nav {
+      padding-bottom: $sidebar-minimizer-height;
+      overflow: visible;
+    }
+
+    .c-d-minimized-none,
+    .c-sidebar-nav-divider,
+    .c-sidebar-nav-label,
+    .c-sidebar-nav-title,
+    .c-sidebar-footer,
+    .c-sidebar-form,
+    .c-sidebar-header {
+      height: 0;
+      padding: 0;
+      margin: 0;
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    // Temporary fix for this issue: https://github.com/coreui/coreui-free-bootstrap-admin-template/issues/404
+    // TODO: find better solution
+    .c-sidebar-minimizer {
+      position: fixed;
+      bottom: 0;
+      width: inherit;
+
+      &::before {
+        transform: rotate(-180deg);
+      }
+    }
+
+    &.c-sidebar-right .c-sidebar-minimizer::before {
+      transform: rotate(0deg);
+    }
+
+    &.c-sidebar-right .c-sidebar-nav {
+      > .c-sidebar-nav-item:hover,
+      > .c-sidebar-nav-dropdown:hover {
+        margin-left: - $sidebar-width;
+      }
+    }
+
+    .c-sidebar-nav-link,
+    .c-sidebar-nav-dropdown-toggle {
+      overflow: hidden;
+      white-space: nowrap;
+      border-left: 0;
+
+      &:hover {
+        width: $sidebar-width + $sidebar-minimized-width;
+      }
+    }
+
+    .c-sidebar-nav-dropdown-toggle::after {
+      display: none;
+    }
+
+    .c-sidebar-nav-dropdown-items {
+      .c-sidebar-nav-link {
+        width: $sidebar-width;
+      }
+    }
+
+    // stylelint-disable-next-line no-duplicate-selectors
+    .c-sidebar-nav > .c-sidebar-nav-dropdown {
+      position: relative;
+
+      > .c-sidebar-nav-dropdown-items {
+        display: none;
+
+        .c-sidebar-nav-dropdown:not(.c-show) > .c-sidebar-nav-dropdown-items {
+          display: none;
+        }
+      }
+      .c-sidebar-nav-dropdown-items {
+        max-height: 1500px;
+      }
+
+
+      // stylelint-disable-next-line no-duplicate-selectors
+      &:hover {
+        width: $sidebar-width + $sidebar-minimized-width;
+        overflow: visible;
+
+        > .c-sidebar-nav-dropdown-items {
+          position: absolute;
+          display: inline;
+
+          left: $sidebar-minimized-width;
+        }
+      }
+    }
+
+    &.c-sidebar-right > .c-sidebar-nav-dropdown:hover > .c-sidebar-nav-dropdown-items {
+      left: 0;
+    }
+  }
+}
+
+// Responsive behavior
+
+@each $breakpoint in map-keys($grid-breakpoints) {
+  @include media-breakpoint-up($breakpoint) {
+    $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+    .c-sidebar.c-sidebar#{$infix}-show,
+    .c-sidebar.c-sidebar-show {
+      &:not(.c-sidebar-right){
+        margin-left: 0;
+        @include media-breakpoint-up($mobile-breakpoint) {
+          &.c-sidebar-fixed {
+            ~ .c-wrapper {
+              margin-left: $sidebar-width;
+            }
+            @each $width, $value in $sidebar-widths {
+              &.c-sidebar-#{$width} {
+                ~ .c-wrapper {
+                  margin-left: $value;
+                }
+              }
+            }
+            &.c-sidebar-minimized {
+              ~ .c-wrapper {
+                margin-left: $sidebar-minimized-width;
+              }
+            }
+          }
+        }
+      }
+      &.c-sidebar-right {
+        margin-right: 0;
+        @include media-breakpoint-up($mobile-breakpoint) {
+          &.c-sidebar-fixed {
+            ~ .c-wrapper {
+              margin-right: $sidebar-width;
+            }
+            @each $width, $value in $sidebar-widths {
+              &.c-sidebar-#{$width} {
+                ~ .c-wrapper {
+                  margin-right: $value;
+                }
+              }
+            }
+            &.c-sidebar-minimized {
+              ~ .c-wrapper {
+                margin-right: $sidebar-minimized-width;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@each $variant, $variant-map in $sidebar-variants-map {
+  $parent-element: ".c-sidebar";
+  @if $variant != $header-default-variant {
+    $parent-element: $parent-element + $parent-element + "-" + $variant;
+  }
+
+  #{$parent-element} {
+    color: map-get($variant-map, "sidebar-color");
+    background: map-get($variant-map, "sidebar-bg");
+  
+    @include borders(map-get($variant-map, "sidebar-borders"));
+  
+    &.c-sidebar-right {
+      @include borders(map-get($variant-map, "sidebar-borders"),true);
+    }
+  
+    .c-sidebar-close {
+      color: map-get($variant-map, "sidebar-color");
+    }
+  
+    .c-sidebar-brand {
+      color: map-get($variant-map, "sidebar-brand-color");
+      background: map-get($variant-map, "sidebar-brand-bg");
+    }
+  
+    .c-sidebar-header {
+      background: map-get($variant-map, "sidebar-header-bg");
+    }
+  
+    .c-sidebar-form .c-form-control {
+      color: map-get($variant-map, "sidebar-form-color");
+      background: map-get($variant-map, "sidebar-form-bg");
+      border: map-get($variant-map, "sidebar-form-border");
+  
+      &::placeholder {
+        color: map-get($variant-map, "sidebar-form-placeholder-color");
+      }
+    }
+  
+    .c-sidebar-nav-title {
+      color: map-get($variant-map, "sidebar-nav-title-color");
+    }
+  
+    .c-sidebar-nav-link {
+      color: map-get($variant-map, "sidebar-nav-link-color");
+      background: map-get($variant-map, "sidebar-nav-link-bg");
+      @include borders(map-get($variant-map, "sidebar-nav-link-borders"));
+  
+      .c-sidebar-nav-icon {
+        color: map-get($variant-map, "sidebar-nav-link-icon-color");
+      }
+  
+      &.c-active {
+        color: map-get($variant-map, "sidebar-nav-link-active-color");
+        background: map-get($variant-map, "sidebar-nav-link-active-bg");
+        @include borders(map-get($variant-map, "sidebar-nav-link-active-borders"));
+  
+        .c-sidebar-nav-icon {
+          color: map-get($variant-map, "sidebar-nav-link-active-icon-color");
+        }
+      }
+      @media (hover: hover), (-ms-high-contrast: none) {
+        &:hover {
+          color: map-get($variant-map, "sidebar-nav-link-hover-color");
+          background: map-get($variant-map, "sidebar-nav-link-hover-bg");
+          @include borders(map-get($variant-map, "sidebar-nav-link-hover-borders"));
+  
+          .c-sidebar-nav-icon {
+            color: map-get($variant-map, "sidebar-nav-link-hover-icon-color");
+          }
+  
+          &.c-sidebar-nav-dropdown-toggle::after {
+            background-image: map-get($variant-map, "sidebar-nav-dropdown-indicator-hover");
+          }
+        }
+      }
+  
+      &.c-disabled {
+        color: map-get($variant-map, "sidebar-nav-link-disabled-color");
+        background: transparent;
+        @include borders(map-get($variant-map, "sidebar-nav-link-disabled-borders"));
+  
+        .c-sidebar-nav-icon {
+          color: map-get($variant-map, "sidebar-nav-link-disabled-icon-color");
+        }
+  
+        &:hover {
+          color: map-get($variant-map, "sidebar-nav-link-disabled-color");
+          @include borders(map-get($variant-map, "sidebar-nav-link-hover-borders"));
+  
+          .c-sidebar-nav-icon {
+            color: map-get($variant-map, "sidebar-nav-link-disabled-icon-color");
+          }
+  
+          &.c-sidebar-nav-dropdown-toggle::after {
+            background-image: map-get($variant-map, "sidebar-nav-dropdown-indicator-hover");
+          }
+        }
+      }
+    }
+    .c-sidebar-nav-dropdown-toggle {
+      position: relative;
+  
+      &::after {
+        background-image: map-get($variant-map, "sidebar-nav-dropdown-indicator");
+      }
+    }
+  
+    .c-sidebar-nav-dropdown.c-show {
+      background: map-get($variant-map, "sidebar-nav-dropdown-bg");
+      @include borders(map-get($variant-map, "sidebar-nav-dropdown-borders"));
+  
+      .c-sidebar-nav-link {
+        color: map-get($variant-map, "sidebar-nav-dropdown-color");
+  
+        &.c-disabled {
+          color: map-get($variant-map, "sidebar-nav-link-disabled-color");
+          background: transparent;
+  
+          &:hover {
+            color: map-get($variant-map, "sidebar-nav-link-disabled-color");
+  
+            .c-sidebar-nav-icon {
+              color: map-get($variant-map, "sidebar-nav-link-disabled-icon-color");
+            }
+          }
+        }
+      }
+    }
+  
+    .c-sidebar-nav-label {
+      color: map-get($variant-map, "sidebar-nav-title-color");
+  
+      &:hover {
+        color: map-get($variant-map, "sidebar-color");
+      }
+  
+      .c-sidebar-nav-icon {
+        color: map-get($variant-map, "sidebar-nav-link-icon-color");
+      }
+    }
+  
+    @if (lightness(map-get($variant-map, "sidebar-bg")) < 40) {
+      .c-progress {
+        background-color: lighten(map-get($variant-map, "sidebar-bg"), 15%) !important;
+      }
+    }
+  
+    .c-sidebar-footer {
+      background: map-get($variant-map, "sidebar-footer-bg");
+      @include borders(map-get($variant-map, "sidebar-footer-borders"));
+    }
+  
+    .c-sidebar-minimizer {
+      background-color: map-get($variant-map, "sidebar-minimizer-bg");
+      @include borders(map-get($variant-map, "sidebar-minimizer-borders"));
+  
+      &::before {
+        background-image: map-get($variant-map, "sidebar-minimizer-indicator");
+      }
+  
+      &:focus,
+      &.c-focus {
+        outline: 0;
+      }
+  
+      &:hover {
+        background-color: map-get($variant-map, "sidebar-minimizer-hover-bg");
+        &::before {
+          background-image: map-get($variant-map, "sidebar-minimizer-hover-indicator");
+        }
+      }
+    }
+    &.c-sidebar-minimized {
+      .c-sidebar-nav-item {
+        &:hover {
+  
+          > .c-sidebar-nav-link {
+            background: map-get($variant-map, "sidebar-nav-link-hover-bg");
+  
+            .c-sidebar-nav-icon {
+              color: map-get($variant-map, "sidebar-nav-link-hover-color");
+            }
+  
+            &.c-disabled {
+              background: map-get($variant-map, "sidebar-nav-link-disabled-bg");
+  
+              .c-sidebar-nav-icon {
+                color: map-get($variant-map, "sidebar-nav-link-disabled-icon-color");
+              }
+            }
+          }
+        }
+      }
+  
+      .c-sidebar-nav {
+        > .c-sidebar-nav-dropdown {
+          > .c-sidebar-nav-dropdown-items {
+            background: map-get($variant-map, "sidebar-bg");
+          }
+  
+          &:hover {
+            background: map-get($variant-map, "sidebar-nav-link-hover-bg");
+          }
+        }
+      }
+    }  
+  }
+}
+
+// stylelint-disable-next-line no-duplicate-selectors
+.c-sidebar {
+  @each $color, $value in $theme-colors
+  {
+    .c-sidebar-nav-link {
+      &.c-sidebar-nav-link-#{$color} {
+        background: $value;
+        .c-sidebar-nav-icon {
+          color: rgba(255, 255, 255, .7);
+        }
+        &:hover {
+          background: darken($value, 5%);
+          .c-sidebar-nav-icon {
+            color: $white;
+          }
+        }
+      }
+    }
+  }
+}

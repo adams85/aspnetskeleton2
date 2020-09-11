@@ -1,13 +1,28 @@
-﻿@model WebApp.UI.Areas.Dashboard.Models.Home.HomeIndexModel
+﻿@model WebApp.UI.Areas.Dashboard.Models.Home.IndexModel
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">@T["Overview"]</h3>
-    </div>
-    <div class="panel-body">
-        <p>
-            <span class="glyphicon glyphicon-time"></span>
-            @T["{0} hour to midnight", Plural.From("{0} hours to midnight", (int)Model.TimeToMidnight.TotalHours), TextContext.From("Dashboard/Home")]
-        </p>
+@using System.Security.Claims
+
+@{
+    var user = ViewContext.HttpContext.User;
+    var userName = user.GetFirstName() ?? user.Identity.Name;
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <p class="lead">
+                    @T["Hi, {0:D}!", @userName]
+                </p>
+
+                <p>
+                    <i class="fa fa-calendar" aria-hidden="true"></i> @T["Today is {0:D}.", Model.UtcNow]
+                    <br />
+                    <i class="fa fa-clock-o" aria-hidden="true"></i> @T["The time is {0:T} (GMT).", Model.UtcNow]
+                    <hr />
+                    @T["{0} hours is left to midnight.", Plural.From("{0} hours are left to midnight.", (int)Model.TimeToMidnight.TotalHours)]
+                </p>
+            </div>
+        </div>
     </div>
 </div>

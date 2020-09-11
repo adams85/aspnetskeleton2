@@ -1,0 +1,20 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/mixins/_breakpoints.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+// Name of the previous breakpoint, or null for the first breakpoint.
+//
+//    >> breakpoint-before(lg)
+//    md
+//    >> breakpoint-next(lg, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px))
+//    md
+//    >> breakpoint-next(lg, $breakpoint-names: (xs sm md lg xl))
+//    md
+@function breakpoint-before($name, $breakpoints: $grid-breakpoints, $breakpoint-names: map-keys($breakpoints)) {
+  $n: index($breakpoint-names, $name);
+  @return if($n != null and $n < length($breakpoint-names), nth($breakpoint-names, $n - 1), null);
+}

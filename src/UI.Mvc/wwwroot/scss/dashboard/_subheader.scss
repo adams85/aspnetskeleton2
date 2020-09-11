@@ -1,0 +1,115 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/_subheader.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+ .c-subheader {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+  min-height: $subheader-height;
+
+  &[class*="bg-"]  {
+    border-color: rgba($black, .1);
+  }
+
+  &.c-subheader-fixed {
+    position: fixed;
+    right: 0;
+    left: 0;
+    z-index: $zindex-fixed;
+  }
+}
+
+.c-subheader-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: $subheader-height;
+  padding: 0;
+  margin-bottom: 0;
+  list-style: none;
+
+  .c-subheader-nav-item {
+    position: relative;
+  }
+
+  .c-subheader-nav-btn {
+    background-color: transparent;
+    border: $btn-border-width solid transparent;
+  }
+
+  .c-subheader-nav-link,
+  .c-subheader-nav-btn {
+    display: flex;
+    align-items: center;
+    padding-right: $header-nav-link-padding-x;
+    padding-left: $header-nav-link-padding-x;
+
+    .badge {
+      position: absolute;
+      top: 50%;
+      margin-top: -16px;
+      left: 50%;
+      margin-left: 0;
+    }
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+//
+// Subheader variants
+//
+
+@each $variant, $variant-map in $subheader-variants-map {
+  $parent-element: ".c-subheader";
+  @if $variant != $header-default-variant {
+    $parent-element: $parent-element + $parent-element + "-" + $variant;
+  }
+
+  #{$parent-element} {
+    background: map-get($variant-map, "subheader-bg");
+    @include borders(map-get($variant-map, "subheader-border"));
+  
+    .c-subheader-nav {
+      .c-subheader-nav-link,
+      .c-subheader-nav-btn {
+        color: map-get($variant-map, "subheader-color");
+  
+        @include hover-focus {
+          color: map-get($variant-map, "subheader-hover-color");
+        }
+  
+        &.c-disabled {
+          color: map-get($variant-map, "subheader-disabled-color");
+        }
+      }
+  
+      .c-show > .c-subheader-nav-link,
+      .c-active > .c-subheader-nav-link,
+      .c-subheader-nav-link.c-show,
+      .c-subheader-nav-link.c-active {
+        color: map-get($variant-map, "subheader-active-color");
+      }
+    }
+  
+    .c-subheader-text {
+      color: map-get($variant-map, "subheader-color");
+      a {
+        color: map-get($variant-map, "subheader-active-color");
+  
+        @include hover-focus {
+          color: map-get($variant-map, "subheader-active-color");
+        }
+      }
+    }  
+  }
+}

@@ -1,0 +1,37 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/mixins/_borders.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+// Borders
+
+@mixin borders($borders, $reverse: false) {
+    @each $border in $borders {
+      $direction: nth($border, 1);
+      @if $direction == "all" {
+        border: map-get($borders, $direction);
+      } @else if $direction == "top" {
+        border-top: map-get($borders, $direction);
+      } @else if $direction == "right" {
+        @if $reverse {
+          border-right: 0;
+          border-left: map-get($borders, $direction);
+        } @else {
+          border-right: map-get($borders, $direction);
+        }
+      } @else if $direction == "bottom" {
+        border-bottom: map-get($borders, $direction);
+      } @else if $direction == "left" {
+        border-left: map-get($borders, $direction);
+        @if $reverse {
+          border-right: map-get($borders, $direction);
+          border-left: 0;
+        } @else {
+          border-left: map-get($borders, $direction);
+        }
+      }
+    }
+  }

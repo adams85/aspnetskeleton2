@@ -6,7 +6,7 @@ using WebApp.Service.Users;
 
 namespace WebApp.UI.Models.Account
 {
-    public class SetPasswordModel
+    public class SetPasswordModel : PageModel
     {
         [Localized] private const string NewPasswordDisplayName = "New password";
         [DisplayName(NewPasswordDisplayName), Required, DataType(DataType.Password)]

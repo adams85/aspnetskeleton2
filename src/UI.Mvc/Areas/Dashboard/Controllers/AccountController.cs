@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Localization;
@@ -13,7 +14,7 @@ using WebApp.UI.Infrastructure.Security;
 namespace WebApp.UI.Areas.Dashboard.Controllers
 {
     [Authorize]
-    [Area("Dashboard")]
+    [Area(UIConstants.DashboardAreaName)]
     public class AccountController : Controller
     {
         private readonly IAccountManager _accountManager;
@@ -26,45 +27,56 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
 
         public IStringLocalizer T { get; set; }
 
+        [HttpGet]
         public IActionResult Index()
         {
-            var model = new ChangePasswordModel();
-
-            ViewData["ActiveMenuItem"] = "Dashboard";
-            ViewData["ActiveSubMenuItem"] = "Account";
-            return View(model);
+            return View(new IndexModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index(ChangePasswordModel model)
+        public async Task<IActionResult> Index(IndexModel model)
         {
-            bool success;
+            ModelState.Clear();
+
+            return model.SubmitAction switch
+            {
+                nameof(ChangePassword) => await ChangePassword(model),
+                _ => BadRequest()
+            };
+        }
+
+        [NonAction]
+        public async Task<IActionResult> ChangePassword(IndexModel model)
+        {
+            const string prefix = nameof(model.ChangePassword);
+
+            await TryUpdateModelAsync(model.ChangePassword, prefix);
+
+            bool? success;
 
             if (ModelState.IsValid)
             {
-                var (status, passwordRequirements) = await _accountManager.ChangePasswordAsync(HttpContext.User.Identity.Name!, model, HttpContext.RequestAborted);
+                var (status, passwordRequirements) = await _accountManager.ChangePasswordAsync(HttpContext.User.Identity.Name!, model.ChangePassword!, HttpContext.RequestAborted);
 
                 if (status == ChangePasswordStatus.InvalidNewPassword)
-                    AddModelError(ModelState, status, passwordRequirements);
+                    AddModelError(status, passwordRequirements);
 
                 success = status == ChangePasswordStatus.Success;
             }
             else
-                success = false;
+                success = null;
 
-            model.Success = success;
+            model.ChangePassword!.Success = success;
 
-            ViewData["ActiveMenuItem"] = "Dashboard";
-            ViewData["ActiveSubMenuItem"] = "Account";
-            return View(model);
+            return View(nameof(Index), model);
 
-            void AddModelError(ModelStateDictionary modelState, ChangePasswordStatus status, PasswordRequirementsData? passwordRequirements)
+            void AddModelError(ChangePasswordStatus status, PasswordRequirementsData? passwordRequirements)
             {
                 switch (status)
                 {
                     case ChangePasswordStatus.InvalidNewPassword:
-                        modelState.AddModelError(nameof(ChangePasswordModel.NewPassword), T.LocalizePasswordRequirements(passwordRequirements));
+                        ModelState.AddModelError(prefix + "." + nameof(ChangePasswordModel.NewPassword), T.LocalizePasswordRequirements(passwordRequirements));
                         return;
                 }
             }

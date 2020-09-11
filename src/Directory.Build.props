@@ -3,6 +3,10 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <PropertyGroup>
+    <Product>AspNetSkeleton</Product>
+    <Copyright>© 2020 Adam Simon</Copyright>
+    <InformationalVersion>2.0</InformationalVersion>
+
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 

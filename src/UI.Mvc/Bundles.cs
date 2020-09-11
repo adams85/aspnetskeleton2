@@ -59,21 +59,16 @@ namespace WebApp.UI
             var themes = themeProvider.GetThemes();
 
             bundles.AddJs("/js/site.js")
-                .Include("/js/*.js");
-
-            bundles.AddJs("/js/bootstrap/bootstrap-validation.js")
-                .Include("/js/bootstrap/bootstrap-validation.js");
+                .Include("/js/*.js")
+                .Include("/js/dashboard/*.js");
 
             for (int i = 0, n = themes.Count; i < n; i++)
             {
                 var sourcePath = themeProvider.GetThemePath(ThemeProvider.ThemesBasePath, themes[i]);
                 var destPath = themeProvider.GetThemePath("/css", themes[i]);
 
-                bundles.AddSass(destPath + "/bootstrap.css")
-                    .Include(sourcePath + "/bootstrap.scss");
-
                 bundles.AddSass(destPath + "/site.css")
-                    .Include(sourcePath + "/site.scss");
+                    .Include(sourcePath + "/dashboard.scss");
             }
         }
     }

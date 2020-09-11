@@ -1,0 +1,35 @@
+﻿/**
+ * --------------------------------------------------------------------------
+ * This is a modified version of the following CoreUI v3.3.0 source file(s):
+ * • https://github.com/coreui/coreui/blob/v3.2.0/scss/_dropdown.scss
+ * Licensed under MIT (https://github.com/coreui/coreui/blob/master/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+// https://github.com/twbs/bootstrap/issues/31451
+
+// @each $breakpoint in map-keys($grid-breakpoints) {
+//   @include media-breakpoint-up($breakpoint) {
+//     $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+//     .c-header .dropdown-menu,
+//     .navbar .dropdown-menu {
+//       &.dropdown-menu#{$infix}-left {
+//         right: auto;
+//         left: 0;
+//       }
+
+//       &.dropdown-menu#{$infix}-right {
+//         right: 0;
+//         left: auto;
+//       }
+//     }
+//   }
+// }
+
+// Links, buttons, and more within the dropdown menu
+//
+// `<button>`-specific styles are denoted with `// For <button>s`
+.dropdown-item {
+  display: flex;
+  align-items: center;
+}

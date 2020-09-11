@@ -1,0 +1,47 @@
+﻿// Brand adjustments
+
+$logo-width-full: 118px;
+$logo-width-minimized: 46px;
+$logo-img-width-full: 46px;
+$logo-img-width-minimized: 46px;
+$logo-img-height: 46px;
+
+@mixin logo($width, $image-width, $image-height) {
+  * {
+    user-select: none !important;
+  }
+
+  a:active, &:hover, &:focus {
+    text-decoration: none !important;
+  }
+
+  .logo-wrapper {
+    width: $width;
+
+    .logo-text {
+      font-variant: small-caps;
+    }
+  }
+
+  .logo-img {
+    width: $image-width;
+    height: $image-height;
+  }
+}
+
+.c-sidebar-brand > .c-sidebar-brand-full, .c-header-brand {
+  @include logo($logo-width-full, $logo-img-width-full, $logo-img-height);
+}
+
+.c-sidebar-brand > .c-sidebar-brand-minimized {
+  @include logo($logo-width-minimized, $logo-img-width-minimized, $logo-img-height);
+}
+
+// Header page title
+
+.c-header {
+  .page-title {
+    font-size: large;
+    font-weight: $font-weight-bold;
+  }
+}

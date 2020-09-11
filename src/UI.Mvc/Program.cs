@@ -25,7 +25,12 @@ namespace WebApp.UI
     public partial class Program
     {
         public static readonly string ApplicationName =
-            typeof(Program).GetAttributes<AssemblyProductAttribute>().FirstOrDefault()?.Product ?? typeof(Program).Assembly.GetName().Name!;
+            typeof(Program).Assembly.GetAttributes<AssemblyProductAttribute>().FirstOrDefault()?.Product ??
+            typeof(Program).Assembly.GetName().Name!;
+
+        public static readonly string ApplicationVersion =
+            typeof(Program).Assembly.GetAttributes<AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion ??
+            typeof(Program).Assembly.GetName().Version!.ToString();
 
         public static async Task Main(string[] args)
         {

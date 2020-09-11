@@ -2,12 +2,18 @@
 
 @using Microsoft.AspNetCore.Mvc.Localization
 @using Karambolo.AspNetCore.Bundling.ViewHelpers
+@using Karambolo.Common
 @using Karambolo.Common.Localization
 @using WebApp.Core
 @using WebApp.Service.Settings
 @using WebApp.UI
+@using WebApp.UI.Areas.Dashboard.Controllers
+@using WebApp.UI.Helpers
+
+@using static WebApp.UI.Areas.Dashboard.Models.DashboardPages
 
 @addTagHelper *, Karambolo.AspNetCore.Bundling
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, WebApp.UI.Mvc
 
 @inject IViewLocalizer T

@@ -1,38 +1,47 @@
-﻿@model bool?
+﻿@model WebApp.UI.Models.SingleValuePageModel<bool?>
 
 @inject ISettingsProvider SettingsProvider
 
-<div class="page-header">
-    <h1>@T["Account Verification"]</h1>
-</div>
-
-@if (Model == null)
-{
-<p class="lead">
-    @T["A message has been sent to the e-mail address you entered. Please follow the instructions given in the message in order to complete your registration."]
-</p>
-
-<p>
-    @T["If you don't receive this message in a few minutes, check your spam folder or contact us."]
-</p>
+@section Header {
+    <h3 class="mb-0">@Model.Layout.Title</h3>
 }
-else if (Model.Value)
+
+@if (Model.Value == null)
 {
-<p class="lead text-info">
-    @T["Well done! Your account has been verified."]
-</p>
-<p>
-    @T["You can <a href=\"{0}\">login</a> now.",
-        Url.Action("Login")]
-</p>
+    <p class="lead">
+        <strong>@T["A message has been sent to the e-mail address you entered."]</strong>
+    </p>
+
+    <p>
+        @T["Please follow the instructions given in the message in order to complete your registration."]
+    </p>
+
+    <p class="mb-0">
+        <i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>
+        @T["If you don't receive this message in a few minutes, check your spam folder or <a href=\"mailto:{0}\">contact the system administrator</a>.",
+            SettingsProvider.AdminMailAddress()]
+    </p>
+}
+else if (Model.Value.Value)
+{
+    <p class="lead mb-0">
+        <strong>@T["Your account has been verified."]</strong>
+    </p>
 }
 else
 {
-<p class="lead text-danger">
-    @T["Your account could not be verified."]
-</p>
-<p>
-    @T["Please try again or <a href=\"mailto:{0}\">contact the system administrator</a> if the problem persists.",
-        SettingsProvider.AdminMailAddress()]
-</p>
+    <p class="lead">
+        <strong>@T["The operation failed."]</strong>
+    </p>
+
+    <p class="mb-0">
+        @T["Please try again or <a href=\"mailto:{0}\">contact the system administrator</a> if the problem persists.",
+            SettingsProvider.AdminMailAddress()]
+    </p>
+}
+
+@section Footer {
+    <div class="text-center">
+        <a asp-action="@LoginPage.Action" asp-controller="@LoginPage.Controller" asp-area="@LoginPage.Area">@(Model.Value == null ? @T["Back to Login"] : @T["Go to Login"])</a>
+    </div>
 }

@@ -33,13 +33,13 @@ namespace WebApp.UI.Infrastructure.Localization
                     sb.Append(T["non-alphabetic characters (!, $, #, etc.)"]).Append(", ");
 
                 if (passwordRequirements.RequireDigit)
-                    sb.Append(T["base 10 digits (0-9)"]).Append(", ");
+                    sb.Append(T["digits (0-9)"]).Append(", ");
 
                 if (passwordRequirements.RequireLowercase)
-                    sb.Append(T["English lowercase characters (a-z)"]).Append(", ");
+                    sb.Append(T["lowercase characters (a-z)"]).Append(", ");
 
                 if (passwordRequirements.RequireUppercase)
-                    sb.Append(T["English uppercase characters (A-Z)"]).Append(", ");
+                    sb.Append(T["uppercase characters (A-Z)"]).Append(", ");
 
                 sb.Remove(sb.Length - 2, 2).Append('.');
             }

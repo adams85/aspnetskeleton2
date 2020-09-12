@@ -212,7 +212,7 @@ namespace WebApp.Service.Infrastructure.Validation
                     // so we skip the check and treat these properties nullable (just as ASP.NET Core's DataAnnotationsMetadataProvider does)
                     !property.DeclaringType!.IsGenericType && property.DeclaringType.IsNonNullableContext(nonNullableContextCache);
 
-                ValidationAttributes = property.GetAttributes<ValidationAttribute>(inherit: true);
+                ValidationAttributes = (ValidationAttribute[])Attribute.GetCustomAttributes(property, typeof(ValidationAttribute));
 
                 ValueAccessor = property.MakeFastGetter<object, object>();
             }
@@ -235,7 +235,7 @@ namespace WebApp.Service.Infrastructure.Validation
 
             private TypeMetadata(Type type)
             {
-                ValidationAttributes = type.GetAttributes<ValidationAttribute>(inherit: true);
+                ValidationAttributes = (ValidationAttribute[])Attribute.GetCustomAttributes(type, typeof(ValidationAttribute));
 
                 var nonNullableContextCache = new Dictionary<Type, bool>();
 

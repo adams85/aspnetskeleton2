@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Karambolo.Common;
 using WebApp.Common.Settings;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Helpers;
@@ -25,9 +23,9 @@ namespace WebApp.Service.Infrastructure.Database
                 var field = typeof(SettingEnum)
                     .GetField(settingName, BindingFlags.Public | BindingFlags.Static);
 
-                var descriptionAttribute = field.GetAttributes<DescriptionAttribute>().FirstOrDefault();
-                var defaultValueAttribute = field.GetAttributes<DefaultValueAttribute>().FirstOrDefault();
-                var rangeAttribute = field.GetAttributes<RangeAttribute>().FirstOrDefault();
+                var descriptionAttribute = field.GetCustomAttribute<DescriptionAttribute>();
+                var defaultValueAttribute = field.GetCustomAttribute<DefaultValueAttribute>();
+                var rangeAttribute = field.GetCustomAttribute<RangeAttribute>();
 
                 AddOrUpdateSetting(settings,
                     settingName,

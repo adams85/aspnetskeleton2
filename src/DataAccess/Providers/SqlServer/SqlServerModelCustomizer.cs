@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Karambolo.Common;
+using System.Linq;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
@@ -22,7 +23,7 @@ namespace WebApp.DataAccess.Providers.SqlServer
                         {
                             var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
                             if (annotation == null)
-                                property.AddAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey, property.PropertyInfo.HasAttribute<CaseInsensitiveAttribute>());
+                                property.AddAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey, property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any());
                         }
 
                         if (Type.GetTypeCode(Nullable.GetUnderlyingType(property.ClrType) ?? property.ClrType) == TypeCode.Decimal && property.GetColumnType() == null)

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Karambolo.Common;
 using WebApp.Common.Roles;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Helpers;
@@ -23,7 +21,7 @@ namespace WebApp.Service.Infrastructure.Database
                 var field = typeof(RoleEnum)
                     .GetField(roleName, BindingFlags.Public | BindingFlags.Static);
 
-                var descriptionAttribute = field.GetAttributes<DescriptionAttribute>().FirstOrDefault();
+                var descriptionAttribute = field.GetCustomAttribute<DescriptionAttribute>();
 
                 if (descriptionAttribute != null)
                     AddOrUpdateRole(roles,

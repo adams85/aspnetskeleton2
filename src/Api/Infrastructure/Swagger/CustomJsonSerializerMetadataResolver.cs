@@ -123,7 +123,7 @@ namespace WebApp.Api.Infrastructure.Swagger
             foreach (var metaMember in metaMembers)
                 if (metaMember.Member is PropertyInfo property)
                 {
-                    //if (property.HasAttribute<JsonExtensionDataAttribute>() && property.PropertyType.IsDictionary(out Type _, out Type valueType))
+                    //if (property.GetCustomAttributes<JsonExtensionDataAttribute>().Any() && property.PropertyType.IsDictionary(out Type _, out Type valueType))
                     //{
                     //    extensionDataValueType = valueType;
                     //    continue;
@@ -144,7 +144,7 @@ namespace WebApp.Api.Infrastructure.Swagger
                     else
                         // for properties declared on generic types determining reference type nullability is too complicated,
                         // so we resort to checking for RequiredAttribute in this case
-                        isNullable = !property.GetAttributes<System.ComponentModel.DataAnnotations.RequiredAttribute>().Any();
+                        isNullable = !property.GetCustomAttributes<System.ComponentModel.DataAnnotations.RequiredAttribute>().Any();
 
                     dataProperties.Add(
                         new DataProperty(

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Karambolo.Common;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.Sqlite
@@ -27,7 +28,7 @@ namespace WebApp.DataAccess.Providers.Sqlite
                         if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
                         {
                             var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
-                            var caseInsensitive = annotation != null || property.PropertyInfo.HasAttribute<CaseInsensitiveAttribute>();
+                            var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
                             property.SetColumnType(caseInsensitive ? "TEXT COLLATE " + _dbProperties.CaseInsensitiveCollation : "TEXT COLLATE " + _dbProperties.CaseSensitiveCollation);
                         }
 

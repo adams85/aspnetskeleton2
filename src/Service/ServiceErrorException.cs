@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace WebApp.Service
 {
@@ -30,8 +31,7 @@ namespace WebApp.Service
 
             var field = typeof(ServiceErrorCode).GetField(name);
 
-            var descriptionAttributes = (DescriptionAttribute[])field.GetCustomAttributes(typeof(DescriptionAttribute), inherit: false);
-            var description = descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : null;
+            var description = field.GetCustomAttribute<DescriptionAttribute>()?.Description;
             return description != null ? string.Format(description, Args) : GetDefaultErrorDescription();
         }
 

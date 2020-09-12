@@ -1,8 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Karambolo.Common;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using Pomelo.EntityFrameworkCore.MySql.Extensions;
 using WebApp.DataAccess.Infrastructure;
 
@@ -28,7 +29,7 @@ namespace WebApp.DataAccess.Providers.MySQL
                         if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
                         {
                             var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
-                            var caseInsensitive = annotation != null || property.PropertyInfo.HasAttribute<CaseInsensitiveAttribute>();
+                            var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
                             property.SetCollation(caseInsensitive ? _dbProperties.CaseInsensitiveCollation : _dbProperties.CaseSensitiveCollation);
                         }
                     }

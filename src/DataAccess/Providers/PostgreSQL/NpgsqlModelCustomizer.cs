@@ -1,8 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Karambolo.Common;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
 namespace WebApp.DataAccess.Providers.PostgreSQL
@@ -30,7 +31,7 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
                         if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
                         {
                             var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
-                            var caseInsensitive = annotation != null || property.PropertyInfo.HasAttribute<CaseInsensitiveAttribute>();
+                            var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
                             if (caseInsensitive)
                                 property.SetColumnType("citext");
                         }

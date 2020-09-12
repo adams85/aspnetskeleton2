@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Localization;
 using WebApp.Service.Infrastructure.Localization;
 using WebApp.Service.Infrastructure.Validation;
@@ -14,7 +13,8 @@ using WebApp.UI.Infrastructure.Security;
 namespace WebApp.UI.Areas.Dashboard.Controllers
 {
     [Authorize]
-    [Area(UIConstants.DashboardAreaName)]
+    [Area(DashboardRoutes.AreaName)]
+    [Route("[area]/[controller]/[action]")]
     public class AccountController : Controller
     {
         private readonly IAccountManager _accountManager;
@@ -27,14 +27,14 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
 
         public IStringLocalizer T { get; set; }
 
-        [HttpGet]
+        [HttpGet(Name = DashboardRoutes.AccountSettingsRouteName)]
         public IActionResult Index()
         {
             return View(new IndexModel());
         }
 
-        [HttpPost]
         [ValidateAntiForgeryToken]
+        [HttpPost(Name = DashboardRoutes.AccountSettingsRouteName)]
         public async Task<IActionResult> Index(IndexModel model)
         {
             ModelState.Clear();

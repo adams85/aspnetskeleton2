@@ -21,6 +21,7 @@ using WebApp.UI.Models.Account;
 namespace WebApp.UI.Controllers
 {
     [Authorize]
+    [Route("[controller]/[action]")]
     public class AccountController : Controller
     {
         private readonly IAccountManager _accountManager;
@@ -61,9 +62,9 @@ namespace WebApp.UI.Controllers
                 return false;
         }
 
-        [HttpGet]
         [AllowAnonymous]
         [AnonymousOnly]
+        [HttpGet(Name = Routes.LoginRouteName)]
         public IActionResult Login(string? returnUrl = null)
         {
             var model = new LoginModel { ReturnUrl = returnUrl };
@@ -71,10 +72,10 @@ namespace WebApp.UI.Controllers
             return View(model);
         }
 
-        [HttpPost]
         [AllowAnonymous]
         [AnonymousOnly]
         [ValidateAntiForgeryToken]
+        [HttpPost(Name = Routes.LoginRouteName)]
         public async Task<IActionResult> Login(LoginModel model, string? returnUrl = null)
         {
             if (ModelState.IsValid)
@@ -92,6 +93,7 @@ namespace WebApp.UI.Controllers
         }
 
         [AllowAnonymous]
+        [Route("", Name = Routes.LogoutRouteName)]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
@@ -104,9 +106,9 @@ namespace WebApp.UI.Controllers
             return _accountManager.CreateUserAsync(model, cancellationToken);
         }
 
-        [HttpGet]
         [AllowAnonymous]
         [AnonymousOnly]
+        [HttpGet(Name = Routes.RegisterRouteName)]
         public IActionResult Register()
         {
             if (!_settingsProvider.EnableRegistration())
@@ -115,10 +117,10 @@ namespace WebApp.UI.Controllers
             return View(new RegisterModel());
         }
 
-        [HttpPost]
         [AllowAnonymous]
         [AnonymousOnly]
         [ValidateAntiForgeryToken]
+        [HttpPost(Name = Routes.RegisterRouteName)]
         public async Task<IActionResult> Register(RegisterModel model)
         {
             if (!_settingsProvider.EnableRegistration())
@@ -156,9 +158,9 @@ namespace WebApp.UI.Controllers
             }
         }
 
-        [HttpGet]
         [AllowAnonymous]
         [AnonymousOnly]
+        [HttpGet(Name = Routes.VerifyRegistrationRouteName)]
         public async Task<IActionResult> Verify(string u, string v)
         {
             var model = new SingleValuePageModel<bool?>();
@@ -171,9 +173,9 @@ namespace WebApp.UI.Controllers
             return View(model);
         }
 
-        [HttpGet]
         [AllowAnonymous]
         [AnonymousOnly]
+        [HttpGet(Name = Routes.ResetPasswordRouteName)]
         public IActionResult ResetPassword(string s)
         {
             var model = new ResetPasswordModel();
@@ -183,10 +185,10 @@ namespace WebApp.UI.Controllers
             return View(model);
         }
 
-        [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
         [AnonymousOnly]
+        [HttpPost(Name = Routes.ResetPasswordRouteName)]
         public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
         {
             if (ModelState.IsValid)
@@ -198,9 +200,9 @@ namespace WebApp.UI.Controllers
             return View(model);
         }
 
-        [HttpGet]
         [AllowAnonymous]
         [AnonymousOnly]
+        [HttpGet(Name = Routes.SetPasswordRouteName)]
         public IActionResult SetPassword(string s, string u, string v)
         {
             var model = new SetPasswordModel();
@@ -210,10 +212,10 @@ namespace WebApp.UI.Controllers
             return View(model);
         }
 
-        [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
         [AnonymousOnly]
+        [HttpPost(Name = Routes.SetPasswordRouteName)]
         public async Task<IActionResult> SetPassword(SetPasswordModel model, string u, string v)
         {
             if (ModelState.IsValid)
@@ -240,6 +242,7 @@ namespace WebApp.UI.Controllers
         }
 
         [AllowAnonymous]
+        [Route("", Name = Routes.AccessDeniedRouteName)]
         public IActionResult AccessDenied()
         {
             return View(new PageModel());

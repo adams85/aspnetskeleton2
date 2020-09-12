@@ -28,8 +28,6 @@
 
 @section Footer {
     <div class="text-center">
-        <a asp-action="@nameof(WebApp.UI.Areas.Dashboard.Controllers.HomeController.Index)"
-           asp-controller="@(MvcHelper.GetControllerName<WebApp.UI.Areas.Dashboard.Controllers.HomeController>())"
-           asp-area="@UIConstants.DashboardAreaName">@T["Back to Dashboard"]</a>
+        <a asp-route="@WebApp.UI.Areas.Dashboard.DashboardRoutes.OverviewRouteName">@T["Back to Dashboard"]</a>
     </div>
 }

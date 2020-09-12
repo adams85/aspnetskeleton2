@@ -1,7 +1,7 @@
 ﻿@model WebApp.UI.Areas.Dashboard.Models.Layout.DashboardPageLayoutModel
 
 @{
-    var applicationUrl = Model.Footer.GetApplicationUrl?.Invoke(Url) ?? s_defaultApplicationUrl;
+    var applicationUrl = Model.Footer.GetApplicationUrl?.Invoke(Url) ?? DefaultApplicationUrl;
 }
 
 <footer class="c-footer">
@@ -27,5 +27,5 @@ else
 }
 
 @functions {
-    private static readonly string? s_defaultApplicationUrl = "https://github.com/adams85/aspnetskeleton2";
+    private const string? DefaultApplicationUrl = "https://github.com/adams85/aspnetskeleton2";
 }

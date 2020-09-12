@@ -10,7 +10,7 @@
     var currentLanguage = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
     var currentTheme = await ThemeManager.GetCurrentThemeAsync(ViewContext.HttpContext);
 
-    var bodyCssClasses = 
+    var bodyCssClasses =
         Model.Layout.BodyCssClasses is IEnumerable<string> bodyCssClassesEnumerable ?
         string.Join(" ", bodyCssClassesEnumerable) :
         Model.Layout.BodyCssClasses?.ToString();
@@ -24,9 +24,9 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
 
-    <meta name="author" content="Adam Simon" />
-    <meta name="description" content="A foundation for building robust ASP.NET Core applications." />
-    <meta name="keywords" content="asp.net core" />
+    <meta name="author" content="@Model.Layout.Author" />
+    <meta name="description" content="@Model.Layout.Descriptions" />
+    <meta name="keywords" content="@Model.Layout.Keywords" />
 
     @RenderSection("Metas", required: false)
 

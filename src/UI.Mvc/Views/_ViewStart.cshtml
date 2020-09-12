@@ -1,14 +1,14 @@
 ﻿@using WebApp.UI.Models.Layout
+@using WebApp.UI.Infrastructure.Navigation 
 
 @model ILayoutModelProvider<LayoutModel>
 
 @{
     Layout = "_PageLayout";
 
-    Model.Layout.PageInfo ??= PageHelper.GetPageByRoute(ViewContext.HttpContext);
-
-    if (Model.Layout.PageInfo != null)
+    var page = Model.Layout.PageInfo ??= Pages.FindPage(ViewContext.ActionDescriptor);
+    if (page != null)
     {
-        Model.Layout.Title ??= Model.Layout.PageInfo.GetDefaultTitle(ViewContext.HttpContext, T);
+        Model.Layout.Title ??= page.GetDefaultTitle(ViewContext.HttpContext, T);
     }
 }

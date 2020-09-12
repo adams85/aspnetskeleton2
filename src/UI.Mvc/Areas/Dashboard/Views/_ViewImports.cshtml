@@ -8,12 +8,12 @@
 @using WebApp.Service.Settings
 @using WebApp.UI
 @using WebApp.UI.Areas.Dashboard.Controllers
-@using WebApp.UI.Helpers
 
-@using static WebApp.UI.Areas.Dashboard.Models.DashboardPages
+@using static WebApp.UI.Areas.Dashboard.DashboardRoutes
 
 @addTagHelper *, Karambolo.AspNetCore.Bundling
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, WebApp.UI.Mvc
 
 @inject IViewLocalizer T
+@inject WebApp.UI.Infrastructure.Navigation.IPageCatalog Pages

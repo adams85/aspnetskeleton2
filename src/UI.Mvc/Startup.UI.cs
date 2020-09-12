@@ -21,6 +21,7 @@ using WebApp.Core.Helpers;
 using WebApp.Service.Settings;
 using WebApp.UI.Infrastructure.DataAnnotations;
 using WebApp.UI.Infrastructure.Hosting;
+using WebApp.UI.Infrastructure.Navigation;
 using WebApp.UI.Infrastructure.Security;
 using WebApp.UI.Infrastructure.Theming;
 using WebApp.UI.Infrastructure.ViewFeatures;
@@ -61,6 +62,8 @@ namespace WebApp.UI
 
             public override void ConfigureServices(IServiceCollection services)
             {
+                services.AddSingleton<IPageCatalog>(sp => new PageCatalog(Pages.GetProviders(sp)));
+
                 services.AddSingleton<IAccountManager, AccountManager>();
 
                 services
@@ -244,13 +247,7 @@ namespace WebApp.UI
 
                 app.UseEndpoints(endpoints =>
                 {
-                    endpoints.MapControllerRoute(
-                        name: "AreaDefault",
-                        pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
-
-                    endpoints.MapControllerRoute(
-                        name: "Default",
-                        pattern: "{controller=Home}/{action=Index}/{id?}");
+                    endpoints.MapControllers();
                 });
             }
         }

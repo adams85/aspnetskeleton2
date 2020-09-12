@@ -4,7 +4,9 @@
 
   <PropertyGroup>
     <Product>AspNetSkeleton</Product>
+    <Company>Adam Simon</Company>
     <Copyright>© 2020 Adam Simon</Copyright>
+    <Description>A foundation for building robust ASP.NET Core applications.</Description>
     <InformationalVersion>2.0</InformationalVersion>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

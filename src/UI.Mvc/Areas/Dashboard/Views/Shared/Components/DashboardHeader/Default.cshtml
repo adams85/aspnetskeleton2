@@ -7,7 +7,7 @@
         <i class="fa fa-bars c-sidebar-nav-icon" aria-hidden="true"></i>
     </button>
 
-    <a class="c-header-brand d-lg-none" asp-action="@OverviewPage.Action" asp-controller="@OverviewPage.Controller" asp-area="@OverviewPage.Area">
+    <a class="c-header-brand d-lg-none" asp-route="@OverviewRouteName">
         <div class="logo-wrapper d-flex flex-row">
             <img class="logo-img" src="~/images/logo-light.png" alt="Logo" />
             <div class="logo-text flex-grow-1 text-center">
@@ -29,7 +29,7 @@
             </a>
 
             <div class="dropdown-menu dropdown-menu-right pt-0">
-                @{ RenderDropDownMenuItems(Model.Header.UserMenu ?? s_defaultUserMenu); }
+                @{ RenderDropDownMenuItems(Model.Header.UserMenu ?? DefaultUserMenu); }
             </div>
         </li>
     </ul>
@@ -42,25 +42,25 @@
 </header>
 
 @functions {
-    private static readonly List<DropDownMenuItemBase> s_defaultUserMenu = new List<DropDownMenuItemBase>
+    private static List<DropDownMenuItemBase>? s_defaultUserMenu;
+
+    List<DropDownMenuItemBase> DefaultUserMenu => System.Threading.LazyInitializer.EnsureInitialized(ref s_defaultUserMenu, () => new List<DropDownMenuItemBase>
     {
-#pragma warning disable IDE1006 // Naming Styles
         new DropDownMenuHeader()
         {
             GetTitle = (_, T) => T["Account"],
         },
-        new DropDownMenuItem(AccountSettingsPage) { IconClassName = "fa-wrench" },
+        new DropDownMenuItem(Pages.GetPage(AccountSettingsRouteName, throwIfNotFound: true)!) { IconClassName = "fa-wrench" },
 
         new DropDownMenuDivider { },
 
         new DropDownMenuItem
         {
             GetTitle = (_, T) => T["Logout"],
-            GetUrl = url => url.Action(nameof(WebApp.UI.Controllers.AccountController.Logout), MvcHelper.GetControllerName<WebApp.UI.Controllers.AccountController>(), new { area = string.Empty }),
+            GetUrl = url => url.RouteUrl(Routes.LogoutRouteName),
             IconClassName = "fa-sign-out",
         },
-#pragma warning restore IDE1006 // Naming Styles
-    };
+    });
 
     void RenderDropDownMenuItems(List<DropDownMenuItemBase> items)
     {

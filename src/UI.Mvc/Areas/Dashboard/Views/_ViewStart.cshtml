@@ -1,14 +1,14 @@
-﻿@using WebApp.UI.Models.Layout
+﻿@using WebApp.UI.Infrastructure.Navigation
+@using WebApp.UI.Models.Layout
 
 @model ILayoutModelProvider<LayoutModel>
 
 @{
     Layout = "~/Areas/Dashboard/Views/Shared/_DashboardPageLayout.cshtml";
 
-    Model.Layout.PageInfo ??= DashboardPageHelper.GetPageByRoute(ViewContext.HttpContext);
-
-    if (Model.Layout.PageInfo != null)
+    var page = Model.Layout.PageInfo ??= Pages.FindPage(ViewContext.ActionDescriptor);
+    if (page != null)
     {
-        Model.Layout.Title ??= Model.Layout.PageInfo.GetDefaultTitle(ViewContext.HttpContext, T);
+        Model.Layout.Title ??= page.GetDefaultTitle(ViewContext.HttpContext, T);
     }
 }

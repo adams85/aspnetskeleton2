@@ -42,6 +42,6 @@ else
 
 @section Footer {
     <div class="text-center">
-        <a asp-action="@LoginPage.Action" asp-controller="@LoginPage.Controller" asp-area="@LoginPage.Area">@(Model.Value == null ? @T["Back to Login"] : @T["Go to Login"])</a>
+        <a asp-route="@LoginRouteName">@(Model.Value == null ? @T["Back to Login"] : @T["Go to Login"])</a>
     </div>
 }

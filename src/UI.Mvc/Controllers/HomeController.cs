@@ -1,18 +1,17 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using WebApp.UI.Helpers;
+using WebApp.UI.Areas.Dashboard;
 using WebApp.UI.Models.Home;
 
 namespace WebApp.UI.Controllers
 {
+    [Route("[controller]/[action]")]
     public class HomeController : Controller
     {
+        [Route("/")]
         public IActionResult Index()
         {
-            return RedirectToAction(
-                nameof(Areas.Dashboard.Controllers.HomeController.Index),
-                MvcHelper.GetControllerName<Areas.Dashboard.Controllers.HomeController>(),
-                new { area = UIConstants.DashboardAreaName, id = (object?)null });
+            return RedirectToRoute(DashboardRoutes.OverviewRouteName);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

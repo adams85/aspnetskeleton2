@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
-using WebApp.UI.Models;
+using WebApp.UI.Infrastructure.Navigation;
 
 namespace WebApp.UI.Areas.Dashboard.Models.Layout
 {
@@ -24,7 +24,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
             {
                 IsVisible = page.IsAccessAllowed;
                 GetTitle = page.GetDefaultTitle;
-                GetUrl = urlHelper => urlHelper.Action(page.RouteValues.Action, page.RouteValues.Controller, new { area = page.RouteValues.Area });
+                GetUrl = urlHelper => urlHelper.RouteUrl(page.RouteName);
             }
 
             public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; set; } = null!;

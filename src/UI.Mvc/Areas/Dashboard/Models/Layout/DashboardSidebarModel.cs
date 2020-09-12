@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
-using WebApp.UI.Models;
+using WebApp.UI.Infrastructure.Navigation;
 
 namespace WebApp.UI.Areas.Dashboard.Models.Layout
 {
@@ -40,12 +40,12 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
             {
                 IsVisible = page.IsAccessAllowed;
                 GetTitle = page.GetDefaultTitle;
-                GetUrl = urlHelper => urlHelper.Action(page.RouteValues.Action, page.RouteValues.Controller, new { area = page.RouteValues.Area });
-                IsActive = (_, routeValues) => routeValues == page.RouteValues;
+                GetUrl = urlHelper => urlHelper.RouteUrl(page.RouteName);
+                IsActive = (_, currentPage) => currentPage == page;
             }
 
             public Func<IUrlHelper, string> GetUrl { get; set; } = null!;
-            public Func<HttpContext, (string Action, string Controller, string? Area), bool> IsActive { get; set; } = null!;
+            public Func<HttpContext, PageInfo?, bool> IsActive { get; set; } = null!;
         }
 
         public class NavigationDropDownItem : NavigationItemBase
@@ -57,11 +57,11 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
                 set => _items = value;
             }
 
-            public bool IsShown(HttpContext context, (string Action, string Controller, string? Area) routeValues)
+            public bool IsShown(HttpContext context, PageInfo? currentPage)
             {
                 return Items.Any(itemBase =>
-                    itemBase is NavigationItem item && item.IsActive(context, routeValues) ||
-                    itemBase is NavigationDropDownItem dropDownItem && dropDownItem.IsShown(context, routeValues));
+                    itemBase is NavigationItem item && item.IsActive(context, currentPage) ||
+                    itemBase is NavigationDropDownItem dropDownItem && dropDownItem.IsShown(context, currentPage));
             }
         }
     }

@@ -132,15 +132,27 @@
 
   // Scrollbar
 
-  &.ps {
-    // Firefox
-    overflow: -moz-scrollbars-none;
-    // IE 10+
-    -ms-overflow-style: none;
-    // Chrome, Edge, Safari, Opera
-    &::-webkit-scrollbar {
-      width: 0 !important;
-    }
+  &::-webkit-scrollbar {
+    width: 12px;
+    border-left: 1px solid rgba(0, 0, 0, .2);
+    border-right: 1px solid rgba(0, 0, 0, .2);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, .33);
+    border-radius: 12px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, .25);
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background-color: rgba(255, 255, 255, .1);
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, .33);
   }
 }
 

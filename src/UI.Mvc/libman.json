@@ -26,11 +26,6 @@
       "provider": "jsdelivr",
       "library": "font-awesome@4.7.0",
       "destination": "wwwroot/lib/font-awesome/"
-    },
-    {
-      "provider": "jsdelivr",
-      "library": "perfect-scrollbar@1.5.0",
-      "destination": "wwwroot/lib/perfect-scrollbar/"
     }
   ]
 }

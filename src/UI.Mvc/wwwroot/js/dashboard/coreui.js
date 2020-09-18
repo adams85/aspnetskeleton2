@@ -8,14 +8,13 @@
  */
 
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('jquery'), require('bootstrap'), require('perfect-scrollbar')) :
-  typeof define === 'function' && define.amd ? define(['jquery', 'bootstrap', 'perfect-scrollbar'], factory) :
-  (global = global || self, global.coreui = factory(global.jQuery, global.bootstrap, global.PerfectScrollbar));
-}(this, (function ($, bootstrap, PerfectScrollbar) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('jquery'), require('bootstrap')) :
+  typeof define === 'function' && define.amd ? define(['jquery', 'bootstrap'], factory) :
+  (global = global || self, global.coreui = factory(global.jQuery, global.bootstrap));
+}(this, (function ($, bootstrap) { 'use strict';
 
   $ = $ && Object.prototype.hasOwnProperty.call($, 'default') ? $['default'] : $;
   bootstrap = bootstrap && Object.prototype.hasOwnProperty.call(bootstrap, 'default') ? bootstrap['default'] : bootstrap;
-  PerfectScrollbar = PerfectScrollbar && Object.prototype.hasOwnProperty.call(PerfectScrollbar, 'default') ? PerfectScrollbar['default'] : PerfectScrollbar;
 
   function _defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
@@ -364,10 +363,6 @@
 
   var Sidebar = /*#__PURE__*/function () {
     function Sidebar($element, config) {
-      if (typeof PerfectScrollbar === 'undefined') {
-        throw new TypeError('CoreUI\'s sidebar require Perfect Scrollbar');
-      }
-
       this._$element = $element;
       this._open = this._isVisible();
       this._mobile = this._isMobile();
@@ -377,10 +372,7 @@
 
       //this._setActiveLink();
 
-      this._ps = null;
       this._$backdrop = null;
-
-      this._psInit();
 
       this._addEventListeners();
 
@@ -480,8 +472,6 @@
         this._$element.addClass(CLASS_NAME_SIDEBAR_MINIMIZED);
 
         this._minimize = true;
-
-        this._psDestroy();
       }
     };
 
@@ -497,9 +487,6 @@
       var _this = this;
 
       this._minimize = false;
-      this._$element.one(TRANSITION_END, function() { 
-        _this._psInit();
-      });
     }
 
     _proto._revertUnfoldable = function _revertUnfoldable() {
@@ -632,34 +619,8 @@
 
       $togglerParent.toggleClass(CLASS_NAME_SHOW$6); // TODO: Set the toggler's position near to cursor after the click.
       // TODO: add transition end
-
-      this._psUpdate();
-    } // PerfectScrollbar
+    }
     ;
-
-    _proto._psInit = function _psInit() {
-      var $nav = this._$element.find(SELECTOR_NAVIGATION_CONTAINER);
-      if ($nav.length && !this._isIOS()) {
-        this._ps = new PerfectScrollbar($nav[0], {
-          suppressScrollX: true,
-          wheelPropagation: false
-        });
-      }
-    };
-
-    _proto._psUpdate = function _psUpdate() {
-      if (this._ps) {
-        this._ps.update();
-      }
-    };
-
-    _proto._psDestroy = function _psDestroy() {
-      if (this._ps) {
-        this._ps.destroy();
-
-        this._ps = null;
-      }
-    };
 
     //_proto._setActiveLink = function _setActiveLink() {
     //  var _this4 = this;

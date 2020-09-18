@@ -36,17 +36,12 @@
     @* stylesheets *@
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.css" />
-        <link rel="stylesheet" href="~/lib/perfect-scrollbar/css/perfect-scrollbar.css" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"
               asp-fallback-href="~/lib/font-awesome/css/font-awesome.min.css"
               asp-fallback-test-class="fa" asp-fallback-test-property="display" asp-fallback-test-value="inline-block"
               integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
-        <link href="https://cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.0/css/perfect-scrollbar.min.css" rel="stylesheet"
-              asp-fallback-href="~/lib/perfect-scrollbar/css/perfect-scrollbar.min.css"
-              asp-fallback-test-class="ps" asp-fallback-test-property="overflow" asp-fallback-test-value="hidden"
-              integrity="sha256-q65N03iTO2DDls5VNZ6/7oZ/4lo2KxwNGDDQLKjMeDg=" crossorigin="anonymous">
     </environment>
 
     <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/site.css" />
@@ -64,7 +59,6 @@
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
         <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js"></script>
-        <script src="~/lib/perfect-scrollbar/dist/perfect-scrollbar.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
     </environment>
     <environment exclude="Development">
@@ -83,10 +77,6 @@
                 asp-fallback-test="window.jQuery && window.jQuery.validator && window.jQuery.validator.unobtrusive"
                 integrity="sha256-9GycpJnliUjJDVDqP0UEu/bsm9U+3dnQUH8+3W10vkY=" crossorigin="anonymous">
         </script>
-        <script src="//cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.0/dist/perfect-scrollbar.min.js"
-                asp-fallback-src="~/lib/perfect-scrollbar/dist/perfect-scrollbar.min.js"
-                asp-fallback-test="window.PerfectScrollbar"
-                integrity="sha256-j/qnOBgDhyaxF4wY5NBiWdmntJy4iDCUbc5Ba2XJKEA=" crossorigin="anonymous"></script>
         <script src="//cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"
                 asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
                 asp-fallback-test="window.bootstrap"

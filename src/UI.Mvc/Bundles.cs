@@ -58,8 +58,10 @@ namespace WebApp.UI
 
             var themes = themeProvider.GetThemes();
 
-            bundles.AddJs("/js/site.js")
-                .Include("/js/*.js")
+            bundles.AddJs("/js/global.js")
+                .Include("/js/*.js");
+
+            bundles.AddJs("/js/dashboard.js")
                 .Include("/js/dashboard/*.js");
 
             for (int i = 0, n = themes.Count; i < n; i++)
@@ -67,7 +69,7 @@ namespace WebApp.UI
                 var sourcePath = themeProvider.GetThemePath(ThemeProvider.ThemesBasePath, themes[i]);
                 var destPath = themeProvider.GetThemePath("/css", themes[i]);
 
-                bundles.AddSass(destPath + "/site.css")
+                bundles.AddSass(destPath + "/global.css")
                     .Include(sourcePath + "/dashboard.scss");
             }
         }

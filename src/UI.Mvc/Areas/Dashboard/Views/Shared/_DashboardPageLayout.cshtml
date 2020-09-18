@@ -37,5 +37,14 @@
 </div>
 
 @section ScriptsBody {
+    <script>
+        DashboardPageContext = {
+            RootPath: @Html.JavaScriptString(Url.Content("~/" + AreaName)),
+            SidebarStateCookieName: @Html.JavaScriptString(DashboardSidebarModel.SidebarStateCookieName)
+        };
+    </script>
+
+    <script src="~/bundles/js/dashboard.js"></script>
+
     @RenderSection("ScriptsBody", required: false)
 }

@@ -39,7 +39,7 @@
    * --------------------------------------------------------------------------
    */
   var TRANSITION_END = bootstrap.Util.TRANSITION_END;
- 
+
   var reflow = bootstrap.Util.reflow;
 
   /**** Class Toggler ****/
@@ -63,8 +63,9 @@
   };
   var CLASS_NAME_CLASS_TOGGLER = 'c-class-toggler';
   var EVENT_CLASS_TOGGLE = 'classtoggle';
-  var EVENT_CLICK_DATA_API$4 = "click" + EVENT_KEY$4 + DATA_API_KEY$4;  
+  var EVENT_CLICK_DATA_API$4 = "click" + EVENT_KEY$4 + DATA_API_KEY$4;
   var SELECTOR_CLASS_TOGGLER = '.c-class-toggler';
+
   /**
    * ------------------------------------------------------------------------
    * Class Definition
@@ -75,7 +76,7 @@
     function ClassToggler($element) {
       this._$element = $element;
 
-      $element.data(DATA_KEY$4, this);      
+      $element.data(DATA_KEY$4, this);
     } // Getters
 
 
@@ -170,7 +171,7 @@
     _proto._getDataAttributes = function _getDataAttributes(value) {
       try {
         return JSON.parse(value.replace(/'/g, '"'));
-      } 
+      }
       catch (_unused) {
         return value;
       }
@@ -227,7 +228,7 @@
       var TargetDetails = function TargetDetails(target, toggle) {
         this.target = target;
         this.toggle = toggle;
-      };      
+      };
 
       if (Array.isArray(targets)) {
         targets.forEach(function (target, index) {
@@ -274,13 +275,13 @@
 
     return ClassToggler;
   }();
+
   /**
    * ------------------------------------------------------------------------
    * Data Api implementation
    * ------------------------------------------------------------------------
    */
 
-  
   $(document).on(EVENT_CLICK_DATA_API$4, SELECTOR_CLASS_TOGGLER, function (event) {
     event.preventDefault();
     var $toggler = $(event.target);
@@ -355,6 +356,7 @@
   var SELECTOR_NAV_LINK$1 = '.c-sidebar-nav-link';
   var SELECTOR_NAVIGATION_CONTAINER = '.c-sidebar-nav';
   var SELECTOR_SIDEBAR = '.c-sidebar';
+
   /**
    * ------------------------------------------------------------------------
    * Class Definition
@@ -667,7 +669,7 @@
       if (this._overlaid && this._open) {
         this._addClickOutListener();
       }
-      
+
       this._$element.on(EVENT_CLASS_TOGGLE$1, function (_, eventDetail) {
         if (eventDetail.className === CLASS_NAME_SIDEBAR_MINIMIZED) {
           if (_this5._$element.hasClass(CLASS_NAME_SIDEBAR_MINIMIZED)) {
@@ -675,7 +677,7 @@
           } else {
             _this5._revertMinimize();
           }
-        }        
+        }
         else if (eventDetail.className === CLASS_NAME_SIDEBAR_UNFOLDABLE) {
           if (_this5._$element.hasClass(CLASS_NAME_SIDEBAR_UNFOLDABLE)) {
             _this5.unfoldable();
@@ -763,6 +765,7 @@
 
     return Sidebar;
   }();
+
   /**
    * ------------------------------------------------------------------------
    * Data Api implementation
@@ -781,7 +784,6 @@
    * ------------------------------------------------------------------------
    */
 
-
   var JQUERY_NO_CONFLICT$b = $.fn[NAME$b];
   $.fn[NAME$b] = Sidebar.jQueryInterface;
   $.fn[NAME$b].Constructor = Sidebar;
@@ -790,7 +792,7 @@
     $.fn[NAME$b] = JQUERY_NO_CONFLICT$b;
     return Sidebar.jQueryInterface;
   };
-  
+
   /**
    * --------------------------------------------------------------------------
    * CoreUI (v3.2.0): index.umd.js

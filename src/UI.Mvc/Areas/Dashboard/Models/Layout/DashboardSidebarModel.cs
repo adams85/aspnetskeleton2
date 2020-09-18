@@ -10,6 +10,13 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
 {
     public class DashboardSidebarModel
     {
+        public static readonly string SidebarStateCookieName = "App.Dashboard.SidebarState";
+
+        public static (bool IsVisible, bool IsMinimized) GetSidebarState(HttpContext httpContext) =>
+            int.TryParse(httpContext.Request.Cookies[SidebarStateCookieName], out var state) ?
+            ((state & 0x1) != 0, (state & 0x2) != 0) :
+            (true, false);
+
         public List<NavigationGroup>? Groups { get; set; }
 
         public class NavigationGroup

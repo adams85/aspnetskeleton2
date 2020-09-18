@@ -20,7 +20,7 @@
                     <br />
                     <i class="fa fa-clock-o" aria-hidden="true"></i> @T["The time is {0:T} (GMT).", Model.UtcNow]
                     <hr />
-                    @T["{0} hours is left to midnight.", Plural.From("{0} hours are left to midnight.", (int)Model.TimeToMidnight.TotalHours)]
+                    @T["{0} hour is left until midnight.", Plural.From("{0} hours are left until midnight.", (int)Model.TimeToMidnight.TotalHours)]
                 </p>
             </div>
         </div>

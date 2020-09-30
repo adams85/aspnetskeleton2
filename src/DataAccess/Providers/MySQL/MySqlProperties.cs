@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using WebApp.DataAccess.Infrastructure;
 
@@ -22,20 +21,20 @@ namespace WebApp.DataAccess.Providers.MySQL
         protected override string DefaultCaseSensitiveCollation => DefaultCaseSensitiveCollationName;
         protected override string DefaultCaseInsensitiveCollation => DefaultCaseInsensitiveCollationName;
 
-        protected override IEqualityComparer<string> CreateCaseSensitiveComparer(string collation)
+        protected override StringComparer CreateCaseSensitiveComparer(string collation)
         {
             return collation switch
             {
-                DefaultCaseSensitiveCollationName => StringComparer.Ordinal,
+                DefaultCaseSensitiveCollationName => StringComparer.InvariantCulture,
                 _ => throw CreateUndefinedCollationError(Provider, CaseSensitiveCollation, caseSensitive: true),
             };
         }
 
-        protected override IEqualityComparer<string> CreateCaseInsensitiveComparer(string collation)
+        protected override StringComparer CreateCaseInsensitiveComparer(string collation)
         {
             return collation switch
             {
-                DefaultCaseInsensitiveCollationName => StringComparer.OrdinalIgnoreCase,
+                DefaultCaseInsensitiveCollationName => StringComparer.InvariantCultureIgnoreCase,
                 _ => throw CreateUndefinedCollationError(Provider, collation, caseSensitive: false),
             };
         }

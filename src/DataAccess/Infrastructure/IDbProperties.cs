@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Data;
 
 namespace WebApp.DataAccess.Infrastructure
@@ -12,9 +12,9 @@ namespace WebApp.DataAccess.Infrastructure
         string? CharacterEncoding { get; }
 
         string CaseSensitiveCollation { get; }
-        IEqualityComparer<string> CaseSensitiveComparer { get; }
+        StringComparer CaseSensitiveComparer { get; }
 
         string CaseInsensitiveCollation { get; }
-        IEqualityComparer<string> CaseInsensitiveComparer { get; }
+        StringComparer CaseInsensitiveComparer { get; }
     }
 }

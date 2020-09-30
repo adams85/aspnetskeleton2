@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using WebApp.DataAccess.Infrastructure;
 
@@ -21,7 +20,7 @@ namespace WebApp.DataAccess.Providers.Sqlite
         protected override string DefaultCaseSensitiveCollation => DefaultCaseSensitiveCollationName;
         protected override string DefaultCaseInsensitiveCollation => DefaultCaseInsensitiveCollationName;
 
-        protected override IEqualityComparer<string> CreateCaseSensitiveComparer(string collation)
+        protected override StringComparer CreateCaseSensitiveComparer(string collation)
         {
             return collation switch
             {
@@ -30,7 +29,7 @@ namespace WebApp.DataAccess.Providers.Sqlite
             };
         }
 
-        protected override IEqualityComparer<string> CreateCaseInsensitiveComparer(string collation)
+        protected override StringComparer CreateCaseInsensitiveComparer(string collation)
         {
             return collation switch
             {

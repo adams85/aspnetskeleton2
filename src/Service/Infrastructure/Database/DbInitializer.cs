@@ -20,8 +20,8 @@ namespace WebApp.Service.Infrastructure.Database
         private readonly IClock _clock;
         private readonly IDbProperties _dbProperties;
 
-        private readonly IEqualityComparer<string> _caseSensitiveComparer;
-        private readonly IEqualityComparer<string> _caseInsensitiveComparer;
+        private readonly StringComparer _caseSensitiveComparer;
+        private readonly StringComparer _caseInsensitiveComparer;
         private readonly ILogger _logger;
 
         private readonly bool _dbEnsureCreated;

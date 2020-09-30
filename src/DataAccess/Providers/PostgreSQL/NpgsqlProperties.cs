@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using WebApp.DataAccess.Infrastructure;
@@ -45,14 +44,14 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
         protected override string DefaultCaseSensitiveCollation => DefaultCaseSensitiveCollationName;
         protected override string DefaultCaseInsensitiveCollation => DefaultCaseInsensitiveCollationName;
 
-        protected override IEqualityComparer<string> CreateCaseSensitiveComparer(string collation) => collation switch
+        protected override StringComparer CreateCaseSensitiveComparer(string collation) => collation switch
         {
             DefaultCaseSensitiveCollationName => StringComparer.Ordinal,
             "English_United States.1252" => StringComparer.Create(CultureInfo.GetCultureInfo("en-US"), ignoreCase: false),
             _ => throw CreateUndefinedCollationError(Provider, CaseSensitiveCollation, caseSensitive: true),
         };
 
-        protected override IEqualityComparer<string> CreateCaseInsensitiveComparer(string collation) => collation switch
+        protected override StringComparer CreateCaseInsensitiveComparer(string collation) => collation switch
         {
             DefaultCaseInsensitiveCollationName => StringComparer.OrdinalIgnoreCase,
             "English_United States.1252" => StringComparer.Create(CultureInfo.GetCultureInfo("en-US"), ignoreCase: true),

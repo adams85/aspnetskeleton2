@@ -29,11 +29,11 @@ namespace WebApp.DataAccess.Infrastructure
 
         protected abstract string DefaultCaseSensitiveCollation { get; }
         public string CaseSensitiveCollation { get; }
-        public IEqualityComparer<string> CaseSensitiveComparer { get; }
+        public StringComparer CaseSensitiveComparer { get; }
 
         protected abstract string DefaultCaseInsensitiveCollation { get; }
         public string CaseInsensitiveCollation { get; }
-        public IEqualityComparer<string> CaseInsensitiveComparer { get; }
+        public StringComparer CaseInsensitiveComparer { get; }
 
         protected Exception CreateUndefinedCollationError(string provider, string? collation, bool caseSensitive)
         {
@@ -41,8 +41,8 @@ namespace WebApp.DataAccess.Infrastructure
             return new InvalidOperationException($"No comparer is defined for the combination of provider {provider} and collation {collation ?? "(default)"}. Modify {methodName} to provide a comparer for the required combination.");
         }
 
-        protected abstract IEqualityComparer<string> CreateCaseSensitiveComparer(string collation);
+        protected abstract StringComparer CreateCaseSensitiveComparer(string collation);
 
-        protected abstract IEqualityComparer<string> CreateCaseInsensitiveComparer(string collation);
+        protected abstract StringComparer CreateCaseInsensitiveComparer(string collation);
     }
 }

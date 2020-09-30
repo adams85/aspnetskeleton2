@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using Karambolo.Common;
 using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.SqlServer
@@ -18,26 +16,20 @@ namespace WebApp.DataAccess.Providers.SqlServer
         protected override string DefaultCaseSensitiveCollation => DefaultCaseSensitiveCollationName;
         protected override string DefaultCaseInsensitiveCollation => DefaultCaseInsensitiveCollationName;
 
-        protected override IEqualityComparer<string> CreateCaseSensitiveComparer(string collation)
+        protected override StringComparer CreateCaseSensitiveComparer(string collation)
         {
             return collation switch
             {
-                DefaultCaseSensitiveCollationName => DelegatedEqualityComparer.Create<string>(
-                    (x, y) => StringComparer.InvariantCulture.Equals(x?.TrimEnd(' '), y?.TrimEnd(' ')),
-                    obj => StringComparer.InvariantCulture.GetHashCode(obj?.TrimEnd(' ') ?? string.Empty)),
-
+                DefaultCaseSensitiveCollationName => new SqlServerStringComparer(StringComparer.InvariantCulture),
                 _ => throw CreateUndefinedCollationError(Provider, CaseSensitiveCollation, caseSensitive: true),
             };
         }
 
-        protected override IEqualityComparer<string> CreateCaseInsensitiveComparer(string collation)
+        protected override StringComparer CreateCaseInsensitiveComparer(string collation)
         {
             return collation switch
             {
-                DefaultCaseInsensitiveCollationName => DelegatedEqualityComparer.Create<string>(
-                    (x, y) => StringComparer.InvariantCultureIgnoreCase.Equals(x?.TrimEnd(' '), y?.TrimEnd(' ')),
-                    obj => StringComparer.InvariantCultureIgnoreCase.GetHashCode(obj?.TrimEnd(' ') ?? string.Empty)),
-
+                DefaultCaseInsensitiveCollationName => new SqlServerStringComparer(StringComparer.InvariantCultureIgnoreCase),
                 _ => throw CreateUndefinedCollationError(Provider, collation, caseSensitive: false),
             };
         }

@@ -19,6 +19,7 @@ using Microsoft.Net.Http.Headers;
 using WebApp.Api.Infrastructure.Localization;
 using WebApp.Core.Helpers;
 using WebApp.Service.Settings;
+using WebApp.UI.Helpers.Razor;
 using WebApp.UI.Infrastructure.DataAnnotations;
 using WebApp.UI.Infrastructure.Hosting;
 using WebApp.UI.Infrastructure.Navigation;
@@ -152,6 +153,13 @@ namespace WebApp.UI
 
                 if (UIOptions.EnableRazorRuntimeCompilation)
                     mvcBuilder.AddRazorRuntimeCompilation();
+
+                #endregion
+
+                #region Global Razor helpers
+
+                services.AddSingleton<IGlobalRazorHelpersFactory, GlobalRazorHelpersFactory>();
+                services.AddTransient(typeof(IGlobalRazorHelpers<>), typeof(GlobalRazorHelpers<>));
 
                 #endregion
 

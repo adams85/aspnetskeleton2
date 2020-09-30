@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Runtime.Serialization;
 using ProtoBuf;
 using WebApp.Common.Infrastructure.Localization;
@@ -39,6 +40,8 @@ namespace WebApp.Service
             ErrorMessage = ItemsRequiredValidatorErrorMessage
         };
 
+        protected virtual IEnumerable<ValidationResult> Validate(ValidationContext validationContext) => Enumerable.Empty<ValidationResult>();
+
         IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
         {
             if (IsPaged)
@@ -47,7 +50,8 @@ namespace WebApp.Service
             if (IsOrdered)
                 yield return this.ValidateMember(OrderColumns, nameof(OrderColumns), validationContext, s_itemsRequiredValidator);
 
-            yield return ValidationResult.Success;
+            foreach (var validationResult in Validate(validationContext))
+                yield return validationResult;
         }
     }
 }

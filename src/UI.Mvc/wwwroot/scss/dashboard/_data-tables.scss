@@ -1,0 +1,20 @@
+﻿.table.data-table {
+  thead {
+    tr {
+      background-color: $table-dark-bg;
+    }
+
+    th {
+      color: $dark;
+
+      .column-header {
+        .btn {
+          padding: 0;
+          vertical-align: baseline;
+          color: $dark;
+          font-weight: $font-weight-bold;
+        }
+      }
+    }
+  }
+}

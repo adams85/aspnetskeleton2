@@ -8,7 +8,7 @@ namespace WebApp.Core.Helpers
     public static class EnumMetadata
     {
         public static EnumMetadata<TEnum>? For<TEnum>(string name) where TEnum : struct, Enum =>
-            EnumMetadata<TEnum>.Cache.TryGetValue(name, out var enumInfo) ? enumInfo : null;
+            EnumMetadata<TEnum>.Members.TryGetValue(name, out var metadata) ? metadata : null;
 
         public static EnumMetadata<TEnum>? For<TEnum>(TEnum value) where TEnum : struct, Enum =>
             For<TEnum>(value.ToString());
@@ -16,7 +16,7 @@ namespace WebApp.Core.Helpers
 
     public sealed class EnumMetadata<TEnum> where TEnum : struct, Enum
     {
-        public static readonly IReadOnlyDictionary<string, EnumMetadata<TEnum>> Cache = Enum.GetNames(typeof(TEnum))
+        public static readonly IReadOnlyDictionary<string, EnumMetadata<TEnum>> Members = Enum.GetNames(typeof(TEnum))
             .Select(name => (name, field: typeof(TEnum).GetField(name)))
             .Where(item => item.field != null)
             .ToDictionary(item => item.name, item => new EnumMetadata<TEnum>(item.name, item.field!));

@@ -14,5 +14,7 @@ namespace WebApp.Service.Settings
         [DataMember(Order = 4)] public string? MinValue { get; set; }
 
         [DataMember(Order = 5)] public string? MaxValue { get; set; }
+
+        [DataMember(Order = 6)] public string? Description { get; set; }
     }
 }

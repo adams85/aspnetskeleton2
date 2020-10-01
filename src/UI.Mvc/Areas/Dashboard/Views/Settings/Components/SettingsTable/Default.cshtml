@@ -1,0 +1,59 @@
+﻿@using WebApp.UI.Areas.Dashboard.Models.Settings
+
+@model ListSettingsQuery
+
+@inject IGlobalRazorHelpers<ITableHelpers> TableHelpers
+
+@{
+    var tableModel = (SettingsTableModel)ViewData[nameof(SettingsTableModel)];
+    var items = tableModel.Result?.Items;
+
+    var currentOrderColumns = Model.OrderColumns?.Select(QueryableHelper.ParseOrderColumn).ToArray() ?? Array.Empty<(string, bool)>();
+}
+
+<form method="get" asp-route="@SettingsRouteName">
+    <table class="table table-bordered table-striped table-hover data-table">
+        <thead>
+            <tr class="table-dark">
+                <th>
+                    @{ TableHelpers.Instance.ColumnHeader(Html.NameFor(m => m.OrderColumns), nameof(SettingData.Name), currentOrderColumns, @T["Code"], "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
+                </th>
+                <th>
+                    @{ TableHelpers.Instance.ColumnHeader(Html.NameFor(m => m.OrderColumns), nameof(SettingData.Value), currentOrderColumns, @T["Value"], "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
+                </th>
+                <th>
+                    @{ TableHelpers.Instance.ColumnHeader(Html.NameFor(m => m.OrderColumns), nameof(SettingData.Description), currentOrderColumns, @T["Description"], "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
+                </th>
+            </tr>
+        </thead>
+
+        <tbody>
+@if (items?.Length > 0)
+{
+    @for (int i = 0, n = items.Length; i < n; i++)
+    {
+        var item = items[i];
+            <tr>
+                <td>
+                    @item.Name
+                </td>
+                <td>
+                    @item.Value
+                </td>
+                <td class="font-weight-light">
+                    @item.Description
+                </td>
+            </tr>
+    }
+}
+else
+{
+            <tr>
+                <td class="text-center" colspan="3">
+                    @T["No data to display."]
+                </td>
+            </tr>
+}
+        </tbody>
+    </table>
+</form>

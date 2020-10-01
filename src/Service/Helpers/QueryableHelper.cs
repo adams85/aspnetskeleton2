@@ -58,6 +58,11 @@ namespace WebApp.Service.Helpers
             }
         }
 
+        public static string ComposeOrderColumn(string columnName, bool descending)
+        {
+            return (descending ? '-' : '+') + columnName;
+        }
+
         public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> source, ApplyColumnOrder<T> applyColumnOrder, params string[] orderColumns)
         {
             for (int i = 0, n = orderColumns.Length; i < n; i++)

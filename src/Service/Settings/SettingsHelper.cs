@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Karambolo.Common;
+using LinqKit;
+using Microsoft.Extensions.Localization;
 using WebApp.Common.Settings;
 using WebApp.Core.Helpers;
 using WebApp.DataAccess.Entities;
@@ -14,20 +20,60 @@ namespace WebApp.Service.Settings
 {
     internal static class SettingsHelper
     {
-        private static readonly Expression<Func<Setting, SettingData>> s_toDataExpr = entity => new SettingData
+        private static readonly Expression<Func<Setting, string?, SettingData>> s_toDataExpr = (entity, description) => new SettingData
         {
             Name = entity.Name,
             Value = entity.Value,
             DefaultValue = entity.DefaultValue,
             MinValue = entity.MinValue,
-            MaxValue = entity.MaxValue
+            MaxValue = entity.MaxValue,
+            Description = description
         };
 
-        private static readonly Func<Setting, SettingData> s_toData = s_toDataExpr.Compile();
+        private static readonly Func<Setting, string?, SettingData> s_toData = s_toDataExpr.Compile();
 
-        public static SettingData ToData(this Setting entity) => s_toData(entity);
+        private static readonly Expression<Func<string, string?>> s_fallbackNameToDescriptionMapperExpr = _ => null;
+        private static readonly Func<string, string?> s_fallbackNameToDescriptionMapper = s_fallbackNameToDescriptionMapperExpr.Compile();
 
-        public static IQueryable<SettingData> ToData(this IQueryable<Setting> linq) => linq.Select(s_toDataExpr);
+        public static SettingData ToData(this Setting entity, Func<string, string?>? nameToDescriptionMapper = null)
+        {
+            nameToDescriptionMapper ??= s_fallbackNameToDescriptionMapper;
+            return s_toData(entity, nameToDescriptionMapper(entity.Name));
+        }
+
+        public static IQueryable<SettingData> ToData(this IQueryable<Setting> linq, Expression<Func<string, string?>>? nameToDescriptionMapper = null)
+        {
+            nameToDescriptionMapper ??= s_fallbackNameToDescriptionMapperExpr;
+            return linq.AsExpandable().Select(entity => s_toDataExpr.Invoke(entity, nameToDescriptionMapper.Invoke(entity.Name)));
+        }
+
+        #region Sorting
+
+        public static Expression<Func<string, string?>> BuildNameToDescriptionMapper(IStringLocalizer settingEnumStringLocalizer)
+        {
+            var param = Expression.Parameter(typeof(string));
+            Expression noTranslationValue = Expression.Constant(null, typeof(string));
+
+            var mapping = EnumMetadata<SettingEnum>.Members.Values
+                .Select(metadata =>
+                {
+                    var description = metadata.Attributes.OfType<DescriptionAttribute>().FirstOrDefault()?.Description;
+                    return (metadata.Name, Translation: description != null ? settingEnumStringLocalizer[description] : null);
+                })
+                .Where(item => item.Translation != null)
+                .Aggregate(noTranslationValue, (expression, item) =>
+                {
+                    // we need to box the translation string to force it to be included as an SQL parameter
+                    var translationBoxedAccess = ExpressionHelper.MakeBoxedAccess(item.Translation!.Value);
+                    return Expression.Condition(Expression.Equal(param, Expression.Constant(item.Name)), translationBoxedAccess, expression);
+                });
+
+            return Expression.Lambda<Func<string, string?>>(mapping, param);
+        }
+
+        #endregion
+
+        #region Validation
 
         private static readonly Func<string, string?> s_normalizeCulture = value =>
         {
@@ -80,5 +126,7 @@ namespace WebApp.Service.Settings
 
             return true;
         }
+
+        #endregion
     }
 }

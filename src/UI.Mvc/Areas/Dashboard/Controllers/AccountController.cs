@@ -27,14 +27,14 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
 
         public IStringLocalizer T { get; set; }
 
-        [HttpGet(Name = DashboardRoutes.AccountSettingsRouteName)]
+        [HttpGet("/[area]/[controller]", Name = DashboardRoutes.AccountSettingsRouteName)]
         public IActionResult Index()
         {
             return View(new IndexModel());
         }
 
         [ValidateAntiForgeryToken]
-        [HttpPost(Name = DashboardRoutes.AccountSettingsRouteName)]
+        [HttpPost("/[area]/[controller]", Name = DashboardRoutes.AccountSettingsRouteName)]
         public async Task<IActionResult> Index(IndexModel model)
         {
             ModelState.Clear();

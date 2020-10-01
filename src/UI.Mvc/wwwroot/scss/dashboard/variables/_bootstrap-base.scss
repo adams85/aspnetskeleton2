@@ -43,6 +43,11 @@ $border-color:  $gray-200 !default;
 
 $spacer:  1rem !default;
 
+// Tables
+
+$table-border-color:          $border-color !default;
+$table-dark-border-color:     darken($table-border-color, 7.5%) !default;
+
 // Typography
 
 $font-family-sans-serif:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !default;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using WebApp.UI.Helpers;
 
 namespace WebApp.UI.Filters
 {
@@ -8,7 +9,7 @@ namespace WebApp.UI.Filters
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            if (filterContext.HttpContext.Request.Headers["X-Requested-With"] != "XMLHttpRequest")
+            if (!filterContext.HttpContext.IsAjaxRequest())
                 filterContext.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
         }
     }

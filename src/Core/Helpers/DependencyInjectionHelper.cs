@@ -18,7 +18,7 @@ namespace WebApp.Core.Helpers
             Func<MethodCallExpression, Type, Expression>? convertReturnValue = null)
             where TDelegate : Delegate
         {
-            return method.BuildWrapperDelegate<TDelegate>(getTargetInstance, GetMethodParams, convertReturnValue);
+            return method.BuildWrapperLambda<TDelegate>(getTargetInstance, GetMethodParams, convertReturnValue).Compile();
 
             IEnumerable<Expression> GetMethodParams(ParameterExpression[] delegateParams, ParameterInfo[] methodParams)
             {

@@ -6,9 +6,7 @@ namespace WebApp.UI.Helpers
 {
     public static class HtmlHelperExtensions
     {
-        public static IHtmlContent JavaScriptString(this IHtmlHelper htmlHelper, string value, bool addQuotes = true)
-        {
-            return htmlHelper.Raw(HttpUtility.JavaScriptStringEncode(value, addQuotes));
-        }
+        public static IHtmlContent JavaScriptString(this IHtmlHelper htmlHelper, string value, bool addQuotes = true) =>
+            htmlHelper.Raw(HttpUtility.JavaScriptStringEncode(value, addQuotes));
     }
 }

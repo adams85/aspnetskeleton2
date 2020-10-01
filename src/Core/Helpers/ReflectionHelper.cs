@@ -10,32 +10,6 @@ namespace WebApp.Core.Helpers
 {
     public static class ReflectionHelper
     {
-        public static TDelegate BuildWrapperDelegate<TDelegate>(this MethodInfo method,
-            Func<ParameterExpression[], Expression?> getTargetInstance,
-            Func<ParameterExpression[], ParameterInfo[], IEnumerable<Expression>> getMethodCallArguments,
-            Func<MethodCallExpression, Type, Expression>? convertReturnValue = null)
-            where TDelegate : Delegate
-        {
-            var delegateInvokeMethod = typeof(TDelegate).GetMethod(nameof(Action.Invoke));
-
-            var delegateParams = delegateInvokeMethod.GetParameters()
-                .Select(param => Expression.Parameter(param.ParameterType))
-                .ToArray();
-
-            var targetInstance = getTargetInstance(delegateParams);
-            var methodCallArguments = getMethodCallArguments(delegateParams, method.GetParameters());
-            var methodCall = Expression.Call(targetInstance, method, methodCallArguments);
-
-            var body =
-                convertReturnValue != null ? convertReturnValue(methodCall, delegateInvokeMethod.ReturnType) :
-                method.ReturnType != delegateInvokeMethod.ReturnType ? Expression.Convert(methodCall, delegateInvokeMethod.ReturnType) :
-                (Expression)methodCall;
-
-            var lambda = Expression.Lambda<TDelegate>(body, delegateParams);
-
-            return lambda.Compile();
-        }
-
         #region Nullable reference types
 
         // https://github.com/dotnet/roslyn/blob/master/docs/features/nullable-metadata.md

@@ -12,6 +12,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Karambolo.PO" Version="1.6.0" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="3.0.0" />
     <PackageReference Include="MailKit" Version="2.8.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="$(DotNetRuntimeVersion)" />

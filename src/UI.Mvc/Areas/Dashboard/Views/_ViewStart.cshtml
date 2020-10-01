@@ -4,7 +4,7 @@
 @model ILayoutModelProvider<LayoutModel>
 
 @{
-    Layout = "~/Areas/Dashboard/Views/Shared/_DashboardPageLayout.cshtml";
+    Layout = "_DashboardPageLayout";
 
     var page = Model.Layout.PageInfo ??= Pages.FindPage(ViewContext.ActionDescriptor);
     if (page != null)

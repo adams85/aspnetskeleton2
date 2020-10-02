@@ -96,25 +96,5 @@ namespace WebApp.Service.Helpers
 
             return source.Skip(pageIndex * pageSize).Take(pageSize);
         }
-
-        private static readonly MethodInfo s_stringContainsMethod = new Predicate<string>(string.Empty.Contains).Method;
-        private static readonly MethodInfo s_stringStartsWithMethod = new Predicate<string>(string.Empty.StartsWith).Method;
-        private static readonly MethodInfo s_stringEndsWithMethod = new Predicate<string>(string.Empty.EndsWith).Method;
-
-        public static IQueryable<T> Match<T>(this IQueryable<T> source, Expression<Func<T, string>> selector, string value, StringMatchStrategy strategy = StringMatchStrategy.Equals)
-        {
-            Expression whereBody = strategy switch
-            {
-                StringMatchStrategy.Equals => Expression.Equal(selector.Body, Expression.Constant(value)),
-                StringMatchStrategy.StartsWith => Expression.Call(selector.Body, s_stringStartsWithMethod, Expression.Constant(value)),
-                StringMatchStrategy.Contains => Expression.Call(selector.Body, s_stringContainsMethod, Expression.Constant(value)),
-                StringMatchStrategy.EndsWith => Expression.Call(selector.Body, s_stringEndsWithMethod, Expression.Constant(value)),
-                _ => throw new ArgumentOutOfRangeException(nameof(strategy))
-            };
-
-            var wherePredicate = Expression.Lambda<Func<T, bool>>(whereBody, selector.Parameters);
-
-            return source.Where(wherePredicate);
-        }
     }
 }

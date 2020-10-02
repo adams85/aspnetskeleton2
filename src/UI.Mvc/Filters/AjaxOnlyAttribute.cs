@@ -9,7 +9,7 @@ namespace WebApp.UI.Filters
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            if (!filterContext.HttpContext.IsAjaxRequest())
+            if (!filterContext.HttpContext.Request.IsAjaxRequest())
                 filterContext.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
         }
     }

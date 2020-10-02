@@ -34,7 +34,6 @@
     <Compile Include="..\Service\Helpers\EnumerableHelper.cs" Link="Helpers\EnumerableHelper.cs" />
     <Compile Include="..\Service\Helpers\ObservableHelper.cs" Link="Helpers\ObservableHelper.cs" />
     <Compile Include="..\Service\Helpers\QueryableHelper.cs" Link="Helpers\QueryableHelper.cs" />
-    <Compile Include="..\Service\Helpers\StringMatchStrategy.cs" Link="Helpers\StringMatchStrategy.cs" />
     <Compile Include="..\Service\Infrastructure\DefaultExecutionContextAccessor.cs" Link="Infrastructure\DefaultExecutionContextAccessor.cs" />
     <Compile Include="..\Service\Infrastructure\Events\EventListenerExtensions.cs" Link="Infrastructure\Events\EventListenerExtensions.cs" />
     <Compile Include="..\Service\Infrastructure\Events\IEventListener.cs" Link="Infrastructure\Events\IEventListener.cs" />

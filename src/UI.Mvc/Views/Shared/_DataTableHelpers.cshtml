@@ -1,0 +1,105 @@
+﻿@using Microsoft.AspNetCore.Html
+@using Microsoft.AspNetCore.Routing
+
+@inherits Microsoft.AspNetCore.Mvc.Razor.RazorPage
+@implements IDataTableHelpers
+
+@functions {
+    // tag helpers will need the following pragmas (https://github.com/dotnet/aspnetcore/issues/20055)
+    //#pragma warning disable MVC1006
+    //#pragma warning disable 1998
+
+    public void TableHeaderRow(int columnCount)
+    {
+        <tr class="table-header-row">
+            <th colspan="@columnCount">
+                <div class="d-flex">
+                    <div class="flex-grow-1"></div>
+                    <div>
+                        <button class="btn btn-primary btn-sm" type="submit">@T["Refresh"]</button>
+                    </div>
+                </div>
+            </th>
+        </tr>
+    }
+
+    public void ColumnHeaderRow(Func<object?, IHtmlContent> content)
+    {
+        <tr class="column-header-row">
+            @content(null)
+        </tr>
+    }
+
+    private static (bool, bool, string?, bool) GetOrderColumns(string columnName, (string, bool)[] currentOrderColumns)
+    {
+        if (currentOrderColumns.Length > 0)
+        {
+            var (orderColumnName, orderColumnDescending) = currentOrderColumns[0];
+
+            if (columnName.Equals(orderColumnName, StringComparison.OrdinalIgnoreCase))
+            {
+                if (orderColumnDescending)
+                    return (true, orderColumnDescending, null, default);
+
+                return (true, orderColumnDescending, columnName, true);
+            }
+        }
+
+        return (false, default, columnName, false);
+    }
+
+    public void ColumnHeader(string title)
+    {
+        <div>
+            <span class="title">@title</span>
+        </div>
+    }
+
+    public void ColumnHeader(string columnName, string formName, (string ColumnName, bool Descending)[] currentOrderColumns, RouteValueDictionary routeValues,
+        string title, string ascendingIconClassName, string descendingIconClassName)
+    {
+        var (isCurrentOrderColumn, currentOrderColumnDescending, orderColumnName, orderColumnDescending) = GetOrderColumns(columnName, currentOrderColumns);
+
+        routeValues = new RouteValueDictionary(routeValues);
+        @if (orderColumnName != null)
+        {
+            routeValues[formName] = QueryableHelper.ComposeOrderColumn(orderColumnName, orderColumnDescending);
+        }
+        else
+        {
+            routeValues.Remove(formName);
+        }
+
+        <div>
+            <a class="title" href="@Url.Action(null, routeValues)">@title</a>
+            @if (isCurrentOrderColumn)
+            {
+                <input type="hidden" name="@formName" value="@QueryableHelper.ComposeOrderColumn(columnName, currentOrderColumnDescending)" />
+                <i class="sort-order fa @(currentOrderColumnDescending ? descendingIconClassName : ascendingIconClassName) ml-1" aria-hidden="true"></i>
+            }
+        </div>
+    }
+
+    public void ColumnFilterRow(Func<object?, IHtmlContent> content)
+    {
+        <tr class="column-filter-row">
+            @content(null)
+        </tr>
+    }
+
+    public void TextColumnFilter(string columnName, string formName, string? currentValue, string title)
+    {
+        <div>
+            <input class="form-control form-control-sm" type="text" name="@formName" value="@currentValue" placeholder="@T["Filter text"]" />
+        </div>
+    }
+
+    public void NoData(int columnCount)
+    {
+        <tr class="no-data-row">
+            <td class="text-center" colspan="@columnCount">
+                @T["No data to display."]
+            </td>
+        </tr>
+    }
+}

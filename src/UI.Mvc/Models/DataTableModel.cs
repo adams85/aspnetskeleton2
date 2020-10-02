@@ -2,7 +2,7 @@
 
 namespace WebApp.UI.Models
 {
-    public abstract class TableModel<TQuery, TResult, TItem>
+    public abstract class DataTableModel<TQuery, TResult, TItem>
         where TQuery : ListQuery, IQuery<TResult>
         where TResult: ListResult<TItem>
     {

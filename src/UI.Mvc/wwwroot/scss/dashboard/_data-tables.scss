@@ -1,20 +1,34 @@
 ﻿.table.data-table {
+  border: 0;
+
   thead {
-    tr {
-      background-color: $table-dark-bg;
+    .table-header-row {
+      border: 0;
+
+      th {
+        padding-left: 0;
+        padding-right: 0;
+        border: 0;
+      }
     }
 
-    th {
-      color: $dark;
+    .column-header-row {
+      background-color: $table-dark-bg;
+      color: $light;
 
-      .column-header {
-        .btn {
-          padding: 0;
-          vertical-align: baseline;
-          color: $dark;
-          font-weight: $font-weight-bold;
-        }
+      .title {
+        font-weight: $font-weight-bold;
       }
+
+      a.title {
+        padding: 0;
+        vertical-align: baseline;
+        color: $light;
+      }
+    }
+
+    .column-filter-row {
+      background-color: theme-color-level('secondary', $table-bg-level);
     }
   }
 }

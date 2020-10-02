@@ -2,58 +2,82 @@
 
 @model ListSettingsQuery
 
-@inject IGlobalRazorHelpers<ITableHelpers> TableHelpers
+@inject IGlobalRazorHelpers<IDataTableHelpers> TableHelpers
 
 @{
     var tableModel = (SettingsTableModel)ViewData[nameof(SettingsTableModel)];
     var items = tableModel.Result?.Items;
 
     var currentOrderColumns = Model.OrderColumns?.Select(QueryableHelper.ParseOrderColumn).ToArray() ?? Array.Empty<(string, bool)>();
+
+    var routeValues = new Microsoft.AspNetCore.Routing.RouteValueDictionary(ViewContext.RouteData.Values);
+    routeValues.Merge(ViewContext.HttpContext.Request.Query);
+
+    SettingData? row = default!;
+    var nameColumnTitle = Html.DisplayNameFor(_ => row.Name);
+    var valueColumnTitle = Html.DisplayNameFor(_ => row.Value);
+    var descriptionColumnTitle = Html.DisplayNameFor(_ => row.Description);
+
+    const int columnCount = 3;
 }
 
 <form method="get" asp-route="@SettingsRouteName">
     <table class="table table-bordered table-striped table-hover data-table">
         <thead>
-            <tr class="table-dark">
-                <th>
-                    @{ TableHelpers.Instance.ColumnHeader(Html.NameFor(m => m.OrderColumns), nameof(SettingData.Name), currentOrderColumns, @T["Code"], "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
-                </th>
-                <th>
-                    @{ TableHelpers.Instance.ColumnHeader(Html.NameFor(m => m.OrderColumns), nameof(SettingData.Value), currentOrderColumns, @T["Value"], "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
-                </th>
-                <th>
-                    @{ TableHelpers.Instance.ColumnHeader(Html.NameFor(m => m.OrderColumns), nameof(SettingData.Description), currentOrderColumns, @T["Description"], "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
-                </th>
-            </tr>
+            @{
+                TableHelpers.Instance.TableHeaderRow(columnCount);
+
+                TableHelpers.Instance.ColumnHeaderRow(
+                @<text>
+                    <th>
+                        @{ TableHelpers.Instance.ColumnHeader(nameof(SettingData.Name), Html.NameFor(m => m.OrderColumns), currentOrderColumns, routeValues, nameColumnTitle, "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
+                    </th>
+                    <th>
+                        @{ TableHelpers.Instance.ColumnHeader(nameof(SettingData.Value), Html.NameFor(m => m.OrderColumns), currentOrderColumns, routeValues, valueColumnTitle, "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
+                    </th>
+                    <th>
+                        @{ TableHelpers.Instance.ColumnHeader(nameof(SettingData.Description), Html.NameFor(m => m.OrderColumns), currentOrderColumns, routeValues, descriptionColumnTitle, "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
+                    </th>
+                </text>);
+
+                TableHelpers.Instance.ColumnFilterRow(
+                @<text>
+                    <th>
+                        @{ TableHelpers.Instance.TextColumnFilter(nameof(SettingData.Name), Html.NameFor(m => m.NamePattern), Model.NamePattern, nameColumnTitle); }
+                    </th>
+                    <th>
+                        @{ TableHelpers.Instance.TextColumnFilter(nameof(SettingData.Value), Html.NameFor(m => m.ValuePattern), Model.ValuePattern, valueColumnTitle); }
+                    </th>
+                    <th>
+                        @{ TableHelpers.Instance.TextColumnFilter(nameof(SettingData.Description), Html.NameFor(m => m.DescriptionPattern), Model.DescriptionPattern, descriptionColumnTitle); }
+                    </th>
+                </text>);
+            }
         </thead>
 
         <tbody>
-@if (items?.Length > 0)
-{
-    @for (int i = 0, n = items.Length; i < n; i++)
-    {
-        var item = items[i];
-            <tr>
-                <td>
-                    @item.Name
-                </td>
-                <td>
-                    @item.Value
-                </td>
-                <td class="font-weight-light">
-                    @item.Description
-                </td>
-            </tr>
-    }
-}
-else
-{
-            <tr>
-                <td class="text-center" colspan="3">
-                    @T["No data to display."]
-                </td>
-            </tr>
-}
+            @if (items?.Length > 0)
+            {
+                @for (int i = 0, n = items.Length; i < n; i++)
+                {
+                    var item = items[i];
+                    <tr>
+                        <td>
+                            @item.Name
+                        </td>
+                        <td>
+                            @item.Value
+                        </td>
+                        <td class="font-weight-light">
+                            @(new LocalizedHtmlString(item.Description, item.Description, false, item.DefaultValue, item.MinValue, item.MaxValue))
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                TableHelpers.Instance.NoData(columnCount);
+            }
         </tbody>
     </table>
 </form>

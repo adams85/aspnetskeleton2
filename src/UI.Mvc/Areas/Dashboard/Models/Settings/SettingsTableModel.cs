@@ -4,7 +4,7 @@ using WebApp.UI.Models;
 
 namespace WebApp.UI.Areas.Dashboard.Models.Settings
 {
-    public class SettingsTableModel : TableModel<ListSettingsQuery, ListResult<SettingData>, SettingData>
+    public class SettingsTableModel : DataTableModel<ListSettingsQuery, ListResult<SettingData>, SettingData>
     {
     }
 }

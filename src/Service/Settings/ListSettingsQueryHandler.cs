@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Localization;
 using WebApp.Common.Settings;
 using WebApp.DataAccess.Entities;
+using WebApp.Service.Helpers;
 
 namespace WebApp.Service.Settings
 {
@@ -19,14 +20,25 @@ namespace WebApp.Service.Settings
 
         public override async Task<ListResult<SettingData>> HandleAsync(ListSettingsQuery query, QueryContext context, CancellationToken cancellationToken)
         {
+            IQueryable<Setting> linq = context.DbContext.Settings;
+
+            if (query.NamePattern != null)
+                linq = linq.Where(setting => setting.Name!.Contains(query.NamePattern));
+
+            if (query.ValuePattern != null)
+                linq = linq.Where(setting => setting.Value!.Contains(query.ValuePattern));
+
             var settingEnumStringLocalizer = _stringLocalizerFactory.Create(typeof(SettingEnumConstants));
 
             // we translate descriptions at this point and include them in the query because we want to enable sorting/filtering on DB-side
             var nameToDescriptionMapper = SettingsHelper.BuildNameToDescriptionMapper(settingEnumStringLocalizer);
 
-            IQueryable<Setting> linq = context.DbContext.Settings;
+            var resultLinq = linq.ToData(nameToDescriptionMapper);
 
-            return await ResultAsync(query, linq.ToData(nameToDescriptionMapper), cancellationToken).ConfigureAwait(false);
+            if (query.DescriptionPattern != null)
+                resultLinq = resultLinq.Where(setting => setting.Description!.ToLower().Contains(query.DescriptionPattern.ToLower()));
+
+            return await ResultAsync(query, resultLinq, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -13,16 +13,16 @@ namespace WebApp.Service
     {
         protected ListQueryHandler() { }
 
-        protected virtual IOrderedQueryable<T> ApplyColumnOrder(IQueryable<T> queryable, string columnName, bool descending, bool nested)
+        protected virtual IOrderedQueryable<T> ApplyOrderingComponent(IQueryable<T> queryable, string keyPath, bool descending, bool nested)
         {
-            try { return nested ? ((IOrderedQueryable<T>)queryable).ThenBy(columnName, descending) : queryable.OrderBy(columnName, descending); }
-            catch { throw new ServiceErrorException(ServiceErrorCode.ParamNotValid, Lambda.MemberPath((TQuery q) => q.OrderColumns), columnName); }
+            try { return nested ? ((IOrderedQueryable<T>)queryable).ThenBy(keyPath, descending) : queryable.OrderBy(keyPath, descending); }
+            catch { throw new ServiceErrorException(ServiceErrorCode.ParamNotValid, Lambda.MemberPath((TQuery q) => q.OrderBy), keyPath); }
         }
 
         protected IQueryable<T> ApplyPagingAndOrdering(TQuery query, IQueryable<T> queryable)
         {
             if (query.IsOrdered)
-                queryable = queryable.ApplyOrdering(ApplyColumnOrder, query.OrderColumns!);
+                queryable = queryable.ApplyOrdering(ApplyOrderingComponent, query.OrderBy!);
 
             if (query.IsPaged)
                 queryable = queryable.ApplyPaging(query.PageIndex, query.PageSize, query.MaxPageSize);

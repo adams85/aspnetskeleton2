@@ -5,15 +5,24 @@ using System.Reflection;
 
 namespace WebApp.Service.Helpers
 {
-    public delegate IOrderedQueryable<T> ApplyColumnOrder<T>(IQueryable<T> source, string columnName, bool descending, bool nested);
+    public delegate IOrderedQueryable<T> ApplyOrderingComponent<T>(IQueryable<T> source, string keyPath, bool descending, bool nested);
 
     public static class QueryableHelper
     {
-        private static IOrderedQueryable<T> OrderByCore<T>(this IQueryable<T> source, string keyPath, bool descending, bool nested)
-        {
-            if (keyPath.Length == 0)
-                throw new ArgumentException(null, nameof(keyPath));
+        private static readonly MethodInfo s_orderByMethodDefinition =
+            new Func<IQueryable<object>, Expression<Func<object, object>>, object>(Queryable.OrderBy<object, object>).Method.GetGenericMethodDefinition();
 
+        private static readonly MethodInfo s_orderByDescendingMethodDefinition =
+            new Func<IQueryable<object>, Expression<Func<object, object>>, object>(Queryable.OrderByDescending<object, object>).Method.GetGenericMethodDefinition();
+
+        private static readonly MethodInfo s_thenByMethodDefinition =
+            new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenBy<object, object>).Method.GetGenericMethodDefinition();
+
+        private static readonly MethodInfo s_thenByDescendingMethodDefinition =
+            new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenByDescending<object, object>).Method.GetGenericMethodDefinition();
+
+        private static IOrderedQueryable<T> OrderByCore<T>(this IQueryable<T> source, string keyPath, MethodInfo orderMethodDefinition)
+        {
             var type = typeof(T);
             var @param = Expression.Parameter(type);
 
@@ -24,28 +33,24 @@ namespace WebApp.Service.Helpers
 
             var keySelector = Expression.Lambda(propertyAccess, @param);
 
-            var orderQuery = Expression.Call(
-                typeof(Queryable),
-                !nested ?
-                (!descending ? nameof(Queryable.OrderBy) : nameof(Queryable.OrderByDescending)) :
-                (!descending ? nameof(Queryable.ThenBy) : nameof(Queryable.ThenByDescending)),
-                new[] { type, propertyAccess.Type },
-                source.Expression, Expression.Quote(keySelector));
+            var orderMethod = orderMethodDefinition.MakeGenericMethod(type, propertyAccess.Type);
+
+            var orderQuery = Expression.Call(orderMethod, source.Expression, Expression.Quote(keySelector));
 
             return (IOrderedQueryable<T>)source.Provider.CreateQuery<T>(orderQuery);
         }
 
         public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string keyPath, bool descending = false)
         {
-            return source.OrderByCore(keyPath, descending, nested: false);
+            return source.OrderByCore(keyPath, !descending ? s_orderByMethodDefinition : s_orderByDescendingMethodDefinition);
         }
 
         public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string keyPath, bool descending = false)
         {
-            return source.OrderByCore(keyPath, descending, nested: true);
+            return source.OrderByCore(keyPath, !descending ? s_thenByMethodDefinition : s_thenByDescendingMethodDefinition);
         }
 
-        public static (string ColumnName, bool Descending) ParseOrderColumn(string value)
+        public static (string KeyPath, bool Descending) ParseOrderingComponent(string value)
         {
             var c = value[0];
             switch (c)
@@ -58,22 +63,22 @@ namespace WebApp.Service.Helpers
             }
         }
 
-        public static string ComposeOrderColumn(string columnName, bool descending)
+        public static string ComposeOrderingComponent(string keyPath, bool descending)
         {
-            return (descending ? '-' : '+') + columnName;
+            return descending ? "-" + keyPath : keyPath;
         }
 
-        public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> source, ApplyColumnOrder<T> applyColumnOrder, params string[] orderColumns)
+        public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> source, ApplyOrderingComponent<T> applyOrderingComponent, params string[] orderingComponents)
         {
-            for (int i = 0, n = orderColumns.Length; i < n; i++)
+            for (int i = 0, n = orderingComponents.Length; i < n; i++)
             {
-                var orderColumn = orderColumns[i];
+                var orderingComponent = orderingComponents[i];
 
-                if (string.IsNullOrEmpty(orderColumn))
-                    throw new ArgumentException(null, nameof(orderColumns));
+                if (string.IsNullOrEmpty(orderingComponent))
+                    throw new ArgumentException(null, nameof(orderingComponents));
 
-                var (columnName, descending) = ParseOrderColumn(orderColumn);
-                source = applyColumnOrder(source, columnName, descending, nested: i > 0);
+                var (keyPath, descending) = ParseOrderingComponent(orderingComponent);
+                source = applyOrderingComponent(source, keyPath, descending, nested: i > 0);
             }
 
             return source;

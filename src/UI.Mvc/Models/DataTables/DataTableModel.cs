@@ -1,6 +1,6 @@
 ﻿using WebApp.Service;
 
-namespace WebApp.UI.Models
+namespace WebApp.UI.Models.DataTables
 {
     public abstract class DataTableModel<TQuery, TResult, TItem>
         where TQuery : ListQuery, IQuery<TResult>
@@ -8,5 +8,7 @@ namespace WebApp.UI.Models
     {
         public TQuery Query { get; set; } = null!;
         public TResult Result { get; set; } = null!;
+
+        public DataTableDefinition<TItem> ToTableDefinition() => new DataTableDefinition<TItem>(Query, Result);
     }
 }

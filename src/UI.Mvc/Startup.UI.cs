@@ -19,7 +19,7 @@ using Microsoft.Net.Http.Headers;
 using WebApp.Api.Infrastructure.Localization;
 using WebApp.Core.Helpers;
 using WebApp.Service.Settings;
-using WebApp.UI.Helpers.Razor;
+using WebApp.UI.Helpers.Views;
 using WebApp.UI.Infrastructure.DataAnnotations;
 using WebApp.UI.Infrastructure.Hosting;
 using WebApp.UI.Infrastructure.Navigation;

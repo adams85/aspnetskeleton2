@@ -16,8 +16,8 @@ namespace WebApp.Service
     [ProtoInclude(13, typeof(ListUsersQuery))]
     public class ListQuery : IQuery, IValidatableObject
     {
-        [DataMember(Order = 1)] public string[]? OrderColumns { get; set; }
-        public bool IsOrdered => OrderColumns != null && OrderColumns.Length > 0;
+        [DataMember(Order = 1)] public string[]? OrderBy { get; set; }
+        public bool IsOrdered => OrderBy != null && OrderBy.Length > 0;
 
         [DataMember(Order = 2)] public int PageIndex { get; set; }
         [DataMember(Order = 3)] public int PageSize { get; set; }
@@ -48,7 +48,7 @@ namespace WebApp.Service
                 yield return this.ValidateMember(PageIndex, nameof(PageIndex), validationContext, s_nonNegativeIntegerValidator);
 
             if (IsOrdered)
-                yield return this.ValidateMember(OrderColumns, nameof(OrderColumns), validationContext, s_itemsRequiredValidator);
+                yield return this.ValidateMember(OrderBy, nameof(OrderBy), validationContext, s_itemsRequiredValidator);
 
             foreach (var validationResult in Validate(validationContext))
                 yield return validationResult;

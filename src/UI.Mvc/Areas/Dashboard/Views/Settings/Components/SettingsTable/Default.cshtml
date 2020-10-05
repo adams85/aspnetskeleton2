@@ -1,83 +1,62 @@
-﻿@using WebApp.UI.Areas.Dashboard.Models.Settings
+﻿@using WebApp.UI.Models.DataTables
+@using WebApp.UI.Areas.Dashboard.Models.Settings
 
 @model ListSettingsQuery
 
-@inject IGlobalRazorHelpers<IDataTableHelpers> TableHelpers
+@inject IGlobalRazorHelpers<IDataTableHelpers> DataTableHelpers
 
 @{
     var tableModel = (SettingsTableModel)ViewData[nameof(SettingsTableModel)];
-    var items = tableModel.Result?.Items;
 
-    var currentOrderColumns = Model.OrderColumns?.Select(QueryableHelper.ParseOrderColumn).ToArray() ?? Array.Empty<(string, bool)>();
+    var tableDefinition = tableModel.ToTableDefinition();
 
-    var routeValues = new Microsoft.AspNetCore.Routing.RouteValueDictionary(ViewContext.RouteData.Values);
-    routeValues.Merge(ViewContext.HttpContext.Request.Query);
+    tableDefinition.GenerateQueryUrl = (url, values) => url.RouteUrl(SettingsRouteName, values);
 
-    SettingData? row = default!;
-    var nameColumnTitle = Html.DisplayNameFor(_ => row.Name);
-    var valueColumnTitle = Html.DisplayNameFor(_ => row.Value);
-    var descriptionColumnTitle = Html.DisplayNameFor(_ => row.Description);
+    tableDefinition.OrderByFormFieldName = Html.NameFor(m => m.OrderBy);
 
-    const int columnCount = 3;
+    tableDefinition.Columns = new List<DataTableColumnDefinition<SettingData>>(3)
+{
+        new DataTableColumnDefinition<SettingData>(tableDefinition, s_nameProperty)
+        {
+            AscendingOrderIconCssClass = "fa-sort-alpha-asc",
+            DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+            Filter = new DataTableColumnFilter.Text
+            {
+                FormFieldName = Html.NameFor(m => m.NamePattern),
+                FormFieldValue = Model.NamePattern
+            }
+        },
+        new DataTableColumnDefinition<SettingData>(tableDefinition, s_valueProperty)
+        {
+            AscendingOrderIconCssClass = "fa-sort-alpha-asc",
+            DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+            Filter = new DataTableColumnFilter.Text
+            {
+                FormFieldName = Html.NameFor(m => m.ValuePattern),
+                FormFieldValue = Model.ValuePattern
+            }
+        },
+        new DataTableColumnDefinition<SettingData>(tableDefinition, s_descriptionProperty)
+        {
+            AscendingOrderIconCssClass = "fa-sort-alpha-asc",
+            DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+            Filter = new DataTableColumnFilter.Text
+            {
+                FormFieldName = Html.NameFor(m => m.DescriptionPattern),
+                FormFieldValue = Model.DescriptionPattern
+            },
+            DataCellTemplate = @<td class="font-weight-light">@GetDescription(item.Data)</td>
+        },
+    };
+
+    DataTableHelpers.Instance.Table(tableDefinition);
 }
 
-<form method="get" asp-route="@SettingsRouteName">
-    <table class="table table-bordered table-striped table-hover data-table">
-        <thead>
-            @{
-                TableHelpers.Instance.TableHeaderRow(columnCount);
+@functions {
+    private static readonly ModelPropertyMetadata<SettingData> s_nameProperty = new ModelPropertyMetadata<SettingData>(m => m.Name);
+    private static readonly ModelPropertyMetadata<SettingData> s_valueProperty = new ModelPropertyMetadata<SettingData>(m => m.Value);
+    private static readonly ModelPropertyMetadata<SettingData> s_descriptionProperty = new ModelPropertyMetadata<SettingData>(m => m.Description);
 
-                TableHelpers.Instance.ColumnHeaderRow(
-                @<text>
-                    <th>
-                        @{ TableHelpers.Instance.ColumnHeader(nameof(SettingData.Name), Html.NameFor(m => m.OrderColumns), currentOrderColumns, routeValues, nameColumnTitle, "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
-                    </th>
-                    <th>
-                        @{ TableHelpers.Instance.ColumnHeader(nameof(SettingData.Value), Html.NameFor(m => m.OrderColumns), currentOrderColumns, routeValues, valueColumnTitle, "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
-                    </th>
-                    <th>
-                        @{ TableHelpers.Instance.ColumnHeader(nameof(SettingData.Description), Html.NameFor(m => m.OrderColumns), currentOrderColumns, routeValues, descriptionColumnTitle, "fa-sort-alpha-asc", "fa-sort-alpha-desc"); }
-                    </th>
-                </text>);
-
-                TableHelpers.Instance.ColumnFilterRow(
-                @<text>
-                    <th>
-                        @{ TableHelpers.Instance.TextColumnFilter(nameof(SettingData.Name), Html.NameFor(m => m.NamePattern), Model.NamePattern, nameColumnTitle); }
-                    </th>
-                    <th>
-                        @{ TableHelpers.Instance.TextColumnFilter(nameof(SettingData.Value), Html.NameFor(m => m.ValuePattern), Model.ValuePattern, valueColumnTitle); }
-                    </th>
-                    <th>
-                        @{ TableHelpers.Instance.TextColumnFilter(nameof(SettingData.Description), Html.NameFor(m => m.DescriptionPattern), Model.DescriptionPattern, descriptionColumnTitle); }
-                    </th>
-                </text>);
-            }
-        </thead>
-
-        <tbody>
-            @if (items?.Length > 0)
-            {
-                @for (int i = 0, n = items.Length; i < n; i++)
-                {
-                    var item = items[i];
-                    <tr>
-                        <td>
-                            @item.Name
-                        </td>
-                        <td>
-                            @item.Value
-                        </td>
-                        <td class="font-weight-light">
-                            @(new LocalizedHtmlString(item.Description, item.Description, false, item.DefaultValue, item.MinValue, item.MaxValue))
-                        </td>
-                    </tr>
-                }
-            }
-            else
-            {
-                TableHelpers.Instance.NoData(columnCount);
-            }
-        </tbody>
-    </table>
-</form>
+    private static LocalizedHtmlString GetDescription(SettingData data) =>
+        new LocalizedHtmlString(data.Description, data.Description, false, data.DefaultValue, data.MinValue, data.MaxValue);
+}

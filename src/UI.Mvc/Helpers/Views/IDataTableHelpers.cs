@@ -7,6 +7,7 @@ namespace WebApp.UI.Helpers.Views
         void Table<TItem>(DataTableDefinition<TItem> tableDefinition);
 
         void TableHeaderRow<TItem>(DataTableDefinition<TItem> tableDefinition);
+        void PageSizeSelector<TItem>(DataTableDefinition<TItem> tableDefinition);
 
         void ColumnHeaderRow<TItem>(DataTableDefinition<TItem> tableDefinition);
         void ColumnHeader<TItem>(DataTableColumnDefinition<TItem> columnDefinition);
@@ -18,5 +19,7 @@ namespace WebApp.UI.Helpers.Views
         void DataRow<TItem>(TItem item, DataTableDefinition<TItem> tableDefinition);
         void DataCell<TItem>(TItem item, DataTableColumnDefinition<TItem> columnDefinition);
         void NoDataRow<TItem>(DataTableDefinition<TItem> tableDefinition);
+
+        void TableFooterRow<TItem>(DataTableDefinition<TItem> tableDefinition);
     }
 }

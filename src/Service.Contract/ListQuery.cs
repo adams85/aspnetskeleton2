@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -52,6 +53,23 @@ namespace WebApp.Service
 
             foreach (var validationResult in Validate(validationContext))
                 yield return validationResult;
+        }
+
+        public void ForcePaging(int defaultPageSize, int maxPageSize)
+        {
+            if (defaultPageSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(defaultPageSize));
+
+            if (maxPageSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(maxPageSize));
+
+            if (!IsPaged)
+            {
+                PageIndex = 0;
+                PageSize = defaultPageSize;
+            }
+
+            MaxPageSize = maxPageSize;
         }
     }
 }

@@ -1,34 +1,32 @@
 ﻿.table.data-table {
   border: 0;
 
-  thead {
-    .table-header-row {
-      border: 0;
+  .table-header-row, .table-footer-row {
+    border-color: transparent;
 
-      th {
-        padding-left: 0;
-        padding-right: 0;
-        border: 0;
-      }
+    th, td {
+      border-color: transparent;
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  .column-header-row {
+    background-color: $table-dark-bg;
+    color: $light;
+
+    .title {
+      font-weight: $font-weight-bold;
     }
 
-    .column-header-row {
-      background-color: $table-dark-bg;
+    a.title {
+      padding: 0;
+      vertical-align: baseline;
       color: $light;
-
-      .title {
-        font-weight: $font-weight-bold;
-      }
-
-      a.title {
-        padding: 0;
-        vertical-align: baseline;
-        color: $light;
-      }
     }
+  }
 
-    .column-filter-row {
-      background-color: theme-color-level('secondary', $table-bg-level);
-    }
+  .column-filter-row {
+    background-color: theme-color-level('secondary', $table-bg-level);
   }
 }

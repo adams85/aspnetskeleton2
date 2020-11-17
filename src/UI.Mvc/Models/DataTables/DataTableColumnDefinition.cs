@@ -18,7 +18,7 @@ namespace WebApp.UI.Models.DataTables
         public string? Title { get; set; }
 
         public bool IsSortable { get; set; } = true;
-        public string? OrderingKeyPath { get; set; }
+        public string? OrderKeyPropertyPath { get; set; }
         public string? AscendingOrderIconCssClass { get; set; }
         public string? DescendingOrderIconCssClass { get; set; }
         public Func<DataTableColumnDefinition<TItem>, IHtmlContent>? HeaderTemplate { get; set; }

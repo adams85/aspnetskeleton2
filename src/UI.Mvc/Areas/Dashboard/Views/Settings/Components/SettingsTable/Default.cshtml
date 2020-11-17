@@ -13,9 +13,11 @@
     tableDefinition.GenerateQueryUrl = (url, values) => url.RouteUrl(SettingsRouteName, values);
 
     tableDefinition.OrderByFormFieldName = Html.NameFor(m => m.OrderBy);
+    tableDefinition.PageIndexFormFieldName = Html.NameFor(m => m.PageIndex);
+    tableDefinition.PageSizeFormFieldName = Html.NameFor(m => m.PageSize);
 
     tableDefinition.Columns = new List<DataTableColumnDefinition<SettingData>>(3)
-{
+    {
         new DataTableColumnDefinition<SettingData>(tableDefinition, s_nameProperty)
         {
             AscendingOrderIconCssClass = "fa-sort-alpha-asc",

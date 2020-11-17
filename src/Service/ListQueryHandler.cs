@@ -13,16 +13,16 @@ namespace WebApp.Service
     {
         protected ListQueryHandler() { }
 
-        protected virtual IOrderedQueryable<T> ApplyOrderingComponent(IQueryable<T> queryable, string keyPath, bool descending, bool nested)
+        protected virtual IOrderedQueryable<T> ApplyOrderByElement(IQueryable<T> queryable, string keyPropertyPath, bool descending, bool nested)
         {
-            try { return nested ? ((IOrderedQueryable<T>)queryable).ThenBy(keyPath, descending) : queryable.OrderBy(keyPath, descending); }
-            catch { throw new ServiceErrorException(ServiceErrorCode.ParamNotValid, Lambda.MemberPath((TQuery q) => q.OrderBy), keyPath); }
+            try { return nested ? ((IOrderedQueryable<T>)queryable).ThenBy(keyPropertyPath, descending) : queryable.OrderBy(keyPropertyPath, descending); }
+            catch { throw new ServiceErrorException(ServiceErrorCode.ParamNotValid, Lambda.MemberPath((TQuery q) => q.OrderBy), keyPropertyPath); }
         }
 
         protected IQueryable<T> ApplyPagingAndOrdering(TQuery query, IQueryable<T> queryable)
         {
             if (query.IsOrdered)
-                queryable = queryable.ApplyOrdering(ApplyOrderingComponent, query.OrderBy!);
+                queryable = queryable.ApplyOrdering(ApplyOrderByElement, query.OrderBy!);
 
             if (query.IsPaged)
                 queryable = queryable.ApplyPaging(query.PageIndex, query.PageSize, query.MaxPageSize);
@@ -35,12 +35,12 @@ namespace WebApp.Service
             return queryable.CountAsync(cancellationToken);
         }
 
-        protected async Task<int?> GetTotalItemCountAsync(TQuery query, IQueryable<T> queryable, T[] items, CancellationToken cancellationToken)
+        protected async Task<int> GetTotalItemCountAsync(TQuery query, IQueryable<T> queryable, T[] items, CancellationToken cancellationToken)
         {
             return
-                query.SkipTotalItemCount ? null :
+                query.SkipTotalItemCount ? -1 :
                 query.IsPaged ? await CountAsync(queryable, cancellationToken).ConfigureAwait(false) :
-                items?.Length;
+                items.Length;
         }
 
         protected virtual Task<T[]> ToArrayAsync(IQueryable<T> queryable, CancellationToken cancellationToken)
@@ -57,17 +57,19 @@ namespace WebApp.Service
             return Result(items, totalItemCount, query.PageIndex, query.PageSize, query.MaxPageSize);
         }
 
-        protected TResult Result(T[] items, int? totalItemCount, int pageIndex, int pageSize, int maxPageSize)
+        protected TResult Result(T[] items, int totalItemCount, int pageIndex, int pageSize, int maxPageSize)
         {
-            if (pageSize <= 0)
-                pageIndex = pageSize = maxPageSize = 0;
+            if (pageSize > 0)
+                pageSize = QueryableHelper.GetEffectivePageSize(pageSize, maxPageSize);
+            else
+                pageSize = pageIndex = 0;
 
             return new TResult
             {
                 Items = items,
-                TotalItemCount = totalItemCount ?? 0,
+                TotalItemCount = totalItemCount,
                 PageIndex = pageIndex,
-                PageSize = QueryableHelper.GetEffectivePageSize(pageSize, maxPageSize)
+                PageSize = pageSize,
             };
         }
     }

@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace WebApp.Service.Helpers
 {
-    public delegate IOrderedQueryable<T> ApplyOrderingComponent<T>(IQueryable<T> source, string keyPath, bool descending, bool nested);
+    public delegate IOrderedQueryable<T> ApplyOrderByElement<T>(IQueryable<T> source, string keyPropertyPath, bool descending, bool nested);
 
     public static class QueryableHelper
     {
@@ -21,13 +21,13 @@ namespace WebApp.Service.Helpers
         private static readonly MethodInfo s_thenByDescendingMethodDefinition =
             new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenByDescending<object, object>).Method.GetGenericMethodDefinition();
 
-        private static IOrderedQueryable<T> OrderByCore<T>(this IQueryable<T> source, string keyPath, MethodInfo orderMethodDefinition)
+        private static IOrderedQueryable<T> OrderByCore<T>(this IQueryable<T> source, string keyPropertyPath, MethodInfo orderMethodDefinition)
         {
             var type = typeof(T);
             var @param = Expression.Parameter(type);
 
             Expression propertyAccess = @param;
-            var propertyNames = keyPath.Split('.');
+            var propertyNames = keyPropertyPath.Split('.');
             for (int i = 0, n = propertyNames.Length; i < n; i++)
                 propertyAccess = Expression.Property(propertyAccess, propertyNames[i]);
 
@@ -40,17 +40,17 @@ namespace WebApp.Service.Helpers
             return (IOrderedQueryable<T>)source.Provider.CreateQuery<T>(orderQuery);
         }
 
-        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string keyPath, bool descending = false)
+        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string keyPropertyPath, bool descending = false)
         {
-            return source.OrderByCore(keyPath, !descending ? s_orderByMethodDefinition : s_orderByDescendingMethodDefinition);
+            return source.OrderByCore(keyPropertyPath, !descending ? s_orderByMethodDefinition : s_orderByDescendingMethodDefinition);
         }
 
-        public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string keyPath, bool descending = false)
+        public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string keyPropertyPath, bool descending = false)
         {
-            return source.OrderByCore(keyPath, !descending ? s_thenByMethodDefinition : s_thenByDescendingMethodDefinition);
+            return source.OrderByCore(keyPropertyPath, !descending ? s_thenByMethodDefinition : s_thenByDescendingMethodDefinition);
         }
 
-        public static (string KeyPath, bool Descending) ParseOrderingComponent(string value)
+        public static (string KeyPropertyPath, bool Descending) ParseOrderByElement(string value)
         {
             var c = value[0];
             switch (c)
@@ -63,22 +63,22 @@ namespace WebApp.Service.Helpers
             }
         }
 
-        public static string ComposeOrderingComponent(string keyPath, bool descending)
+        public static string ComposeOrderByElement(string keyPropertyPath, bool descending)
         {
-            return descending ? "-" + keyPath : keyPath;
+            return descending ? "-" + keyPropertyPath : keyPropertyPath;
         }
 
-        public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> source, ApplyOrderingComponent<T> applyOrderingComponent, params string[] orderingComponents)
+        public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> source, ApplyOrderByElement<T> applyOrderByElement, params string[] orderByElements)
         {
-            for (int i = 0, n = orderingComponents.Length; i < n; i++)
+            for (int i = 0, n = orderByElements.Length; i < n; i++)
             {
-                var orderingComponent = orderingComponents[i];
+                var orderByElement = orderByElements[i];
 
-                if (string.IsNullOrEmpty(orderingComponent))
-                    throw new ArgumentException(null, nameof(orderingComponents));
+                if (string.IsNullOrEmpty(orderByElement))
+                    throw new ArgumentException("Elements cannot be null or empty.", nameof(orderByElements));
 
-                var (keyPath, descending) = ParseOrderingComponent(orderingComponent);
-                source = applyOrderingComponent(source, keyPath, descending, nested: i > 0);
+                var (keyPropertyPath, descending) = ParseOrderByElement(orderByElement);
+                source = applyOrderByElement(source, keyPropertyPath, descending, nested: i > 0);
             }
 
             return source;

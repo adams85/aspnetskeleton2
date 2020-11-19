@@ -3,7 +3,7 @@
 namespace WebApp.Service.Settings
 {
     [DataContract]
-    public class ListSettingsQuery : ListQuery, IQuery<ListResult<SettingData>>
+    public class ListSettingsQuery : ListQuery<ListResult<SettingData>>
     {
         public static readonly int DefaultPageSize = 200;
 

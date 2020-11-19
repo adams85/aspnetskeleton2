@@ -10,4 +10,4 @@ IF %ERRORLEVEL% NEQ 0 goto:eof
   IF %ERRORLEVEL% NEQ 0 goto:eof
 )
 
-dotnet tool restore --configfile "%~dp0\.config\local-nuget.config" --no-cache
+dotnet tool restore --add-source "%~dp0\.nuget" --no-cache

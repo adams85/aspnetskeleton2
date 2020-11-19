@@ -3,7 +3,7 @@
 namespace WebApp.Service.Users
 {
     [DataContract]
-    public class ListUsersQuery : ListQuery, IQuery<ListResult<UserData>>
+    public class ListUsersQuery : ListQuery<ListResult<UserData>>
     {
         public static readonly int DefaultPageSize = 100;
 

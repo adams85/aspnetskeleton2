@@ -18,7 +18,7 @@ namespace CodegenTools.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+    #line 1 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class QueryHandler : QueryTemplateBase
     {
@@ -33,21 +33,21 @@ namespace CodegenTools.Templates
                     "m.Threading;\r\nusing System.Threading.Tasks;\r\nusing Microsoft.EntityFrameworkCore" +
                     ";\r\nusing ");
             
-            #line 12 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 12 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Namespace}.DataAccess.Entities"));
             
             #line default
             #line hidden
             this.Write(";\r\n\r\nnamespace ");
             
-            #line 14 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 14 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Namespace}.Service.{Group}"));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n");
             
-            #line 16 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 16 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
 
 var resultType = GetResultType();
 
@@ -56,35 +56,35 @@ var resultType = GetResultType();
             #line hidden
             this.Write("    internal sealed class ");
             
-            #line 19 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 19 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}QueryHandler"));
             
             #line default
             #line hidden
             this.Write(" : ");
             
-            #line 19 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 19 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetQueryHandlerBaseType(resultType)));
             
             #line default
             #line hidden
             this.Write("\r\n    {\r\n        public override async Task<");
             
-            #line 21 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 21 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resultType));
             
             #line default
             #line hidden
             this.Write("> HandleAsync(");
             
-            #line 21 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 21 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}Query"));
             
             #line default
             #line hidden
             this.Write(" query, QueryContext context, CancellationToken cancellationToken)\r\n        {\r\n");
             
-            #line 23 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 23 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
 
 if (!IsList)
 {
@@ -96,7 +96,7 @@ if (!IsList)
                     "ndAsync(new object[] { query.Id }, cancellationToken).ConfigureAwait(false);\r\n\r\n" +
                     "            RequireExisting(entity, q => q.Id);\r\n\r\n            // ...\r\n");
             
-            #line 33 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 33 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
 
 if (IsProgressReporter)
 {
@@ -108,7 +108,7 @@ if (IsProgressReporter)
                     "          StatusText = \"Finished\",\r\n                Progress = 1f\r\n            }" +
                     ");\r\n");
             
-            #line 43 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 43 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
 
 }
 
@@ -117,14 +117,14 @@ if (IsProgressReporter)
             #line hidden
             this.Write("\r\n            return new ");
             
-            #line 47 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 47 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resultType));
             
             #line default
             #line hidden
             this.Write("\r\n            {\r\n            };\r\n");
             
-            #line 50 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 50 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
 
 } 
 else 
@@ -133,10 +133,10 @@ else
             
             #line default
             #line hidden
-            this.Write("            IQueryable<Entity> entityQuery = context.DbContext.Settings;\r\n\r\n     " +
+            this.Write("            IQueryable<Entity> entityQuery = context.DbContext.Entities;\r\n\r\n     " +
                     "       // ...\r\n");
             
-            #line 58 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 58 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
 
 if (IsProgressReporter)
 {
@@ -148,7 +148,7 @@ if (IsProgressReporter)
                     "          StatusText = \"Finished\",\r\n                Progress = 1f\r\n            }" +
                     ");\r\n");
             
-            #line 68 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 68 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
 
 }
 
@@ -159,7 +159,7 @@ if (IsProgressReporter)
                     "wait ResultAsync(query, entityDataQuery, cancellationToken).ConfigureAwait(false" +
                     ");\r\n");
             
-            #line 75 "e:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
+            #line 75 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\QueryHandler.tt"
 
 }
 

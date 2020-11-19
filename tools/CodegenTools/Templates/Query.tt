@@ -9,6 +9,14 @@ using System.Runtime.Serialization;
 
 namespace <#= $"{Namespace}.Service.{Group}" #>
 {
+<#
+if (IsList)
+{
+#>
+    // TODO: Don't forget to add the corresponding ProtoInclude attribute to the base class!
+<#
+}
+#>
     [DataContract]
     public class <#= $"{Name}Query" #> : <#= GetQueryBaseType(GetResultType()) #><#= IsProgressReporter ? ", IProgressReporterQuery" : "" #>
     {

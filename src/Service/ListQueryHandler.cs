@@ -8,7 +8,7 @@ using WebApp.Service.Helpers;
 namespace WebApp.Service
 {
     internal abstract class ListQueryHandler<TQuery, TResult, T> : QueryHandler<TQuery, TResult>
-        where TQuery : ListQuery, IQuery<TResult>
+        where TQuery : ListQuery<TResult>
         where TResult : ListResult<T>, new()
     {
         protected ListQueryHandler() { }
@@ -75,7 +75,7 @@ namespace WebApp.Service
     }
 
     internal abstract class ListQueryHandler<TQuery, T> : ListQueryHandler<TQuery, ListResult<T>, T>
-        where TQuery : ListQuery, IQuery<ListResult<T>>
+        where TQuery : ListQuery<ListResult<T>>
     {
         protected ListQueryHandler() { }
     }

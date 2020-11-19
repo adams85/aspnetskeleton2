@@ -3,7 +3,7 @@
 namespace WebApp.UI.Models.DataTables
 {
     public abstract class DataTableModel<TQuery, TResult, TItem>
-        where TQuery : ListQuery, IQuery<TResult>
+        where TQuery : ListQuery<TResult>
         where TResult: ListResult<TItem>
     {
         public TQuery Query { get; set; } = null!;

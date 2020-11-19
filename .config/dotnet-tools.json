@@ -13,14 +13,14 @@
       "commands": [
         "dotnet-bundle"
       ]
-    },    
+    },
     "karambolo.aspnetskeleton.codegentools": {
       "version": "1.0.0",
       "commands": [
         "codegen"
       ]
     },
-    "karambolo.potools": {
+    "karambolo.aspnetskeleton.potools": {
       "version": "1.0.0",
       "commands": [
         "po"

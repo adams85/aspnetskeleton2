@@ -16,7 +16,7 @@
     tableDefinition.PageIndexFormFieldName = Html.NameFor(m => m.PageIndex);
     tableDefinition.PageSizeFormFieldName = Html.NameFor(m => m.PageSize);
 
-    tableDefinition.Columns = new List<DataTableColumnDefinition<SettingData>>(3)
+    tableDefinition.Columns = new List<DataTableColumnDefinition<SettingData>>()
     {
         new DataTableColumnDefinition<SettingData>(tableDefinition, s_nameProperty)
         {

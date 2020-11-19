@@ -52,7 +52,7 @@ if (IsProgressReporter)
 else 
 {
 #>
-            IQueryable<Entity> entityQuery = context.DbContext.Settings;
+            IQueryable<Entity> entityQuery = context.DbContext.Entities;
 
             // ...
 <#

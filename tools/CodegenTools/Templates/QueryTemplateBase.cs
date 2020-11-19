@@ -25,10 +25,7 @@
 
         public string GetQueryBaseType(string resultType)
         {
-            return
-                !IsList ?
-                $"IQuery<{resultType}>" :
-                "ListQuery, " + (UseGenericListResult ? $"IQuery<ListResult<{ListItemType}>>" : $"IQuery<{resultType}>");
+            return !IsList ? $"IQuery<{resultType}>" : $"ListQuery<{resultType}>";
         }
 
         public string GetQueryHandlerBaseType(string resultType)

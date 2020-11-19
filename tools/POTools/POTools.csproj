@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageId>Karambolo.POTools</PackageId>
+    <PackageId>Karambolo.AspNetSkeleton.POTools</PackageId>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>po</ToolCommandName>
     <PackageOutputPath>..\..\.nuget</PackageOutputPath>

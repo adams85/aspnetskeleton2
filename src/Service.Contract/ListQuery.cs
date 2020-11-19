@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Runtime.Serialization;
 using ProtoBuf;
 using WebApp.Common.Infrastructure.Localization;
@@ -15,7 +14,8 @@ namespace WebApp.Service
     [ProtoInclude(11, typeof(ListSettingsQuery))]
     [ProtoInclude(12, typeof(ListRolesQuery))]
     [ProtoInclude(13, typeof(ListUsersQuery))]
-    public class ListQuery : IQuery, IValidatableObject
+    public abstract class ListQuery<TResult> : IListQuery, IQuery<TResult>, IValidatableObject
+        where TResult : IListResult
     {
         [DataMember(Order = 1)] public string[]? OrderBy { get; set; }
         public bool IsOrdered => OrderBy != null && OrderBy.Length > 0;
@@ -41,19 +41,16 @@ namespace WebApp.Service
             ErrorMessage = ItemsRequiredValidatorErrorMessage
         };
 
-        protected virtual IEnumerable<ValidationResult> Validate(ValidationContext validationContext) => Enumerable.Empty<ValidationResult>();
-
-        IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
+        protected virtual IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (IsPaged)
                 yield return this.ValidateMember(PageIndex, nameof(PageIndex), validationContext, s_nonNegativeIntegerValidator);
 
             if (IsOrdered)
                 yield return this.ValidateMember(OrderBy, nameof(OrderBy), validationContext, s_itemsRequiredValidator);
-
-            foreach (var validationResult in Validate(validationContext))
-                yield return validationResult;
         }
+
+        IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext) => Validate(validationContext);
 
         public void ForcePaging(int defaultPageSize, int maxPageSize)
         {

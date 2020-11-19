@@ -11,13 +11,13 @@ namespace WebApp.UI.Models.DataTables
 {
     public class DataTableDefinition<TItem>
     {
-        public DataTableDefinition(ListQuery query, ListResult<TItem> result)
+        public DataTableDefinition(IListQuery query, ListResult<TItem> result)
         {
             Query = query;
             Result = result;
         }
 
-        public ListQuery Query { get; }
+        public IListQuery Query { get; }
 
         private (string, bool)[]? _queryOrderByElements;
         public (string KeyPropertyPath, bool Descending)[] QueryOrderByElements =>

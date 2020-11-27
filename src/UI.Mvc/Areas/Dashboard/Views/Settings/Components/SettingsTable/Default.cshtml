@@ -1,6 +1,9 @@
 ﻿@using WebApp.UI.Models.DataTables
 @using WebApp.UI.Areas.Dashboard.Models.Settings
 
+@using static WebApp.UI.Models.DataTables.DataTableColumnDefinition
+@using static WebApp.UI.Models.DataTables.DataTableColumnFilterDefinition
+
 @model ListSettingsQuery
 
 @inject IGlobalRazorHelpers<IDataTableHelpers> DataTableHelpers
@@ -8,56 +11,47 @@
 @{
     var tableModel = (SettingsTableModel)ViewData[nameof(SettingsTableModel)];
 
-    var tableDefinition = tableModel.ToTableDefinition();
-
-    tableDefinition.GenerateQueryUrl = (url, values) => url.RouteUrl(SettingsRouteName, values);
-
-    tableDefinition.OrderByFormFieldName = Html.NameFor(m => m.OrderBy);
-    tableDefinition.PageIndexFormFieldName = Html.NameFor(m => m.PageIndex);
-    tableDefinition.PageSizeFormFieldName = Html.NameFor(m => m.PageSize);
-
-    tableDefinition.Columns = new List<DataTableColumnDefinition<SettingData>>()
+    var tableDefinition = new DataTableDefinition(tableModel)
     {
-        new DataTableColumnDefinition<SettingData>(tableDefinition, s_nameProperty)
+        GenerateQueryUrl = (url, values) => url.RouteUrl(SettingsRouteName, values),
+
+        OrderByFormFieldName = Html.NameFor(m => m.OrderBy),
+        PageIndexFormFieldName = Html.NameFor(m => m.PageIndex),
+        PageSizeFormFieldName = Html.NameFor(m => m.PageSize),
+
+        ColumnsFactory = table => new DataTableColumnDefinition[]
         {
-            AscendingOrderIconCssClass = "fa-sort-alpha-asc",
-            DescendingOrderIconCssClass = "fa-sort-alpha-desc",
-            Filter = new DataTableColumnFilter.Text
+            new DataColumn(table, s_nameColumnBinding)
             {
-                FormFieldName = Html.NameFor(m => m.NamePattern),
-                FormFieldValue = Model.NamePattern
-            }
-        },
-        new DataTableColumnDefinition<SettingData>(tableDefinition, s_valueProperty)
-        {
-            AscendingOrderIconCssClass = "fa-sort-alpha-asc",
-            DescendingOrderIconCssClass = "fa-sort-alpha-desc",
-            Filter = new DataTableColumnFilter.Text
-            {
-                FormFieldName = Html.NameFor(m => m.ValuePattern),
-                FormFieldValue = Model.ValuePattern
-            }
-        },
-        new DataTableColumnDefinition<SettingData>(tableDefinition, s_descriptionProperty)
-        {
-            AscendingOrderIconCssClass = "fa-sort-alpha-asc",
-            DescendingOrderIconCssClass = "fa-sort-alpha-desc",
-            Filter = new DataTableColumnFilter.Text
-            {
-                FormFieldName = Html.NameFor(m => m.DescriptionPattern),
-                FormFieldValue = Model.DescriptionPattern
+                AscendingOrderIconCssClass = "fa-sort-alpha-asc",
+                DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+                FilterFactory = column => new TextFilter(column, Html.NameFor(m => m.NamePattern), Model.NamePattern)
             },
-            DataCellTemplate = @<td class="font-weight-light">@GetDescription(item.Data)</td>
-        },
+
+            new DataColumn(table, s_valueColumnBinding)
+            {
+                AscendingOrderIconCssClass = "fa-sort-alpha-asc",
+                DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+                FilterFactory = column => new TextFilter(column, Html.NameFor(m => m.ValuePattern), Model.ValuePattern)
+            },
+
+            new DataColumn(table, s_descriptionColumnBinding)
+            {
+                AscendingOrderIconCssClass = "fa-sort-alpha-asc",
+                DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+                DataCellTemplate = @<td class="font-weight-light">@GetDescription((SettingData)item.Item)</td>,
+                FilterFactory = column => new TextFilter(column, Html.NameFor(m => m.DescriptionPattern), Model.DescriptionPattern)
+            },
+        }
     };
 
     DataTableHelpers.Instance.Table(tableDefinition);
 }
 
 @functions {
-    private static readonly ModelPropertyMetadata<SettingData> s_nameProperty = new ModelPropertyMetadata<SettingData>(m => m.Name);
-    private static readonly ModelPropertyMetadata<SettingData> s_valueProperty = new ModelPropertyMetadata<SettingData>(m => m.Value);
-    private static readonly ModelPropertyMetadata<SettingData> s_descriptionProperty = new ModelPropertyMetadata<SettingData>(m => m.Description);
+    private static readonly DataTableColumnBinding s_nameColumnBinding = DataTableColumnBinding.For<SettingData>(m => m.Name);
+    private static readonly DataTableColumnBinding s_valueColumnBinding = DataTableColumnBinding.For<SettingData>(m => m.Value);
+    private static readonly DataTableColumnBinding s_descriptionColumnBinding = DataTableColumnBinding.For<SettingData>(m => m.Description);
 
     private static LocalizedHtmlString GetDescription(SettingData data) =>
         new LocalizedHtmlString(data.Description, data.Description, false, data.DefaultValue, data.MinValue, data.MaxValue);

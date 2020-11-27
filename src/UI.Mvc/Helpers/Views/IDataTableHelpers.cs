@@ -4,22 +4,23 @@ namespace WebApp.UI.Helpers.Views
 {
     public interface IDataTableHelpers
     {
-        void Table<TItem>(DataTableDefinition<TItem> tableDefinition);
+        void Table(DataTableDefinition tableDefinition);
 
-        void TableHeaderRow<TItem>(DataTableDefinition<TItem> tableDefinition);
-        void PageSizeSelector<TItem>(DataTableDefinition<TItem> tableDefinition);
+        void TableHeaderRow(DataTableDefinition tableDefinition);
+        void PageSizeSelector(DataTableDefinition tableDefinition);
 
-        void ColumnHeaderRow<TItem>(DataTableDefinition<TItem> tableDefinition);
-        void ColumnHeader<TItem>(DataTableColumnDefinition<TItem> columnDefinition);
+        void ColumnHeaderRow(DataTableDefinition tableDefinition);
+        void ColumnHeader(DataTableColumnDefinition columnDefinition);
 
-        void ColumnFilterRow<TItem>(DataTableDefinition<TItem> tableDefinition);
-        void ColumnFilter<TItem>(DataTableColumnDefinition<TItem> columnDefinition);
-        void TextColumnFilter<TItem>(DataTableColumnFilter.Text columnFilter, DataTableColumnDefinition<TItem> columnDefinition);
+        void ColumnFilterRow(DataTableDefinition tableDefinition);
+        void ColumnFilter(DataTableColumnDefinition columnDefinition);
+        void TextColumnFilter(DataTableColumnFilterDefinition.TextFilter filterDefinition);
 
-        void DataRow<TItem>(TItem item, DataTableDefinition<TItem> tableDefinition);
-        void DataCell<TItem>(TItem item, DataTableColumnDefinition<TItem> columnDefinition);
-        void NoDataRow<TItem>(DataTableDefinition<TItem> tableDefinition);
+        void DataRow(object item, DataTableDefinition tableDefinition);
+        void DataCell(object item, DataTableColumnDefinition columnDefinition);
+        void BoundDataCell(object item, DataTableColumnDefinition.DataColumn columnDefinition);
+        void NoDataRow(DataTableDefinition tableDefinition);
 
-        void TableFooterRow<TItem>(DataTableDefinition<TItem> tableDefinition);
+        void TableFooterRow(DataTableDefinition tableDefinition);
     }
 }

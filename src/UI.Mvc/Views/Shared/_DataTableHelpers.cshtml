@@ -12,7 +12,7 @@
     //#pragma warning disable MVC1006
     //#pragma warning disable 1998
 
-    public void Table<TItem>(DataTableDefinition<TItem> tableDefinition)
+    public void Table(DataTableDefinition tableDefinition)
     {
         if (tableDefinition.TableTemplate != null)
         {
@@ -42,11 +42,11 @@
                 </thead>
 
                 <tbody>
-                    @if (items?.Length > 0)
+                    @if (items?.Count > 0)
                     {
-                        for (int i = 0, n = items.Length; i < n; i++)
+                        for (int i = 0, n = items.Count; i < n; i++)
                         {
-                            DataRow(items[i], tableDefinition);
+                            DataRow(items[i]!, tableDefinition);
                         }
                     }
                     else
@@ -67,7 +67,7 @@
 
     #region Header
 
-    public void TableHeaderRow<TItem>(DataTableDefinition<TItem> tableDefinition)
+    public void TableHeaderRow(DataTableDefinition tableDefinition)
     {
         if (tableDefinition.TableHeaderRowTemplate != null)
         {
@@ -94,7 +94,7 @@
         </tr>
     }
 
-    public void PageSizeSelector<TItem>(DataTableDefinition<TItem> tableDefinition)
+    public void PageSizeSelector(DataTableDefinition tableDefinition)
     {
         var currentPageSize = tableDefinition.Result.PageSize;
         var maxPageSize = tableDefinition.Query.MaxPageSize;
@@ -127,7 +127,7 @@
         }
     }
 
-    public void ColumnHeaderRow<TItem>(DataTableDefinition<TItem> tableDefinition)
+    public void ColumnHeaderRow(DataTableDefinition tableDefinition)
     {
         if (tableDefinition.ColumnHeaderRowTemplate != null)
         {
@@ -145,7 +145,7 @@
         </tr>
     }
 
-    public void ColumnHeader<TItem>(DataTableColumnDefinition<TItem> columnDefinition)
+    public void ColumnHeader(DataTableColumnDefinition columnDefinition)
     {
         if (columnDefinition.HeaderTemplate != null)
         {
@@ -153,11 +153,12 @@
             return;
         }
 
-        var title = columnDefinition.Title ?? columnDefinition.Property.GetDisplayName(Html.MetadataProvider);
-        string currentOrderKeyPropertyPath;
+        var dataColumn = columnDefinition as DataTableColumnDefinition.DataColumn;
+        var title = columnDefinition.Title ?? dataColumn?.Binding.GetDisplayName(Html.MetadataProvider);
+        string? currentOrderKeyPropertyPath;
 
         <th>
-            @if (columnDefinition.Table.AllowSorting && columnDefinition.IsSortable && (currentOrderKeyPropertyPath = columnDefinition.OrderKeyPropertyPath ?? columnDefinition.Property.Path) != null)
+            @if (columnDefinition.Table.AllowSorting && columnDefinition.IsSortable && (currentOrderKeyPropertyPath = columnDefinition.OrderKeyPropertyPath ?? dataColumn?.Binding.PropertyPathString) != null)
             {
                 var (isActiveOrderColumn, currentOrderDescending, newOrderKeyPropertyPath, newOrderDescending) =
                     GetOrderByState(currentOrderKeyPropertyPath, columnDefinition.Table.QueryOrderByElements);
@@ -225,7 +226,7 @@
         }
     }
 
-    public void ColumnFilterRow<TItem>(DataTableDefinition<TItem> tableDefinition)
+    public void ColumnFilterRow(DataTableDefinition tableDefinition)
     {
         if (tableDefinition.ColumnFilterRowTemplate != null)
         {
@@ -243,7 +244,7 @@
         </tr>
     }
 
-    public void ColumnFilter<TItem>(DataTableColumnDefinition<TItem> columnDefinition)
+    public void ColumnFilter(DataTableColumnDefinition columnDefinition)
     {
         if (columnDefinition.FilterTemplate != null)
         {
@@ -254,8 +255,8 @@
         <th>
             @switch (columnDefinition.Filter)
             {
-                case DataTableColumnFilter.Text textColumnFilter:
-                    TextColumnFilter(textColumnFilter, columnDefinition);
+                case DataTableColumnFilterDefinition.TextFilter textFilterDefinition:
+                    TextColumnFilter(textFilterDefinition);
                     break;
                 case null:
                     break;
@@ -265,10 +266,10 @@
         </th>
     }
 
-    public void TextColumnFilter<TItem>(DataTableColumnFilter.Text columnFilter, DataTableColumnDefinition<TItem> columnDefinition)
+    public void TextColumnFilter(DataTableColumnFilterDefinition.TextFilter filterDefinition)
     {
         <div>
-            <input class="form-control form-control-sm" type="text" name="@columnFilter.FormFieldName" value="@columnFilter.FormFieldValue" placeholder="@(columnFilter.PlaceholderText ?? T["Filter text"])" />
+            <input class="form-control form-control-sm" type="text" name="@filterDefinition.FormFieldName" value="@filterDefinition.FormFieldValue" placeholder="@(filterDefinition.PlaceholderText ?? T["Filter text"])" />
         </div>
     }
 
@@ -276,7 +277,7 @@
 
     #region Data
 
-    public void DataRow<TItem>(TItem item, DataTableDefinition<TItem> tableDefinition)
+    public void DataRow(object item, DataTableDefinition tableDefinition)
     {
         if (tableDefinition.DataRowTemplate != null)
         {
@@ -294,7 +295,7 @@
         </tr>
     }
 
-    public void DataCell<TItem>(TItem item, DataTableColumnDefinition<TItem> columnDefinition)
+    public void DataCell(object item, DataTableColumnDefinition columnDefinition)
     {
         if (columnDefinition.DataCellTemplate != null)
         {
@@ -302,10 +303,24 @@
             return;
         }
 
-        <td>@columnDefinition.Property.GetValue(item)</td>
+        @switch (columnDefinition)
+        {
+            case DataTableColumnDefinition.DataColumn dataColumnDefinition:
+                BoundDataCell(item, dataColumnDefinition);
+                break;
+            case null:
+                break;
+            default:
+                throw new NotSupportedException($"No default render function is defined for column type {columnDefinition.GetType()}.");
+        }
     }
 
-    public void NoDataRow<TItem>(DataTableDefinition<TItem> tableDefinition)
+    public void BoundDataCell(object item, DataTableColumnDefinition.DataColumn columnDefinition)
+    {
+        <td>@columnDefinition.Binding.GetValue(item)</td>
+    }
+
+    public void NoDataRow(DataTableDefinition tableDefinition)
     {
         if (tableDefinition.NoDataRowTemplate != null)
         {
@@ -330,7 +345,7 @@
         MaximumPageNumbersToDisplay = 5
     };
 
-    public void TableFooterRow<TItem>(DataTableDefinition<TItem> tableDefinition)
+    public void TableFooterRow(DataTableDefinition tableDefinition)
     {
         if (tableDefinition.TableFooterRowTemplate != null)
         {

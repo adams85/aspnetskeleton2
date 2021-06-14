@@ -1,0 +1,424 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Routing
+@using WebApp.UI.Models.DataTables
+
+@inherits GlobalRazorHelpersPage
+@implements IDataTableHelpers
+
+@functions {
+    // for styling see
+    // * wwwroot/lib/bootstrap/scss/_tables.scss
+    // * wwwroot/scss/dashboard/_data-tables.scss
+
+    // template delegates, tag helpers need the following pragmas to compile (https://github.com/dotnet/aspnetcore/issues/20055)
+    //#pragma warning disable MVC1006
+    //#pragma warning disable 1998
+
+    public void Table(DataTableModel tableModel)
+    {
+        if (tableModel.TableTemplate != null)
+        {
+            @tableModel.TableTemplate(tableModel)
+            return;
+        }
+
+        <!form id="@tableModel.FilterFormHtmlId" method="get" action="@tableModel.GenerateDisplayUrl(Url, null)"></!form>
+        <table id="@tableModel.TableHtmlId" class="table table-bordered table-striped table-hover data-table">
+            @{
+                TableHeader(tableModel);
+                TableBody(tableModel);
+                TableFooter(tableModel);
+            }
+        </table>
+    }
+
+    #region Header
+
+    public void TableHeader(DataTableModel tableModel)
+    {
+        <thead>
+            @if (tableModel.ShowTableHeaderRow)
+            {
+                TableHeaderRow(tableModel);
+            }
+
+            @if (tableModel.ShowColumnHeaderRow)
+            {
+                ColumnHeaderRow(tableModel);
+            }
+
+            @if (tableModel.AllowFiltering)
+            {
+                ColumnFilterRow(tableModel);
+            }
+        </thead>
+    }
+
+    public void TableHeaderRow(DataTableModel tableModel)
+    {
+        if (tableModel.TableHeaderRowTemplate != null)
+        {
+            @tableModel.TableHeaderRowTemplate(tableModel)
+            return;
+        }
+
+        <tr class="table-header-row">
+            <th class="font-weight-normal" colspan="@tableModel.Columns.Count">
+                <div class="d-flex">
+                    <div class="flex-grow-1">
+                        @if (tableModel.AllowPaging && tableModel.Result.PageSize > 0)
+                        {
+                            var pageSizeSelector = HelperToHtmlContent((_, state) => PageSizeSelector(state), tableModel);
+
+                            @T["Show {0} items", pageSizeSelector]
+                        }
+                    </div>
+                    <div>
+                        <button class="btn btn-info btn-sm" type="submit" form="@tableModel.FilterFormHtmlId"><i class="fa fa-refresh" aria-hidden="true"></i> @T["Refresh"]</button>
+                        @if (tableModel.AllowEditing && tableModel.CanCreateRow)
+                        {
+                            var actionRouteValues = tableModel.GetReturnUrlRouteValues(Url);
+                            <a class="btn btn-success btn-sm" href="@tableModel.GenerateCreateUrl(Url, actionRouteValues)"><i class="fa fa-plus" aria-hidden="true"></i> @T["Create New"]</a>
+                        }
+                    </div>
+                </div>
+            </th>
+        </tr>
+    }
+
+    public void PageSizeSelector(DataTableModel tableModel)
+    {
+        var currentPageSize = tableModel.Result.PageSize;
+        var maxPageSize = tableModel.Query.MaxPageSize;
+        maxPageSize = maxPageSize > 0 ? maxPageSize : 500;
+
+        <select class="page-size-selector" form="@tableModel.FilterFormHtmlId" name="@tableModel.PageSizeFormFieldName">
+            @using (var enumerator = GeneratePageSizes())
+            {
+                enumerator.MoveNext();
+                var pageSize = enumerator.Current;
+                do
+                {
+                    <!option value="@pageSize" selected="@(pageSize == currentPageSize)">@pageSize</!option>
+
+                    enumerator.MoveNext();
+                    pageSize = enumerator.Current;
+                }
+                while (pageSize <= maxPageSize);
+            }
+        </select>
+
+        static IEnumerator<int> GeneratePageSizes()
+        {
+            @for (var pageSize = 10; ; pageSize = checked(pageSize * 10))
+            {
+                yield return pageSize;
+                yield return checked(pageSize * 2);
+                yield return checked(pageSize * 5);
+            }
+        }
+    }
+
+    public void ColumnHeaderRow(DataTableModel tableModel)
+    {
+        if (tableModel.ColumnHeaderRowTemplate != null)
+        {
+            @tableModel.ColumnHeaderRowTemplate(tableModel)
+            return;
+        }
+
+        var columns = tableModel.Columns;
+
+        <tr class="column-header-row">
+            @for (int i = 0, n = columns.Count; i < n; i++)
+            {
+                ColumnHeaderCell(columns[i]);
+            }
+        </tr>
+    }
+
+    public void ColumnHeaderCell(DataTableColumnModel columnModel)
+    {
+        if (columnModel.HeaderCellTemplate != null)
+        {
+            @columnModel.HeaderCellTemplate(columnModel)
+            return;
+        }
+
+        var dataColumn = columnModel as DataTableColumnModel.DataColumn;
+        var title = columnModel.Title ?? dataColumn?.Binding.GetDisplayName(Html.MetadataProvider);
+        string? currentOrderKeyPropertyPath;
+
+        <th>
+            @if (columnModel.Table.AllowSorting && columnModel.CanSort && (currentOrderKeyPropertyPath = columnModel.OrderKeyPropertyPath ?? dataColumn?.Binding.PropertyPathString) != null)
+            {
+                var (isActiveOrderColumn, currentOrderDescending, newOrderKeyPropertyPath, newOrderDescending) =
+                    GetOrderByState(currentOrderKeyPropertyPath, columnModel.Table.QueryOrderByElements);
+
+                var formFieldName = columnModel.Table.OrderByFormFieldName;
+                var routeValues = CreateOrderByRouteValues(ViewContext.HttpContext, formFieldName, newOrderKeyPropertyPath, newOrderDescending);
+
+                <div>
+                    <a class="title" href="@columnModel.Table.GenerateDisplayUrl(Url, routeValues)">@title</a>
+                    @if (isActiveOrderColumn)
+                    {
+                        <input type="hidden" form="@columnModel.Table.FilterFormHtmlId" name="@formFieldName" value="@QueryableHelper.ComposeOrderByElement(currentOrderKeyPropertyPath, currentOrderDescending)" />
+                        var orderIconCssClass = currentOrderDescending ? columnModel.DescendingOrderIconCssClass : columnModel.AscendingOrderIconCssClass;
+                        if (orderIconCssClass != null)
+                        {
+                            <i class="sort-order fa @(orderIconCssClass) ml-1" aria-hidden="true"></i>
+                        }
+                    }
+                </div>
+            }
+            else
+            {
+                <div>
+                    <span class="title">@title</span>
+                </div>
+            }
+        </th>
+
+        static (bool, bool, string?, bool) GetOrderByState(string currentOrderKeyPropertyPath, (string, bool)[] orderByElements)
+        {
+            if (orderByElements.Length > 0)
+            {
+                var (keyPropertyPath, descending) = orderByElements[0];
+
+                if (currentOrderKeyPropertyPath.Equals(keyPropertyPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (descending)
+                        return (true, descending, null, default);
+
+                    return (true, descending, currentOrderKeyPropertyPath, true);
+                }
+            }
+
+            return (false, default, currentOrderKeyPropertyPath, false);
+        }
+
+        static RouteValueDictionary CreateOrderByRouteValues(HttpContext httpContext, string? formFieldName, string? orderKeyPropertyPath, bool orderDescending)
+        {
+            var routeValues = new RouteValueDictionary();
+            routeValues.Merge(httpContext.Request.Query);
+
+            if (formFieldName != null)
+            {
+                @if (orderKeyPropertyPath != null)
+                {
+                    routeValues[formFieldName] = QueryableHelper.ComposeOrderByElement(orderKeyPropertyPath, orderDescending);
+                }
+                else
+                {
+                    routeValues.Remove(formFieldName);
+                }
+            }
+
+            return routeValues;
+        }
+    }
+
+    public void ColumnFilterRow(DataTableModel tableModel)
+    {
+        if (tableModel.ColumnFilterRowTemplate != null)
+        {
+            @tableModel.ColumnFilterRowTemplate(tableModel)
+            return;
+        }
+
+        var columns = tableModel.Columns;
+
+        <tr class="column-filter-row">
+            @for (int i = 0, n = columns.Count; i < n; i++)
+            {
+                ColumnFilterCell(columns[i]);
+            }
+        </tr>
+    }
+
+    public void ColumnFilterCell(DataTableColumnModel columnModel)
+    {
+        columnModel.RenderFilterCell(this);
+    }
+
+    public void ColumnFilterCell(DataTableColumnModel columnModel, Action<IDataTableHelpers> renderFilter)
+    {
+        <th>
+            @{ renderFilter(this); }
+        </th>
+    }
+
+    public void TextColumnFilter(DataTableColumnFilterModel.TextFilter filterModel)
+    {
+        <div>
+            <input class="form-control form-control-sm" type="text" form="@filterModel.Column.Table.FilterFormHtmlId" name="@filterModel.FormFieldName" value="@filterModel.FormFieldValue" placeholder="@(filterModel.PlaceholderText ?? T["Filter text"])" />
+        </div>
+    }
+
+    #endregion
+
+    #region Content
+
+    public void TableBody(DataTableModel tableModel)
+    {
+        var items = tableModel.Result.Items;
+
+        <tbody>
+            @if (items?.Count > 0)
+            {
+                for (int i = 0, n = items.Count; i < n; i++)
+                {
+                    ContentRow(items[i]!, tableModel);
+                }
+            }
+            else
+            {
+                NoContentRow(tableModel);
+            }
+        </tbody>
+    }
+
+    public void ContentRow(object item, DataTableModel tableModel)
+    {
+        if (tableModel.ContentRowTemplate != null)
+        {
+            @tableModel.ContentRowTemplate((item, tableModel))
+            return;
+        }
+
+        var columns = tableModel.Columns;
+
+        <tr class="content-row">
+            @for (int i = 0, n = columns.Count; i < n; i++)
+            {
+                ContentCell(item, columns[i]);
+            }
+        </tr>
+    }
+
+    public void ContentCell(object item, DataTableColumnModel columnModel)
+    {
+        columnModel.RenderContentCell(this, item);
+    }
+
+    public void DataContentCell(object item, DataTableColumnModel.DataColumn columnModel)
+    {
+        <td>@columnModel.Binding.GetValue(item)</td>
+    }
+
+    public void ControlContentCell(object item, DataTableColumnModel.ControlColumn columnModel)
+    {
+        object? rowId;
+
+        <td class="control-column">
+            @if (columnModel.Table.AllowEditing && (rowId = columnModel.Table.GetRowId(item)) != null)
+            {
+                var canEdit = columnModel.CanEditRow(item);
+                var canDelete = columnModel.CanDeleteRow(item);
+
+                if (canEdit || canDelete)
+                {
+                    var actionRouteValues = new RouteValueDictionary(columnModel.Table.GetReturnUrlRouteValues(Url)) { ["id"] = rowId };
+
+                    @if (canEdit)
+                    {
+                        <a class="btn btn-info btn-sm" href="@columnModel.Table.GenerateEditUrl(Url, actionRouteValues)" title="@T["Edit"]">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </a>
+                    }
+
+                    @if (canDelete)
+                    {
+                        <a class="btn btn-danger btn-sm" href="@columnModel.Table.GenerateDeleteUrl(Url, actionRouteValues)" title="@T["Delete"]">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </a>
+                    }
+                }
+            }
+        </td>
+    }
+
+    public void NoContentRow(DataTableModel tableModel)
+    {
+        if (tableModel.NoContentRowTemplate != null)
+        {
+            @tableModel.NoContentRowTemplate(tableModel)
+            return;
+        }
+
+        <tr class="no-content-row">
+            <td class="text-center" colspan="@tableModel.Columns.Count">
+                @T["No data to display."]
+            </td>
+        </tr>
+    }
+
+    #endregion
+
+    #region Footer
+
+    public void TableFooter(DataTableModel tableModel)
+    {
+        <tfoot>
+            @if (tableModel.ShowTableFooterRow)
+            {
+                TableFooterRow(tableModel);
+            }
+        </tfoot>
+    }
+
+    private static readonly PagerRenderOptions s_defaultPagerRenderOptions = new PagerRenderOptions
+    {
+        Display = true,
+        MaximumPageNumbersToDisplay = 5
+    };
+
+    public void TableFooterRow(DataTableModel tableModel)
+    {
+        if (tableModel.TableFooterRowTemplate != null)
+        {
+            @tableModel.TableFooterRowTemplate(tableModel)
+            return;
+        }
+
+        var result = tableModel.Result;
+
+        @if (result.TotalItemCount > 0)
+        {
+            var pagerInfo = new PagerInfo(result.PageIndex, result.PageSize, result.TotalItemCount);
+
+            <tr class="table-footer-row">
+                <td colspan="@tableModel.Columns.Count">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            @T["Showing {0} to {1} of {2} item", pagerInfo.ItemStartIndex + 1, pagerInfo.ItemEndIndex, Plural.From("Showing {0} to {1} of {2} items", pagerInfo.TotalItemCount)]
+                        </div>
+                        <div>
+                            @if (tableModel.AllowPaging && result.PageSize > 0)
+                            {
+                                @Html.Pager(in pagerInfo,
+                                    page => tableModel.GenerateDisplayUrl(Url, CreatePagingRouteValues(ViewContext.HttpContext, tableModel.PageIndexFormFieldName, page - 1)),
+                                    tableModel.PagerRenderOptions ?? s_defaultPagerRenderOptions)
+                            }
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+
+        static RouteValueDictionary CreatePagingRouteValues(HttpContext httpContext, string? formFieldName, int pageIndex)
+        {
+            var routeValues = new RouteValueDictionary();
+            routeValues.Merge(httpContext.Request.Query);
+
+            if (formFieldName != null)
+            {
+                routeValues[formFieldName] = pageIndex;
+            }
+
+            return routeValues;
+        }
+    }
+
+    #endregion
+}

@@ -1,9 +1,15 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using WebApp.UI.Infrastructure.Navigation;
 
 namespace WebApp.UI.Models.Layout
 {
+    [BindNever, ValidateNever]
     public abstract class LayoutModel
     {
         private static readonly string? s_defaultAuthor = typeof(Program).Assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
@@ -18,6 +24,13 @@ namespace WebApp.UI.Models.Layout
 
         public PageInfo? PageInfo { get; set; }
         public LocalizedHtmlString? Title { get; set; }
+        public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString>? GetTitle { get; set; }
         public object? BodyCssClasses { get; set; }
+
+        public virtual void Initialize(ActionContext actionContext, IPageCatalog pages, IHtmlLocalizer htmlLocalizer)
+        {
+            PageInfo ??= pages.FindPage(actionContext.ActionDescriptor);
+            Title ??= (GetTitle ?? PageInfo?.GetDefaultTitle)?.Invoke(actionContext.HttpContext, htmlLocalizer);
+        }
     }
 }

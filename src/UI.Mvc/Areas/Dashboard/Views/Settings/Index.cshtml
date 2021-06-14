@@ -1,7 +1,7 @@
-﻿@model WebApp.UI.Areas.Dashboard.Models.SingleValueDashboardPageModel<ListSettingsQuery>
+﻿@model WebApp.UI.Areas.Dashboard.Models.DashboardPageModel<ListSettingsQuery>
 
 <div class="card">
     <div class="card-body">
-        <vc:settings-table query="@Model.Value" />
+        <vc:settings-table query="@Model.Content" />
     </div>
 </div>

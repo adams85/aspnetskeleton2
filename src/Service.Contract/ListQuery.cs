@@ -52,7 +52,7 @@ namespace WebApp.Service
 
         IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext) => Validate(validationContext);
 
-        public void ForcePaging(int defaultPageSize, int maxPageSize)
+        public void EnsurePaging(int defaultPageSize, int maxPageSize)
         {
             if (defaultPageSize <= 0)
                 throw new ArgumentOutOfRangeException(nameof(defaultPageSize));

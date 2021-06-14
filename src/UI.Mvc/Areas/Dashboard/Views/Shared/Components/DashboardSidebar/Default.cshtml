@@ -21,7 +21,7 @@
     </div>
 
     <ul class="c-sidebar-nav">
-        @{ RenderSidebarNavGroups(Model.Sidebar.Groups ?? DefaultGroups); }
+        @{ await RenderSidebarNavGroupsAsync(Model.Sidebar.Groups ?? DefaultGroups); }
     </ul>
     <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent" data-class="c-sidebar-minimized"></button>
 </div>
@@ -37,16 +37,25 @@
             {
                 new NavigationItem(Pages.GetPage(OverviewRouteName, throwIfNotFound: true)!) { IconClassName = "fa-tachometer" },
             }
+        },
+        new NavigationGroup
+        {
+            GetTitle = (httpContext, T) => T["Administrators"],
+            IsVisibleAsync = httpContext => Task.FromResult(httpContext.User.IsInRole(nameof(RoleEnum.Administators))),
+            Items =
+            {
+                new NavigationItem(Pages.GetPage(SettingsRouteName, throwIfNotFound: true)!) { IconClassName = "fa-wrench" },
+            }
         }
     });
 
-    void RenderSidebarNavGroups(List<NavigationGroup> groups)
+    async Task RenderSidebarNavGroupsAsync(List<NavigationGroup> groups)
     {
         @for (int i = 0, n = groups.Count; i < n; i++)
         {
             var group = groups[i];
 
-            if (group.IsVisible != null && !group.IsVisible(ViewContext.HttpContext))
+            if (group.IsVisibleAsync != null && !await group.IsVisibleAsync(ViewContext.HttpContext))
                 continue;
 
             @if (group.GetTitle != null)
@@ -54,17 +63,17 @@
                 <li class="c-sidebar-nav-title">@group.GetTitle(ViewContext.HttpContext, T)</li>
             }
 
-            RenderSidebarNavItems(group.Items);
+            await RenderSidebarNavItemsAsync(group.Items);
         }
     }
 
-    void RenderSidebarNavItems(List<NavigationItemBase> items)
+    async Task RenderSidebarNavItemsAsync(List<NavigationItemBase> items)
     {
         for (int i = 0, n = items.Count; i < n; i++)
         {
             var itemBase = items[i];
 
-            if (itemBase.IsVisible != null && !itemBase.IsVisible(ViewContext.HttpContext))
+            if (itemBase.IsVisibleAsync != null && !await itemBase.IsVisibleAsync(ViewContext.HttpContext))
                 continue;
 
             if (itemBase is NavigationItem item)
@@ -73,7 +82,7 @@
             }
             else if (itemBase is NavigationDropDownItem dropDownItem)
             {
-                RenderSidebarNavDropDown(dropDownItem);
+                await RenderSidebarNavDropDownAsync(dropDownItem);
             }
         }
     }
@@ -92,7 +101,7 @@
         </li>
     }
 
-    void RenderSidebarNavDropDown(NavigationDropDownItem item)
+    async Task RenderSidebarNavDropDownAsync(NavigationDropDownItem item)
     {
         var isShown = item.IsShown(ViewContext.HttpContext, Model.PageInfo);
         <li class="c-sidebar-nav-item c-sidebar-nav-dropdown @(isShown ? "c-show" : null)">
@@ -105,7 +114,7 @@
             </a>
 
             <ul class="c-sidebar-nav-dropdown-items">
-                @{ RenderSidebarNavItems(item.Items); }
+                @{ await RenderSidebarNavItemsAsync(item.Items); }
             </ul>
         </li>
     }

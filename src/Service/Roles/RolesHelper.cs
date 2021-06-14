@@ -10,18 +10,18 @@ namespace WebApp.Service.Roles
 {
     internal static class RolesHelper
     {
-        private static readonly Expression<Func<Role, RoleData>> s_toDataExpr = r => new RoleData
+        private static readonly Expression<Func<Role, RoleData>> s_toDataExpression = r => new RoleData
         {
             RoleId = r.Id,
             RoleName = r.RoleName,
             Description = r.Description,
         };
 
-        private static readonly Func<Role, RoleData> s_toData = s_toDataExpr.Compile();
+        private static readonly Func<Role, RoleData> s_toData = s_toDataExpression.Compile();
 
         public static RoleData ToData(this Role entity) => s_toData(entity);
 
-        public static IQueryable<RoleData> ToData(this IQueryable<Role> source) => source.Select(s_toDataExpr);
+        public static IQueryable<RoleData> ToData(this IQueryable<Role> source) => source.Select(s_toDataExpression);
 
         public static Expression<Func<Role, bool>> GetFilterByNameWhere(string name, bool pattern = false)
         {

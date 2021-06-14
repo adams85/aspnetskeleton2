@@ -10,7 +10,7 @@ namespace WebApp.Service.Users
 {
     internal static class UsersHelper
     {
-        private static readonly Expression<Func<User, UserData>> s_toDataExpr = u => new UserData
+        private static readonly Expression<Func<User, UserData>> s_toDataExpression = u => new UserData
         {
             UserId = u.Id,
             UserName = u.UserName,
@@ -24,11 +24,11 @@ namespace WebApp.Service.Users
             LastLockoutDate = u.LastLockoutDate,
         };
 
-        private static readonly Func<User, UserData> s_toData = s_toDataExpr.Compile();
+        private static readonly Func<User, UserData> s_toData = s_toDataExpression.Compile();
 
         public static UserData ToData(this User entity) => s_toData(entity);
 
-        public static IQueryable<UserData> ToData(this IQueryable<User> source) => source.Select(s_toDataExpr);
+        public static IQueryable<UserData> ToData(this IQueryable<User> source) => source.Select(s_toDataExpression);
 
         public static Expression<Func<User, bool>> GetFilterByNameWhere(string name, bool pattern = false)
         {

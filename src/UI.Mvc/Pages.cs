@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using WebApp.UI.Areas.Dashboard;
+﻿using System.Collections.Generic;
 using WebApp.UI.Infrastructure.Navigation;
 
 namespace WebApp.UI
 {
     public sealed class Pages : IPageCollectionProvider
     {
-        public static IPageCollectionProvider[] GetProviders(IServiceProvider sp) => new IPageCollectionProvider[]
-        {
-            new Pages(),
-            new DashboardPages(),
-        };
+        public static readonly string EditPopupViewName = "Popups/EditPopup";
+        public static readonly string DeletePopupViewName = "Popups/DeletePopup";
 
         private static readonly IReadOnlyList<PageInfo> s_pages = new[]
         {

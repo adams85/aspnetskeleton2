@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
@@ -13,7 +14,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
 
         public abstract class DropDownMenuItemBase
         {
-            public Func<HttpContext, bool>? IsVisible { get; set; }
+            public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; set; }
         }
 
         public class DropDownMenuItem : DropDownMenuItemBase
@@ -22,7 +23,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
 
             public DropDownMenuItem(PageInfo page)
             {
-                IsVisible = page.IsAccessAllowed;
+                IsVisibleAsync = page.IsAccessAllowedAsync;
                 GetTitle = page.GetDefaultTitle;
                 GetUrl = urlHelper => urlHelper.RouteUrl(page.RouteName);
             }

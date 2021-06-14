@@ -34,7 +34,7 @@ namespace WebApp.UI.Controllers
             T = stringLocalizer ?? (IStringLocalizer)NullStringLocalizer.Instance;
         }
 
-        public IStringLocalizer T { get; set; }
+        public IStringLocalizer T { get; }
 
         private async Task<bool> LoginCoreAsync(LoginModel model, CancellationToken cancellationToken)
         {
@@ -163,12 +163,12 @@ namespace WebApp.UI.Controllers
         [HttpGet(Name = Routes.VerifyRegistrationRouteName)]
         public async Task<IActionResult> Verify(string u, string v)
         {
-            var model = new SingleValuePageModel<bool?>();
+            var model = new PageModel<bool?>();
 
             if (u != null && v != null)
-                model.Value = await _accountManager.VerifyUserAsync(u, v, HttpContext.RequestAborted);
+                model.Content = await _accountManager.VerifyUserAsync(u, v, HttpContext.RequestAborted);
             else
-                model.Value = null;
+                model.Content = null;
 
             return View(model);
         }

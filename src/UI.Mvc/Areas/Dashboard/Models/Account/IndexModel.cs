@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace WebApp.UI.Areas.Dashboard.Models.Account
 {
@@ -7,7 +8,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Account
         public string? SubmitAction { get; set; }
 
         private ChangePasswordModel? _changePassword;
-        [BindNever]
+        [BindNever, ValidateNever]
         public ChangePasswordModel ChangePassword
         {
             get => _changePassword ??= new ChangePasswordModel();

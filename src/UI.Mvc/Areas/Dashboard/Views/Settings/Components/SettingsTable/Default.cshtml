@@ -1,25 +1,37 @@
 ﻿@using WebApp.UI.Models.DataTables
 @using WebApp.UI.Areas.Dashboard.Models.Settings
 
-@using static WebApp.UI.Models.DataTables.DataTableColumnDefinition
-@using static WebApp.UI.Models.DataTables.DataTableColumnFilterDefinition
+@using static WebApp.UI.Models.DataTables.DataTableColumnModel
+@using static WebApp.UI.Models.DataTables.DataTableColumnFilterModel
 
 @model ListSettingsQuery
 
 @inject IGlobalRazorHelpers<IDataTableHelpers> DataTableHelpers
 
 @{
-    var tableModel = (SettingsTableModel)ViewData[nameof(SettingsTableModel)];
+    var listModel = (SettingListModel)ViewData[nameof(SettingListModel)];
+    var tableModel = CreateTableModel(listModel);
+    DataTableHelpers.Instance.Table(tableModel);
+}
 
-    var tableDefinition = new DataTableDefinition(tableModel)
+@functions {
+    private static readonly DataTableColumnBinding s_nameColumnBinding = DataTableColumnBinding.For<SettingData>(m => m.Name);
+    private static readonly DataTableColumnBinding s_valueColumnBinding = DataTableColumnBinding.For<SettingData>(m => m.Value);
+    private static readonly DataTableColumnBinding s_descriptionColumnBinding = DataTableColumnBinding.For<SettingData>(m => m.Description);
+
+#pragma warning disable 1998
+    private DataTableModel CreateTableModel(IDataTableSource source) => new DataTableModel(source)
     {
-        GenerateQueryUrl = (url, values) => url.RouteUrl(SettingsRouteName, values),
+        CanCreateRow = false,
+        GetRowId = item => ((SettingData)item).Name,
+
+        GenerateDisplayUrl = (url, values) => url.RouteUrl(SettingsRouteName, values),
 
         OrderByFormFieldName = Html.NameFor(m => m.OrderBy),
         PageIndexFormFieldName = Html.NameFor(m => m.PageIndex),
         PageSizeFormFieldName = Html.NameFor(m => m.PageSize),
 
-        ColumnsFactory = table => new DataTableColumnDefinition[]
+        ColumnsFactory = table => new DataTableColumnModel[]
         {
             new DataColumn(table, s_nameColumnBinding)
             {
@@ -39,20 +51,15 @@
             {
                 AscendingOrderIconCssClass = "fa-sort-alpha-asc",
                 DescendingOrderIconCssClass = "fa-sort-alpha-desc",
-                DataCellTemplate = @<td class="font-weight-light">@GetDescription((SettingData)item.Item)</td>,
+                ContentCellTemplate = @<td class="font-weight-light">@SettingListModel.GetDescription((SettingData)item.Item)</td>,
                 FilterFactory = column => new TextFilter(column, Html.NameFor(m => m.DescriptionPattern), Model.DescriptionPattern)
             },
+
+            new ControlColumn(table)
+            {
+                CanDeleteRow = False<object>.Func
+            }
         }
     };
-
-    DataTableHelpers.Instance.Table(tableDefinition);
-}
-
-@functions {
-    private static readonly DataTableColumnBinding s_nameColumnBinding = DataTableColumnBinding.For<SettingData>(m => m.Name);
-    private static readonly DataTableColumnBinding s_valueColumnBinding = DataTableColumnBinding.For<SettingData>(m => m.Value);
-    private static readonly DataTableColumnBinding s_descriptionColumnBinding = DataTableColumnBinding.For<SettingData>(m => m.Description);
-
-    private static LocalizedHtmlString GetDescription(SettingData data) =>
-        new LocalizedHtmlString(data.Description, data.Description, false, data.DefaultValue, data.MinValue, data.MaxValue);
+#pragma warning restore 1998
 }

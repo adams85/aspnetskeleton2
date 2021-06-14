@@ -1,26 +1,34 @@
-﻿using WebApp.UI.Models.DataTables;
+﻿using System;
+using WebApp.UI.Models.DataTables;
 
 namespace WebApp.UI.Helpers.Views
 {
     public interface IDataTableHelpers
     {
-        void Table(DataTableDefinition tableDefinition);
+        void Table(DataTableModel tableModel);
 
-        void TableHeaderRow(DataTableDefinition tableDefinition);
-        void PageSizeSelector(DataTableDefinition tableDefinition);
+        void TableHeader(DataTableModel tableModel);
+        void TableHeaderRow(DataTableModel tableModel);
+        void PageSizeSelector(DataTableModel tableModel);
 
-        void ColumnHeaderRow(DataTableDefinition tableDefinition);
-        void ColumnHeader(DataTableColumnDefinition columnDefinition);
+        void ColumnHeaderRow(DataTableModel tableModel);
+        void ColumnHeaderCell(DataTableColumnModel columnModel);
 
-        void ColumnFilterRow(DataTableDefinition tableDefinition);
-        void ColumnFilter(DataTableColumnDefinition columnDefinition);
-        void TextColumnFilter(DataTableColumnFilterDefinition.TextFilter filterDefinition);
+        void ColumnFilterRow(DataTableModel tableModel);
+        void ColumnFilterCell(DataTableColumnModel columnModel);
+        void ColumnFilterCell(DataTableColumnModel columnModel, Action<IDataTableHelpers> renderFilter);
+        void TextColumnFilter(DataTableColumnFilterModel.TextFilter filterModel);
 
-        void DataRow(object item, DataTableDefinition tableDefinition);
-        void DataCell(object item, DataTableColumnDefinition columnDefinition);
-        void BoundDataCell(object item, DataTableColumnDefinition.DataColumn columnDefinition);
-        void NoDataRow(DataTableDefinition tableDefinition);
+        void TableBody(DataTableModel tableModel);
+        void ContentRow(object item, DataTableModel tableModel);
+        void ContentCell(object item, DataTableColumnModel columnModel);
+        void DataContentCell(object item, DataTableColumnModel.DataColumn columnModel);
+        void ControlContentCell(object item, DataTableColumnModel.ControlColumn columnModel);
+        void NoContentRow(DataTableModel tableModel);
 
-        void TableFooterRow(DataTableDefinition tableDefinition);
+        void TableFooter(DataTableModel tableModel);
+        void TableFooterRow(DataTableModel tableModel);
+
+        void Write(object value);
     }
 }

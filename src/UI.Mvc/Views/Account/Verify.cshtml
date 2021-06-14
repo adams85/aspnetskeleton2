@@ -1,4 +1,4 @@
-﻿@model WebApp.UI.Models.SingleValuePageModel<bool?>
+﻿@model WebApp.UI.Models.PageModel<bool?>
 
 @inject ISettingsProvider SettingsProvider
 
@@ -6,7 +6,7 @@
     <h3 class="mb-0">@Model.Layout.Title</h3>
 }
 
-@if (Model.Value == null)
+@if (Model.Content == null)
 {
     <p class="lead">
         <strong>@T["A message has been sent to the e-mail address you entered."]</strong>
@@ -22,7 +22,7 @@
             SettingsProvider.AdminMailAddress()]
     </p>
 }
-else if (Model.Value.Value)
+else if (Model.Content.Value)
 {
     <p class="lead mb-0">
         <strong>@T["Your account has been verified."]</strong>
@@ -42,6 +42,6 @@ else
 
 @section Footer {
     <div class="text-center">
-        <a asp-route="@LoginRouteName">@(Model.Value == null ? @T["Back to Login"] : @T["Go to Login"])</a>
+        <a asp-route="@LoginRouteName">@(Model.Content == null ? @T["Back to Login"] : @T["Go to Login"])</a>
     </div>
 }

@@ -31,7 +31,7 @@ namespace WebApp.Service.Settings
             var settingEnumStringLocalizer = _stringLocalizerFactory.Create(typeof(SettingEnumConstants));
 
             // we translate descriptions at this point and include them in the query because we want to enable sorting/filtering on DB-side
-            var nameToDescriptionMapper = SettingsHelper.BuildNameToDescriptionMapper(settingEnumStringLocalizer);
+            var nameToDescriptionMapper = SettingsHelper.BuildNameToDescriptionMapperExpression(settingEnumStringLocalizer);
 
             var resultLinq = linq.ToData(nameToDescriptionMapper);
 

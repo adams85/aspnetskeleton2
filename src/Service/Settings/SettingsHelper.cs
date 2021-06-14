@@ -20,7 +20,7 @@ namespace WebApp.Service.Settings
 {
     internal static class SettingsHelper
     {
-        private static readonly Expression<Func<Setting, string?, SettingData>> s_toDataExpr = (entity, description) => new SettingData
+        private static readonly Expression<Func<Setting, string?, SettingData>> s_toDataExpression = (entity, description) => new SettingData
         {
             Name = entity.Name,
             Value = entity.Value,
@@ -30,10 +30,10 @@ namespace WebApp.Service.Settings
             Description = description
         };
 
-        private static readonly Func<Setting, string?, SettingData> s_toData = s_toDataExpr.Compile();
+        private static readonly Func<Setting, string?, SettingData> s_toData = s_toDataExpression.Compile();
 
-        private static readonly Expression<Func<string, string?>> s_fallbackNameToDescriptionMapperExpr = _ => null;
-        private static readonly Func<string, string?> s_fallbackNameToDescriptionMapper = s_fallbackNameToDescriptionMapperExpr.Compile();
+        private static readonly Expression<Func<string, string?>> s_fallbackNameToDescriptionMapperExpression = _ => null;
+        private static readonly Func<string, string?> s_fallbackNameToDescriptionMapper = s_fallbackNameToDescriptionMapperExpression.Compile();
 
         public static SettingData ToData(this Setting entity, Func<string, string?>? nameToDescriptionMapper = null)
         {
@@ -43,23 +43,34 @@ namespace WebApp.Service.Settings
 
         public static IQueryable<SettingData> ToData(this IQueryable<Setting> linq, Expression<Func<string, string?>>? nameToDescriptionMapper = null)
         {
-            nameToDescriptionMapper ??= s_fallbackNameToDescriptionMapperExpr;
-            return linq.AsExpandable().Select(entity => s_toDataExpr.Invoke(entity, nameToDescriptionMapper.Invoke(entity.Name)));
+            nameToDescriptionMapper ??= s_fallbackNameToDescriptionMapperExpression;
+            return linq.AsExpandable().Select(entity => s_toDataExpression.Invoke(entity, nameToDescriptionMapper.Invoke(entity.Name)));
         }
 
         #region Sorting
 
-        public static Expression<Func<string, string?>> BuildNameToDescriptionMapper(IStringLocalizer settingEnumStringLocalizer)
+        private static LocalizedString? GetDescriptionTranslation(EnumMetadata<SettingEnum> metadata, IStringLocalizer settingEnumStringLocalizer)
+        {
+            var description = metadata.Attributes.OfType<DescriptionAttribute>().FirstOrDefault()?.Description;
+            return description != null ? settingEnumStringLocalizer[description] : null;
+        }
+
+        public static Func<string, string?> BuildNameToDescriptionMapper(IStringLocalizer settingEnumStringLocalizer)
+        {
+            return name =>
+            {
+                var metadata = EnumMetadata.For<SettingEnum>(name);
+                return metadata != null ? GetDescriptionTranslation(metadata, settingEnumStringLocalizer)?.Value : null;
+            };
+        }
+
+        public static Expression<Func<string, string?>> BuildNameToDescriptionMapperExpression(IStringLocalizer settingEnumStringLocalizer)
         {
             var param = Expression.Parameter(typeof(string));
             Expression noTranslationValue = Expression.Constant(null, typeof(string));
 
             var mapping = EnumMetadata<SettingEnum>.Members.Values
-                .Select(metadata =>
-                {
-                    var description = metadata.Attributes.OfType<DescriptionAttribute>().FirstOrDefault()?.Description;
-                    return (metadata.Name, Translation: description != null ? settingEnumStringLocalizer[description] : null);
-                })
+                .Select(metadata => (metadata.Name, Translation: GetDescriptionTranslation(metadata, settingEnumStringLocalizer)))
                 .Where(item => item.Translation != null)
                 .Aggregate(noTranslationValue, (expression, item) =>
                 {

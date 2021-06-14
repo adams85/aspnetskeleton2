@@ -34,7 +34,7 @@ namespace WebApp.Api.Controllers
             if (model == null)
                 return BadRequest();
 
-            model.ForcePaging(ListUsersQuery.DefaultPageSize, _settingsProvider.MaxPageSize());
+            model.EnsurePaging(ListUsersQuery.DefaultPageSize, _settingsProvider.MaxPageSize());
 
             var result = await _queryDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 

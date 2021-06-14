@@ -29,7 +29,7 @@
             </a>
 
             <div class="dropdown-menu dropdown-menu-right pt-0">
-                @{ RenderDropDownMenuItems(Model.Header.UserMenu ?? DefaultUserMenu); }
+                @{ await RenderDropDownMenuItemsAsync(Model.Header.UserMenu ?? DefaultUserMenu); }
             </div>
         </li>
     </ul>
@@ -62,13 +62,13 @@
         },
     });
 
-    void RenderDropDownMenuItems(List<DropDownMenuItemBase> items)
+    async Task RenderDropDownMenuItemsAsync(List<DropDownMenuItemBase> items)
     {
         @for (int i = 0, n = items.Count; i < n; i++)
         {
             var itemBase = items[i];
 
-            if (itemBase.IsVisible != null && !itemBase.IsVisible(ViewContext.HttpContext))
+            if (itemBase.IsVisibleAsync != null && !await itemBase.IsVisibleAsync(ViewContext.HttpContext))
                 continue;
 
             if (itemBase is DropDownMenuItem item)

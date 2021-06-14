@@ -4,9 +4,12 @@ using WebApp.Common.Infrastructure.Localization;
 
 namespace WebApp.Service.Settings
 {
+    [Display(Name = DisplayName)]
     [DataContract]
     public class SettingData
     {
+        [Localized] private const string DisplayName = "Setting";
+
         [Localized] private const string NameDisplayName = "Code";
         [Display(Name = NameDisplayName)]
         [DataMember(Order = 1)] public string Name { get; set; } = null!;
@@ -24,5 +27,11 @@ namespace WebApp.Service.Settings
         [Localized] private const string DescriptionDisplayName = "Description";
         [Display(Name = DescriptionDisplayName)]
         [DataMember(Order = 6)] public string? Description { get; set; }
+
+        public UpdateSettingCommand ToUpdateCommand() => new UpdateSettingCommand
+        {
+            Name = this.Name,
+            Value = this.Value
+        };
     }
 }

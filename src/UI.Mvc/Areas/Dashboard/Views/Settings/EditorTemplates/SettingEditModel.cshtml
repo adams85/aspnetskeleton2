@@ -1,0 +1,33 @@
+﻿@using WebApp.UI.Areas.Dashboard.Models.Settings
+
+@model WebApp.UI.Models.EditModel<SettingData>
+
+<form class="needs-validation" method="post" novalidate>
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label asp-for="Item.Name"></label>
+            <input class="form-control-plaintext" asp-for="Item.Name" type="text" readonly>
+        </div>
+        <div class="form-group col-md-6">
+            <label asp-for="Item.Value"></label>
+            <input asp-for="Item.Value" type="text" class="form-control" autofocus>
+            <div class="invalid-feedback">
+                <span asp-validation-for="Item.Value"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Item.Description"></label>
+        <div>
+            @SettingListModel.GetDescription(Model.Item)
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button class="btn btn-primary px-4 mr-2" type="submit">@T["Save"]</button>
+        <a class="btn btn-secondary px-4" href="@Model.ReturnUrl">@T["Cancel"]</a>
+    </div>
+</form>

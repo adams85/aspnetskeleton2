@@ -19,7 +19,7 @@ using Microsoft.Net.Http.Headers;
 using WebApp.Api.Infrastructure.Localization;
 using WebApp.Core.Helpers;
 using WebApp.Service.Settings;
-using WebApp.UI.Helpers.Views;
+using WebApp.UI.Areas.Dashboard;
 using WebApp.UI.Infrastructure.DataAnnotations;
 using WebApp.UI.Infrastructure.Hosting;
 using WebApp.UI.Infrastructure.Navigation;
@@ -63,7 +63,11 @@ namespace WebApp.UI
 
             public override void ConfigureServices(IServiceCollection services)
             {
-                services.AddSingleton<IPageCatalog>(sp => new PageCatalog(Pages.GetProviders(sp)));
+                services.AddSingleton<IPageCatalog>(sp => new PageCatalog(new IPageCollectionProvider[]
+                {
+                    new Pages(),
+                    new DashboardPages(),
+                }));
 
                 services.AddSingleton<IAccountManager, AccountManager>();
 

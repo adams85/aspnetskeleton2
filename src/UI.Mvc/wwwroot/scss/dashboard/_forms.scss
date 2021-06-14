@@ -5,6 +5,16 @@
   }
 }
 
+.form-group label {
+  font-weight: $font-weight-bold;
+}
+
+// removing outline from readonly plain text form controls
+
+.form-control-plaintext:focus {
+  outline: none;
+}
+
 // MVC validation
 
 .validation-summary-errors {

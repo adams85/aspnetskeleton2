@@ -1,0 +1,20 @@
+﻿@model WebApp.UI.Models.DeleteModel
+
+@section Header {
+    <h3 class="mb-0">@Model.GetTitle(ViewContext.HttpContext, T)</h3>
+}
+
+<form method="post" novalidate>
+    <p class="lead">
+        @T["You are about to delete the {0} with identifier '{1}'.", Model.GetItemDisplayName(ViewContext.HttpContext, T), Model.ItemId]
+    </p>
+
+    <p class="text-danger">
+        @T["Are you sure you want to do this?"]
+    </p>
+
+    <div class="mt-4">
+        <button class="btn btn-primary px-4 mr-2" type="submit">@T["Yes"]</button>
+        <a class="btn btn-secondary px-4" href="@Model.ReturnUrl">@T["No"]</a>
+    </div>
+</form>

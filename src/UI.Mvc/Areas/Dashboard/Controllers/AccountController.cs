@@ -25,7 +25,7 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
             T = stringLocalizer ?? (IStringLocalizer)NullStringLocalizer.Instance;
         }
 
-        public IStringLocalizer T { get; set; }
+        public IStringLocalizer T { get; }
 
         [HttpGet("/[area]/[controller]", Name = DashboardRoutes.AccountSettingsRouteName)]
         public IActionResult Index()

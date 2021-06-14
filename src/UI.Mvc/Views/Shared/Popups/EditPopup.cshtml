@@ -1,0 +1,7 @@
+﻿@model WebApp.UI.Models.EditModel
+
+@section Header {
+    <h3 class="mb-0">@Model.GetTitle(ViewContext.HttpContext, T)</h3>
+}
+
+@Html.EditorForModel(Model.EditorTemplateName)

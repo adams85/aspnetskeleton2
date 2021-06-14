@@ -6,9 +6,5 @@
 @{
     Layout = "_PageLayout";
 
-    var page = Model.Layout.PageInfo ??= Pages.FindPage(ViewContext.ActionDescriptor);
-    if (page != null)
-    {
-        Model.Layout.Title ??= page.GetDefaultTitle(ViewContext.HttpContext, T);
-    }
+    Model.Layout.Initialize(ViewContext, Pages, T);
 }

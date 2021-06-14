@@ -8,12 +8,12 @@ namespace WebApp.UI.Infrastructure.Localization
 {
     public static class UIStringLocalizerExtensions
     {
-        public static string LocalizePasswordRequirements(
-#pragma warning disable IDE1006 // Naming Styles
-            this IStringLocalizer T,
-#pragma warning restore IDE1006 // Naming Styles
-            PasswordRequirementsData? passwordRequirements)
+        public static string LocalizePasswordRequirements(this IStringLocalizer stringLocalizer, PasswordRequirementsData? passwordRequirements)
         {
+#pragma warning disable IDE1006 // Naming Styles
+            var T = stringLocalizer;
+#pragma warning restore IDE1006 // Naming Styles
+
             var errorMessage = T["The password does not meet the complexity requirements."];
 
             if (passwordRequirements == null)

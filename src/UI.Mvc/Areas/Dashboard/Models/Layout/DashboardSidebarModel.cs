@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
@@ -21,7 +22,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
 
         public class NavigationGroup
         {
-            public Func<HttpContext, bool>? IsVisible { get; set; }
+            public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; set; }
             public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString>? GetTitle { get; set; }
 
             private List<NavigationItemBase>? _items;
@@ -34,7 +35,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
 
         public abstract class NavigationItemBase
         {
-            public Func<HttpContext, bool>? IsVisible { get; set; }
+            public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; set; }
             public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; set; } = null!;
             public string? IconClassName { get; set; }
         }
@@ -45,7 +46,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
 
             public NavigationItem(PageInfo page)
             {
-                IsVisible = page.IsAccessAllowed;
+                IsVisibleAsync = page.IsAccessAllowedAsync;
                 GetTitle = page.GetDefaultTitle;
                 GetUrl = urlHelper => urlHelper.RouteUrl(page.RouteName);
                 IsActive = (_, currentPage) => currentPage == page;

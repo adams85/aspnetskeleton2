@@ -23,14 +23,22 @@ namespace WebApp.UI.Models.Layout
         public string? Keywords { get; set; }
 
         public PageInfo? PageInfo { get; set; }
+        public string? LayoutName { get; set; }
         public LocalizedHtmlString? Title { get; set; }
         public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString>? GetTitle { get; set; }
         public object? BodyCssClasses { get; set; }
 
+        protected virtual LocalizedHtmlString? GetActualTitle(HttpContext httpContext, IHtmlLocalizer htmlLocalizer) =>
+            Title ?? (GetTitle ?? PageInfo?.GetDefaultTitle)?.Invoke(httpContext, htmlLocalizer);
+
+        protected virtual string? GetActualLayoutName(HttpContext httpContext) =>
+            LayoutName ?? PageInfo?.LayoutName;
+
         public virtual void Initialize(ActionContext actionContext, IPageCatalog pages, IHtmlLocalizer htmlLocalizer)
         {
             PageInfo ??= pages.FindPage(actionContext.ActionDescriptor);
-            Title ??= (GetTitle ?? PageInfo?.GetDefaultTitle)?.Invoke(actionContext.HttpContext, htmlLocalizer);
+            LayoutName = GetActualLayoutName(actionContext.HttpContext);
+            Title = GetActualTitle(actionContext.HttpContext, htmlLocalizer);
         }
     }
 }

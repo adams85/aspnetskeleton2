@@ -2,19 +2,15 @@
 
 @model ILayoutModelProvider<LayoutModel>
 
-@inject WebApp.UI.Infrastructure.Theming.IThemeManager ThemeManager
-
 @{
     var title = Model.Layout.Title;
 
     var currentLanguage = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
-    var currentTheme = await ThemeManager.GetCurrentThemeAsync(ViewContext.HttpContext);
 
     var bodyCssClasses =
         Model.Layout.BodyCssClasses is IEnumerable<string> bodyCssClassesEnumerable ?
         string.Join(" ", bodyCssClassesEnumerable) :
         Model.Layout.BodyCssClasses?.ToString();
-    bodyCssClasses = "c-app" + (!string.IsNullOrEmpty(bodyCssClasses) ? " " + bodyCssClasses : null);
 }
 
 <!DOCTYPE html>
@@ -43,8 +39,6 @@
               asp-fallback-test-class="fa" asp-fallback-test-property="display" asp-fallback-test-value="inline-block"
               integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
     </environment>
-
-    <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/global.css" />
 
     @RenderSection("Stylesheets", required: false)
 

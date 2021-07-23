@@ -163,7 +163,7 @@ namespace WebApp.UI.Controllers
         [HttpGet(Name = Routes.VerifyRegistrationRouteName)]
         public async Task<IActionResult> Verify(string u, string v)
         {
-            var model = new PageModel<bool?>();
+            var model = new PopupPageModel<bool?>();
 
             if (u != null && v != null)
                 model.Content = await _accountManager.VerifyUserAsync(u, v, HttpContext.RequestAborted);
@@ -245,7 +245,7 @@ namespace WebApp.UI.Controllers
         [Route("", Name = Routes.AccessDeniedRouteName)]
         public IActionResult AccessDenied()
         {
-            return View(new PageModel());
+            return View(new PopupPageModel());
         }
 
         #region Helpers

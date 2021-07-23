@@ -1,10 +1,9 @@
 ﻿@using WebApp.UI.Models.Layout
-@using WebApp.UI.Infrastructure.Navigation 
 
 @model ILayoutModelProvider<LayoutModel>
 
 @{
-    Layout = "_PageLayout";
-
     Model.Layout.Initialize(ViewContext, Pages, T);
+
+    Layout = Model.Layout.LayoutName ?? "_Layout";
 }

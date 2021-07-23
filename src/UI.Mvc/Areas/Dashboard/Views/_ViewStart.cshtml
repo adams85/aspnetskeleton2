@@ -4,7 +4,7 @@
 @model ILayoutModelProvider<LayoutModel>
 
 @{
-    Layout = "_DashboardPageLayout";
-
     Model.Layout.Initialize(ViewContext, Pages, T);
+
+    Layout = Model.Layout.LayoutName ?? "_DashboardPageLayout";
 }

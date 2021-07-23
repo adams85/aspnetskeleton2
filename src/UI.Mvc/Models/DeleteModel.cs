@@ -8,7 +8,7 @@ using WebApp.UI.Models.Layout;
 
 namespace WebApp.UI.Models
 {
-    public class DeleteModel : ILayoutModelProvider<PageLayoutModel>
+    public class DeleteModel : ILayoutModelProvider<PopupPageLayoutModel>
     {
         public DeleteModel()
         {
@@ -16,10 +16,10 @@ namespace WebApp.UI.Models
             GetTitle = GetDefaultTitle;
         }
 
-        private PageLayoutModel? _layout;
-        public PageLayoutModel Layout
+        private PopupPageLayoutModel? _layout;
+        public PopupPageLayoutModel Layout
         {
-            get => _layout ??= new PageLayoutModel
+            get => _layout ??= new PopupPageLayoutModel
             {
                 GetTitle = (httpContext, htmlLocalizer) => GetTitle(httpContext, htmlLocalizer)
             };

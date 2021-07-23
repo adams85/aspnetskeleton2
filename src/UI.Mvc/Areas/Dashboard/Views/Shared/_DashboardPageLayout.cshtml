@@ -2,8 +2,11 @@
 
 @model WebApp.UI.Models.Layout.ILayoutModelProvider<DashboardPageLayoutModel>
 
+@inject WebApp.UI.Infrastructure.Theming.IThemeManager ThemeManager
+
 @{
     Layout = "_Layout";
+    Model.Layout.BodyCssClasses = "c-app";
 }
 
 @section Metas {
@@ -11,6 +14,10 @@
 }
 
 @section Stylesheets {
+    @{ var currentTheme = await ThemeManager.GetCurrentThemeAsync(ViewContext.HttpContext); }
+
+    <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/dashboard.css" />
+
     @RenderSection("Stylesheets", required: false)
 }
 

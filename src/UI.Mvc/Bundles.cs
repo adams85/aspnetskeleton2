@@ -69,7 +69,10 @@ namespace WebApp.UI
                 var sourcePath = themeProvider.GetThemePath(ThemeProvider.ThemesBasePath, themes[i]);
                 var destPath = themeProvider.GetThemePath("/css", themes[i]);
 
-                bundles.AddSass(destPath + "/global.css")
+                bundles.AddSass(destPath + "/public.css")
+                    .Include(sourcePath + "/public.scss");
+
+                bundles.AddSass(destPath + "/dashboard.css")
                     .Include(sourcePath + "/dashboard.scss");
             }
         }

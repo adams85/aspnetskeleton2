@@ -2,7 +2,7 @@
 
 namespace WebApp.UI.Models.Home
 {
-    public class ErrorViewModel : PageModel
+    public class ErrorViewModel : PopupPageModel
     {
         public string? RequestId { get; set; }
 

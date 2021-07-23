@@ -13,6 +13,8 @@ namespace WebApp.UI.Infrastructure.Navigation
         public string RouteName { get; }
         public string AreaName { get; }
 
+        public string? LayoutName { get; set; }
+
         public Func<HttpContext, Task<bool>>? IsAccessAllowedAsync { get; set; }
         public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle { get; set; } = null!;
     }

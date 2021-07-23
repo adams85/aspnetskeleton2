@@ -18,7 +18,7 @@ namespace WebApp.UI.Areas.Dashboard.ViewComponents.Layout
             _settingsProvider = settingsProvider ?? throw new ArgumentNullException(nameof(settingsProvider));
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(ListSettingsQuery query)
+        public async Task<IViewComponentResult> InvokeAsync(ListSettingsQuery query, string? prefix = null)
         {
             query.EnsurePaging(ListSettingsQuery.DefaultPageSize, _settingsProvider.MaxPageSize());
 
@@ -27,6 +27,8 @@ namespace WebApp.UI.Areas.Dashboard.ViewComponents.Layout
                 Query = query,
                 Result = await _queryDispatcher.DispatchAsync(query, HttpContext.RequestAborted)
             };
+
+            ViewData.TemplateInfo.HtmlFieldPrefix = prefix;
 
             return View(query);
         }

@@ -6,6 +6,7 @@ namespace WebApp.UI.Helpers.Views
     public interface IDataTableHelpers
     {
         void Table(DataTableModel tableModel);
+        void TableFilterForm(DataTableModel tableModel);
 
         void TableHeader(DataTableModel tableModel);
         void TableHeaderRow(DataTableModel tableModel);

@@ -22,7 +22,8 @@
             return;
         }
 
-        <!form id="@tableModel.FilterFormHtmlId" method="get" action="@tableModel.GenerateDisplayUrl(Url, null)"></!form>
+        TableFilterForm(tableModel);
+
         <table id="@tableModel.TableHtmlId" class="table table-bordered table-striped table-hover data-table">
             @{
                 TableHeader(tableModel);
@@ -30,6 +31,27 @@
                 TableFooter(tableModel);
             }
         </table>
+    }
+
+    public void TableFilterForm(DataTableModel tableModel)
+    {
+        var tableFieldNames = tableModel.Columns
+            .OfType<DataTableColumnModel.DataColumn>()
+            .SelectMany(column => column.Filter?.FormFieldNames ?? Enumerable.Empty<string>())
+            .Append(tableModel.PageIndexFormFieldName)
+            .Append(tableModel.PageSizeFormFieldName)
+            .Append(tableModel.OrderByFormFieldName)
+            .Where(fieldName => fieldName != null)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase)!;
+
+        <!form id="@tableModel.FilterFormHtmlId" method="get" action="@tableModel.GenerateDisplayUrl(Url, null)">
+            @foreach (var (key, value) in ViewContext.HttpContext.Request.Query)
+                if (!tableFieldNames.Contains(key))
+                    for (int i = 0, n = value.Count; i < n; i++)
+                    {
+                        <input type="hidden" name="@key" value="@value[i]" />
+                    }
+        </!form>
     }
 
     #region Header

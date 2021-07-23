@@ -9,6 +9,7 @@ using WebApp.Service.Infrastructure;
 using WebApp.Service.Infrastructure.Localization;
 using WebApp.Service.Settings;
 using WebApp.UI.Areas.Dashboard.Models;
+using WebApp.UI.Areas.Dashboard.Models.Settings;
 using WebApp.UI.Helpers;
 using WebApp.UI.Models;
 
@@ -19,7 +20,7 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
     [Route("[area]/[controller]/[action]")]
     public class SettingsController : Controller
     {
-        private const string SettingEditorTemplateName = "EditorTemplates/SettingEditModel";
+        private const string SettingEditorTemplateName = "EditorTemplates/" + nameof(SettingEditModel);
 
         private readonly IQueryDispatcher _queryDispatcher;
         private readonly ICommandDispatcher _commandDispatcher;
@@ -56,7 +57,7 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
             if (item == null)
                 return NotFound();
 
-            var model = new EditModel<SettingData>
+            var model = new SettingEditModel
             {
                 Item = item,
                 IsNewItem = false,
@@ -69,7 +70,7 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
 
         [ValidateAntiForgeryToken]
         [HttpPost("{id}")]
-        public async Task<IActionResult> Edit(string id, EditModel<SettingData> model, [FromQuery] string? returnUrl)
+        public async Task<IActionResult> Edit(string id, SettingEditModel model, [FromQuery] string? returnUrl)
         {
             if (ModelState.IsValid)
             {
@@ -81,7 +82,7 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
                 }
                 catch (ServiceErrorException ex) when (ex.ErrorCode == ServiceErrorCode.ParamNotValid && (string)ex.Args[0] == nameof(SettingData.Value))
                 {
-                    ModelState.AddModelError(nameof(EditModel<SettingData>.Item) + "." + nameof(SettingData.Value), T["Invalid value."].Value);
+                    ModelState.AddModelError(nameof(SettingEditModel.Item) + "." + nameof(SettingData.Value), T["Invalid value."].Value);
                 }
 
                 if (ModelState.IsValid)

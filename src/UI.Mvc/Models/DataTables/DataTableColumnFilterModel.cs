@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Localization;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.Localization;
 using WebApp.UI.Helpers.Views;
 
 namespace WebApp.UI.Models.DataTables
@@ -10,22 +11,21 @@ namespace WebApp.UI.Models.DataTables
             Column = column;
         }
 
-        protected DataTableColumnFilterModel(DataTableColumnModel column, string formFieldName, object? formFieldValue) : this(column)
-        {
-            FormFieldName = formFieldName;
-            FormFieldValue = formFieldValue;
-        }
-
         public DataTableColumnModel Column { get; }
 
-        public string? FormFieldName { get; set; }
-        public object? FormFieldValue { get; set; }
+        public abstract IEnumerable<string> FormFieldNames { get; }
 
         protected internal abstract void RenderDefault(IDataTableHelpers helpers);
 
         public sealed class TextFilter : DataTableColumnFilterModel
         {
-            public TextFilter(DataTableColumnModel column, string formFieldName, object? formFieldValue) : base(column, formFieldName, formFieldValue) { }
+            public TextFilter(DataTableColumnModel column, string formFieldName, object? formFieldValue) : base(column) =>
+                (FormFieldName, FormFieldValue) = (formFieldName, formFieldValue);
+
+            public override IEnumerable<string> FormFieldNames => new[] { FormFieldName };
+
+            public string FormFieldName { get; set; }
+            public object? FormFieldValue { get; set; }
 
             public LocalizedHtmlString? PlaceholderText { get; set; }
 

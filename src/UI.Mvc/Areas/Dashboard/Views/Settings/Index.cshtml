@@ -2,6 +2,8 @@
 
 <div class="card">
     <div class="card-body">
-        <vc:settings-table query="@Model.Content" />
+        @* TODO: prefix may be omitted after upgrading to .NET 6 *@
+        @* https://github.com/dotnet/aspnetcore/issues/5011 *@
+        <vc:settings-table query="@Model.Content" prefix="" />
     </div>
 </div>

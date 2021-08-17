@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Karambolo.Common;
 using Microsoft.AspNetCore.Http;
-using WebApp.Core.Helpers;
 using WebApp.Service.Settings;
 
 namespace WebApp.UI.Infrastructure.Theming

@@ -24,7 +24,7 @@ namespace WebApp.DataAccess.Providers.MySQL
         }
 
         // TODO: revise this approach when https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/issues/618 gets resolved
-        // based on: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/blob/3.1.2/src/EFCore.MySql/Migrations/MySqlMigrationsSqlGenerator.cs#L373
+        // based on: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/blob/3.2.6/src/EFCore.MySql/Migrations/MySqlMigrationsSqlGenerator.cs#L422
         protected override void Generate(MySqlCreateDatabaseOperation operation, IModel? model, MigrationCommandListBuilder builder)
         {
             if (operation == null)

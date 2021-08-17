@@ -58,7 +58,7 @@ namespace WebApp.UI
         /// the call to <see cref="RoutingServiceCollectionExtensions.AddRouting(IServiceCollection)"/> must be removed as
         /// we need to prevent routing services from being added to the root container (see <seealso cref="Startup.ConfigureServices(IServiceCollection)"/> for details).
         /// </remarks>
-        // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.6/src/DefaultBuilder/src/WebHost.cs
+        // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/DefaultBuilder/src/WebHost.cs
         private static void ConfigureWebDefaults(IWebHostBuilder builder)
         {
             builder
@@ -122,7 +122,7 @@ namespace WebApp.UI
         private static void FixHostingStartupAssemblies(IWebHostBuilder builder)
         {
             var hostingStartupAssemblies = SplitAssemblyList(builder.GetSetting(WebHostDefaults.HostingStartupAssembliesKey))
-                .ToLookup(value => new AssemblyName(value).Name, Identity<string>.Func, StringComparer.OrdinalIgnoreCase);
+                .ToLookup(value => new AssemblyName(value).Name, CachedDelegates.Identity<string>.Func, StringComparer.OrdinalIgnoreCase);
 
             IEnumerable<string> assembliesToExclude = Enumerable.Empty<string>();
 

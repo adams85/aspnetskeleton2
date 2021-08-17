@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Karambolo.Common;
+using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Users;
@@ -17,20 +17,20 @@ namespace WebApp.Service.Roles
             var dbProperties = context.DbContext.GetDbProperties();
 
             var distinctUserNames = new HashSet<string>(dbProperties.CaseInsensitiveComparer);
-            var userWhereBuilder = PredicateBuilder<User>.False();
+            var userWhereBuilder = PredicateBuilder.New<User>(false);
             foreach (var userName in command.UserNames)
                 if (distinctUserNames.Add(userName))
                     userWhereBuilder.Or(UsersHelper.GetFilterByNameWhere(userName));
 
             var distinctRoleNames = new HashSet<string>(dbProperties.CaseInsensitiveComparer);
-            var roleWhereBuilder = PredicateBuilder<Role>.False();
+            var roleWhereBuilder = PredicateBuilder.New<Role>(false);
             foreach (var roleName in command.RoleNames)
                 if (distinctRoleNames.Add(roleName))
                     roleWhereBuilder.Or(RolesHelper.GetFilterByNameWhere(roleName));
 
             var userIds = await
             (
-                from u in context.DbContext.Users.Where(userWhereBuilder.Build())
+                from u in context.DbContext.Users.Where(userWhereBuilder)
                 select u.Id
             ).ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
@@ -38,7 +38,7 @@ namespace WebApp.Service.Roles
 
             var roleAndUserIdPairs = await
             (
-                from r in context.DbContext.Roles.Where(roleWhereBuilder.Build())
+                from r in context.DbContext.Roles.Where(roleWhereBuilder)
                 from ur in r.Users.DefaultIfEmpty()
                 select ValueTuple.Create(r.Id, (int?)ur.UserId)
             ).ToArrayAsync<(int RoleId, int? UserId)>(cancellationToken).ConfigureAwait(false);

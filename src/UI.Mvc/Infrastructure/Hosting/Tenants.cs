@@ -14,7 +14,7 @@ namespace WebApp.UI.Infrastructure.Hosting
 
         public Tenants(IEnumerable<Tenant> tenants)
         {
-            _tenants = tenants.ToDictionary(tenant => tenant.Id, Identity<Tenant>.Func);
+            _tenants = tenants.ToDictionary(tenant => tenant.Id, CachedDelegates.Identity<Tenant>.Func);
             MainBranchTenant = tenants.FirstOrDefault(tenant => tenant.BranchPredicate == null);
         }
 

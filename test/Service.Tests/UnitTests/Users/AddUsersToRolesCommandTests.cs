@@ -23,7 +23,7 @@ namespace WebApp.Service.Tests.UnitTests.Users
 
             var command = new AddUsersToRolesCommand
             {
-                UserNames = new[] { "JohnDoe", },
+                UserNames = new[] { "JohnDoe" },
                 RoleNames = new[] { nameof(RoleEnum.Administators) },
             };
 

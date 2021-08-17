@@ -20,7 +20,7 @@ namespace WebApp.DataAccess
         private static readonly IReadOnlyDictionary<string, IConfigurationFactory> s_configurationFactories = typeof(EFCoreConfiguration).Assembly.GetTypes()
             .Where(type => type.IsClass && !type.IsAbstract && type.HasInterface(typeof(IConfigurationFactory)))
             .Select(type => (IConfigurationFactory)Activator.CreateInstance(type))
-            .ToDictionary(factory => factory.ProviderName, Identity<IConfigurationFactory>.Func);
+            .ToDictionary(factory => factory.ProviderName, CachedDelegates.Identity<IConfigurationFactory>.Func);
 
         public static EFCoreConfiguration From(DataAccessOptions options)
         {

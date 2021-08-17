@@ -49,7 +49,7 @@ namespace WebApp.Service.Infrastructure.Events
                             await _queryDispatcher.DispatchAsync(query, ct).ConfigureAwait(false);
                             throw new InvalidOperationException($"{nameof(StreamBusEventsQuery)} returned unexpectedly.");
                         })
-                        .Subscribe(Noop<Unit>.Action, observer.OnError);
+                        .Subscribe(CachedDelegates.Noop<Unit>.Action, observer.OnError);
                 })
                 .Do(OnEventReceived, OnStreamError)
                 .Retry(wrapSubsequent: source => source.DelaySubscription(_delayOnDropout))

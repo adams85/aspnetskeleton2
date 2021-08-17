@@ -52,7 +52,7 @@ namespace WebApp.UI.Infrastructure.ViewFeatures
             razorPage.ViewContext = viewContext;
 
             // we need to save and restore the original view data dictionary as it is changed by IRazorPageActivator.Activate
-            // https://github.com/dotnet/aspnetcore/blob/v3.1.6/src/Mvc/Mvc.Razor/src/RazorPagePropertyActivator.cs#L59
+            // https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.Razor/src/RazorPagePropertyActivator.cs#L59
             var originalViewData = viewContext.ViewData;
             try { _razorPageActivator.Activate(razorPage, viewContext); }
             finally { viewContext.ViewData = originalViewData; }

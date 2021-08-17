@@ -27,7 +27,7 @@ namespace WebApp.Api.Infrastructure.Swagger
         public CustomJsonSerializerDataContractResolver(IOptions<JsonOptions>? jsonOptions)
         {
             _serializerOptions = jsonOptions?.Value?.JsonSerializerOptions ?? new JsonSerializerOptions().ConfigureApiDefaults();
-            _convertMemberName = _serializerOptions.PropertyNamingPolicy != null ? _serializerOptions.PropertyNamingPolicy.ConvertName : Identity<string>.Func;
+            _convertMemberName = _serializerOptions.PropertyNamingPolicy != null ? _serializerOptions.PropertyNamingPolicy.ConvertName : CachedDelegates.Identity<string>.Func;
         }
 
         public DataContract GetDataContractForType(Type type)

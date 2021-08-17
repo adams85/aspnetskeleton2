@@ -27,7 +27,7 @@ namespace WebApp.Service.Infrastructure.Events
             const string subscriberErrorFormat = "Error occurred in a listener's {0} handler.";
 
             // Subject<T> invokes the subscribed observers one after another without exception handling
-            // (see https://github.com/dotnet/reactive/blob/rxnet-v4.4.1/Rx.NET/Source/src/System.Reactive/Subjects/Subject.cs#L148),
+            // (see https://github.com/dotnet/reactive/blob/rxnet-v5.0.0/Rx.NET/Source/src/System.Reactive/Subjects/Subject.cs#L147),
             // so we need to wrap our subject to make sure that a synchronous exception thrown in a listener's OnNext handler doesn't prevent the notification of others
             _events = Observable
                 .Create<Event>(observer =>
@@ -68,7 +68,7 @@ namespace WebApp.Service.Infrastructure.Events
 
         public IDisposable PublishMany(IObservable<Event> events) =>
             events
-                .Do(Noop<Event>.Action, ex => _logger.LogError(ex, "A source sequence terminated with error."))
+                .Do(CachedDelegates.Noop<Event>.Action, ex => _logger.LogError(ex, "A source sequence terminated with error."))
                 .OnErrorResumeNext(Observable.Never<Event>())
                 .Multicast(_subject)
                 .Connect();

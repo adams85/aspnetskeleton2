@@ -14,7 +14,7 @@ namespace WebApp.UI.Infrastructure.Navigation
         {
             _pages = providers
                 .SelectMany(provider => provider.GetPages())
-                .ToDictionary(page => page.RouteName, Identity<PageInfo>.Func);
+                .ToDictionary(page => page.RouteName, CachedDelegates.Identity<PageInfo>.Func);
         }
 
         public PageInfo? GetPage(string routeName, bool throwIfNotFound = false) =>

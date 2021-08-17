@@ -9,7 +9,7 @@ using WebApp.Api.Infrastructure.Localization;
 
 namespace WebApp.Api.Infrastructure.DataAnnotations
 {
-    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.6/src/Mvc/Mvc.DataAnnotations/src/ValidatableObjectAdapter.cs
+    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.DataAnnotations/src/ValidatableObjectAdapter.cs
     public sealed class CustomValidatableObjectAdapter : IModelValidator
     {
         private readonly IValidationAttributeAdapterProvider _validationAttributeAdapterProvider;

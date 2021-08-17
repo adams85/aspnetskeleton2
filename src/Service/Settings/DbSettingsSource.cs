@@ -40,7 +40,7 @@ namespace WebApp.Service.Settings
             _initializedTcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             var initialize = Load()
-                .Do(Noop<SettingsChangedEvent>.Action, ex => _initializedTcs.TrySetException(ex), () => _initializedTcs.TrySetResult(null));
+                .Do(CachedDelegates.Noop<SettingsChangedEvent>.Action, ex => _initializedTcs.TrySetException(ex), () => _initializedTcs.TrySetResult(null));
 
             _notifySubscription = initialize
                 .Concat(Observable
@@ -81,7 +81,7 @@ namespace WebApp.Service.Settings
 
         private IObservable<SettingsChangedEvent> Load() => Observable
             .FromAsync(LoadAsync)
-            .Do(Noop<SettingsChangedEvent>.Action, ex => _logger.LogError(ex, "Unexpected error occurred when loading settings."));
+            .Do(CachedDelegates.Noop<SettingsChangedEvent>.Action, ex => _logger.LogError(ex, "Unexpected error occurred when loading settings."));
 
         private bool RegisterChange(SettingsChangedEvent @event)
         {

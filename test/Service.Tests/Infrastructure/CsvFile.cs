@@ -1,4 +1,5 @@
 ﻿using System;
+using CsvHelper;
 using CsvHelper.Configuration;
 
 namespace WebApp.Service.Tests.Infrastructure
@@ -12,6 +13,7 @@ namespace WebApp.Service.Tests.Infrastructure
 
         public Type EntityType { get; set; } = null!;
 
-        public Action<IReaderConfiguration>? ConfigureReader { get; set; }
+        public Action<CsvConfiguration>? ConfigureReader { get; set; }
+        public Action<CsvContext>? InitializeReaderContext { get; set; }
     }
 }

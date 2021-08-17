@@ -17,22 +17,27 @@ namespace WebApp.Service.Tests.Infrastructure.Database
         private static readonly CultureInfo s_defaultCsvCulture = CultureInfo.GetCultureInfo("en-US");
 
         private readonly CsvFile[] _files;
-        private readonly Action<IReaderConfiguration> _configureReader;
+        private readonly Action<CsvConfiguration> _configureReader;
+        private readonly Action<CsvContext> _initializeReaderContext;
 
-        public CsvDatabaseSeeder(IEnumerable<CsvFile> files, Action<IReaderConfiguration>? configureReader = null)
+        public CsvDatabaseSeeder(IEnumerable<CsvFile> files, Action<CsvConfiguration>? configureReader = null, Action<CsvContext>? initializeReaderContext = null)
         {
             _files = files.ToArray();
             _configureReader = configureReader ?? DefaultConfigureReader;
+            _initializeReaderContext = initializeReaderContext ?? DefaultInitializeReaderContext;
         }
 
-        private void DefaultConfigureReader(IReaderConfiguration configuration)
+        private void DefaultConfigureReader(CsvConfiguration configuration)
         {
             configuration.HasHeaderRecord = true;
             configuration.Delimiter = ";";
             configuration.IgnoreReferences = true;
             configuration.HeaderValidated = null;
             configuration.MissingFieldFound = null;
+        }
 
+        private void DefaultInitializeReaderContext(CsvContext context)
+        {
             // https://github.com/JoshClose/CsvHelper/issues/670
             // HACK: it seems there's no built-in way to apply general settings for automatic type conversions,
             // so we gather the possible types and apply the necessary settings type by type.
@@ -48,8 +53,8 @@ namespace WebApp.Service.Tests.Infrastructure.Database
 
             foreach (var type in publicInstanceMemberTypes)
             {
-                var options = configuration.TypeConverterOptionsCache.GetOptions(type);
-                options.CultureInfo = configuration.CultureInfo;
+                var options = context.TypeConverterOptionsCache.GetOptions(type);
+                options.CultureInfo = context.Configuration.CultureInfo;
 
                 // consider "NULL" string as NULL value
                 if (!type.IsValueType || Nullable.GetUnderlyingType(type) != null)
@@ -61,21 +66,25 @@ namespace WebApp.Service.Tests.Infrastructure.Database
         {
             foreach (var file in _files)
                 using (var reader = new StreamReader(file.FilePath))
-                using (var csv = new CsvReader(reader, new CsvConfiguration(s_defaultCsvCulture)))
+                using (var csv = new CsvReader(reader, CreateReaderConfiguration(_configureReader, file.ConfigureReader)))
                 {
-                    // applies global configuration
-                    _configureReader(csv.Configuration);
-
-                    // applies optional, file level configuration
-                    file.ConfigureReader?.Invoke(csv.Configuration);
+                    _initializeReaderContext(csv.Context);
+                    file.InitializeReaderContext?.Invoke(csv.Context);
 
                     var entities = csv.GetRecords(file.EntityType);
 
                     dbContext.AddRange(entities);
                 }
 
-
             await dbContext.SaveChangesAsync(cancellationToken);
+
+            static CsvConfiguration CreateReaderConfiguration(Action<CsvConfiguration> applyGlobalConfiguration, Action<CsvConfiguration>? applyFileConfiguration)
+            {
+                var configuration = new CsvConfiguration(s_defaultCsvCulture);
+                applyGlobalConfiguration(configuration);
+                applyFileConfiguration?.Invoke(configuration);
+                return configuration;
+            }
         }
     }
 }

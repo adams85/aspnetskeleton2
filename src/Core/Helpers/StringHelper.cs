@@ -35,7 +35,7 @@ namespace WebApp.Core.Helpers
             }
 
             List<string> items;
-            normalizeItem ??= Identity<string>.Func;
+            normalizeItem ??= CachedDelegates.Identity<string>.Func;
 
             using (var enumerator = SplitCommaSeparatedList(value, options).GetEnumerator())
                 if (enumerator.MoveNext())

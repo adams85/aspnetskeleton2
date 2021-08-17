@@ -76,25 +76,25 @@ namespace WebApp.Service.Infrastructure
         {
             var command = new ListUsersQuery
             {
-                OrderColumns = new[] { "" }
+                OrderBy = new[] { "" }
             };
 
             var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command));
 
             Assert.IsType<ItemsRequiredAttribute>(validationEx.ValidationAttribute);
-            Assert.Equal(new[] { nameof(command.OrderColumns) }, validationEx.ValidationResult.MemberNames);
+            Assert.Equal(new[] { nameof(command.OrderBy) }, validationEx.ValidationResult.MemberNames);
 
             string? textToLocalize = null;
 
             var validationAttribute = (ExtendedValidationAttribute)validationEx.ValidationAttribute;
-            var formattedErrorMessage = validationAttribute.FormatErrorMessage(nameof(command.OrderColumns), new DelegatedTextLocalizer((hint, args) =>
+            var formattedErrorMessage = validationAttribute.FormatErrorMessage(nameof(command.OrderBy), new DelegatedTextLocalizer((hint, args) =>
             {
                 textToLocalize = hint;
                 return args != null ? NullTextLocalizer.Instance[hint, args] : NullTextLocalizer.Instance[hint];
             }));
 
             Assert.Equal("The field {0} must contain non-empty strings.", textToLocalize);
-            Assert.Equal($"The field {nameof(command.OrderColumns)} must contain non-empty strings.", formattedErrorMessage);
+            Assert.Equal($"The field {nameof(command.OrderBy)} must contain non-empty strings.", formattedErrorMessage);
         }
 
         [Fact]

@@ -10,7 +10,7 @@ namespace WebApp.UI.Models.DataTables
 {
     public sealed class DataTableColumnBinding
     {
-        public static DataTableColumnBinding For<TItem>() => new DataTableColumnBinding(typeof(TItem), Array.Empty<PropertyInfo>(), Identity<object>.Func);
+        public static DataTableColumnBinding For<TItem>() => new DataTableColumnBinding(typeof(TItem), Array.Empty<PropertyInfo>(), CachedDelegates.Identity<object>.Func);
 
         public static DataTableColumnBinding For<TItem>(Expression<Func<TItem, object?>> pathExpression)
         {

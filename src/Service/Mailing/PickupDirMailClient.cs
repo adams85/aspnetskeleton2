@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,6 +45,24 @@ namespace WebApp.Service.Mailing
         public override bool IsSecure => false;
 
         public override bool IsAuthenticated => true;
+
+        public override bool IsEncrypted => false;
+
+        public override bool IsSigned => false;
+
+        public override SslProtocols SslProtocol => SslProtocols.None;
+
+        public override CipherAlgorithmType? SslCipherAlgorithm => null;
+
+        public override int? SslCipherStrength => null;
+
+        public override HashAlgorithmType? SslHashAlgorithm => null;
+
+        public override int? SslHashStrength => null;
+
+        public override ExchangeAlgorithmType? SslKeyExchangeAlgorithm => null;
+
+        public override int? SslKeyExchangeStrength => null;
 
         private static void AddUnique(IList<MailboxAddress> recipients, HashSet<string> unique, IEnumerable<MailboxAddress> mailboxes)
         {

@@ -18,7 +18,7 @@ namespace WebApp.Service.Helpers
         public static IObservable<TSource> Retry<TSource>(this IObservable<TSource> source,
             Func<IObservable<TSource>, IObservable<TSource>>? wrapInitial = null, Func<IObservable<TSource>, IObservable<TSource>>? wrapSubsequent = null)
         {
-            return RepeateInfinitely(source, wrapInitial ?? Identity<IObservable<TSource>>.Func, wrapSubsequent ?? Identity<IObservable<TSource>>.Func)
+            return RepeateInfinitely(source, wrapInitial ?? CachedDelegates.Identity<IObservable<TSource>>.Func, wrapSubsequent ?? CachedDelegates.Identity<IObservable<TSource>>.Func)
                 .Catch();
 
             static IEnumerable<IObservable<TSource>> RepeateInfinitely(IObservable<TSource> source,
@@ -37,7 +37,7 @@ namespace WebApp.Service.Helpers
             if (retryCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(retryCount));
 
-            return Repeate(source, retryCount, wrapInitial ?? Identity<IObservable<TSource>>.Func, wrapSubsequent ?? Identity<IObservable<TSource>>.Func)
+            return Repeate(source, retryCount, wrapInitial ?? CachedDelegates.Identity<IObservable<TSource>>.Func, wrapSubsequent ?? CachedDelegates.Identity<IObservable<TSource>>.Func)
                 .Catch();
 
             static IEnumerable<IObservable<TSource>> Repeate(IObservable<TSource> source, int retryCount,

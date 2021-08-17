@@ -12,7 +12,7 @@ using ProtoBuf;
 
 namespace WebApp.Api.Infrastructure.Serialization
 {
-    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.6/src/Mvc/Mvc.NewtonsoftJson/src/NewtonsoftJsonInputFormatter.cs
+    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.NewtonsoftJson/src/NewtonsoftJsonInputFormatter.cs
     public sealed class ProtoBufInputFormatter : InputFormatter
     {
         private const int DefaultMemoryThreshold = 1024 * 30;

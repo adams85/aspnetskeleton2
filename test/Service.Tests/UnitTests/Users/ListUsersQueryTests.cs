@@ -49,7 +49,7 @@ namespace WebApp.Service.Users
                 // TODO: SQLite doesn't respect case insensitivity when matching parts of strings
                 UserNamePattern = "Doe",
                 PageSize = 1,
-                OrderColumns = new[] { "+UserName" }
+                OrderBy = new[] { "+UserName" }
             };
 
             var queryContext = new QueryContext(query, testContext.Services);

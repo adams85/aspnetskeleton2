@@ -92,7 +92,7 @@ namespace WebApp.Service.Settings
             catch (CultureNotFoundException) { return null; }
         };
 
-        private static readonly Func<string, string?> s_normalizeTheme = Identity<string>.Func;
+        private static readonly Func<string, string?> s_normalizeTheme = CachedDelegates.Identity<string>.Func;
 
         private static readonly EmailAddressAttribute s_emailAddressValidator = new EmailAddressAttribute();
 

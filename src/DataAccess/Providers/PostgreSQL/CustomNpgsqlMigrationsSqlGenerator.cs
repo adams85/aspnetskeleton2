@@ -23,7 +23,7 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
             _dbCollation = dbProperties.CaseSensitiveCollation;
         }
 
-        // based on: https://github.com/npgsql/efcore.pg/blob/v3.1.4/src/EFCore.PG/Migrations/NpgsqlMigrationsSqlGenerator.cs#L731
+        // based on: https://github.com/npgsql/efcore.pg/blob/v3.1.11/src/EFCore.PG/Migrations/NpgsqlMigrationsSqlGenerator.cs#L731
         protected override void Generate(NpgsqlCreateDatabaseOperation operation, IModel? model, MigrationCommandListBuilder builder)
         {
             if (operation == null)

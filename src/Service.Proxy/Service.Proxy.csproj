@@ -16,13 +16,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Grpc.Net.Client" Version="2.30.0" />
-    <PackageReference Include="Karambolo.PO" Version="1.6.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.38.0" />
+    <PackageReference Include="Karambolo.PO" Version="1.7.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="protobuf-net.Grpc" Version="1.0.123" />
-    <PackageReference Include="System.Reactive" Version="4.4.1" />
+    <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

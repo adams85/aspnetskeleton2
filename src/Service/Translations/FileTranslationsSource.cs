@@ -63,7 +63,7 @@ namespace WebApp.Service.Translations
                 .SelectMany(item => item.filePaths.Select(filePath => (filePath, item.exception)).ToObservable())
                 .SelectMany(item => LoadFile(item.filePath, item.exception)
                     .Catch<(string, TranslationsChangedEvent), Exception>(ex => Observable.Empty<(string, TranslationsChangedEvent)>()))
-                .Do(Noop<(string, TranslationsChangedEvent)>.Action, ex => _initializedTcs.TrySetException(ex), () => _initializedTcs.TrySetResult(null));
+                .Do(CachedDelegates.Noop<(string, TranslationsChangedEvent)>.Action, ex => _initializedTcs.TrySetException(ex), () => _initializedTcs.TrySetResult(null));
 
             if (_reloadOnChange)
             {
@@ -205,7 +205,7 @@ namespace WebApp.Service.Translations
         private IObservable<(string, TranslationsChangedEvent)> LoadFile(string filePath, Exception? obtainFilesException) => Observable
             .FromAsync(ct => LoadFileAsync(filePath, obtainFilesException, ct))
             .Where(item => item.Event != null)!
-            .Do(Noop<(string, TranslationsChangedEvent)>.Action, ex => _logger.LogError(ex, "Unexpected error occurred when loading translation file \"{PATH}\".", filePath));
+            .Do(CachedDelegates.Noop<(string, TranslationsChangedEvent)>.Action, ex => _logger.LogError(ex, "Unexpected error occurred when loading translation file \"{PATH}\".", filePath));
 
         private string[] GetCurrentFiles()
         {

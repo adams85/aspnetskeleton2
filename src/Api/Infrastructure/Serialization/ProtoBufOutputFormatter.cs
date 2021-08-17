@@ -7,7 +7,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace WebApp.Api.Infrastructure.Serialization
 {
-    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.6/src/Mvc/Mvc.NewtonsoftJson/src/NewtonsoftJsonOutputFormatter.cs
+    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.NewtonsoftJson/src/NewtonsoftJsonOutputFormatter.cs
     public sealed class ProtoBufOutputFormatter : OutputFormatter
     {
         private readonly MvcOptions _mvcOptions;

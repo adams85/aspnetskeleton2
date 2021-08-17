@@ -46,7 +46,7 @@ namespace WebApp.UI.Models.DataTables
             new Action<IDataTableHelpers>(RenderFilterCellDefault);
 
         protected virtual void RenderFilterCellDefault(IDataTableHelpers helpers) =>
-            helpers.ColumnFilterCell(this, Filter != null ? Filter.RenderDefault : Noop<IDataTableHelpers>.Action);
+            helpers.ColumnFilterCell(this, Filter != null ? Filter.RenderDefault : CachedDelegates.Noop<IDataTableHelpers>.Action);
 
         private Func<(object Item, DataTableColumnModel ColumnModel), IHtmlContent>? _contentCellTemplate;
         public Func<(object Item, DataTableColumnModel ColumnModel), IHtmlContent>? ContentCellTemplate
@@ -85,8 +85,8 @@ namespace WebApp.UI.Models.DataTables
         {
             public ControlColumn(DataTableModel table) : base(table) { }
 
-            public Func<object, bool> CanEditRow { get; set; } = True<object>.Func;
-            public Func<object, bool> CanDeleteRow { get; set; } = True<object>.Func;
+            public Func<object, bool> CanEditRow { get; set; } = CachedDelegates.True<object>.Func;
+            public Func<object, bool> CanDeleteRow { get; set; } = CachedDelegates.True<object>.Func;
 
             protected override void RenderContentCellDefault(IDataTableHelpers helpers, object item) => helpers.ControlContentCell(item, this);
         }

@@ -31,11 +31,8 @@ namespace WebApp.UI.Models
 
         protected virtual string GetDefaultItemDisplayName(HttpContext httpContext, IHtmlLocalizer htmlLocalizer)
         {
-#pragma warning disable IDE1006 // Naming Styles
-            var T = htmlLocalizer;
-#pragma warning restore IDE1006 // Naming Styles
-
-            return T["Item"].Value;
+            var t = htmlLocalizer;
+            return t["Item"].Value;
         }
 
         [BindNever, ValidateNever]
@@ -43,11 +40,8 @@ namespace WebApp.UI.Models
 
         protected virtual LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer htmlLocalizer)
         {
-#pragma warning disable IDE1006 // Naming Styles
-            var T = htmlLocalizer;
-#pragma warning restore IDE1006 // Naming Styles
-
-            return IsNewItem ? T["Create {0}", GetItemDisplayName(httpContext, T)] : T["Edit {0}", GetItemDisplayName(httpContext, T)];
+            var t = htmlLocalizer;
+            return IsNewItem ? t["Create {0}", GetItemDisplayName(httpContext, t)] : t["Edit {0}", GetItemDisplayName(httpContext, t)];
         }
 
         [BindNever]

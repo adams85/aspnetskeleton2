@@ -15,7 +15,7 @@ namespace POTools.Services.Extracting
         private readonly string _localizedAttributePluralIdArgName;
         private readonly string _localizedAttributeContextIdArgName;
 
-        private readonly string _localizerMemberName;
+        private readonly HashSet<string> _localizerMemberNames;
 
         private readonly string _pluralTypeName;
         private readonly string _pluralFactoryMemberName;
@@ -32,7 +32,7 @@ namespace POTools.Services.Extracting
             _localizedAttributePluralIdArgName = settings?.LocalizedAttributePluralIdArgName ?? CSharpTextExtractorSettings.DefaultLocalizedAttributePluralIdArgName;
             _localizedAttributeContextIdArgName = settings?.LocalizedAttributeContextIdArgName ?? CSharpTextExtractorSettings.DefaultLocalizedAttributeContextIdArgName;
 
-            _localizerMemberName = settings?.LocalizerMemberName ?? CSharpTextExtractorSettings.DefaultLocalizerMemberName;
+            _localizerMemberNames = (settings?.LocalizerMemberNames ?? CSharpTextExtractorSettings.DefaultLocalizerMemberNames).ToHashSet();
 
             _pluralTypeName = settings?.PluralTypeName ?? CSharpTextExtractorSettings.DefaultPluralTypeName;
             _pluralFactoryMemberName = settings?.PluralFactoryMemberName ?? CSharpTextExtractorSettings.DefaultPluralFactoryMemberName;
@@ -51,9 +51,9 @@ namespace POTools.Services.Extracting
             return CSharpSyntaxTree.ParseText(code, cancellationToken: cancellationToken);
         }
 
-        protected virtual IEnumerable<MemberDeclarationSyntax> GetRelevantDeclarations(SyntaxTree syntaxTree, CancellationToken cancellationToken)
+        protected virtual IEnumerable<MemberDeclarationSyntax> GetRelevantDeclarations(SyntaxNode root, CancellationToken cancellationToken)
         {
-            return syntaxTree.GetRoot(cancellationToken).DescendantNodes()
+            return root.DescendantNodes()
                 .OfType<MemberDeclarationSyntax>()
                 .Where(node =>
                     node is EnumMemberDeclarationSyntax ||
@@ -125,7 +125,7 @@ namespace POTools.Services.Extracting
         {
             return declaration.DescendantNodes()
                 .OfType<ElementAccessExpressionSyntax>()
-                .Where(elementAccess => elementAccess.Expression is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == _localizerMemberName)
+                .Where(elementAccess => elementAccess.Expression is IdentifierNameSyntax identifier && _localizerMemberNames.Contains(identifier.Identifier.ValueText))
                 .Select(elementAccess => GetTextInfo(elementAccess, cancellationToken));
 
             LocalizableTextInfo GetTextInfo(ElementAccessExpressionSyntax translateExpression, CancellationToken cancellationToken)
@@ -230,12 +230,13 @@ namespace POTools.Services.Extracting
             var code = GetCode(content, cancellationToken);
 
             var syntaxTree = ParseText(code, cancellationToken);
-            if (syntaxTree.GetDiagnostics(cancellationToken).Any(d => d.Severity >= DiagnosticSeverity.Error))
-                throw new ArgumentException("Source code has errors", nameof(content));
+            var errorDiagnostic = syntaxTree.GetDiagnostics(cancellationToken).FirstOrDefault(d => d.Severity >= DiagnosticSeverity.Error);
+            if (errorDiagnostic != null)
+                throw new ArgumentException($"Source code has errors: {errorDiagnostic} at {errorDiagnostic.Location}", nameof(content));
 
             var root = syntaxTree.GetRoot(cancellationToken);
 
-            return GetRelevantDeclarations(syntaxTree, cancellationToken)
+            return GetRelevantDeclarations(root, cancellationToken)
                 .SelectMany(declaration => ScanDeclaration(declaration, cancellationToken));
         }
     }

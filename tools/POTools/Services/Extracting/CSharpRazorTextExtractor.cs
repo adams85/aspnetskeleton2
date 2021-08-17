@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.AspNetCore.Razor.Language;
+using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,7 +18,14 @@ namespace POTools.Services.Extracting
 
         public CSharpRazorTextExtractor(CSharpTextExtractorSettings? settings) : base(settings)
         {
-            _projectEngine = RazorProjectEngine.Create(RazorConfiguration.Default, RazorProjectFileSystem.Create(@"\"));
+            _projectEngine = RazorProjectEngine.Create(RazorConfiguration.Default, RazorProjectFileSystem.Create(@"\"), builder =>
+            {
+                // required for successfully parsing documents containing Templated Razor Delegates
+                builder.AddTargetExtension(new TemplateTargetExtension
+                {
+                    TemplateTypeName = "global::Microsoft.AspNetCore.Mvc.Razor.HelperResult",
+                });
+            });
         }
 
         protected override string GetCode(string content, CancellationToken cancellationToken)
@@ -25,17 +33,11 @@ namespace POTools.Services.Extracting
             var sourceDocument = RazorSourceDocument.Create(content, "_");
             var codeDocument = _projectEngine.Process(sourceDocument, fileKind: null, importSources: null, tagHelpers: null);
             var parsedDocument = codeDocument.GetCSharpDocument();
-            if (parsedDocument.Diagnostics.OfType<RazorDiagnostic>().Any(d => d.Severity == RazorDiagnosticSeverity.Error))
-                throw new ArgumentException("Razor code has errors.", nameof(content));
+            var errorDiagnostic = parsedDocument.Diagnostics.OfType<RazorDiagnostic>().FirstOrDefault(d => d.Severity == RazorDiagnosticSeverity.Error);
+            if (errorDiagnostic != null)
+                throw new ArgumentException($"Razor code has errors: {errorDiagnostic}.", nameof(content));
 
             return parsedDocument.GeneratedCode;
-        }
-
-        protected override IEnumerable<MemberDeclarationSyntax> GetRelevantDeclarations(SyntaxTree syntaxTree, CancellationToken cancellationToken)
-        {
-            return syntaxTree.GetRoot(cancellationToken).DescendantNodes()
-                .OfType<MethodDeclarationSyntax>()
-                .Where(md => !md.Modifiers.Any(sk => sk.IsKind(SyntaxKind.StaticKeyword)));
         }
     }
 }

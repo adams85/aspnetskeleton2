@@ -48,7 +48,7 @@
     {
         new DropDownMenuHeader()
         {
-            GetTitle = (_, T) => T["Account"],
+            GetTitle = (_, t) => t["Account"],
         },
         new DropDownMenuItem(Pages.GetPage(AccountSettingsRouteName, throwIfNotFound: true)!) { IconClassName = "fa-wrench" },
 
@@ -56,7 +56,7 @@
 
         new DropDownMenuItem
         {
-            GetTitle = (_, T) => T["Logout"],
+            GetTitle = (_, t) => t["Logout"],
             GetUrl = url => url.RouteUrl(Routes.LogoutRouteName),
             IconClassName = "fa-sign-out",
         },

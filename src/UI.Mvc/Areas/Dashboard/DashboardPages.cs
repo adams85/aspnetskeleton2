@@ -9,23 +9,19 @@ namespace WebApp.UI.Areas.Dashboard
     {
         private static readonly IReadOnlyList<PageInfo> s_pages = new[]
         {
-#pragma warning disable IDE1006 // Naming Styles
-
             new PageInfo(DashboardRoutes.OverviewRouteName, DashboardRoutes.AreaName)
             {
-                GetDefaultTitle = (_, T) => T["Overview"]
+                GetDefaultTitle = (_, t) => t["Overview"]
             },
             new PageInfo(DashboardRoutes.AccountSettingsRouteName, DashboardRoutes.AreaName)
             {
-                GetDefaultTitle = (_, T) => T["Account Settings"]
+                GetDefaultTitle = (_, t) => t["Account Settings"]
             },
             new PageInfo(DashboardRoutes.SettingsRouteName, DashboardRoutes.AreaName)
             {
-                GetDefaultTitle = (_, T) => T["Application Settings"],
+                GetDefaultTitle = (_, t) => t["Application Settings"],
                 IsAccessAllowedAsync = httpContext => Task.FromResult(httpContext.User.IsInRole(nameof(RoleEnum.Administators)))
             },
-
-#pragma warning restore IDE1006 // Naming Styles
         };
 
         public IEnumerable<PageInfo> GetPages() => s_pages;

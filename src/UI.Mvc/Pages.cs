@@ -10,34 +10,30 @@ namespace WebApp.UI
 
         private static readonly IReadOnlyList<PageInfo> s_pages = new[]
         {
-#pragma warning disable IDE1006 // Naming Styles
-
             new PageInfo(Routes.AccessDeniedRouteName)
             {
-                GetDefaultTitle = (_, T) => T["Access Denied"]
+                GetDefaultTitle = (_, t) => t["Access Denied"]
             },
             new PageInfo(Routes.LoginRouteName)
             {
-                GetDefaultTitle = (_, T) => T["Login"]
+                GetDefaultTitle = (_, t) => t["Login"]
             },
             new PageInfo(Routes.RegisterRouteName)
             {
-                GetDefaultTitle = (_, T) => T["Create an Account"]
+                GetDefaultTitle = (_, t) => t["Create an Account"]
             },
             new PageInfo(Routes.ResetPasswordRouteName)
             {
-                GetDefaultTitle = (_, T) => T["Forgotten Password"]
+                GetDefaultTitle = (_, t) => t["Forgotten Password"]
             },
             new PageInfo(Routes.SetPasswordRouteName)
             {
-                GetDefaultTitle = (_, T) => T["New Password"]
+                GetDefaultTitle = (_, t) => t["New Password"]
             },
             new PageInfo(Routes.VerifyRegistrationRouteName)
             {
-                GetDefaultTitle = (_, T) => T["Account Verification"]
+                GetDefaultTitle = (_, t) => t["Account Verification"]
             },
-
-#pragma warning restore IDE1006 // Naming Styles
         };
 
         public IEnumerable<PageInfo> GetPages() => s_pages;

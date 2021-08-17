@@ -40,7 +40,7 @@
         },
         new NavigationGroup
         {
-            GetTitle = (httpContext, T) => T["Administrators"],
+            GetTitle = (httpContext, t) => t["Administrators"],
             IsVisibleAsync = httpContext => Task.FromResult(httpContext.User.IsInRole(nameof(RoleEnum.Administators))),
             Items =
             {

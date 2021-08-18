@@ -17,11 +17,12 @@ namespace WebApp.UI
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment, UIOptions.BundleOptions options)
         {
             var bundling = services.AddBundling()
-                .UseWebMarkupMin()
+                .UseNUglify()
                 .UseHashVersioning()
                 .AddCss()
                 .AddJs()
-                .AddSass();
+                .AddSass()
+                .AddEcmaScript();
 
             if (options.UsePersistentCache)
             {
@@ -38,7 +39,11 @@ namespace WebApp.UI
                 bundling.EnableCacheHeader(options.CacheHeaderMaxAge ?? UIOptions.DefaultCacheHeaderMaxAge);
 
             if (environment.IsDevelopment())
-                bundling.EnableChangeDetection();
+            {
+                bundling
+                    .EnableChangeDetection()
+                    .EnableSourceIncludes();
+            }
         }
 
         public Bundles() { }
@@ -46,8 +51,9 @@ namespace WebApp.UI
         // setup for design-time mode bundling
         public override IEnumerable<IBundlingModule> Modules => base.Modules.Concat(new IBundlingModule[]
         {
-            new WebMarkupMinBundlingModule(),
-            new SassBundlingModule()
+            new NUglifyBundlingModule(),
+            new SassBundlingModule(),
+            new EcmaScriptBundlingModule(),
         });
 
         public override void Configure(BundleCollectionConfigurer bundles)

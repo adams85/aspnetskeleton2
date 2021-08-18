@@ -303,5 +303,6 @@ __pycache__/
 
 # Other
 /.nuget/
+/src/UI.Mvc/wwwroot/bundles
 /src/UI.Mvc/wwwroot/lib
 *.Development.db

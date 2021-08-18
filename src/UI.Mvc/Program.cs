@@ -32,6 +32,13 @@ namespace WebApp.UI
             typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ??
             typeof(Program).Assembly.GetName().Version!.ToString();
 
+        public static readonly bool UsesDesignTimeBundling =
+#if USES_DESIGNTIME_BUNDLING
+            true;
+#else
+            false;
+#endif
+
         public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();

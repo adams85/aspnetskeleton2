@@ -103,7 +103,10 @@ namespace WebApp.UI
 
                 #region Bundling
 
-                Bundles.ConfigureServices(services, Configuration, Environment, UIOptions.Bundles);
+                if (Program.UsesDesignTimeBundling)
+                    services.AddBundling();
+                else
+                    Bundles.ConfigureServices(services, Configuration, Environment, UIOptions.Bundles);
 
                 #endregion
 
@@ -206,7 +209,10 @@ namespace WebApp.UI
 
                 #region Bundling
 
-                app.UseBundling(new Bundles());
+                if (Program.UsesDesignTimeBundling)
+                    app.InitializeBundling();
+                else
+                    app.UseBundling(new Bundles());
 
                 #endregion
 

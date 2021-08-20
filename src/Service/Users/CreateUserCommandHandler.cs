@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Helpers;
@@ -60,7 +62,9 @@ namespace WebApp.Service.Users
 
             if (!command.IsApproved)
             {
-                await using (var transaction = await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+                await using (DisposableAdapter.From<IDbContextTransaction>(
+                    await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false),
+                    out var transaction).ConfigureAwait(false))
                 {
                     await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

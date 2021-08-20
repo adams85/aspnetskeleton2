@@ -3,7 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
+using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.Service.Mailing;
 using WebApp.Service.Mailing.Users;
@@ -61,7 +63,9 @@ namespace WebApp.Service.Users
 
             if (lockedOut)
             {
-                await using (var transaction = await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+                await using (DisposableAdapter.From<IDbContextTransaction>(
+                    await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false),
+                    out var transaction).ConfigureAwait(false))
                 {
                     await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.DataAccess;
 using WebApp.DataAccess.Infrastructure;
@@ -99,7 +100,7 @@ namespace WebApp.Service.Infrastructure.Database
             if (ShouldSeedObjects(DbSeedObjects.DbObjects))
                 await SeedDbObjectsAsync(cancellationToken).ConfigureAwait(false);
 
-            await using (var transaction = await _context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+            await using ((await _context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false)).AsAsyncDisposable(out var transaction).ConfigureAwait(false))
             {
                 if (ShouldSeedObjects(DbSeedObjects.BaseData))
                 {

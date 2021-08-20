@@ -65,9 +65,9 @@ namespace WebApp.Service.Settings
 
         private Task<SettingsChangedEvent> LoadAsync(CancellationToken cancellationToken) => Task.Run(async () =>
         {
-            await using (var scope = DisposableAdapter.From(_serviceScopeFactory.CreateScope()))
+            await using (DisposableAdapter.From(_serviceScopeFactory.CreateScope(), out var scope).ConfigureAwait(false))
             {
-                var dbContext = scope.Value.ServiceProvider.GetRequiredService<ReadOnlyDataContext>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDataContext>();
 
                 var linq = dbContext.Settings;
 

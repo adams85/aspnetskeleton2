@@ -335,16 +335,16 @@ namespace WebApp.Service.Mailing
 
         private async Task ProcessAsync(CancellationToken cancellationToken)
         {
-            await using (var scope = DisposableAdapter.From(_serviceScopeFactory.CreateScope()))
+            await using (DisposableAdapter.From(_serviceScopeFactory.CreateScope(), out var scope).ConfigureAwait(false))
             {
-                var dbContext = scope.Value.ServiceProvider.GetRequiredService<WritableDataContext>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<WritableDataContext>();
 
                 IReadOnlyList<Task<Mail>> produceMailTasks;
                 do
                 {
                     var queueItems = PeekItems(dbContext);
 
-                    produceMailTasks = await ProduceMailsAsync(queueItems, scope.Value.ServiceProvider, cancellationToken).ConfigureAwait(false);
+                    produceMailTasks = await ProduceMailsAsync(queueItems, scope.ServiceProvider, cancellationToken).ConfigureAwait(false);
 
                     if (produceMailTasks.Count > 0)
                         await SendMailsAsync(produceMailTasks, dbContext, cancellationToken).ConfigureAwait(false);

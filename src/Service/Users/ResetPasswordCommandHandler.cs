@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.Service.Helpers;
 using WebApp.Service.Mailing;
@@ -39,7 +41,9 @@ namespace WebApp.Service.Users
             user.PasswordVerificationToken = SecurityHelper.GenerateToken(_guidProvider);
             user.PasswordVerificationTokenExpirationDate = _clock.UtcNow + command.TokenExpirationTimeSpan;
 
-            await using (var transaction = await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false))
+            await using (DisposableAdapter.From<IDbContextTransaction>(
+                await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false),
+                out var transaction).ConfigureAwait(false))
             {
                 await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

@@ -72,14 +72,14 @@ namespace WebApp.Service.Infrastructure.Templating
 
         public async Task<string> RenderAsync<TModel>(string templateName, TModel model, CultureInfo? culture = null, CultureInfo? uiCulture = null, CancellationToken cancellationToken = default)
         {
-            await using (var scope = DisposableAdapter.From(_serviceScopeFactory.CreateScope()))
+            await using (DisposableAdapter.From(_serviceScopeFactory.CreateScope(), out var scope).ConfigureAwait(false))
             {
                 culture ??= CultureInfo.CurrentCulture;
                 uiCulture ??= CultureInfo.CurrentUICulture;
 
                 var templateView = FindTemplateView(templateName);
 
-                var httpContext = new DefaultHttpContext { RequestServices = scope.Value.ServiceProvider };
+                var httpContext = new DefaultHttpContext { RequestServices = scope.ServiceProvider };
                 var actionContext = new ActionContext(httpContext, s_routeData, s_actionDescriptor);
 
                 using (var writer = new StringWriter())

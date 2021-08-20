@@ -12,8 +12,8 @@ namespace Microsoft.Extensions.Hosting
     {
         internal static async Task InitializeApplicationAsync(this IServiceProvider hostServices, CancellationToken cancellationToken)
         {
-            await using (var scope = DisposableAdapter.From(hostServices.CreateScope()))
-                foreach (var initializer in scope.Value.ServiceProvider.GetRequiredService<IEnumerable<IApplicationInitializer>>())
+            await using (DisposableAdapter.From(hostServices.CreateScope(), out var scope).ConfigureAwait(false))
+                foreach (var initializer in scope.ServiceProvider.GetRequiredService<IEnumerable<IApplicationInitializer>>())
                     await initializer.InitializeAsync(cancellationToken).ConfigureAwait(false);
         }
 

@@ -43,7 +43,7 @@
   </Choose>
 
   <ItemGroup>
-    <PackageReference Include="Karambolo.Extensions.Logging.File" Version="3.2.0" />
+    <PackageReference Include="Karambolo.Extensions.Logging.File" Version="3.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="$(DotNetRuntimeVersion)" />

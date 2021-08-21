@@ -63,7 +63,7 @@ namespace WebApp.Api.Infrastructure.Swagger
             {
                 if (keyType.IsEnum)
                     throw new NotSupportedException(
-                        $"Schema cannot be generated for type {underlyingType} as it's not supported by the System.Text.Json serializer");
+                        $"Schema cannot be generated for type {underlyingType} as it's not supported by the System.Text.Json serializer.");
 
                 return new DataContract(
                     dataType: DataType.Object,
@@ -99,7 +99,7 @@ namespace WebApp.Api.Infrastructure.Swagger
 
             //Test to determine if the serializer will treat as string or not
             var serializeAsString = underlyingValues.Any()
-                && JsonSerializer.Serialize(underlyingValues.First(), _serializerOptions).StartsWith("\"");
+                && JsonSerializer.Serialize(underlyingValues.First(), _serializerOptions).StartsWith("\"", StringComparison.Ordinal);
 
             return serializeAsString
                 ? underlyingValues.Select(value => JsonSerializer.Serialize(value, _serializerOptions).Replace("\"", string.Empty))

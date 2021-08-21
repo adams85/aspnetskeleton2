@@ -431,15 +431,15 @@ namespace POTools.Commands
 
             public int Compare(POKey x, POKey y)
             {
-                var indicator = string.Compare(x.Id, y.Id);
+                var indicator = string.CompareOrdinal(x.Id, y.Id);
                 if (indicator != 0)
                     return indicator;
 
-                indicator = string.Compare(x.PluralId, y.PluralId);
+                indicator = string.CompareOrdinal(x.PluralId, y.PluralId);
                 if (indicator != 0)
                     return indicator;
 
-                return string.Compare(x.ContextId, y.ContextId);
+                return string.CompareOrdinal(x.ContextId, y.ContextId);
             }
         }
     }

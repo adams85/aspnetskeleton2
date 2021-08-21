@@ -64,7 +64,7 @@ namespace WebApp.UI.Infrastructure.ViewFeatures
 
         public THelpers Create<THelpers>(ViewContext viewContext) where THelpers : class
         {
-            var helpersViewPath = _helpersTypeViewPathMappings.GetOrAdd(typeof(THelpers), type => "Helpers/_" + (type.Name.StartsWith("I") ? type.Name.Substring(1) : type.Name));
+            var helpersViewPath = _helpersTypeViewPathMappings.GetOrAdd(typeof(THelpers), type => "Helpers/_" + (type.Name.StartsWith("I", StringComparison.Ordinal) ? type.Name.Substring(1) : type.Name));
 
             return (THelpers)CreateRazorPage(helpersViewPath, viewContext);
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -180,7 +181,7 @@ namespace WebApp.UI.Controllers
         {
             var model = new ResetPasswordModel();
             if (s != null)
-                model.Success = Convert.ToBoolean(int.Parse(s));
+                model.Success = Convert.ToBoolean(int.Parse(s, CultureInfo.InvariantCulture));
 
             return View(model);
         }
@@ -207,7 +208,7 @@ namespace WebApp.UI.Controllers
         {
             var model = new SetPasswordModel();
             if (s != null)
-                model.Success = Convert.ToBoolean(int.Parse(s));
+                model.Success = Convert.ToBoolean(int.Parse(s, CultureInfo.InvariantCulture));
 
             return View(model);
         }

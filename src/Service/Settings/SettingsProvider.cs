@@ -42,7 +42,7 @@ namespace WebApp.Service.Settings
             _gate = new object();
             _initializedTcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            // event listener doesn't provide guarenteed delivery (currently), so we might miss some change notifications during a dropout;
+            // event listener doesn't provide guaranteed delivery (currently), so we might miss some change notifications during a dropout;
             // thus, we should also refresh the internal cache after connection has been restored
             _refreshSubscription = _eventListener.IsActive
                 .Where(isActive => isActive)

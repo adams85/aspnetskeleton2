@@ -65,13 +65,13 @@ namespace CodegenTools.Commands
                 var serviceContractProjectPath = GetProjectPath(rootPath, ServiceContractProjectName);
 
                 if (!Directory.Exists(rootPath))
-                    throw new CommandException($"The specified root directory does not exist.");
+                    throw new CommandException("The specified root directory does not exist.");
 
                 if (!Directory.Exists(serviceContractProjectPath))
                     throw new CommandException($"The specified root directory is invalid. Project directory '{serviceContractProjectPath}' does not exist.");
             }
             else if (!TryLocateRootPath(out rootPath!))
-                throw new CommandException($"Root directory was not found.");
+                throw new CommandException("Root directory was not found.");
 
             return rootPath;
         }

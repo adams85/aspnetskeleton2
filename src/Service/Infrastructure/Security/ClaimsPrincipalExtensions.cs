@@ -7,7 +7,7 @@ namespace System.Security.Claims
     {
         public static void AddClaimsFrom(this ClaimsIdentity identity, CachedUserInfoData userInfo)
         {
-            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userInfo.UserId.ToString()));
+            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userInfo.UserId.ToString(CultureInfo.InvariantCulture)));
             identity.AddClaim(new Claim(ClaimTypes.Name, userInfo.UserName));
             identity.AddClaim(new Claim(ClaimTypes.Email, userInfo.Email));
 

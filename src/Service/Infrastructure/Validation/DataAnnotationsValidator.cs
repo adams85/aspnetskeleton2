@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Karambolo.Common;
@@ -37,7 +38,7 @@ namespace WebApp.Service.Infrastructure.Validation
             return string.IsNullOrEmpty(memberName) ? memberPathBase : GetPropertyMemberPath(memberPathBase, memberName);
         }
 
-        internal static string GetItemMemberPath(string memberPathBase, int index) => memberPathBase + "[" + index + "]";
+        internal static string GetItemMemberPath(string memberPathBase, int index) => memberPathBase + "[" + index.ToString(CultureInfo.InvariantCulture) + "]";
 
         internal static string GetPropertyMemberPath(string memberPathBase, string propertyName) => memberPathBase.Length > 0 ? memberPathBase + "." + propertyName : propertyName;
 

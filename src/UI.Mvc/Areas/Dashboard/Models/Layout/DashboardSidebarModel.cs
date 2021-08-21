@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +15,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
         public static readonly string SidebarStateCookieName = "App.Dashboard.SidebarState";
 
         public static (bool IsVisible, bool IsMinimized) GetSidebarState(HttpContext httpContext) =>
-            int.TryParse(httpContext.Request.Cookies[SidebarStateCookieName], out var state) ?
+            int.TryParse(httpContext.Request.Cookies[SidebarStateCookieName], NumberStyles.Integer, CultureInfo.InvariantCulture, out var state) ?
             ((state & 0x1) != 0, (state & 0x2) != 0) :
             (true, false);
 

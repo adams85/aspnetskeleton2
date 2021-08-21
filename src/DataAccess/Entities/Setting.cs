@@ -22,7 +22,7 @@ namespace WebApp.DataAccess.Entities
 
         public string? MaxValue { get; set; }
 
-        internal class Configuration : IEntityTypeConfiguration<Setting>
+        internal sealed class Configuration : IEntityTypeConfiguration<Setting>
         {
             public void Configure(EntityTypeBuilder<Setting> builder)
             {

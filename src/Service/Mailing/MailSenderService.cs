@@ -385,7 +385,7 @@ namespace WebApp.Service.Mailing
                     {
                         // basic protection against littering the log with identical, recurring exceptions (e.g. db connection errors, etc.)
                         if (previousException?.ToString() != ex.ToString())
-                            _logger.LogError(ex, $"Unexpected error occurred in the mail sender background service.");
+                            _logger.LogError(ex, "Unexpected error occurred in the mail sender background service.");
 
                         previousException = ex;
 

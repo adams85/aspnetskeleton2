@@ -64,23 +64,55 @@ namespace WebApp.UI
 
             var themes = themeProvider.GetThemes();
 
-            bundles.AddJs("/js/global.js")
+            #region Global
+
+            bundles.AddCss("/css/global/vendor.css")
+                .Include("/lib/font-awesome/css/font-awesome.css");
+
+            bundles.AddJs("/js/global/vendor.js")
+                .Include("/lib/jquery/dist/jquery.js")
+                .Include("/lib/jquery-validation/dist/jquery.validate.js")
+                .Include("/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js")
+                .Include("/lib/bootstrap/dist/js/bootstrap.bundle.js");
+
+            bundles.AddJs("/js/global/site.js")
                 .Include("/js/*.js");
 
-            bundles.AddJs("/js/dashboard.js")
-                .Include("/js/dashboard/*.js");
+            #endregion
+
+            #region Public UI
+
+            // These bundles are unused as the template project doesn't have a public UI (like a landing page) and
+            // the unrestricted pages (account-related pages mainly) use the dashboard's stylesheet currently.
+
+            bundles.AddJs("/js/public/site.js")
+                .Include("/js/public/site.js")
+                .EnableEs6ModuleBundling();
+
+            bundles.AddSass("/css/public/site.css")
+                .Include("/scss/public/site.scss");
+
+            #endregion
+
+            #region Dashboard
+
+            bundles.AddJs("/js/dashboard/vendor.js")
+                .Include("/js/dashboard/coreui.js");
+
+            bundles.AddJs("/js/dashboard/site.js")
+                .Include("/js/dashboard/site.js")
+                .EnableEs6ModuleBundling();
 
             for (int i = 0, n = themes.Count; i < n; i++)
             {
                 var sourcePath = themeProvider.GetThemePath(ThemeProvider.ThemesBasePath, themes[i]);
                 var destPath = themeProvider.GetThemePath("/css", themes[i]);
 
-                bundles.AddSass(destPath + "/public.css")
-                    .Include(sourcePath + "/public.scss");
-
-                bundles.AddSass(destPath + "/dashboard.css")
-                    .Include(sourcePath + "/dashboard.scss");
+                bundles.AddSass(destPath + "/dashboard/site.css")
+                    .Include(sourcePath + "/dashboard/site.scss");
             }
+
+            #endregion
         }
     }
 }

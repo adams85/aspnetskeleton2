@@ -16,7 +16,7 @@
 @section Stylesheets {
     @{ var currentTheme = await ThemeManager.GetCurrentThemeAsync(ViewContext.HttpContext); }
 
-    <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/dashboard.css" />
+    <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/dashboard/site.css" />
 
     @RenderSection("Stylesheets", required: false)
 }
@@ -51,7 +51,8 @@
         };
     </script>
 
-    <script src="~/bundles/js/dashboard.js"></script>
+    <script src="~/bundles/js/dashboard/vendor.js"></script>
+    <script src="~/bundles/js/dashboard/site.js"></script>
 
     @RenderSection("ScriptsBody", required: false)
 }

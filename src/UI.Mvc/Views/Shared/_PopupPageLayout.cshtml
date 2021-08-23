@@ -16,7 +16,7 @@
 @section Stylesheets {
     @{ var currentTheme = await ThemeManager.GetCurrentThemeAsync(ViewContext.HttpContext); }
 
-    <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/dashboard.css" />
+    <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/dashboard/site.css" />
 
     @RenderSection("Stylesheets", required: false)
 }

@@ -23,12 +23,12 @@ namespace WebApp.UI.Infrastructure.Theming
         }
 
         public IReadOnlyList<string> GetThemes() => LazyInitializer.EnsureInitialized(ref _themes, () =>
-            _env.WebRootFileProvider.GetDirectoryContents(GetThemePath(ThemesBasePath))
+            _env.WebRootFileProvider.GetDirectoryContents(GetThemePath(ThemesBasePath).Value)
                 .Where(fileInfo => fileInfo.IsDirectory)
                 .Select(fileInfo => fileInfo.Name)
                 .ToArray());
 
         public PathString GetThemePath(PathString basePath, string? name = null) =>
-            basePath.Add(name != null ? ThemesDirPath + "/" + name : ThemesDirPath);
+            basePath + new PathString(name != null ? ThemesDirPath + "/" + name : ThemesDirPath);
     }
 }

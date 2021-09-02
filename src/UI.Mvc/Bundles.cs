@@ -62,8 +62,6 @@ namespace WebApp.UI
                 bundles.AppServices.GetService<IThemeProvider>() ??
                 new ThemeProvider(bundles.AppServices.GetRequiredService<IWebHostEnvironment>());
 
-            var themes = themeProvider.GetThemes();
-
             #region Global
 
             bundles.AddCss("/css/global/vendor.css")
@@ -103,13 +101,15 @@ namespace WebApp.UI
                 .Include("/js/dashboard/site.js")
                 .EnableEs6ModuleBundling();
 
+            var themes = themeProvider.GetThemes();
+
             for (int i = 0, n = themes.Count; i < n; i++)
             {
-                var sourcePath = themeProvider.GetThemePath(ThemeProvider.ThemesBasePath, themes[i]);
+                var sourceFilePath = themeProvider.GetThemePath(ThemeProvider.ThemesBasePath, themes[i]).Value;
                 var destPath = themeProvider.GetThemePath("/css", themes[i]);
 
-                bundles.AddSass(destPath + "/dashboard/site.css")
-                    .Include(sourcePath + "/dashboard/site.scss");
+                bundles.AddSass(destPath.Add("/dashboard/site.css"))
+                    .Include(sourceFilePath + "/dashboard/site.scss");
             }
 
             #endregion

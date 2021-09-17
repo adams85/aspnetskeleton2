@@ -27,9 +27,8 @@ namespace CodegenTools.Commands
         [Required]
         public string Group { get; set; } = null!;
 
-        [Argument(1, "name", Description = "Query name")]
         [Required]
-        public string Name { get; set; } = null!;
+        public abstract string Name { get; set; }
 
         [Option("--root-path <PATH>", Description = "The location of the root directory of the solution. If not specified, it will be auto-detected by looking for sln files in the current directory and upwards.")]
         public string? RootPath { get; set; }

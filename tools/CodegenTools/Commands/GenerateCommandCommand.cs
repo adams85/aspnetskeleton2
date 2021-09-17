@@ -17,6 +17,9 @@ namespace CodegenTools.Commands
             _context = context;
         }
 
+        [Argument(1, "name", Description = "Command name")]
+        public sealed override string Name { get; set; } = null!;
+
         [Option("-k|--key-generator", Description = "If specified, infrastructure for notification of auto-generated IDs will be added to the command.")]
         public bool IsKeyGenerator { get; set; }
 

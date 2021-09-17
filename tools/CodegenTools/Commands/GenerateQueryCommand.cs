@@ -17,6 +17,9 @@ namespace CodegenTools.Commands
             _context = context;
         }
 
+        [Argument(1, "name", Description = "Query name")]
+        public sealed override string Name { get; set; } = null!;
+
         [Option("-r|--result", Description = "If specified, no result type will be generated, but the query will use the specified result type.")]
         public string? ResultType { get; set; }
 

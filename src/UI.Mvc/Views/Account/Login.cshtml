@@ -52,9 +52,9 @@
     </div>
 </form>
 
-@section Footer {
-    @if (SettingsProvider.EnableRegistration())
-    {
+@if (SettingsProvider.EnableRegistration())
+{
+    @section Footer {
         <div class="text-center">
             <a asp-route="@RegisterRouteName">@T["Don't you have an account yet?"]</a>
         </div>

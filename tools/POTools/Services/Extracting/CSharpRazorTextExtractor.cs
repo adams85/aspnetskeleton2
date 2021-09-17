@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace POTools.Services.Extracting
 {
@@ -20,11 +17,18 @@ namespace POTools.Services.Extracting
         {
             _projectEngine = RazorProjectEngine.Create(RazorConfiguration.Default, RazorProjectFileSystem.Create(@"\"), builder =>
             {
-                // required for successfully parsing documents containing Templated Razor Delegates
-                builder.AddTargetExtension(new TemplateTargetExtension
+                if (!builder.Features.OfType<SectionDirectivePass>().Any())
+                    SectionDirective.Register(builder);
+
+                IRazorTargetExtensionFeature razorTargetExtensionFeature = builder.Features.OfType<IRazorTargetExtensionFeature>().FirstOrDefault();
+                if (razorTargetExtensionFeature == null || !razorTargetExtensionFeature.TargetExtensions.OfType<TemplateTargetExtension>().Any())
                 {
-                    TemplateTypeName = "global::Microsoft.AspNetCore.Mvc.Razor.HelperResult",
-                });
+                    // required for successfully parsing documents containing Templated Razor Delegates
+                    builder.AddTargetExtension(new TemplateTargetExtension
+                    {
+                        TemplateTypeName = "global::Microsoft.AspNetCore.Mvc.Razor.HelperResult",
+                    });
+                }
             });
         }
 

@@ -14,7 +14,7 @@ namespace WebApp.UI
                 // in the root container which would bring along routing services. We cannot allow this as it would completely mess up routing.
                 // So we register ITemplateRenderer in the UI tenant container (being an MVC app, it adds a Razor view engine anyway)
                 // and add this fake registration which delegates the service resolution to the UI tenant container.
-                // This is an ugly trick but we cannot do much better. It's not something very risky though since ITemplateRenderer is a transient service and
+                // This is an ugly trick but we cannot do much better. It's not something hazardous though since ITemplateRenderer is a transient service and
                 // the root container and tenant containers have the same lifetime.
                 sp.GetRequiredService<Tenants>()[UITenantId]!.TenantServices.GetRequiredService<ITemplateRenderer>());
         }

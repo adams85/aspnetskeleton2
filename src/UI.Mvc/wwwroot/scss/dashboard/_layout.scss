@@ -85,7 +85,7 @@
   flex-shrink: 0;
   flex-grow: 1;
   min-width: 0;
-  padding-top: 2 * $spacer;
+  padding: 2 * $spacer 0;
 
   > .container-fluid {
     @include media-breakpoint-up(md) {

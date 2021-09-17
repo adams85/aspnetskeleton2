@@ -6,9 +6,12 @@
 @implements IDataTableHelpers
 
 @functions {
+    // for progressive enhancement via AJAX see
+    // * wwwroot/js/data-table.js
+
     // for styling see
     // * wwwroot/lib/bootstrap/scss/_tables.scss
-    // * wwwroot/scss/dashboard/_data-tables.scss
+    // * wwwroot/scss/dashboard/_data-table.scss
 
     // template delegates, tag helpers need the following pragmas to compile (https://github.com/dotnet/aspnetcore/issues/20055)
     //#pragma warning disable MVC1006
@@ -22,15 +25,17 @@
             return;
         }
 
-        TableFilterForm(tableModel);
+        <div class="data-table-wrapper">
+            @{ TableFilterForm(tableModel); }
 
-        <table id="@tableModel.TableHtmlId" class="table table-bordered table-striped table-hover data-table">
-            @{
-                TableHeader(tableModel);
-                TableBody(tableModel);
-                TableFooter(tableModel);
-            }
-        </table>
+            <table id="@tableModel.TableHtmlId" class="table table-bordered table-striped table-hover data-table">
+                @{
+                    TableHeader(tableModel);
+                    TableBody(tableModel);
+                    TableFooter(tableModel);
+                }
+            </table>
+        </div>
     }
 
     public void TableFilterForm(DataTableModel tableModel)
@@ -86,6 +91,9 @@
 
         <tr class="table-header-row">
             <th class="font-weight-normal" colspan="@tableModel.Columns.Count">
+                <div class="alert alert-danger server-error-alert" role="alert">
+                    @T["A server error occurred. Try again or contact the system administrator if the problem persists."]
+                </div>
                 <div class="d-flex">
                     <div class="flex-grow-1">
                         @if (tableModel.AllowPaging && tableModel.Result.PageSize > 0)
@@ -96,11 +104,11 @@
                         }
                     </div>
                     <div>
-                        <button class="btn btn-info btn-sm" type="submit" form="@tableModel.FilterFormHtmlId"><i class="fa fa-refresh" aria-hidden="true"></i> @T["Refresh"]</button>
+                        <button class="btn btn-info btn-sm refresh-table-btn" type="submit" form="@tableModel.FilterFormHtmlId"><i class="fa fa-refresh" aria-hidden="true"></i> @T["Refresh"]</button>
                         @if (tableModel.AllowEditing && tableModel.CanCreateRow)
                         {
                             var actionRouteValues = tableModel.GetReturnUrlRouteValues(Url);
-                            <a class="btn btn-success btn-sm" href="@tableModel.GenerateCreateUrl(Url, actionRouteValues)"><i class="fa fa-plus" aria-hidden="true"></i> @T["Create New"]</a>
+                            <a class="btn btn-success btn-sm create-item-btn" href="@tableModel.GenerateCreateUrl(Url, actionRouteValues)"><i class="fa fa-plus" aria-hidden="true"></i> @T["Create New"]</a>
                         }
                     </div>
                 </div>
@@ -171,7 +179,7 @@
         var title = columnModel.Title ?? dataColumn?.Binding.GetDisplayName(Html.MetadataProvider);
         string? currentOrderKeyPropertyPath;
 
-        <th>
+        <th class="@columnModel.HeaderCellCssClasses">
             @if (columnModel.Table.AllowSorting && columnModel.CanSort && (currentOrderKeyPropertyPath = columnModel.OrderKeyPropertyPath ?? dataColumn?.Binding.PropertyPathString) != null)
             {
                 var (isActiveOrderColumn, currentOrderDescending, newOrderKeyPropertyPath, newOrderDescending) =
@@ -265,7 +273,7 @@
 
     public void ColumnFilterCell(DataTableColumnModel columnModel, Action<IDataTableHelpers> renderFilter)
     {
-        <th>
+        <th class="@columnModel.FilterCellCssClasses">
             @{ renderFilter(this); }
         </th>
     }
@@ -325,14 +333,14 @@
 
     public void DataContentCell(object item, DataTableColumnModel.DataColumn columnModel)
     {
-        <td>@columnModel.Binding.GetValue(item)</td>
+        <td class="@columnModel.ContentCellCssClasses">@columnModel.Binding.GetValue(item)</td>
     }
 
     public void ControlContentCell(object item, DataTableColumnModel.ControlColumn columnModel)
     {
         object? rowId;
 
-        <td class="control-column">
+        <td class="@columnModel.ContentCellCssClasses">
             @if (columnModel.Table.AllowEditing && (rowId = columnModel.Table.GetRowId(item)) != null)
             {
                 var canEdit = columnModel.CanEditRow(item);
@@ -344,14 +352,14 @@
 
                     @if (canEdit)
                     {
-                        <a class="btn btn-info btn-sm" href="@columnModel.Table.GenerateEditUrl(Url, actionRouteValues)" title="@T["Edit"]">
+                        <a class="btn btn-info btn-sm edit-item-btn" href="@columnModel.Table.GenerateEditUrl(Url, actionRouteValues)" title="@T["Edit"]">
                             <i class="fa fa-pencil" aria-hidden="true"></i>
                         </a>
                     }
 
                     @if (canDelete)
                     {
-                        <a class="btn btn-danger btn-sm" href="@columnModel.Table.GenerateDeleteUrl(Url, actionRouteValues)" title="@T["Delete"]">
+                        <a class="btn btn-danger btn-sm delete-item-btn" href="@columnModel.Table.GenerateDeleteUrl(Url, actionRouteValues)" title="@T["Delete"]">
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </a>
                     }

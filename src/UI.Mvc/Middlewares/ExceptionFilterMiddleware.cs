@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Net.Http.Headers;
 using WebApp.Service;
+using WebApp.UI.Helpers;
 
 namespace WebApp.UI.Middlewares
 {
@@ -17,7 +18,6 @@ namespace WebApp.UI.Middlewares
         private static readonly Action<ILogger, Exception> s_logUnhandledException =
             LoggerMessage.Define(LogLevel.Error, new EventId(1, "UnhandledException"), "An unhandled exception has occurred while executing the request.");
 
-        private static readonly RouteData s_emptyRouteData = new RouteData();
         private static readonly ActionDescriptor s_emptyActionDescriptor = new ActionDescriptor();
 
         private static Task ClearCacheHeaders(object state)
@@ -45,17 +45,25 @@ namespace WebApp.UI.Middlewares
 
         private bool TryHandleException(Exception ex, HttpContext context, [MaybeNullWhen(false)] out IActionResult result)
         {
-            var isAjaxRequest = context.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            switch (ex)
+            {
+                case ServiceErrorException serviceErrorException:
+                    switch (serviceErrorException.ErrorCode)
+                    {
+                        case ServiceErrorCode.EntityNotFound:
+                            result = new StatusCodeResult(StatusCodes.Status404NotFound);
+                            return true;
+                    }
+                    break;
+                case OperationCanceledException operationCanceledException when operationCanceledException.CancellationToken == context.RequestAborted:
+                    // preventing aborted requests from littering the log by swallowing the exception,
+                    // it doesn't matter much what status code are returned but we use Nginx's non-standard status code:
+                    // https://stackoverflow.com/questions/46234679/what-is-the-correct-http-status-code-for-a-cancelled-request#answer-46361806
+                    result = new StatusCodeResult(499);
+                    return true;
+            }
 
-            if (ex is ServiceErrorException serviceErrorException)
-                switch (serviceErrorException.ErrorCode)
-                {
-                    case ServiceErrorCode.EntityNotFound:
-                        result = new StatusCodeResult(StatusCodes.Status404NotFound);
-                        return true;
-                }
-
-            if (isAjaxRequest)
+            if (context.Request.IsAjaxRequest())
             {
                 s_logUnhandledException(_logger, ex);
                 result = new ContentResult
@@ -79,7 +87,11 @@ namespace WebApp.UI.Middlewares
             catch (Exception ex) when (!context.Response.HasStarted && TryHandleException(ex, context, out var result))
             {
                 context.Response.OnStarting(_clearCacheHeadersDelegate, context.Response);
-                await result.ExecuteResultAsync(new ActionContext(context, s_emptyRouteData, s_emptyActionDescriptor));
+
+                var routeData = context.GetRouteData() ?? new RouteData();
+                var actionContext = new ActionContext(context, routeData, s_emptyActionDescriptor);
+
+                await result.ExecuteResultAsync(actionContext);
             }
         }
     }

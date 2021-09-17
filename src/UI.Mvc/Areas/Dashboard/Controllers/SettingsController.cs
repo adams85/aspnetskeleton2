@@ -10,8 +10,8 @@ using WebApp.Service.Infrastructure.Localization;
 using WebApp.Service.Settings;
 using WebApp.UI.Areas.Dashboard.Models;
 using WebApp.UI.Areas.Dashboard.Models.Settings;
+using WebApp.UI.Areas.Dashboard.ViewComponents.Settings;
 using WebApp.UI.Helpers;
-using WebApp.UI.Models;
 
 namespace WebApp.UI.Areas.Dashboard.Controllers
 {
@@ -37,12 +37,10 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
         [HttpGet("/[area]/[controller]", Name = DashboardRoutes.SettingsRouteName)]
         public IActionResult Index(ListSettingsQuery query)
         {
-            var model = new DashboardPageModel<ListSettingsQuery>
-            {
-                Content = query
-            };
-
-            return View(model);
+            return
+                HttpContext.Request.IsAjaxRequest() ?
+                ViewComponent(typeof(SettingsTableViewComponent), new { query }) :
+                (IActionResult)View(new DashboardPageModel<ListSettingsQuery> { Content = query });
         }
 
         [HttpGet("{id}")]
@@ -65,7 +63,7 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
                 ReturnUrl = EnsureReturnUrl(returnUrl)
             };
 
-            return View(Pages.EditPopupViewName, model);
+            return HttpContext.Request.IsAjaxRequest() ? PartialView(Pages.EditPopupPartialViewName, model) : (IActionResult)View(Pages.EditPageViewName, model);
         }
 
         [ValidateAntiForgeryToken]
@@ -86,7 +84,7 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
                 }
 
                 if (ModelState.IsValid)
-                    return Redirect(EnsureReturnUrl(returnUrl));
+                    return HttpContext.Request.IsAjaxRequest() ? NoContent() : (IActionResult)Redirect(EnsureReturnUrl(returnUrl));
             }
 
             var item = await _queryDispatcher.DispatchAsync(new GetSettingQuery
@@ -107,7 +105,7 @@ namespace WebApp.UI.Areas.Dashboard.Controllers
             model.EditorTemplateName = RouteData.Values.GetDefaultViewPath(SettingEditorTemplateName);
             model.ReturnUrl = EnsureReturnUrl(returnUrl);
 
-            return View(Pages.EditPopupViewName, model);
+            return HttpContext.Request.IsAjaxRequest() ? PartialView(Pages.EditPopupPartialViewName, model) : (IActionResult)View(Pages.EditPageViewName, model);
         }
 
         [NonAction]

@@ -1,0 +1,117 @@
+﻿.data-table {
+  border: 0;
+
+  .table-header-row, .table-footer-row {
+    border-color: transparent;
+
+    th, td {
+      border-color: transparent;
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  .column-header-row {
+    background-color: $table-dark-bg;
+    color: $light;
+
+    .title {
+      font-weight: $font-weight-bold;
+    }
+
+    a.title {
+      padding: 0;
+      vertical-align: baseline;
+      color: $light;
+    }
+  }
+
+  .column-filter-row {
+    background-color: theme-color-level('secondary', $table-bg-level);
+  }
+
+  .content-row {
+    &:hover, &:focus-within {
+      .control-column {
+        opacity: 1;
+        transition: opacity ease-in 0.5s;
+      }
+    }
+
+    .control-column {
+      opacity: 0;
+      width: 4.5rem;
+      white-space: nowrap;
+      text-align: center;
+
+      .btn.btn-sm {
+        padding: 0.25rem;
+        line-height: 0.75rem;
+      }
+    }
+  }
+
+  /* AJAX loading */
+
+  & > tbody {
+    position: relative;
+
+    &:after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      visibility: hidden;
+      z-index: $zindex-dropdown + 1;
+      background-color: rgba(0, 0, 0, .1);
+      opacity: 0;
+      transition-property: opacity, visibility;
+      transition-duration: .25s;
+      transition-timing-function: ease-out;
+      content: "";
+    }
+  }
+
+  @mixin show-overlay($show-loader) {
+    &:after {
+      visibility: visible;
+      opacity: 1;
+
+      @if $show-loader {
+        background-image: url('../../images/loading.svg');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 4.5rem 4.5rem;
+      }
+    }
+  }
+
+  &.loading > tbody {
+    @include show-overlay(true);
+  }
+
+  &.server-error > tbody {
+    @include show-overlay(false);
+  }
+
+  &:not(.server-error) .server-error-alert {
+    display: none;
+  }
+
+  /* no-js support */
+
+  html:not(.no-js) &:not(.server-error) {
+    .refresh-table-btn {
+      display: none;
+    }
+  }
+}
+
+// Predefined column widths
+
+@each $size, $value in (10: 10%, 15: 15%, 20: 20%, 25: 25%, 33: 33%, 40: 40%, 50: 50%) {
+  .cw-#{$size} {
+    width: $value !important;
+  }
+}

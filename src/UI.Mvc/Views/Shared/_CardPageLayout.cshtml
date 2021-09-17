@@ -1,6 +1,6 @@
 ﻿@using WebApp.UI.Models.Layout
 
-@model ILayoutModelProvider<PopupPageLayoutModel>
+@model ILayoutModelProvider<CardPageLayoutModel>
 
 @inject WebApp.UI.Infrastructure.Theming.IThemeManager ThemeManager
 
@@ -16,7 +16,7 @@
 @section Stylesheets {
     @{ var currentTheme = await ThemeManager.GetCurrentThemeAsync(ViewContext.HttpContext); }
 
-    <link rel="stylesheet" href="~/bundles/css/themes/@currentTheme/dashboard/site.css" />
+    <link href="~/bundles/css/themes/@currentTheme/dashboard/site.css" rel="stylesheet" />
 
     @RenderSection("Stylesheets", required: false)
 }

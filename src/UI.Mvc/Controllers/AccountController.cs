@@ -153,7 +153,7 @@ namespace WebApp.UI.Controllers
                         return;
 
                     default:
-                        modelState.AddModelError(string.Empty, T["An unexpected error occurred. Please verify your entry and try again. If the problem persists, please contact your system administrator."]);
+                        modelState.AddModelError(string.Empty, T["An unexpected error occurred. Please verify your entry and try again. If the problem persists, please contact the system administrator."]);
                         return;
                 }
             }
@@ -164,7 +164,7 @@ namespace WebApp.UI.Controllers
         [HttpGet(Name = Routes.VerifyRegistrationRouteName)]
         public async Task<IActionResult> Verify(string u, string v)
         {
-            var model = new PopupPageModel<bool?>();
+            var model = new CardPageModel<bool?>();
 
             if (u != null && v != null)
                 model.Content = await _accountManager.VerifyUserAsync(u, v, HttpContext.RequestAborted);
@@ -246,7 +246,7 @@ namespace WebApp.UI.Controllers
         [Route("", Name = Routes.AccessDeniedRouteName)]
         public IActionResult AccessDenied()
         {
-            return View(new PopupPageModel());
+            return View(new CardPageModel());
         }
 
         #region Helpers

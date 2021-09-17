@@ -14,7 +14,7 @@
 }
 
 <!DOCTYPE html>
-<html lang="@currentLanguage">
+<html lang="@currentLanguage" class="no-js">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -30,11 +30,13 @@
     <link rel="icon" type="image/png" href="@Url.Content("~/favicon.ico")" />
 
     @* stylesheets *@
-    <link rel="stylesheet" href="~/bundles/css/global/vendor.css" />
+    <link href="~/bundles/css/global/vendor.css" rel="stylesheet" />
 
     @RenderSection("Stylesheets", required: false)
 
     @* scripts *@
+    <script>(function (el) { el.className = el.className.replace(/(^|\s)no-js(?=\s|$)/, '$1js') })(document.documentElement)</script>
+
     @RenderSection("ScriptsHead", required: false)
 </head>
 <body class="@bodyCssClasses">

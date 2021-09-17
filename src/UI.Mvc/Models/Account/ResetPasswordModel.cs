@@ -7,7 +7,7 @@ using WebApp.Service.Users;
 
 namespace WebApp.UI.Models.Account
 {
-    public class ResetPasswordModel : PopupPageModel
+    public class ResetPasswordModel : CardPageModel
     {
         [Localized] private const string UserNameDisplayName = "E-mail address";
         [DisplayName(UserNameDisplayName), Required]

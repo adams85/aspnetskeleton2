@@ -6,7 +6,7 @@ using WebApp.Common.Infrastructure.Localization;
 
 namespace WebApp.UI.Models.Account
 {
-    public class LoginModel : PopupPageModel
+    public class LoginModel : CardPageModel
     {
         [Localized] private const string UserNameDisplayName = "E-mail address";
         [DisplayName(UserNameDisplayName), Required]

@@ -68,6 +68,12 @@ namespace WebApp.Api.Infrastructure.ErrorHandling
                             StatusCode = StatusCodes.Status400BadRequest
                         };
                         break;
+                    case OperationCanceledException operationCanceledException when operationCanceledException.CancellationToken == context.RequestAborted:
+                        // preventing aborted requests from littering the log by swallowing the exception,
+                        // it doesn't matter much what status code are returned but we use Nginx's non-standard status code:
+                        // https://stackoverflow.com/questions/46234679/what-is-the-correct-http-status-code-for-a-cancelled-request#answer-46361806
+                        result = new StatusCodeResult(499);
+                        break;
                     default:
                         s_logUnhandledException(_logger, exception);
 

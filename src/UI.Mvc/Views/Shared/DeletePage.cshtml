@@ -1,0 +1,7 @@
+﻿@model WebApp.UI.Models.DeleteModel
+
+@section Header {
+    <h3 class="mb-0">@Model.GetTitle(ViewContext.HttpContext, T)</h3>
+}
+
+<partial name="@WebApp.UI.Pages.DeleteConfirmationPartialViewName" model="Model" />

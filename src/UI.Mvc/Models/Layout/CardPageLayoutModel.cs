@@ -2,9 +2,9 @@
 
 namespace WebApp.UI.Models.Layout
 {
-    public class PopupPageLayoutModel : LayoutModel
+    public class CardPageLayoutModel : LayoutModel
     {
         protected override string? GetActualLayoutName(HttpContext httpContext) =>
-            base.GetActualLayoutName(httpContext) ?? "_PopupPageLayout";
+            base.GetActualLayoutName(httpContext) ?? "_CardPageLayout";
     }
 }

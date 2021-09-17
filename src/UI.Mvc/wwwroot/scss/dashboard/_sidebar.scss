@@ -27,15 +27,16 @@
     z-index: $zindex-fixed + 1;
   }
 
-  &:not(.c-sidebar-right){
+  &:not(.c-sidebar-right) {
     margin-left: - $sidebar-width;
   }
+
   &.c-sidebar-right {
     order: 99;
     margin-right: - $sidebar-width;
   }
 
-  &[class*="bg-"]  {
+  &[class*="bg-"] {
     border-color: rgba($black, .1);
   }
 
@@ -44,9 +45,10 @@
       flex: 0 0 $value;
       width: $value;
 
-      &:not(.c-sidebar-right){
+      &:not(.c-sidebar-right) {
         margin-left: - $value;
       }
+
       &.c-sidebar-right {
         margin-right: - $value;
       }
@@ -83,6 +85,18 @@
     &.c-sidebar-right {
       right: 0;
     }
+  }
+
+  html.no-js & {
+    position: static;
+  }
+
+  html.no-js &:not(.c-sidebar-right) {
+    margin-left: 0;
+  }
+
+  html.no-js &.c-sidebar-right {
+    margin-right: 0;
   }
 }
 
@@ -217,10 +231,11 @@
   position: relative;
   transition: background $layout-transition-speed ease-in-out;
 
-  &.c-show {
+  &.c-show, html.no-js &:hover {
     @if $enable-sidebar-nav-rounded {
       border-radius: $border-radius;
     }
+
     > .c-sidebar-nav-dropdown-items {
       max-height: 1500px;
     }
@@ -323,9 +338,14 @@
 
   .c-sidebar-right & {
     justify-content: flex-start;
+
     &::before {
       transform: rotate(-180deg);
     }
+  }
+
+  html.no-js & {
+    display: none;
   }
 }
 
@@ -480,7 +500,7 @@
     $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
     .c-sidebar.c-sidebar#{$infix}-show,
     .c-sidebar.c-sidebar-show {
-      &:not(.c-sidebar-right){
+      html:not(.no-js) &:not(.c-sidebar-right){
         margin-left: 0;
         @include media-breakpoint-up($mobile-breakpoint) {
           &.c-sidebar-fixed {
@@ -502,7 +522,7 @@
           }
         }
       }
-      &.c-sidebar-right {
+      html:not(.no-js) &.c-sidebar-right {
         margin-right: 0;
         @include media-breakpoint-up($mobile-breakpoint) {
           &.c-sidebar-fixed {

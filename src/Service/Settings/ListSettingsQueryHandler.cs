@@ -23,10 +23,10 @@ namespace WebApp.Service.Settings
             IQueryable<Setting> linq = context.DbContext.Settings;
 
             if (query.NamePattern != null)
-                linq = linq.Where(setting => setting.Name!.Contains(query.NamePattern));
+                linq = linq.Where(setting => setting.Name!.ToLower().Contains(query.NamePattern.ToLower()));
 
             if (query.ValuePattern != null)
-                linq = linq.Where(setting => setting.Value!.Contains(query.ValuePattern));
+                linq = linq.Where(setting => setting.Value!.ToLower().Contains(query.ValuePattern.ToLower()));
 
             var settingEnumStringLocalizer = _stringLocalizerFactory.Create(typeof(SettingEnumConstants));
 

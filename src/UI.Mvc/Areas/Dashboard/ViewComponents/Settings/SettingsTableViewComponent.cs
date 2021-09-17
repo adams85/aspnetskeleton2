@@ -5,7 +5,7 @@ using WebApp.Service.Infrastructure;
 using WebApp.Service.Settings;
 using WebApp.UI.Areas.Dashboard.Models.Settings;
 
-namespace WebApp.UI.Areas.Dashboard.ViewComponents.Layout
+namespace WebApp.UI.Areas.Dashboard.ViewComponents.Settings
 {
     public class SettingsTableViewComponent : ViewComponent
     {

@@ -86,6 +86,10 @@
   &:focus {
       outline: 0;
   }
+
+  html.no-js & {
+    display: none;
+  }
 }
 
 .c-header-toggler-icon {
@@ -136,6 +140,13 @@
 
   .dropdown-item {
     min-width: 180px;
+  }
+
+  html.no-js & .dropdown:hover {
+    .dropdown-menu {
+      margin-top: 0;
+      display: block;
+    }
   }
 }
 

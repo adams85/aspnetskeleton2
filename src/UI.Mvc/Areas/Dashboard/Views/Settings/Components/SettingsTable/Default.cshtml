@@ -37,6 +37,7 @@
             {
                 AscendingOrderIconCssClass = "fa-sort-alpha-asc",
                 DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+                HeaderCellCssClasses = "cw-15",
                 FilterFactory = column => new TextFilter(column, Html.NameFor(m => m.NamePattern), Model.NamePattern)
             },
 
@@ -44,6 +45,7 @@
             {
                 AscendingOrderIconCssClass = "fa-sort-alpha-asc",
                 DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+                HeaderCellCssClasses = "cw-15",
                 FilterFactory = column => new TextFilter(column, Html.NameFor(m => m.ValuePattern), Model.ValuePattern)
             },
 

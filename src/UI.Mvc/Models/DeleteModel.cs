@@ -8,7 +8,7 @@ using WebApp.UI.Models.Layout;
 
 namespace WebApp.UI.Models
 {
-    public class DeleteModel : ILayoutModelProvider<PopupPageLayoutModel>
+    public class DeleteModel : ILayoutModelProvider<CardPageLayoutModel>
     {
         public DeleteModel()
         {
@@ -16,10 +16,10 @@ namespace WebApp.UI.Models
             GetTitle = GetDefaultTitle;
         }
 
-        private PopupPageLayoutModel? _layout;
-        public PopupPageLayoutModel Layout
+        private CardPageLayoutModel? _layout;
+        public CardPageLayoutModel Layout
         {
-            get => _layout ??= new PopupPageLayoutModel
+            get => _layout ??= new CardPageLayoutModel
             {
                 GetTitle = (httpContext, htmlLocalizer) => GetTitle(httpContext, htmlLocalizer)
             };

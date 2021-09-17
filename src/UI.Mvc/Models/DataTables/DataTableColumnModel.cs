@@ -21,6 +21,8 @@ namespace WebApp.UI.Models.DataTables
         public string? AscendingOrderIconCssClass { get; set; }
         public string? DescendingOrderIconCssClass { get; set; }
 
+        public string? HeaderCellCssClasses { get; set; }
+
         public Func<DataTableColumnModel, IHtmlContent>? HeaderCellTemplate { get; set; }
 
         public bool CanFilter { get; set; }
@@ -32,6 +34,8 @@ namespace WebApp.UI.Models.DataTables
             set => Filter = value(this);
         }
 
+        public string? FilterCellCssClasses { get; set; }
+
         private Func<DataTableColumnModel, IHtmlContent>? _filterCellTemplate;
         public Func<DataTableColumnModel, IHtmlContent>? FilterCellTemplate
         {
@@ -42,11 +46,13 @@ namespace WebApp.UI.Models.DataTables
         private Action<IDataTableHelpers>? _renderFilterCell;
         public Action<IDataTableHelpers> RenderFilterCell => _renderFilterCell ??=
             FilterCellTemplate != null ?
-            helpers => helpers.Write(FilterCellTemplate(this)) :
+            helpers => helpers.Write(FilterCellTemplate!(this)) :
             new Action<IDataTableHelpers>(RenderFilterCellDefault);
 
         protected virtual void RenderFilterCellDefault(IDataTableHelpers helpers) =>
             helpers.ColumnFilterCell(this, Filter != null ? Filter.RenderDefault : CachedDelegates.Noop<IDataTableHelpers>.Action);
+
+        public string? ContentCellCssClasses { get; set; }
 
         private Func<(object Item, DataTableColumnModel ColumnModel), IHtmlContent>? _contentCellTemplate;
         public Func<(object Item, DataTableColumnModel ColumnModel), IHtmlContent>? ContentCellTemplate
@@ -58,7 +64,7 @@ namespace WebApp.UI.Models.DataTables
         private Action<IDataTableHelpers, object>? _renderContentCell;
         public Action<IDataTableHelpers, object> RenderContentCell => _renderContentCell ??=
             ContentCellTemplate != null ?
-            (helpers, item) => helpers.Write(ContentCellTemplate((item, this))) :
+            (helpers, item) => helpers.Write(ContentCellTemplate!((item, this))) :
             new Action<IDataTableHelpers, object>(RenderContentCellDefault);
 
         protected abstract void RenderContentCellDefault(IDataTableHelpers helpers, object item);
@@ -83,7 +89,10 @@ namespace WebApp.UI.Models.DataTables
 
         public sealed class ControlColumn : DataTableColumnModel
         {
-            public ControlColumn(DataTableModel table) : base(table) { }
+            public ControlColumn(DataTableModel table) : base(table)
+            {
+                ContentCellCssClasses = "control-column";
+            }
 
             public Func<object, bool> CanEditRow { get; set; } = CachedDelegates.True<object>.Func;
             public Func<object, bool> CanDeleteRow { get; set; } = CachedDelegates.True<object>.Func;

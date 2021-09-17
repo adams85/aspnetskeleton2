@@ -19,6 +19,7 @@ namespace WebApp.UI
             var bundling = services.AddBundling()
                 .UseNUglify()
                 .UseHashVersioning()
+                .UseQueryStringVersioning()
                 .AddCss()
                 .AddJs()
                 .AddSass()
@@ -71,10 +72,12 @@ namespace WebApp.UI
                 .Include("/lib/jquery/dist/jquery.js")
                 .Include("/lib/jquery-validation/dist/jquery.validate.js")
                 .Include("/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js")
-                .Include("/lib/bootstrap/dist/js/bootstrap.bundle.js");
+                .Include("/lib/bootstrap/dist/js/bootstrap.bundle.js")
+                .Include("/js/jquery.validation.bootstrap.js");
 
             bundles.AddJs("/js/global/site.js")
-                .Include("/js/*.js");
+                .Include("/js/site.js")
+                .EnableEs6ModuleBundling();
 
             #endregion
 

@@ -305,4 +305,5 @@ __pycache__/
 /.nuget/
 /src/UI.Mvc/wwwroot/bundles
 /src/UI.Mvc/wwwroot/lib
+/src/UI.Mvc/wwwroot/js
 *.Development.db

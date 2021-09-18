@@ -7,17 +7,29 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NUglify.Css;
+using NUglify.JavaScript;
 using WebApp.UI.Infrastructure.Theming;
 
 namespace WebApp.UI
 {
     public class Bundles : DesignTimeBundlingConfiguration
     {
+        private static CssSettings CreateNUglifyCssSettings() => new CssSettings
+        {
+            CommentMode = CssComment.None
+        };
+
+        private static CodeSettings CreateNUglifyJsSettings() => new CodeSettings
+        {
+            PreserveImportantComments = false
+        };
+
         // setup for run-time mode bundling
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment, UIOptions.BundleOptions options)
         {
             var bundling = services.AddBundling()
-                .UseNUglify()
+                .UseNUglify(CreateNUglifyCssSettings(), CreateNUglifyJsSettings())
                 .UseHashVersioning()
                 .UseQueryStringVersioning()
                 .AddCss()
@@ -52,7 +64,7 @@ namespace WebApp.UI
         // setup for design-time mode bundling
         public override IEnumerable<IBundlingModule> Modules => base.Modules.Concat(new IBundlingModule[]
         {
-            new NUglifyBundlingModule(),
+            new NUglifyBundlingModule(CreateNUglifyCssSettings(), CreateNUglifyJsSettings()),
             new SassBundlingModule(),
             new EcmaScriptBundlingModule(),
         });
@@ -72,8 +84,10 @@ namespace WebApp.UI
                 .Include("/lib/jquery/dist/jquery.js")
                 .Include("/lib/jquery-validation/dist/jquery.validate.js")
                 .Include("/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js")
-                .Include("/lib/bootstrap/dist/js/bootstrap.bundle.js")
-                .Include("/js/jquery.validation.bootstrap.js");
+                .Include("/lib/popper.js/dist/umd/popper.js")
+                .Include("/lib/bootstrap/dist/js/bootstrap.js")
+                .Include("/js/jquery.validation.bootstrap.js")
+                .Include("/lib/tslib/tslib.js");
 
             bundles.AddJs("/js/global/site.js")
                 .Include("/js/site.js")

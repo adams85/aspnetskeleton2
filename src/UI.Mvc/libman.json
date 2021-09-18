@@ -9,6 +9,16 @@
     },
     {
       "provider": "jsdelivr",
+      "library": "@types/jquery@3.5.1",
+      "destination": "wwwroot/lib/@types/jquery/"
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "@types/sizzle@2.3.3",
+      "destination": "wwwroot/lib/@types/sizzle/"
+    },
+    {
+      "provider": "jsdelivr",
       "library": "jquery-validation@1.19.2",
       "destination": "wwwroot/lib/jquery-validation/"
     },
@@ -19,13 +29,28 @@
     },
     {
       "provider": "jsdelivr",
+      "library": "popper.js@1.16.1",
+      "destination": "wwwroot/lib/popper.js/"
+    },
+    {
+      "provider": "jsdelivr",
       "library": "bootstrap@4.5.2",
       "destination": "wwwroot/lib/bootstrap/"
     },
     {
       "provider": "jsdelivr",
+      "library": "@types/bootstrap@4.5.1",
+      "destination": "wwwroot/lib/@types/bootstrap/"
+    },
+    {
+      "provider": "jsdelivr",
       "library": "font-awesome@4.7.0",
       "destination": "wwwroot/lib/font-awesome/"
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "tslib@2.3.1",
+      "destination": "wwwroot/lib/tslib/"
     }
   ]
 }

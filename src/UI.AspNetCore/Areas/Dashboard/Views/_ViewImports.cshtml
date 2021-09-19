@@ -1,4 +1,4 @@
-﻿@attribute [AssociatedAssemblyName(ApplicationConstants.AssemblyNamePrefix + ".UI.Mvc")]
+﻿@attribute [AssociatedAssemblyName(ApplicationConstants.AssemblyNamePrefix + ".UI.AspNetCore")]
 
 @using Microsoft.AspNetCore.Mvc.Localization
 @using Karambolo.AspNetCore.Bundling.ViewHelpers
@@ -20,7 +20,7 @@
 
 @addTagHelper *, Karambolo.AspNetCore.Bundling
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@addTagHelper *, WebApp.UI.Mvc
+@addTagHelper *, WebApp.UI.AspNetCore
 
 @inject IViewLocalizer T
 @inject WebApp.UI.Infrastructure.Navigation.IPageCatalog Pages

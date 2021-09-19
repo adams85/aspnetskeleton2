@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyName>WebApp.UI.Mvc</AssemblyName>
+    <AssemblyName>WebApp.UI.AspNetCore</AssemblyName>
     <RootNamespace>WebApp.UI</RootNamespace>
 
     <UseDesignTimeBundling>false</UseDesignTimeBundling>

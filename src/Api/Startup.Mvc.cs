@@ -1,7 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using Karambolo.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Localization;
@@ -21,7 +24,8 @@ namespace WebApp.Api
         {
             builder.Services.ReplaceLast(ServiceDescriptor.Singleton<IModelMetadataProvider, CustomModelMetadataProvider>());
 
-            ConfigureDataAnnotationServices(builder);
+            ConfigureModelBinding(builder);
+            ConfigureModelValidation(builder);
 
             builder
                 .AddJsonOptions(options => options.JsonSerializerOptions.ConfigureApiDefaults())
@@ -39,7 +43,17 @@ namespace WebApp.Api
             ConfigureMvcPartial(builder);
         }
 
-        public void ConfigureDataAnnotationServices(IMvcBuilder builder)
+        public void ConfigureModelBinding(IMvcBuilder builder)
+        {
+            builder.AddMvcOptions(options =>
+            {
+                var index = options.ModelBinderProviders.FindIndex(provider => provider is ComplexTypeModelBinderProvider);
+                Debug.Assert(index >= 0, "Microsoft.AspNetCore.Mvc.MvcOptions.ModelBinderProviders defaults have apparently changed.");
+                options.ModelBinderProviders.Insert(index, new ListQueryModelBinderProvider());
+            });
+        }
+
+        public void ConfigureModelValidation(IMvcBuilder builder)
         {
             builder.Services.ReplaceLast(ServiceDescriptor.Singleton<IValidationAttributeAdapterProvider, CustomValidationAttributeAdapterProvider>());
 

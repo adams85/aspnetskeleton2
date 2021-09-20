@@ -10,6 +10,7 @@ namespace WebApp.Service.Users
     [DataContract]
     public class CreateUserCommand : IKeyGeneratorCommand
     {
+        [Localized] private const string CommaNotAllowedErrorMessage = "The field {0} must contain no comma characters.";
         [Required, MaxLength(UserNameMaxLength), RegularExpression(@"^[^,]*$", ErrorMessage = CommaNotAllowedErrorMessage)]
         [DataMember(Order = 1)] public string UserName { get; set; } = null!;
 
@@ -30,7 +31,5 @@ namespace WebApp.Service.Users
         [DataMember(Order = 7)] public string? LastName { get; set; }
 
         public Action<ICommand, object>? OnKeyGenerated { get; set; }
-
-        [Localized] private const string CommaNotAllowedErrorMessage = "The field {0} must contain no comma characters.";
     }
 }

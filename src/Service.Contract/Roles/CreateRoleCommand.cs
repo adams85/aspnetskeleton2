@@ -10,6 +10,7 @@ namespace WebApp.Service.Roles
     [DataContract]
     public class CreateRoleCommand : IKeyGeneratorCommand
     {
+        [Localized] private const string CommaNotAllowedErrorMessage = "The field {0} must contain no comma characters.";
         [Required, MaxLength(RoleNameMaxLength), RegularExpression(@"^[^,]*$", ErrorMessage = CommaNotAllowedErrorMessage)]
         [DataMember(Order = 1)] public string RoleName { get; set; } = null!;
 
@@ -17,7 +18,5 @@ namespace WebApp.Service.Roles
         [DataMember(Order = 2)] public string? Description { get; set; }
 
         public Action<ICommand, object>? OnKeyGenerated { get; set; }
-
-        [Localized] private const string CommaNotAllowedErrorMessage = "The field {0} must contain no comma characters.";
     }
 }

@@ -136,7 +136,8 @@ namespace WebApp.UI
 
                 var mvcBuilder = services.AddControllersWithViews();
 
-                _apiStartup.ConfigureDataAnnotationServices(mvcBuilder);
+                _apiStartup.ConfigureModelBinding(mvcBuilder);
+                _apiStartup.ConfigureModelValidation(mvcBuilder);
 
                 services.Configure<MvcViewOptions>(options => options.ClientModelValidatorProviders.Add(new DataAnnotationsClientLocalizationAdjuster()));
 

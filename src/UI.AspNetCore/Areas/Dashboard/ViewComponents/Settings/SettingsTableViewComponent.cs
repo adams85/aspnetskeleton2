@@ -20,8 +20,6 @@ namespace WebApp.UI.Areas.Dashboard.ViewComponents.Settings
 
         public async Task<IViewComponentResult> InvokeAsync(ListSettingsQuery query, string? prefix = null)
         {
-            query.EnsurePaging(ListSettingsQuery.DefaultPageSize, _settingsProvider.MaxPageSize());
-
             ViewData[nameof(SettingListModel)] = new SettingListModel
             {
                 Query = query,

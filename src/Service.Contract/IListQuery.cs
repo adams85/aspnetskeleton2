@@ -1,8 +1,8 @@
-﻿using System.Linq;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.Service
 {
-    public interface IListQuery : IQuery
+    public interface IListQuery : IQuery, IValidatableObject
     {
         string[]? OrderBy { get; set; }
         bool IsOrdered { get; }
@@ -13,5 +13,7 @@ namespace WebApp.Service
         bool IsPaged { get; }
 
         bool SkipTotalItemCount { get; set; }
+
+        void EnsurePaging(int maxPageSize);
     }
 }

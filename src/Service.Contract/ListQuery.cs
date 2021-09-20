@@ -14,7 +14,7 @@ namespace WebApp.Service
     [ProtoInclude(11, typeof(ListSettingsQuery))]
     [ProtoInclude(12, typeof(ListRolesQuery))]
     [ProtoInclude(13, typeof(ListUsersQuery))]
-    public abstract class ListQuery<TResult> : IListQuery, IQuery<TResult>, IValidatableObject
+    public abstract class ListQuery<TResult> : IListQuery, IQuery<TResult>
         where TResult : IListResult
     {
         [DataMember(Order = 1)] public string[]? OrderBy { get; set; }
@@ -27,15 +27,29 @@ namespace WebApp.Service
 
         [DataMember(Order = 5)] public bool SkipTotalItemCount { get; set; }
 
+        public virtual int DefaultPageSize => 0;
+
+        public void EnsurePaging(int maxPageSize)
+        {
+            if (maxPageSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(maxPageSize));
+
+            if (!IsPaged)
+            {
+                PageIndex = 0;
+                PageSize = DefaultPageSize > 0 ? DefaultPageSize : maxPageSize;
+            }
+
+            MaxPageSize = maxPageSize;
+        }
+
         [Localized] private const string NonNegativeIntegerValidatorErrorMessage = "The field {0} must be a non-negative integer.";
-
-        [Localized] private const string ItemsRequiredValidatorErrorMessage = "The field {0} must contain non-empty strings.";
-
         private static readonly ValidationAttribute s_nonNegativeIntegerValidator = new RangeAttribute(0, int.MaxValue)
         {
             ErrorMessage = NonNegativeIntegerValidatorErrorMessage
         };
 
+        [Localized] private const string ItemsRequiredValidatorErrorMessage = "The field {0} must contain non-empty strings.";
         private static readonly ValidationAttribute s_itemsRequiredValidator = new ItemsRequiredAttribute()
         {
             ErrorMessage = ItemsRequiredValidatorErrorMessage
@@ -51,22 +65,5 @@ namespace WebApp.Service
         }
 
         IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext) => Validate(validationContext);
-
-        public void EnsurePaging(int defaultPageSize, int maxPageSize)
-        {
-            if (defaultPageSize <= 0)
-                throw new ArgumentOutOfRangeException(nameof(defaultPageSize));
-
-            if (maxPageSize <= 0)
-                throw new ArgumentOutOfRangeException(nameof(maxPageSize));
-
-            if (!IsPaged)
-            {
-                PageIndex = 0;
-                PageSize = defaultPageSize;
-            }
-
-            MaxPageSize = maxPageSize;
-        }
     }
 }

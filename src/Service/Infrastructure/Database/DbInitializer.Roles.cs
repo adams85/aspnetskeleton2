@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApp.Common.Roles;
+using WebApp.Core.Helpers;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Helpers;
 
@@ -16,16 +18,13 @@ namespace WebApp.Service.Infrastructure.Database
         {
             var roles = await _context.Roles.ToDictionarySafeAsync(entity => entity.RoleName, AsExistingEntity, _caseInsensitiveComparer, cancellationToken).ConfigureAwait(false);
 
-            foreach (var roleName in Enum.GetNames(typeof(RoleEnum)))
+            foreach (var (roleName, enumMetadata) in EnumMetadata<RoleEnum>.Members)
             {
-                var field = typeof(RoleEnum)
-                    .GetField(roleName, BindingFlags.Public | BindingFlags.Static);
-
-                var descriptionAttribute = field.GetCustomAttribute<DescriptionAttribute>();
+                var descriptionAttribute = enumMetadata.Attributes.OfType<DescriptionAttribute>().FirstOrDefault();
 
                 if (descriptionAttribute != null)
                     AddOrUpdateRole(roles,
-                        id: (int)field.GetValue(null),
+                        id: (int)enumMetadata.Value,
                         roleName,
                         description: descriptionAttribute.Description);
             }

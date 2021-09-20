@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApp.Common.Settings;
+using WebApp.Core.Helpers;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Helpers;
 
@@ -18,14 +20,14 @@ namespace WebApp.Service.Infrastructure.Database
         {
             var settings = await _context.Settings.ToDictionarySafeAsync(entity => entity.Name, AsExistingEntity, _caseSensitiveComparer, cancellationToken).ConfigureAwait(false);
 
-            foreach (var settingName in Enum.GetNames(typeof(SettingEnum)))
+            foreach (var (settingName, enumMetadata) in EnumMetadata<SettingEnum>.Members)
             {
                 var field = typeof(SettingEnum)
                     .GetField(settingName, BindingFlags.Public | BindingFlags.Static);
 
-                var descriptionAttribute = field.GetCustomAttribute<DescriptionAttribute>();
-                var defaultValueAttribute = field.GetCustomAttribute<DefaultValueAttribute>();
-                var rangeAttribute = field.GetCustomAttribute<RangeAttribute>();
+                var descriptionAttribute = enumMetadata.Attributes.OfType<DescriptionAttribute>().FirstOrDefault();
+                var defaultValueAttribute = enumMetadata.Attributes.OfType<DefaultValueAttribute>().FirstOrDefault();
+                var rangeAttribute = enumMetadata.Attributes.OfType<RangeAttribute>().FirstOrDefault();
 
                 AddOrUpdateSetting(settings,
                     settingName,

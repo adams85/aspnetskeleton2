@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using WebApp.Api.Infrastructure.Localization;
+using WebApp.Common.Infrastructure.Localization;
 
 namespace WebApp.Api.Infrastructure.DataAnnotations
 {
@@ -39,9 +40,9 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
 
         public void CreateValidators(ModelValidatorProviderContext context)
         {
-            var stringLocalizerAdapter =
+            var stringLocalizer =
                 _stringLocalizerFactory != null && _dataAnnotationLocalizerProvider != null && context.ModelMetadata.ModelType.HasInterface(typeof(IValidatableObject)) ?
-                new StringLocalizerAdapter(_dataAnnotationLocalizerProvider(context.ModelMetadata.ContainerType ?? context.ModelMetadata.ModelType, _stringLocalizerFactory)) :
+                EnsureTextLocalizerInterface(_dataAnnotationLocalizerProvider(context.ModelMetadata.ContainerType ?? context.ModelMetadata.ModelType, _stringLocalizerFactory)) :
                 null;
 
             var validatableObjectAdapterFound = false;
@@ -59,14 +60,14 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
 
                 // 2. support for ExtendedValidationResult localization in the case of IValidatableObject
 
-                if (stringLocalizerAdapter != null)
+                if (stringLocalizer != null)
                 {
                     // we need to check type by name because unfortunately ValidatableObjectAdapter is internal
                     if (result.Validator != null && result.Validator.GetType().FullName == "Microsoft.AspNetCore.Mvc.DataAnnotations.ValidatableObjectAdapter")
                     {
                         results[i] = new ValidatorItem(result.ValidatorMetadata)
                         {
-                            Validator = new CustomValidatableObjectAdapter(_validationAttributeAdapterProvider, stringLocalizerAdapter),
+                            Validator = new CustomValidatableObjectAdapter(_validationAttributeAdapterProvider, stringLocalizer),
                             IsReusable = result.IsReusable,
                         };
 
@@ -75,8 +76,11 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
                 }
             }
 
-            if (stringLocalizerAdapter != null)
+            if (stringLocalizer != null)
                 Debug.Assert(validatableObjectAdapterFound, "Microsoft.AspNetCore.Mvc.DataAnnotations internals have apparently changed.");
+
+            static IStringLocalizer EnsureTextLocalizerInterface(IStringLocalizer stringLocalizer) =>
+                stringLocalizer is ITextLocalizer ? stringLocalizer : new TextLocalizerAdapter(stringLocalizer);
         }
 
         public bool HasValidators(Type modelType, IList<object> validatorMetadata) => false;

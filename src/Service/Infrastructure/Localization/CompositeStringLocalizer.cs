@@ -7,6 +7,7 @@ using Karambolo.Common.Localization;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using WebApp.Common.Infrastructure.Localization;
 
 namespace WebApp.Service.Infrastructure.Localization
 {
@@ -46,6 +47,8 @@ namespace WebApp.Service.Infrastructure.Localization
             }
         }
 
+        string ITextLocalizer.this[string hint] => this[hint].Value;
+
         public LocalizedString this[string name, params object[] arguments]
         {
             get
@@ -59,6 +62,8 @@ namespace WebApp.Service.Infrastructure.Localization
                 return new LocalizedString(name, value, resourceNotFound, searchedLocation);
             }
         }
+
+        string ITextLocalizer.this[string hint, params object[] args] => this[hint, args].Value;
 
         private bool TryGetValue<TState>(TState state,
             Func<IStringLocalizer, TState, (string?, string?, bool)> getValue,

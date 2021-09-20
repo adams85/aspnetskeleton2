@@ -62,7 +62,7 @@ namespace WebApp.Service.Users
 
             if (!command.IsApproved)
             {
-                await using (DisposableAdapter.From<IDbContextTransaction>(
+                await using (AsyncDisposableAdapter.From<IDbContextTransaction>(
                     await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false),
                     out var transaction).ConfigureAwait(false))
                 {

@@ -44,10 +44,10 @@ namespace WebApp.Service.Tests.Infrastructure
 
         public async ValueTask DisposeAsync()
         {
-            await DisposableAdapter.From(_scope).DisposeAsync();
+            await AsyncDisposableAdapter.From(_scope).DisposeAsync();
 
             if (_services is IDisposable servicesDisposable)
-                await DisposableAdapter.From(servicesDisposable).DisposeAsync();
+                await AsyncDisposableAdapter.From(servicesDisposable).DisposeAsync();
         }
 
         public Guid Id { get; }

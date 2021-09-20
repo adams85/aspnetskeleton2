@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.Extensions.Localization;
 using WebApp.Api.Infrastructure.Localization;
 
 namespace WebApp.Api.Infrastructure.DataAnnotations
@@ -13,12 +14,12 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
     public sealed class CustomValidatableObjectAdapter : IModelValidator
     {
         private readonly IValidationAttributeAdapterProvider _validationAttributeAdapterProvider;
-        private readonly StringLocalizerAdapter _stringLocalizerAdapter;
+        private readonly IStringLocalizer _stringLocalizer;
 
-        public CustomValidatableObjectAdapter(IValidationAttributeAdapterProvider validationAttributeAdapterProvider, StringLocalizerAdapter stringLocalizerAdapter)
+        public CustomValidatableObjectAdapter(IValidationAttributeAdapterProvider validationAttributeAdapterProvider, IStringLocalizer stringLocalizer)
         {
             _validationAttributeAdapterProvider = validationAttributeAdapterProvider;
-            _stringLocalizerAdapter = stringLocalizerAdapter;
+            _stringLocalizer = stringLocalizer;
         }
 
         public IEnumerable<ModelValidationResult> Validate(ModelValidationContext context)
@@ -77,7 +78,7 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
         {
             if (result is ExtendedValidationResult extendedValidationResult)
             {
-                var adapter = _validationAttributeAdapterProvider.GetAttributeAdapter(extendedValidationResult.ValidationAttribute, _stringLocalizerAdapter);
+                var adapter = _validationAttributeAdapterProvider.GetAttributeAdapter(extendedValidationResult.ValidationAttribute, _stringLocalizer);
                 if (adapter != null)
                 {
                     ModelMetadata? memberModelMetadata;

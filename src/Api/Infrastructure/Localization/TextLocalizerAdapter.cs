@@ -6,11 +6,11 @@ using WebApp.Common.Infrastructure.Localization;
 
 namespace WebApp.Api.Infrastructure.Localization
 {
-    public sealed class StringLocalizerAdapter : IStringLocalizer, ITextLocalizer
+    public sealed class TextLocalizerAdapter : IStringLocalizer, ITextLocalizer
     {
         private readonly IStringLocalizer _stringLocalizer;
 
-        public StringLocalizerAdapter(IStringLocalizer stringLocalizer)
+        public TextLocalizerAdapter(IStringLocalizer stringLocalizer)
         {
             _stringLocalizer = stringLocalizer;
         }
@@ -24,6 +24,6 @@ namespace WebApp.Api.Infrastructure.Localization
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) => _stringLocalizer.GetAllStrings(includeParentCultures);
 
         [Obsolete("This method is obsolete. Use `CurrentCulture` and `CurrentUICulture` instead.")]
-        public IStringLocalizer WithCulture(CultureInfo culture) => new StringLocalizerAdapter(_stringLocalizer.WithCulture(culture));
+        public IStringLocalizer WithCulture(CultureInfo culture) => new TextLocalizerAdapter(_stringLocalizer.WithCulture(culture));
     }
 }

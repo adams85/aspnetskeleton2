@@ -35,7 +35,7 @@
         {
             Items =
             {
-                new NavigationItem(Pages.GetPage(OverviewRouteName, throwIfNotFound: true)!) { IconClassName = "fa-tachometer" },
+                new NavigationItem(Pages.GetPage(OverviewRouteName, throwIfNotFound: true)!) { IconCssClass = "fa-tachometer" },
             }
         },
         new NavigationGroup
@@ -44,7 +44,7 @@
             IsVisibleAsync = httpContext => Task.FromResult(httpContext.User.IsInRole(nameof(RoleEnum.Administators))),
             Items =
             {
-                new NavigationItem(Pages.GetPage(SettingsRouteName, throwIfNotFound: true)!) { IconClassName = "fa-wrench" },
+                new NavigationItem(Pages.GetPage(SettingsRouteName, throwIfNotFound: true)!) { IconCssClass = "fa-wrench" },
             }
         }
     });
@@ -92,9 +92,9 @@
         var isActive = item.IsActive(ViewContext.HttpContext, Model.PageInfo);
         <li class="c-sidebar-nav-item">
             <a class="c-sidebar-nav-link @(isActive ? "c-active" : null)" href="@item.GetUrl(Url)">
-                @if (item.IconClassName != null)
+                @if (item.IconCssClass != null)
                 {
-                    <i class="fa @item.IconClassName c-sidebar-nav-icon" aria-hidden="true"></i>
+                    <i class="fa @item.IconCssClass c-sidebar-nav-icon" aria-hidden="true"></i>
                 }
                 @item.GetTitle(ViewContext.HttpContext, T)
             </a>
@@ -106,9 +106,9 @@
         var isShown = item.IsShown(ViewContext.HttpContext, Model.PageInfo);
         <li class="c-sidebar-nav-item c-sidebar-nav-dropdown @(isShown ? "c-show" : null)">
             <a class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
-                @if (item.IconClassName != null)
+                @if (item.IconCssClass != null)
                 {
-                    <i class="fa @item.IconClassName c-sidebar-nav-icon" aria-hidden="true"></i>
+                    <i class="fa @item.IconCssClass c-sidebar-nav-icon" aria-hidden="true"></i>
                 }
                 @item.GetTitle(ViewContext.HttpContext, T)
             </a>

@@ -35,7 +35,7 @@ namespace WebApp.Service
 
         public ValueTask DisposeAsync()
         {
-            return DisposableAdapter.From(_serviceScope).DisposeAsync();
+            return AsyncDisposableAdapter.From(_serviceScope).DisposeAsync();
         }
 
         public IServiceProvider ScopedServices => _serviceScope.ServiceProvider;

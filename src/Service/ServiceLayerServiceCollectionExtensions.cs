@@ -76,7 +76,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static IServiceCollection AddApplicationInitializers(this IServiceCollection services)
         {
-            // registration order is important!
+            // registration order matters!
 
             services.AddScoped<IApplicationInitializer, DbInitializer>();
 

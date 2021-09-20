@@ -18,8 +18,8 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
         {
             _textLocalizer =
                 stringLocalizer != null ?
-                stringLocalizer as StringLocalizerAdapter ?? new StringLocalizerAdapter(stringLocalizer) :
-                (ITextLocalizer)NullTextLocalizer.Instance;
+                stringLocalizer as ITextLocalizer ?? new TextLocalizerAdapter(stringLocalizer) :
+                NullTextLocalizer.Instance;
         }
 
         public override void AddValidation(ClientModelValidationContext context) { }

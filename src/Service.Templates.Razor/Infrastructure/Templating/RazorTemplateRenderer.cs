@@ -72,7 +72,7 @@ namespace WebApp.Service.Infrastructure.Templating
 
         public async Task<string> RenderAsync<TModel>(string templateName, TModel model, CultureInfo? culture = null, CultureInfo? uiCulture = null, CancellationToken cancellationToken = default)
         {
-            await using (DisposableAdapter.From(_serviceScopeFactory.CreateScope(), out var scope).ConfigureAwait(false))
+            await using (AsyncDisposableAdapter.From(_serviceScopeFactory.CreateScope(), out var scope).ConfigureAwait(false))
             {
                 culture ??= CultureInfo.CurrentCulture;
                 uiCulture ??= CultureInfo.CurrentUICulture;

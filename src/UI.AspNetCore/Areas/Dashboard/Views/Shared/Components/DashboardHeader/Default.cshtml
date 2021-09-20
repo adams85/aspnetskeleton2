@@ -50,7 +50,7 @@
         {
             GetTitle = (_, t) => t["Account"],
         },
-        new DropDownMenuItem(Pages.GetPage(AccountSettingsRouteName, throwIfNotFound: true)!) { IconClassName = "fa-wrench" },
+        new DropDownMenuItem(Pages.GetPage(AccountSettingsRouteName, throwIfNotFound: true)!) { IconCssClass = "fa-wrench" },
 
         new DropDownMenuDivider { },
 
@@ -58,7 +58,7 @@
         {
             GetTitle = (_, t) => t["Logout"],
             GetUrl = url => url.RouteUrl(Routes.LogoutRouteName),
-            IconClassName = "fa-sign-out",
+            IconCssClass = "fa-sign-out",
         },
     });
 
@@ -89,9 +89,9 @@
     void RenderDropDownMenuItem(DropDownMenuItem item)
     {
         <a class="dropdown-item" href="@item.GetUrl(Url)">
-            @if (item.IconClassName != null)
+            @if (item.IconCssClass != null)
             {
-                <i class="fa @item.IconClassName c-icon mfe-2" aria-hidden="true"></i>
+                <i class="fa @item.IconCssClass c-icon mfe-2" aria-hidden="true"></i>
             }
             @item.GetTitle(ViewContext.HttpContext, T)
         </a>

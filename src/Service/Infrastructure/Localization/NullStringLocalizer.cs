@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Karambolo.Common.Localization;
 using Microsoft.Extensions.Localization;
+using WebApp.Common.Infrastructure.Localization;
 
 namespace WebApp.Service.Infrastructure.Localization
 {
@@ -22,6 +23,8 @@ namespace WebApp.Service.Infrastructure.Localization
             }
         }
 
+        string ITextLocalizer.this[string hint] => this[hint].Value;
+
         public LocalizedString this[string name, params object[] arguments]
         {
             get
@@ -30,6 +33,8 @@ namespace WebApp.Service.Infrastructure.Localization
                 return new LocalizedString(name, value, resourceNotFound: false, searchedLocation);
             }
         }
+
+        string ITextLocalizer.this[string hint, params object[] args] => this[hint, args].Value;
 
         public string GetTranslation(string name, Plural plural, TextContext context, out string? searchedLocation, out bool resourceNotFound)
         {

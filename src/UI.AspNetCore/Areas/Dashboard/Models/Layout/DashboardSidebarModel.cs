@@ -38,7 +38,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
         {
             public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; set; }
             public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; set; } = null!;
-            public string? IconClassName { get; set; }
+            public string? IconCssClass { get; set; }
         }
 
         public class NavigationItem : NavigationItemBase

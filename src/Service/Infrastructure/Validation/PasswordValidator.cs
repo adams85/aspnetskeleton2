@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using WebApp.Common.Infrastructure.Localization;
 using WebApp.Common.Infrastructure.Validation;
@@ -25,14 +24,11 @@ namespace WebApp.Service.Infrastructure.Validation
 
         private readonly PasswordRequirementsData? _passwordRequirements;
 
-        public PasswordValidator(IStringLocalizer<PasswordValidator> stringLocalizer, IOptions<PasswordOptions>? passwordOptions)
+        public PasswordValidator(IOptions<PasswordOptions>? passwordOptions)
         {
             var passwordOptionsValue = passwordOptions?.Value;
             _passwordRequirements = passwordOptionsValue != null ? GetPasswordRequirements(passwordOptionsValue) : null;
-            T = stringLocalizer;
         }
-
-        private IStringLocalizer<PasswordValidator> T { get; }
 
         private bool IsValidPassword(string? value)
         {

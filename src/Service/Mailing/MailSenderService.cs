@@ -335,7 +335,7 @@ namespace WebApp.Service.Mailing
 
         private async Task ProcessAsync(CancellationToken cancellationToken)
         {
-            await using (DisposableAdapter.From(_serviceScopeFactory.CreateScope(), out var scope).ConfigureAwait(false))
+            await using (AsyncDisposableAdapter.From(_serviceScopeFactory.CreateScope(), out var scope).ConfigureAwait(false))
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<WritableDataContext>();
 

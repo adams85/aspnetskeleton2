@@ -41,7 +41,7 @@ namespace WebApp.Service.Users
             user.PasswordVerificationToken = SecurityHelper.GenerateToken(_guidProvider);
             user.PasswordVerificationTokenExpirationDate = _clock.UtcNow + command.TokenExpirationTimeSpan;
 
-            await using (DisposableAdapter.From<IDbContextTransaction>(
+            await using (AsyncDisposableAdapter.From<IDbContextTransaction>(
                 await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false),
                 out var transaction).ConfigureAwait(false))
             {

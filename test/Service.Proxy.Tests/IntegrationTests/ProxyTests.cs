@@ -36,7 +36,7 @@ namespace WebApp.Service
         [Fact]
         public async Task DispatchCommandExpectingSuccess()
         {
-            await using var scope = DisposableAdapter.From(s_proxyServices.CreateScope());
+            await using var scope = AsyncDisposableAdapter.From(s_proxyServices.CreateScope());
 
             // this operation should be a no-op
             var command = new RegisterUserActivityCommand
@@ -55,7 +55,7 @@ namespace WebApp.Service
         [Fact]
         public async Task DispatchCommandExpectingFailure()
         {
-            await using var scope = DisposableAdapter.From(s_proxyServices.CreateScope());
+            await using var scope = AsyncDisposableAdapter.From(s_proxyServices.CreateScope());
 
             // this operation should be a no-op
             var command = new RegisterUserActivityCommand
@@ -77,7 +77,7 @@ namespace WebApp.Service
         [Fact]
         public async Task DispatchQueryExpectingSuccess()
         {
-            await using var scope = DisposableAdapter.From(s_proxyServices.CreateScope());
+            await using var scope = AsyncDisposableAdapter.From(s_proxyServices.CreateScope());
 
             var query = new ListUsersQuery
             {
@@ -95,7 +95,7 @@ namespace WebApp.Service
         [Fact]
         public async Task DispatchQueryExpectingFailure()
         {
-            await using var scope = DisposableAdapter.From(s_proxyServices.CreateScope());
+            await using var scope = AsyncDisposableAdapter.From(s_proxyServices.CreateScope());
 
             var query = new GetUserQuery { };
 

@@ -7,6 +7,7 @@ using Karambolo.PO;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using WebApp.Common.Infrastructure.Localization;
 using WebApp.Service.Translations;
 
 namespace WebApp.Service.Infrastructure.Localization
@@ -42,6 +43,8 @@ namespace WebApp.Service.Infrastructure.Localization
             }
         }
 
+        string ITextLocalizer.this[string hint] => this[hint].Value;
+
         public LocalizedString this[string name, params object[] arguments]
         {
             get
@@ -55,6 +58,8 @@ namespace WebApp.Service.Infrastructure.Localization
                 return new LocalizedString(name, value, resourceNotFound, searchedLocation);
             }
         }
+
+        string ITextLocalizer.this[string hint, params object[] args] => this[hint, args].Value;
 
         private POCatalog? GetCatalog()
         {

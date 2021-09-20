@@ -30,7 +30,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
 
             public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; set; } = null!;
             public Func<IUrlHelper, string> GetUrl { get; set; } = null!;
-            public string? IconClassName { get; set; }
+            public string? IconCssClass { get; set; }
         }
 
         public class DropDownMenuHeader : DropDownMenuItemBase

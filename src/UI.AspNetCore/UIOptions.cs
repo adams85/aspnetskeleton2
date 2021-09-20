@@ -40,7 +40,6 @@ namespace WebApp.UI
 
         public class ViewOptions
         {
-            public bool EnableResponseMinification { get; set; }
             public bool EnableResponseCaching { get; set; }
             public TimeSpan? CacheHeaderMaxAge { get; set; }
         }

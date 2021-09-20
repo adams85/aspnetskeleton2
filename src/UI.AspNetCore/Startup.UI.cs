@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.ResponseCaching;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -27,7 +27,6 @@ using WebApp.UI.Infrastructure.Security;
 using WebApp.UI.Infrastructure.Theming;
 using WebApp.UI.Infrastructure.ViewFeatures;
 using WebApp.UI.Middlewares;
-using WebMarkupMin.AspNetCore3;
 
 namespace WebApp.UI
 {
@@ -75,28 +74,12 @@ namespace WebApp.UI
                     .AddSingleton<IThemeProvider, ThemeProvider>()
                     .AddSingleton<IThemeManager, ThemeManager>();
 
-                #region Response compression & minification
+                #region Response compression
 
-                if (UIOptions.Views.EnableResponseMinification || UIOptions.EnableResponseCompression)
+                if (UIOptions.EnableResponseCompression)
                 {
-                    var webMarkupMin = services.AddWebMarkupMin(options =>
-                    {
-                        options.AllowCompressionInDevelopmentEnvironment = true;
-                        options.AllowMinificationInDevelopmentEnvironment = true;
-                        options.DisablePoweredByHttpHeaders = true;
-                    });
-
-                    if (UIOptions.Views.EnableResponseMinification)
-                    {
-                        webMarkupMin.AddHtmlMinification(o => o.SupportedMediaTypes = new HashSet<string>() { "text/html" });
-                        services.Configure<HtmlMinificationOptions>(Configuration.GetSection("Response:HtmlMinification"));
-                    }
-
-                    if (UIOptions.EnableResponseCompression)
-                    {
-                        webMarkupMin.AddHttpCompression();
-                        services.Configure<HttpCompressionOptions>(Configuration.GetSection("Response:HttpCompression"));
-                    }
+                    services.AddResponseCompression();
+                    services.Configure<ResponseCompressionOptions>(Configuration.GetSection("Response:Compression"));
                 }
 
                 #endregion
@@ -201,10 +184,10 @@ namespace WebApp.UI
                 if (!IsRunningBehindProxy)
                     app.UseHttpsRedirection();
 
-                #region Response compression & minification
+                #region Response compression
 
-                if (UIOptions.Views.EnableResponseMinification || UIOptions.EnableResponseCompression)
-                    app.UseWebMarkupMin();
+                if (UIOptions.EnableResponseCompression)
+                    app.UseResponseCompression();
 
                 #endregion
 

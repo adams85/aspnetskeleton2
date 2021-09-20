@@ -12,7 +12,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
 {
     public class DashboardSidebarModel
     {
-        public static readonly string SidebarStateCookieName = "App.Dashboard.SidebarState";
+        public const string SidebarStateCookieName = "App.Dashboard.SidebarState";
 
         public static (bool IsVisible, bool IsMinimized) GetSidebarState(HttpContext httpContext) =>
             int.TryParse(httpContext.Request.Cookies[SidebarStateCookieName], NumberStyles.Integer, CultureInfo.InvariantCulture, out var state) ?

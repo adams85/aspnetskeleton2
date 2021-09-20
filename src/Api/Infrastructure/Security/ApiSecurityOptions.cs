@@ -4,7 +4,7 @@ namespace WebApp.Api.Infrastructure.Security
 {
     public class ApiSecurityOptions
     {
-        public static readonly string DefaultSectionName = "Security:Api";
+        public const string DefaultSectionName = "Security:Api";
 
         public static readonly TimeSpan DefaultJwtAccessTokenClockSkew = TimeSpan.Zero;
         public static readonly TimeSpan DefaultJwtAccessTokenExpirationTime = TimeSpan.FromMinutes(10);

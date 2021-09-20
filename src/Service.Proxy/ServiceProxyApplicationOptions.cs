@@ -2,7 +2,7 @@
 {
     public class ServiceProxyApplicationOptions
     {
-        public static readonly string DefaultSectionName = "Application";
+        public const string DefaultSectionName = "Application";
 
         public string ServiceBaseUrl { get; set; } = null!;
     }

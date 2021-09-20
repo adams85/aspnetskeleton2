@@ -2,7 +2,7 @@
 {
     public class DbOptions
     {
-        public static readonly string DefaultSectionName = "Database";
+        public const string DefaultSectionName = "Database";
 
         public string Provider { get; set; } = null!;
         public string ConnectionString { get; set; } = null!;

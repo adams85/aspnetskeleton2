@@ -5,11 +5,11 @@ namespace WebApp.UI
 {
     public sealed class Pages : IPageCollectionProvider
     {
-        public static readonly string EditPageViewName = "EditPage";
-        public static readonly string EditPopupPartialViewName = "Partials/_EditPopup";
-        public static readonly string DeletePageViewName = "DeletePage";
-        public static readonly string DeletePopupPartialViewName = "Partials/_DeletePopup";
-        public static readonly string DeleteConfirmationPartialViewName = "Partials/_DeleteConfirmation";
+        public const string EditPageViewName = "EditPage";
+        public const string EditPopupPartialViewName = "Partials/_EditPopup";
+        public const string DeletePageViewName = "DeletePage";
+        public const string DeletePopupPartialViewName = "Partials/_DeletePopup";
+        public const string DeleteConfirmationPartialViewName = "Partials/_DeleteConfirmation";
 
         private static readonly IReadOnlyList<PageInfo> s_pages = new[]
         {

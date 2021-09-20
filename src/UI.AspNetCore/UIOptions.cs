@@ -12,7 +12,7 @@ namespace WebApp.UI
 
     public class UIOptions
     {
-        public static readonly string DefaultSectionName = "Application:UI";
+        public const string DefaultSectionName = "Application:UI";
 
         public static readonly TimeSpan DefaultCacheHeaderMaxAge = TimeSpan.FromDays(7);
 

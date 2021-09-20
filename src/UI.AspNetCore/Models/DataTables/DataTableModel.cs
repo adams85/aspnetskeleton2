@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using WebApp.Service;
@@ -13,10 +12,10 @@ namespace WebApp.UI.Models.DataTables
 {
     public sealed class DataTableModel
     {
-        public static readonly string DefaultDisplayActionName = "Index";
-        public static readonly string DefaultCreateActionName = "Create";
-        public static readonly string DefaultEditActionName = "Edit";
-        public static readonly string DefaultDeleteActionName = "Delete";
+        public const string DefaultDisplayActionName = "Index";
+        public const string DefaultCreateActionName = "Create";
+        public const string DefaultEditActionName = "Edit";
+        public const string DefaultDeleteActionName = "Delete";
 
         public DataTableModel(IListQuery query, IListResult result, Type itemType)
         {

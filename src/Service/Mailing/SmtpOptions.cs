@@ -5,7 +5,7 @@ namespace WebApp.Service.Mailing
 {
     public class SmtpOptions
     {
-        public static readonly string DefaultSectionName = "Smtp";
+        public const string DefaultSectionName = "Smtp";
 
         public static readonly int DefaultPort = 25;
         public static readonly SecureSocketOptions DefaultSecurity = SecureSocketOptions.Auto;

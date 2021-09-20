@@ -6,7 +6,7 @@ namespace WebApp.Service.Mailing.Users
     [DataContract]
     public class UserLockedOutMailModel : MailModel
     {
-        public static readonly string AssociatedMailType = "UserLockedOut";
+        public const string AssociatedMailType = "UserLockedOut";
 
         public override string MailType => AssociatedMailType;
 

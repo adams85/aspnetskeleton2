@@ -6,7 +6,7 @@ namespace WebApp.Service.Mailing.Users
     [DataContract]
     public class UnapprovedUserCreatedMailModel : MailModel
     {
-        public static readonly string AssociatedMailType = "UnapprovedUserCreated";
+        public const string AssociatedMailType = "UnapprovedUserCreated";
 
         public override string MailType => AssociatedMailType;
 

@@ -7,7 +7,7 @@ namespace WebApp.Service.Mailing.Users
     [DataContract]
     public class PasswordResetMailModel : MailModel
     {
-        public static readonly string AssociatedMailType = "PasswordReset";
+        public const string AssociatedMailType = "PasswordReset";
 
         public override string MailType => AssociatedMailType;
 

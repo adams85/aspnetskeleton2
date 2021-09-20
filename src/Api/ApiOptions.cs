@@ -2,6 +2,6 @@
 {
     public class ApiOptions
     {
-        public static readonly string DefaultSectionName = "Application:Api";
+        public const string DefaultSectionName = "Application:Api";
     }
 }

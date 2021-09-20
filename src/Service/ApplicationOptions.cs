@@ -2,7 +2,7 @@
 {
     public class ApplicationOptions
     {
-        public static readonly string DefaultSectionName = "Application";
+        public const string DefaultSectionName = "Application";
 
         public string UIBaseUrl { get; set; } = null!;
     }

@@ -277,7 +277,7 @@ $.fn[NAME].defaults = {
             $elements.removeClass("disabled");
         else
             $elements.addClass("disabled");
-        $elements.prop("disabled", !value);
+        $elements.attr({ "disabled": !value, "aria-disabled": "" + !value});
     },
     handleEditModalSubmitError: function ($modal, jqXhr, error) {
         const $modalBody = $(".modal-body", $modal);

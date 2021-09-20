@@ -108,7 +108,7 @@
                         @if (tableModel.AllowEditing && tableModel.CanCreateRow)
                         {
                             var actionRouteValues = tableModel.GetReturnUrlRouteValues(Url);
-                            <a class="btn btn-success btn-sm create-item-btn" href="@tableModel.GenerateCreateUrl(Url, actionRouteValues)"><i class="fa fa-plus" aria-hidden="true"></i> @T["Create New"]</a>
+                            <a class="btn btn-success btn-sm create-item-btn" href="@tableModel.GenerateCreateUrl(Url, actionRouteValues)" role="button"><i class="fa fa-plus" aria-hidden="true"></i> @T["Create New"]</a>
                         }
                     </div>
                 </div>
@@ -352,14 +352,14 @@
 
                     @if (canEdit)
                     {
-                        <a class="btn btn-info btn-sm edit-item-btn" href="@columnModel.Table.GenerateEditUrl(Url, actionRouteValues)" title="@T["Edit"]">
+                        <a class="btn btn-info btn-sm edit-item-btn" href="@columnModel.Table.GenerateEditUrl(Url, actionRouteValues)" title="@T["Edit"]" role="button">
                             <i class="fa fa-pencil" aria-hidden="true"></i>
                         </a>
                     }
 
                     @if (canDelete)
                     {
-                        <a class="btn btn-danger btn-sm delete-item-btn" href="@columnModel.Table.GenerateDeleteUrl(Url, actionRouteValues)" title="@T["Delete"]">
+                        <a class="btn btn-danger btn-sm delete-item-btn" href="@columnModel.Table.GenerateDeleteUrl(Url, actionRouteValues)" title="@T["Delete"]" role="button">
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </a>
                     }

@@ -98,14 +98,6 @@
   &:not(.server-error) .server-error-alert {
     display: none;
   }
-
-  /* no-js support */
-
-  html:not(.no-js) &:not(.server-error) {
-    .refresh-table-btn {
-      display: none;
-    }
-  }
 }
 
 // Predefined column widths

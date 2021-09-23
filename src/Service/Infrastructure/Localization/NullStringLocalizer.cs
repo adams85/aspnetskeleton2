@@ -43,20 +43,20 @@ namespace WebApp.Service.Infrastructure.Localization
             return value!;
         }
 
-        public bool TryGetTranslation(string name, Plural plural, TextContext context, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
+        public bool TryGetTranslation(string name, Plural plural, TextContext context, out string? searchedLocation, out string value)
         {
             searchedLocation = null;
             value = plural.Id != null && plural.Count != 1 ? plural.Id : name;
             return true;
         }
 
-        public bool TryLocalize(string name, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
+        public bool TryLocalize(string name, out string? searchedLocation, out string value)
         {
             TryGetTranslation(name, default, default, out searchedLocation, out value!);
             return true;
         }
 
-        public bool TryLocalize(string name, object[] arguments, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
+        public bool TryLocalize(string name, object[] arguments, out string? searchedLocation, out string value)
         {
             var (plural, context) = LocalizationHelper.GetSpecialArgs(arguments);
             TryGetTranslation(name, plural, context, out searchedLocation, out value);

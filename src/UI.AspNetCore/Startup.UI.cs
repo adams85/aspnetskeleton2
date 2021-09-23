@@ -140,7 +140,7 @@ namespace WebApp.UI
 
                 services
                     .ReplaceLast(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>())
-                    .ReplaceLast(ServiceDescriptor.Singleton<IViewLocalizer, ExtendedViewLocalizer>());
+                    .ReplaceLast(ServiceDescriptor.Transient<IViewLocalizer, ExtendedViewLocalizer>());
 
                 if (UIOptions.EnableRazorRuntimeCompilation)
                     mvcBuilder.AddRazorRuntimeCompilation();

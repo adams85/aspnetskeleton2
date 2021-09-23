@@ -1,4 +1,8 @@
-﻿@attribute [AssociatedAssemblyName(ApplicationConstants.AssemblyNamePrefix + ".UI.AspNetCore")]
+﻿@*
+    TODO: decorating views with the AssociatedAssemblyName attribute will become unnecessary and can be removed after upgrading to .NET 6
+    (see also https://docs.microsoft.com/en-us/dotnet/core/compatibility/aspnet-core/6.0/razor-compiler-doesnt-produce-views-assembly)
+*@
+@attribute [AssociatedAssemblyName(ApplicationConstants.AssemblyNamePrefix + ".UI.AspNetCore")]
 
 @using Microsoft.AspNetCore.Mvc.Localization
 @using Karambolo.AspNetCore.Bundling.ViewHelpers

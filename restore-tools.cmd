@@ -31,7 +31,7 @@ ECHO.
 
 FOR %%T IN (%ProjectTools%) DO (
   ECHO Removing '%%T' from NuGet package cache...
-  rmdir /S /Q "%NugetPkgCache%\%%T" 2> nul
+  rmdir /S /Q "%NugetPkgCache%\%%T"
 )
 
 :restore

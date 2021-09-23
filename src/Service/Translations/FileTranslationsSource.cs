@@ -25,6 +25,7 @@ namespace WebApp.Service.Translations
         {
             SkipComments = true,
             SkipInfoHeaders = true,
+            StringDecodingOptions = new POStringDecodingOptions { KeepKeyStringsPlatformIndependent = true }
         };
 
         private readonly IEventPublisher _eventPublisher;

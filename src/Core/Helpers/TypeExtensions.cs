@@ -30,6 +30,6 @@ namespace WebApp.Core.Helpers
         }
 
         public static string? GetAssociatedAssemblyName(this Type type) =>
-            s_associatedAssemblyNameCache.GetOrAdd(type, type => type.GetCustomAttribute<AssociatedAssemblyNameAttribute>()?.AssemblyName?.Name);
+            s_associatedAssemblyNameCache.GetOrAdd(type, type => type.GetCustomAttribute<AssociatedAssemblyNameAttribute>()?.AssemblyName.Name);
     }
 }

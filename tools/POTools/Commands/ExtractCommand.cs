@@ -166,18 +166,16 @@ namespace POTools.Commands
                         if (originalCatalog != null && originalCatalog.TryGetValue(key, out var originalEntry))
                         {
                             var hasChanged =
-                                originalEntry.Count == 0 || originalEntry[0] != text.Id ||
-                                (text.PluralId == null ?
-                                    originalEntry.Count > 1 :
-                                    originalEntry.Count != 2 || originalEntry[1] != text.PluralId);
+                                key.Id != originalEntry[0] ||
+                                key.PluralId != null && (originalEntry.Count != 2 || key.PluralId != originalEntry[1]);
 
                             state = hasChanged ? "changed" : null;
                         }
 
                         entry =
-                            text.PluralId == null ?
-                            (IPOEntry)new POSingularEntry(key) { Translation = text.Id } :
-                            new POPluralEntry(key) { text.Id, text.PluralId };
+                            key.PluralId == null ?
+                            (IPOEntry)new POSingularEntry(key) { Translation = key.Id } :
+                            new POPluralEntry(key) { key.Id, key.PluralId };
 
                         entry.Comments = new List<POComment>();
 
@@ -205,7 +203,13 @@ namespace POTools.Commands
                 foreach (var originalEntry in originalCatalog)
                     if (!catalog.Contains(originalEntry.Key))
                     {
-                        var entry = new POSingularEntry(originalEntry.Key) { Translation = "***THIS ENTRY WAS REMOVED. DO NOT TRANSLATE!***" };
+                        const string entryRemovedMessage = "***THIS ENTRY WAS REMOVED. DO NOT TRANSLATE!***";
+
+                        var entry =
+                            originalEntry.Key.PluralId == null ?
+                            (IPOEntry)new POSingularEntry(originalEntry.Key) { Translation = entryRemovedMessage } :
+                            new POPluralEntry(originalEntry.Key) { entryRemovedMessage };
+
                         entry.Comments = new List<POComment> { new POFlagsComment { Flags = new HashSet<string> { "removed" } } };
                         catalog.Add(entry);
                     }
@@ -302,12 +306,12 @@ namespace POTools.Commands
 
             catalog.Headers = new Dictionary<string, string>
             {
-                { POCatalog.ProjectIdVersionHeaderName, string.Empty },
-                { POCatalog.ReportMsgidBugsToHeaderName, string.Empty },
-                { POCatalog.PotCreationDateHeaderName, $"{now:yyyy-MM-dd hh:mm}{(now.Offset >= TimeSpan.Zero ? "+" : "-")}{now.Offset:hhmm}" },
-                { POCatalog.PORevisionDateHeaderName, string.Empty },
-                { POCatalog.LastTranslatorHeaderName, string.Empty },
-                { POCatalog.LanguageTeamHeaderName, string.Empty },
+                [POCatalog.ProjectIdVersionHeaderName] = string.Empty,
+                [POCatalog.ReportMsgidBugsToHeaderName] = string.Empty,
+                [POCatalog.PotCreationDateHeaderName] = $"{now:yyyy-MM-dd hh:mm}{(now.Offset >= TimeSpan.Zero ? "+" : "-")}{now.Offset:hhmm}",
+                [POCatalog.PORevisionDateHeaderName] = string.Empty,
+                [POCatalog.LastTranslatorHeaderName] = string.Empty,
+                [POCatalog.LanguageTeamHeaderName] = string.Empty,
             };
 
             if (culture != null)

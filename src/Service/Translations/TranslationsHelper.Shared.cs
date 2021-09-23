@@ -11,17 +11,16 @@ namespace WebApp.Service.Translations
             PluralFormCount = catalog.PluralFormCount,
             PluralFormSelector = catalog.PluralFormSelector,
             Entries = catalog
-                .Cast<IPOEntry>()
+                .AsEnumerable<IPOEntry>()
+                .Where(entry => entry.Count > 0)
                 .Select(entry =>
                 {
                     TranslationEntryData entryData;
 
-                    if (entry is POPluralEntry || entry.Count > 1)
-                        entryData = new TranslationEntryData.Plural { Translations = entry.ToArray() };
-                    else if (entry is POSingularEntry || entry.Count == 1)
+                    if (entry.Key.PluralId == null)
                         entryData = new TranslationEntryData.Singular { Translation = entry[0] };
                     else
-                        return null;
+                        entryData = new TranslationEntryData.Plural { Translations = entry.ToArray() };
 
                     entryData.Id = entry.Key.Id;
                     entryData.PluralId = entry.Key.PluralId;
@@ -29,7 +28,6 @@ namespace WebApp.Service.Translations
 
                     return entryData;
                 })
-                .Where(entry => entry != null)
                 .ToArray()!
         };
 
@@ -40,10 +38,10 @@ namespace WebApp.Service.Translations
 
                 var key = new POKey(entryData.Id, entryData.PluralId, entryData.ContextId);
 
-                if (entryData is TranslationEntryData.Plural pluralEntryData)
-                    entry = new POPluralEntry(key, pluralEntryData.Translations ?? Enumerable.Empty<string>());
-                else if (entryData is TranslationEntryData.Singular singularEntryData)
+                if (entryData is TranslationEntryData.Singular singularEntryData)
                     entry = new POSingularEntry(key) { Translation = singularEntryData.Translation };
+                else if (entryData is TranslationEntryData.Plural pluralEntryData)
+                    entry = new POPluralEntry(key, pluralEntryData.Translations ?? Enumerable.Empty<string>());
                 else
                     throw new InvalidOperationException();
 
@@ -55,4 +53,3 @@ namespace WebApp.Service.Translations
         };
     }
 }
-

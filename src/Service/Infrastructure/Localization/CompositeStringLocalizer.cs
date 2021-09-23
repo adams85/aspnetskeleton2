@@ -24,7 +24,7 @@ namespace WebApp.Service.Infrastructure.Localization
             _logger = logger ?? (ILogger)NullLogger.Instance;
         }
 
-        public CompositeStringLocalizer(IStringLocalizerFactory stringLocalizerFactory, IEnumerable<(string? BaseName, string Location)> baseNameLocationPairs,
+        public CompositeStringLocalizer(IStringLocalizerFactory stringLocalizerFactory, IEnumerable<(string BaseName, string Location)> baseNameLocationPairs,
             ILogger<CompositeStringLocalizer>? logger = null)
             : this(baseNameLocationPairs.Select(pair => stringLocalizerFactory.Create(pair.BaseName, pair.Location)), null, logger) { }
 

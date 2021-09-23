@@ -57,7 +57,7 @@ namespace WebApp.Api.Infrastructure.Localization
             Debug.Assert(!string.IsNullOrEmpty(path), "Couldn't determine a path for the view");
 
             var location =
-                (viewContext.View as RazorView)?.RazorPage.GetType()?.GetAssociatedAssemblyName() ??
+                (viewContext.View as RazorView)?.RazorPage.GetType().GetAssociatedAssemblyName() ??
                 _applicationName;
 
             _localizer = _localizerFactory.Create(BuildBaseName(path, location), location);

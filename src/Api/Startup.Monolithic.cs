@@ -18,7 +18,7 @@ namespace WebApp.Api
 
                 services
                     .ReplaceLast(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>())
-                    .ReplaceLast(ServiceDescriptor.Singleton<IViewLocalizer, ExtendedViewLocalizer>());
+                    .ReplaceLast(ServiceDescriptor.Transient<IViewLocalizer, ExtendedViewLocalizer>());
             }
         }
     }

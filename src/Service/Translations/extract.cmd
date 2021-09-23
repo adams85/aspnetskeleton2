@@ -12,7 +12,7 @@ FOR %%L IN (%Languages%) DO (
 
 FOR %%P IN (%Projects%) DO (
   echo Extracting %%P...
-  
+
   cd "%~dp0\..\..\%%P"
-  dotnet po scan -p %%P.csproj | dotnet po extract -o "%~dp0\%ApplicationPrefix%%%P.pot" -m %LanguageSwitches%
+  dotnet po scan -p %%P.csproj | dotnet po extract -o "%~dp0\%ApplicationPrefix%%%P.pot" -m %LanguageSwitches% --no-backup
 )

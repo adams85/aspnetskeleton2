@@ -126,16 +126,17 @@ namespace POTools.Services.Extracting
             return declaration.DescendantNodes()
                 .OfType<ElementAccessExpressionSyntax>()
                 .Where(elementAccess => elementAccess.Expression is IdentifierNameSyntax identifier && _localizerMemberNames.Contains(identifier.Identifier.ValueText))
-                .Select(elementAccess => GetTextInfo(elementAccess, cancellationToken));
+                .Select(elementAccess => GetTextInfo(elementAccess, cancellationToken))
+                .Where(item => item != null)!;
 
-            LocalizableTextInfo GetTextInfo(ElementAccessExpressionSyntax translateExpression, CancellationToken cancellationToken)
+            LocalizableTextInfo? GetTextInfo(ElementAccessExpressionSyntax translateExpression, CancellationToken cancellationToken)
             {
                 var lineNumber = translateExpression.GetLineNumber(cancellationToken);
 
                 var argList = translateExpression.ArgumentList;
                 var id = GetId(argList);
                 if (id == null)
-                    return new LocalizableTextInfo { LineNumber = lineNumber };
+                    return null;
 
                 return new LocalizableTextInfo
                 {
@@ -149,13 +150,7 @@ namespace POTools.Services.Extracting
             static string? GetId(BaseArgumentListSyntax node)
             {
                 var args = node.Arguments;
-                return
-                    args.Count > 0 &&
-                        args[0] is ArgumentSyntax arg &&
-                        arg.Expression is LiteralExpressionSyntax literal &&
-                        literal.Token.IsKind(SyntaxKind.StringLiteralToken) ?
-                    literal.Token.ValueText :
-                    null;
+                return args.Count > 0 ? args[0].Expression.ResolveStringConstantExpression() : null;
             }
 
             string? GetPluralId(BaseArgumentListSyntax node)
@@ -177,13 +172,7 @@ namespace POTools.Services.Extracting
                     return null;
 
                 var args = factoryInvocation.ArgumentList.Arguments;
-                return
-                    args.Count == 2 &&
-                        args[0] is ArgumentSyntax argument &&
-                        argument.Expression is LiteralExpressionSyntax literal &&
-                        literal.Token.IsKind(SyntaxKind.StringLiteralToken) ?
-                    literal.Token.ValueText :
-                    null;
+                return args.Count == 2 ? args[0].Expression.ResolveStringConstantExpression() : null;
             }
 
             string? GetContextId(BaseArgumentListSyntax node)
@@ -199,13 +188,7 @@ namespace POTools.Services.Extracting
                     return null;
 
                 args = factoryInvocation.ArgumentList.Arguments;
-                return
-                    args.Count == 1 &&
-                        args[0] is ArgumentSyntax argument &&
-                        argument.Expression is LiteralExpressionSyntax literal &&
-                        literal.Token.IsKind(SyntaxKind.StringLiteralToken) ?
-                    literal.Token.ValueText :
-                    null;
+                return args.Count == 1 ? args[0].Expression.ResolveStringConstantExpression() : null;
             }
         }
 

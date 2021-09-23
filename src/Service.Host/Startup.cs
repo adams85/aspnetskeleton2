@@ -43,7 +43,7 @@ namespace WebApp.Service.Host
 
             services
                 .ReplaceLast(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>())
-                .ReplaceLast(ServiceDescriptor.Singleton<IViewLocalizer, ExtendedViewLocalizer>());
+                .ReplaceLast(ServiceDescriptor.Transient<IViewLocalizer, ExtendedViewLocalizer>());
 
             // https://protobuf-net.github.io/protobuf-net.Grpc/gettingstarted
             services.AddCodeFirstGrpc(options => options.Interceptors.Add<RestoreExecutionContextInterceptor>());

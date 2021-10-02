@@ -37,7 +37,6 @@ namespace WebApp.Service.Users
 
             var user = userWithProfile.User;
 
-            user.Password = null;
             user.PasswordVerificationToken = SecurityHelper.GenerateToken(_guidProvider);
             user.PasswordVerificationTokenExpirationDate = _clock.UtcNow + command.TokenExpirationTimeSpan;
 

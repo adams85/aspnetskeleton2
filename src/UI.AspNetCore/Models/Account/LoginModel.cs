@@ -2,11 +2,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using WebApp.Common.Infrastructure.Localization;
 
 namespace WebApp.UI.Models.Account
 {
-    public class LoginModel : CardPageModel
+    public class LoginModel
     {
         [Localized] private const string UserNameDisplayName = "E-mail address";
         [DisplayName(UserNameDisplayName), Required]
@@ -28,10 +29,7 @@ namespace WebApp.UI.Models.Account
         [DisplayName(RememberMeDisplayName)]
         public bool RememberMe { get; set; }
 
-        [BindNever]
+        [BindNever, ValidateNever]
         public NetworkCredential Credentials { get; } = new NetworkCredential();
-
-        [BindNever]
-        public string? ReturnUrl { get; set; }
     }
 }

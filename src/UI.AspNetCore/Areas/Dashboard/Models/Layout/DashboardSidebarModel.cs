@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
-using WebApp.UI.Infrastructure.Navigation;
+using WebApp.UI.Models;
 
 namespace WebApp.UI.Areas.Dashboard.Models.Layout
 {
@@ -45,16 +45,16 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
         {
             public NavigationItem() { }
 
-            public NavigationItem(PageInfo page)
+            public NavigationItem(PageDescriptor page)
             {
                 IsVisibleAsync = page.IsAccessAllowedAsync;
                 GetTitle = page.GetDefaultTitle;
-                GetUrl = urlHelper => urlHelper.RouteUrl(page.RouteName);
+                GetUrl = urlHelper => urlHelper.Page(page.PageName, new { area = page.AreaName });
                 IsActive = (_, currentPage) => currentPage == page;
             }
 
             public Func<IUrlHelper, string> GetUrl { get; set; } = null!;
-            public Func<HttpContext, PageInfo?, bool> IsActive { get; set; } = null!;
+            public Func<HttpContext, PageDescriptor?, bool> IsActive { get; set; } = null!;
         }
 
         public class NavigationDropDownItem : NavigationItemBase
@@ -66,7 +66,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
                 set => _items = value;
             }
 
-            public bool IsShown(HttpContext context, PageInfo? currentPage)
+            public bool IsShown(HttpContext context, PageDescriptor? currentPage)
             {
                 return Items.Any(itemBase =>
                     itemBase is NavigationItem item && item.IsActive(context, currentPage) ||

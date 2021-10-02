@@ -1,0 +1,72 @@
+﻿@page
+@model IndexModel
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                @T["Change Password"]
+            </div>
+            <div class="card-body">
+                @if (Model.ChangePasswordSuccess == true)
+                {
+                <p class="text-info">
+                    <i class="fa fa-check" aria-hidden="true"></i> @T["Your password has been successfully changed."]
+                </p>
+                }
+                else if (Model.ChangePasswordSuccess == false)
+                {
+                <p class="text-danger">
+                    <i class="fa fa-times" aria-hidden="true"></i> @T["Your password could not be changed."]
+                </p>
+                }
+
+                <form class="form-horizontal needs-validation" method="post" role="form" novalidate asp-page-handler="@IndexModel.ChangePasswordHandler">
+                    <div asp-validation-summary="ModelOnly"></div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fa fa-lock" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                        <input class="form-control rounded-right" asp-for="ChangePasswordModel.CurrentPassword" type="password" placeholder="@Html.DisplayNameFor(m => m.ChangePasswordModel.CurrentPassword)" />
+                        <div class="invalid-feedback">
+                            <span asp-validation-for="ChangePasswordModel.CurrentPassword"></span>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fa fa-lock" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                        <input class="form-control rounded-right" asp-for="ChangePasswordModel.NewPassword" type="password" placeholder="@Html.DisplayNameFor(m => m.ChangePasswordModel.NewPassword)" />
+                        <div class="invalid-feedback">
+                            <span asp-validation-for="ChangePasswordModel.NewPassword"></span>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fa fa-lock" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                        <input class="form-control rounded-right" asp-for="ChangePasswordModel.ConfirmPassword" type="password" placeholder="@Html.DisplayNameFor(m => m.ChangePasswordModel.ConfirmPassword)" />
+                        <div class="invalid-feedback">
+                            <span asp-validation-for="ChangePasswordModel.ConfirmPassword"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-6">
+                            <button class="btn btn-primary px-4" type="submit">@T["Change password"]</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

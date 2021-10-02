@@ -1,9 +1,0 @@
-﻿@using WebApp.UI.Models.Layout
-
-@model ILayoutModelProvider<LayoutModel>
-
-@{
-    Model.Layout.Initialize(ViewContext, Pages, T);
-
-    Layout = Model.Layout.LayoutName ?? "_Layout";
-}

@@ -1,0 +1,84 @@
+﻿@page
+@model RegisterModel
+
+@section Header {
+    <h3 class="mb-0">@Model.Layout.Title</h3>
+}
+
+<form class="needs-validation" method="post" novalidate>
+    <p class="text-muted">@T["Fill in the following form to create a user account in the application"]</p>
+
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-id-card-o" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="Model.FirstName" type="text" placeholder="@Html.DisplayNameFor(m => m.Model.FirstName)" autofocus />
+        <div class="invalid-feedback">
+            <span asp-validation-for="Model.FirstName"></span>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-id-card-o" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="Model.LastName" type="text" placeholder="@Html.DisplayNameFor(m => m.Model.LastName)" />
+        <div class="invalid-feedback">
+            <span asp-validation-for="Model.LastName"></span>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-envelope-o" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="Model.UserName" type="text" placeholder="@Html.DisplayNameFor(m => m.Model.UserName)" />
+        <div class="invalid-feedback">
+            <span asp-validation-for="Model.UserName"></span>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="Model.Password" type="password" placeholder="@Html.DisplayNameFor(m => m.Model.Password)" />
+        <div class="invalid-feedback">
+            <span asp-validation-for="Model.Password"></span>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="Model.ConfirmPassword" type="password" placeholder="@Html.DisplayNameFor(m => m.Model.ConfirmPassword)" />
+        <div class="invalid-feedback">
+            <span asp-validation-for="Model.ConfirmPassword"></span>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-6">
+            <button class="btn btn-primary px-4" type="submit">@T["Create account"]</button>
+        </div>
+    </div>
+</form>
+
+@section Footer {
+    <div class="text-center">
+        <a asp-page="@LoginModel.PageDescriptor.PageName" asp-area="@LoginModel.PageDescriptor.AreaName">@T["Back to Login"]</a>
+    </div>
+}

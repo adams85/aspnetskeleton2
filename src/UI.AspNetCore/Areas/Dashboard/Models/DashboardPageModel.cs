@@ -1,9 +1,11 @@
 ﻿using WebApp.UI.Areas.Dashboard.Models.Layout;
+using WebApp.UI.Models;
 using WebApp.UI.Models.Layout;
 
 namespace WebApp.UI.Areas.Dashboard.Models
 {
-    public class DashboardPageModel : ILayoutModelProvider<DashboardPageLayoutModel>
+    public abstract class DashboardPageModel<TPageDescriptor> : BasePageModel<TPageDescriptor>, ILayoutModelProvider<DashboardPageLayoutModel>
+        where TPageDescriptor : PageDescriptor, new()
     {
         private DashboardPageLayoutModel? _layout;
         public DashboardPageLayoutModel Layout
@@ -11,10 +13,5 @@ namespace WebApp.UI.Areas.Dashboard.Models
             get => _layout ??= new DashboardPageLayoutModel();
             set => _layout = value;
         }
-    }
-
-    public class DashboardPageModel<TContent> : DashboardPageModel
-    {
-        public TContent Content { get; set; } = default!;
     }
 }

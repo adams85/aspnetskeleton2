@@ -1,0 +1,7 @@
+﻿@model Models.Layout.ILayoutModelProvider<Models.Layout.LayoutModel>
+
+@{
+    Model.Layout.Initialize(ViewContext, T);
+
+    Layout = Model.Layout.LayoutName ?? "_Layout";
+}

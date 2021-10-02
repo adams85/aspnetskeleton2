@@ -1,0 +1,7 @@
+﻿@model UI.Models.Layout.ILayoutModelProvider<UI.Models.Layout.LayoutModel>
+
+@{
+    Model.Layout.Initialize(ViewContext, T);
+
+    Layout = Model.Layout.LayoutName ?? "_DashboardPageLayout";
+}

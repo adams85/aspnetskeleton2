@@ -25,7 +25,7 @@ namespace WebApp.UI
             public override Func<HttpContext, bool>? BranchPredicate { get; } = CreatePathPrefixBranchPredicate("/api");
 
             protected override bool ShouldResolveFromRoot(ServiceDescriptor service) =>
-                // AddDataAnnotationsLocalization calls under the hood, that is, it adds base localization services,
+                // AddDataAnnotationsLocalization calls AddLocalization under the hood, that is, it adds base localization services,
                 // but those are already registered in the root container and we need those shared instances
                 // https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L14
                 service.ServiceType == typeof(IStringLocalizerFactory) || service.ServiceType == typeof(IStringLocalizer<>);

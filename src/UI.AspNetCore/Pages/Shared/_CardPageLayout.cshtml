@@ -1,0 +1,54 @@
+﻿@model Models.Layout.ILayoutModelProvider<Models.Layout.CardPageLayoutModel>
+
+@inject Infrastructure.Theming.IThemeManager ThemeManager
+
+@{
+    Layout = "_Layout";
+    Model.Layout.BodyCssClasses = "c-app flex-row align-items-center";
+}
+
+@section Metas {
+    @RenderSection("Metas", required: false)
+}
+
+@section Stylesheets {
+    @{ var currentTheme = await ThemeManager.GetCurrentThemeAsync(ViewContext.HttpContext); }
+
+    <link href="~/bundles/css/themes/@currentTheme/dashboard/site.css" rel="stylesheet" />
+
+    @RenderSection("Stylesheets", required: false)
+}
+
+@section ScriptsHead {
+    @RenderSection("ScriptsHead", required: false)
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card main">
+                @if (IsSectionDefined("Header"))
+                {
+                    <div class="card-header">
+                        @await RenderSectionAsync("Header")
+                    </div>
+                }
+
+                <div class="card-body">
+                    @RenderBody()
+                </div>
+
+                @if (IsSectionDefined("Footer"))
+                {
+                    <div class="card-footer">
+                        @await RenderSectionAsync("Footer")
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBody {
+    @RenderSection("ScriptsBody", required: false)
+}

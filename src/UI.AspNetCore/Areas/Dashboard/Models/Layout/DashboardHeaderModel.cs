@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
-using WebApp.UI.Infrastructure.Navigation;
+using WebApp.UI.Models;
 
 namespace WebApp.UI.Areas.Dashboard.Models.Layout
 {
@@ -21,11 +21,11 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
         {
             public DropDownMenuItem() { }
 
-            public DropDownMenuItem(PageInfo page)
+            public DropDownMenuItem(PageDescriptor page)
             {
                 IsVisibleAsync = page.IsAccessAllowedAsync;
                 GetTitle = page.GetDefaultTitle;
-                GetUrl = urlHelper => urlHelper.RouteUrl(page.RouteName);
+                GetUrl = urlHelper => urlHelper.Page(page.PageName, new { area = page.AreaName });
             }
 
             public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; set; } = null!;

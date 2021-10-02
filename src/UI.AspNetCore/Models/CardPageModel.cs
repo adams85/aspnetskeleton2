@@ -2,7 +2,8 @@
 
 namespace WebApp.UI.Models
 {
-    public class CardPageModel : ILayoutModelProvider<CardPageLayoutModel>
+    public abstract class CardPageModel<TPageDescriptor> : BasePageModel<TPageDescriptor>, ILayoutModelProvider<CardPageLayoutModel>
+        where TPageDescriptor : PageDescriptor, new()
     {
         private CardPageLayoutModel? _layout;
         public CardPageLayoutModel Layout
@@ -10,10 +11,5 @@ namespace WebApp.UI.Models
             get => _layout ??= new CardPageLayoutModel();
             set => _layout = value;
         }
-    }
-
-    public class CardPageModel<TContent> : CardPageModel
-    {
-        public TContent Content { get; set; } = default!;
     }
 }

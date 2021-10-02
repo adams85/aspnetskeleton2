@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Reflection;
+using Karambolo.Common;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -19,14 +22,15 @@ using Microsoft.Net.Http.Headers;
 using WebApp.Api.Infrastructure.Localization;
 using WebApp.Core.Helpers;
 using WebApp.Service.Settings;
-using WebApp.UI.Areas.Dashboard;
+using WebApp.UI.Infrastructure;
 using WebApp.UI.Infrastructure.DataAnnotations;
+using WebApp.UI.Infrastructure.ErrorHandling;
+using WebApp.UI.Infrastructure.Filters;
 using WebApp.UI.Infrastructure.Hosting;
-using WebApp.UI.Infrastructure.Navigation;
 using WebApp.UI.Infrastructure.Security;
 using WebApp.UI.Infrastructure.Theming;
 using WebApp.UI.Infrastructure.ViewFeatures;
-using WebApp.UI.Middlewares;
+using WebApp.UI.Models;
 
 namespace WebApp.UI
 {
@@ -62,12 +66,6 @@ namespace WebApp.UI
 
             public override void ConfigureServices(IServiceCollection services)
             {
-                services.AddSingleton<IPageCatalog>(sp => new PageCatalog(new IPageCollectionProvider[]
-                {
-                    new Pages(),
-                    new DashboardPages(),
-                }));
-
                 services.AddSingleton<IAccountManager, AccountManager>();
 
                 services
@@ -103,6 +101,12 @@ namespace WebApp.UI
                     .Bind(Configuration.GetSection($"{UISecurityOptions.DefaultSectionName}:Authentication"))
                     .Configure<IAccountManager>((options, accountManager) => options.Events = new UICookieAuthenticationEvents(accountManager));
 
+                services.AddAuthorization(options => AnonymousOnlyAttribute.AddPolicy(options));
+
+                services
+                    .ReplaceLast(ServiceDescriptor.Singleton<IAuthorizationPolicyProvider, CustomAuthorizationPolicyProvider>())
+                    .AddSingleton<IPageAuthorizationHelper, PageAuthorizationHelper>();
+
                 #endregion
 
                 #region View caching
@@ -117,7 +121,7 @@ namespace WebApp.UI
 
                 #region MVC
 
-                var mvcBuilder = services.AddControllersWithViews();
+                var mvcBuilder = services.AddRazorPages(options => options.Conventions.Add(new GlobalPageApplicationModelConvention()));
 
                 _apiStartup.ConfigureModelBinding(mvcBuilder);
                 _apiStartup.ConfigureModelValidation(mvcBuilder);
@@ -141,6 +145,8 @@ namespace WebApp.UI
                 services
                     .ReplaceLast(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>())
                     .ReplaceLast(ServiceDescriptor.Transient<IViewLocalizer, ExtendedViewLocalizer>());
+
+                services.AddSingleton(typeof(RuntimeCompilationAwareValueCache<>));
 
                 if (UIOptions.EnableRazorRuntimeCompilation)
                     mvcBuilder.AddRazorRuntimeCompilation();
@@ -169,7 +175,7 @@ namespace WebApp.UI
                 }
                 else
                 {
-                    app.UseExceptionHandler("/Home/Error");
+                    app.UseExceptionHandler("/Error");
                     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                     app.UseHsts();
                 }
@@ -249,8 +255,32 @@ namespace WebApp.UI
 
                 app.UseEndpoints(endpoints =>
                 {
-                    endpoints.MapControllers();
+                    endpoints.MapRazorPages();
                 });
+            }
+
+            // we need a custom IPageApplicationModelConvention implementation because PageConventionCollection doesn't provide
+            // a simpler way of global customization (e.g. adding filters to all pages of all areas) currently:
+            // https://github.com/dotnet/aspnetcore/issues/9783
+            private sealed class GlobalPageApplicationModelConvention : IPageApplicationModelConvention
+            {
+                public void Apply(PageApplicationModel model)
+                {
+                    model.Filters.Add(new EnsureHandlerPageFilter());
+
+                    Type pageDescriptorProviderType;
+                    if ((pageDescriptorProviderType = model.HandlerType).HasInterface(typeof(IPageDescriptorProvider)) ||
+                        (pageDescriptorProviderType = model.PageType).HasInterface(typeof(IPageDescriptorProvider)))
+                    {
+                        var pageDescriptor = PageDescriptor.Get(pageDescriptorProviderType);
+
+                        if (pageDescriptor.GetAuthorizationPolicyAsync != null)
+                        {
+                            var policyName = CustomAuthorizationPolicyProvider.AuthorizePagePolicyPrefix + pageDescriptorProviderType.AssemblyQualifiedNameWithoutAssemblyDetails();
+                            model.EndpointMetadata.Add(new AuthorizeAttribute(policyName));
+                        }
+                    }
+                }
             }
         }
     }

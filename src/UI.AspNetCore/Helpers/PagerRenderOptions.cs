@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace WebApp.UI.Helpers
 {
     // https://github.com/dncuug/X.PagedList/blob/68345177ef1de43b2538134378d9abe6292ff83d/src/X.PagedList.Web.Common/PagedListRenderOptions.cs
     public sealed class PagerRenderOptions
     {
+        public static readonly PagerRenderOptions Default = new PagerRenderOptions
+        {
+            Display = true,
+            MaximumPageNumbersToDisplay = 5
+        };
+
         ///<summary>
         /// The default settings render all navigation links and no descriptive text
         ///</summary>

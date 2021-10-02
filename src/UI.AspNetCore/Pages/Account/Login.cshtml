@@ -1,0 +1,63 @@
+﻿@page
+@model LoginModel
+
+@inject ISettingsProvider SettingsProvider
+
+@section Header {
+    <h3 class="mb-0">@Model.Layout.Title</h3>
+}
+
+<form class="needs-validation" method="post" asp-route-returnUrl="@Model.ReturnUrl" novalidate>
+    <p class="text-muted">@T["Sign in to your account"]</p>
+
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-envelope-o" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="Model.UserName" type="text" placeholder="@Html.DisplayNameFor(m => m.Model.UserName)" autofocus />
+        <div class="invalid-feedback">
+            <span asp-validation-for="Model.UserName"></span>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+            </span>
+        </div>
+        <input class="form-control rounded-right" asp-for="Model.Password" type="password" placeholder="@Html.DisplayNameFor(m => m.Model.Password)" />
+        <div class="invalid-feedback">
+            <span asp-validation-for="Model.Password"></span>
+        </div>
+    </div>
+
+    <div class="form-group mb-3">
+        <div class="form-check">
+            <input class="form-check-input" id="@Html.IdFor(m => m.Model.RememberMe)" name="@Html.NameFor(m => m.Model.RememberMe)" type="checkbox" checked="@Model.Model.RememberMe" value="@true.ToString()" />
+            <label class="form-check-label" asp-for="Model.RememberMe"></label>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-6">
+            <button class="btn btn-primary px-4" type="submit">@T["Login"]</button>
+        </div>
+        <div class="col-6 text-right">
+            <a class="btn btn-link px-0" asp-page="@ResetPasswordModel.PageDescriptor.PageName" asp-area="@ResetPasswordModel.PageDescriptor.AreaName" role="button">@T["Forgot your password?"]</a>
+        </div>
+    </div>
+</form>
+
+@if (SettingsProvider.EnableRegistration())
+{
+    @section Footer {
+        <div class="text-center">
+            <a asp-page="@RegisterModel.PageDescriptor.PageName" asp-area="@RegisterModel.PageDescriptor.AreaName">@T["Don't you have an account yet?"]</a>
+        </div>
+    }
+}

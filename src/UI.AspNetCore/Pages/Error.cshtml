@@ -1,0 +1,30 @@
+﻿@page
+@model ErrorModel
+
+@inject ISettingsProvider SettingsProvider
+
+@section Header {
+    <h3 class="mb-0">@Model.Layout.Title</h3>
+}
+
+<p class="lead">
+    <strong class="text-danger">@T["An error occurred while processing your request."]</strong>
+</p>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>@T["Request ID:"]</strong> <code>@Model.RequestId</code>
+    </p>
+}
+
+<p class="mb-0">
+    @T["Please try again or <a href=\"mailto:{0}\">contact the system administrator</a> if the problem persists.",
+         SettingsProvider.AdminMailAddress()]
+</p>
+
+@section Footer {
+    <div class="text-center">
+        <a asp-page="@Areas.Dashboard.Pages.IndexModel.PageDescriptor.PageName" asp-area="@Areas.Dashboard.Pages.IndexModel.PageDescriptor.AreaName">@T["Back to Dashboard"]</a>
+    </div>
+}

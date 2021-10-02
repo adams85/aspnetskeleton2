@@ -27,7 +27,7 @@ namespace WebApp.Api.Infrastructure.Security
         internal const string JwtRefreshTokenHttpHeaderName = "X-Refresh-Token";
         internal const string JwtRefreshTokenAuthorizationHeaderParamName = "Refresh";
 
-        private const string JwtRefreshTokenHttpContextItemKey = "JwtRefreshToken";
+        private static readonly object s_jwtRefreshTokenHttpContextItemKey = new object();
 
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly IQueryDispatcher _queryDispatcher;
@@ -242,7 +242,7 @@ namespace WebApp.Api.Infrastructure.Security
                     break;
 
             // context.Properties.SetParameter(...) seems to be the proper way to pass the refresh token to ValidateJwtTokenAsync but it won't work for some reason...
-            context.HttpContext.Items[JwtRefreshTokenHttpContextItemKey] = refreshToken;
+            context.HttpContext.Items[s_jwtRefreshTokenHttpContextItemKey] = refreshToken;
             context.HttpContext.Request.Headers[HeaderNames.Authorization] = authorization.Substring(0, i + 1);
 
             return Task.CompletedTask;
@@ -259,7 +259,7 @@ namespace WebApp.Api.Infrastructure.Security
             try { Validators.ValidateLifetime(notBefore, expires, jwtToken, _jwtValidationParameters); }
             catch (SecurityTokenValidationException ex)
             {
-                if (!(ex is SecurityTokenExpiredException) || (refreshToken = context.HttpContext.Items[JwtRefreshTokenHttpContextItemKey] as string) == null)
+                if (!(ex is SecurityTokenExpiredException) || (refreshToken = context.HttpContext.Items[s_jwtRefreshTokenHttpContextItemKey] as string) == null)
                 {
                     context.Fail(ex);
                     return;

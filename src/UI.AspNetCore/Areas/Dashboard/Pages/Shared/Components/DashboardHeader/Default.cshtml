@@ -1,0 +1,111 @@
+﻿@using static Models.Layout.DashboardHeaderModel
+
+@model Models.Layout.DashboardPageLayoutModel
+
+@inject Infrastructure.RuntimeCompilationAwareValueCache<List<DropDownMenuItemBase>> DefaultUserMenuCache
+
+<header class="c-header c-header-fixed c-header-with-subheader">
+    <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar" data-class="c-sidebar-show">
+        <i class="fa fa-bars c-sidebar-nav-icon" aria-hidden="true"></i>
+    </button>
+
+    <a class="c-header-brand d-lg-none" asp-page="@IndexModel.PageDescriptor.PageName" asp-area="@IndexModel.PageDescriptor.AreaName">
+        <div class="logo-wrapper d-flex flex-row">
+            <img class="logo-img" src="~/images/logo-light.png" alt="Logo" />
+            <div class="logo-text flex-grow-1 text-center">
+                <span>AspNet</span><br /><strong>Skeleton</strong>
+            </div>
+        </div>
+    </a>
+
+    <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar" data-class="c-sidebar-lg-show" responsive="true">
+        <i class="fa fa-bars" aria-hidden="true"></i>
+    </button>
+
+    <ul class="c-header-nav ml-auto mr-4">
+        <li class="c-header-nav-item dropdown">
+            <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                <div class="c-avatar">
+                    <img class="c-avatar-img" src="~/images/account-icon.svg" alt="@User.Identity.Name">
+                </div>
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-right pt-0">
+                @{ await RenderDropDownMenuItemsAsync(Model.Header.UserMenu ?? DefaultUserMenu); }
+            </div>
+        </li>
+    </ul>
+
+    <div class="c-subheader px-3">
+        <div class="c-header-text page-title d-flex align-items-center ml-3">
+            @Model.Title
+        </div>
+    </div>
+</header>
+
+@functions {
+    List<DropDownMenuItemBase> DefaultUserMenu => DefaultUserMenuCache.GetOrCreate(() => new List<DropDownMenuItemBase>
+    {
+        new DropDownMenuHeader()
+        {
+            GetTitle = (_, t) => t["Account"],
+        },
+        new DropDownMenuItem(Account.IndexModel.PageDescriptor) { IconCssClass = "fa-wrench" },
+
+        new DropDownMenuDivider { },
+
+        new DropDownMenuItem()
+        {
+            GetTitle = (_, t) => t["Logout"],
+            GetUrl = url => url.Page(UI.Pages.Account.LogoutModel.PageDescriptor.PageName, new { area = UI.Pages.Account.LogoutModel.PageDescriptor.AreaName  }),
+            IconCssClass = "fa-sign-out",
+        },
+    });
+}
+
+@functions {
+    async Task RenderDropDownMenuItemsAsync(List<DropDownMenuItemBase> items)
+    {
+        @for (int i = 0, n = items.Count; i < n; i++)
+        {
+            var itemBase = items[i];
+
+            if (itemBase.IsVisibleAsync != null && !await itemBase.IsVisibleAsync(ViewContext.HttpContext))
+                continue;
+
+            if (itemBase is DropDownMenuItem item)
+            {
+                RenderDropDownMenuItem(item);
+            }
+            else if (itemBase is DropDownMenuHeader header)
+            {
+                RenderDropDownMenuHeader(header);
+            }
+            else if (itemBase is DropDownMenuDivider divider)
+            {
+                RenderDropDownMenuDivider(divider);
+            }
+        }
+    }
+
+    void RenderDropDownMenuItem(DropDownMenuItem item)
+    {
+        <a class="dropdown-item" href="@item.GetUrl(Url)">
+            @if (item.IconCssClass != null)
+            {
+                <i class="fa @item.IconCssClass c-icon mfe-2" aria-hidden="true"></i>
+            }
+            @item.GetTitle(ViewContext.HttpContext, T)
+        </a>
+    }
+
+    void RenderDropDownMenuHeader(DropDownMenuHeader header)
+    {
+        <div class="dropdown-header bg-light py-2"><strong>@header.GetTitle(ViewContext.HttpContext, T)</strong></div>
+    }
+
+    void RenderDropDownMenuDivider(DropDownMenuDivider divider)
+    {
+        <div class="dropdown-divider"></div>
+    }
+}

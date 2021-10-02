@@ -1,0 +1,60 @@
+﻿@using WebApp.UI.Areas.Dashboard.Models.DataTables
+
+@using static WebApp.UI.Areas.Dashboard.Models.DataTables.DataTableColumnModel
+@using static WebApp.UI.Areas.Dashboard.Models.DataTables.DataTableColumnFilterModel
+
+@model ListSettingsQuery
+
+@inject IGlobalRazorHelpers<Pages.Shared.Helpers.IDataTableHelpers> DataTableHelpers
+
+@{
+    var pageModel = (IndexModel)ViewData[nameof(IndexModel)];
+    var tableModel = CreateTableModel(pageModel);
+    DataTableHelpers.Instance.Table(tableModel);
+}
+
+@functions {
+#pragma warning disable 1998
+    private DataTableModel CreateTableModel(IDataTableSource source) => new DataTableModel(source)
+    {
+        CanCreateRow = false,
+        GetRowId = item => ((SettingData)item).Name,
+
+        OrderByFormFieldName = Html.NameFor(m => m.OrderBy),
+        PageIndexFormFieldName = Html.NameFor(m => m.PageIndex),
+        PageSizeFormFieldName = Html.NameFor(m => m.PageSize),
+
+        ColumnsFactory = table => new DataTableColumnModel[]
+        {
+            new DataColumn(table, IndexModel.ColumnBindings.Name)
+            {
+                AscendingOrderIconCssClass = "fa-sort-alpha-asc",
+                DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+                HeaderCellCssClasses = "cw-15",
+                FilterFactory = column => new TextFilter(column, Html.NameFor(m => m.NamePattern), Model.NamePattern)
+            },
+
+            new DataColumn(table, IndexModel.ColumnBindings.Value)
+            {
+                AscendingOrderIconCssClass = "fa-sort-alpha-asc",
+                DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+                HeaderCellCssClasses = "cw-15",
+                FilterFactory = column => new TextFilter(column, Html.NameFor(m => m.ValuePattern), Model.ValuePattern)
+            },
+
+            new DataColumn(table, IndexModel.ColumnBindings.Description)
+            {
+                AscendingOrderIconCssClass = "fa-sort-alpha-asc",
+                DescendingOrderIconCssClass = "fa-sort-alpha-desc",
+                ContentCellTemplate = @<td class="font-weight-light">@IndexModel.GetDescription((SettingData)item.Item)</td>,
+                FilterFactory = column => new TextFilter(column, Html.NameFor(m => m.DescriptionPattern), Model.DescriptionPattern)
+            },
+
+            new ControlColumn(table)
+            {
+                CanDeleteRow = CachedDelegates.False<object>.Func
+            }
+        }
+    };
+#pragma warning restore 1998
+}

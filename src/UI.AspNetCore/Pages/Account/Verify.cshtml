@@ -1,0 +1,48 @@
+﻿@page
+@model VerifyModel
+
+@inject ISettingsProvider SettingsProvider
+
+@section Header {
+    <h3 class="mb-0">@Model.Layout.Title</h3>
+}
+
+@if (Model.Success == null)
+{
+    <p class="lead">
+        <strong>@T["A message has been sent to the e-mail address you entered."]</strong>
+    </p>
+
+    <p>
+        @T["Please follow the instructions given in the message in order to complete your registration."]
+    </p>
+
+    <p class="mb-0">
+        <i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>
+        @T["If you don't receive this message in a few minutes, check your spam folder or <a href=\"mailto:{0}\">contact the system administrator</a>.",
+            SettingsProvider.AdminMailAddress()]
+    </p>
+}
+else if (Model.Success.Value)
+{
+    <p class="lead mb-0">
+        <strong>@T["Your account has been verified."]</strong>
+    </p>
+}
+else
+{
+    <p class="lead">
+        <strong>@T["The operation failed."]</strong>
+    </p>
+
+    <p class="mb-0">
+        @T["Please try again or <a href=\"mailto:{0}\">contact the system administrator</a> if the problem persists.",
+            SettingsProvider.AdminMailAddress()]
+    </p>
+}
+
+@section Footer {
+    <div class="text-center">
+        <a asp-page="@LoginModel.PageDescriptor.PageName" asp-area="@LoginModel.PageDescriptor.AreaName">@(Model.Success == null ? T["Back to Login"] : T["Go to Login"])</a>
+    </div>
+}

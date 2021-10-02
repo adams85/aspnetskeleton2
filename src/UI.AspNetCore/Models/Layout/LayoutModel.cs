@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using WebApp.UI.Infrastructure.Navigation;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace WebApp.UI.Models.Layout
 {
@@ -22,23 +21,23 @@ namespace WebApp.UI.Models.Layout
         public string? Descriptions { get; set; } = s_defaultDescription;
         public string? Keywords { get; set; }
 
-        public PageInfo? PageInfo { get; set; }
+        public PageDescriptor? PageDescriptor { get; private set; }
         public string? LayoutName { get; set; }
         public LocalizedHtmlString? Title { get; set; }
         public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString>? GetTitle { get; set; }
         public object? BodyCssClasses { get; set; }
 
         protected virtual LocalizedHtmlString? GetActualTitle(HttpContext httpContext, IHtmlLocalizer htmlLocalizer) =>
-            Title ?? (GetTitle ?? PageInfo?.GetDefaultTitle)?.Invoke(httpContext, htmlLocalizer);
+            Title ?? (GetTitle ?? PageDescriptor?.GetDefaultTitle)?.Invoke(httpContext, htmlLocalizer);
 
         protected virtual string? GetActualLayoutName(HttpContext httpContext) =>
-            LayoutName ?? PageInfo?.LayoutName;
+            LayoutName ?? PageDescriptor?.LayoutName;
 
-        public virtual void Initialize(ActionContext actionContext, IPageCatalog pages, IHtmlLocalizer htmlLocalizer)
+        public virtual void Initialize(ViewContext viewContext, IHtmlLocalizer htmlLocalizer)
         {
-            PageInfo ??= pages.FindPage(actionContext.ActionDescriptor);
-            LayoutName = GetActualLayoutName(actionContext.HttpContext);
-            Title = GetActualTitle(actionContext.HttpContext, htmlLocalizer);
+            PageDescriptor = (viewContext.ViewData.Model as IPageDescriptorProvider)?.PageDescriptor;
+            LayoutName = GetActualLayoutName(viewContext.HttpContext);
+            Title = GetActualTitle(viewContext.HttpContext, htmlLocalizer);
         }
     }
 }

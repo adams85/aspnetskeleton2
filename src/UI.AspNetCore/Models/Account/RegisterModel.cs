@@ -6,7 +6,7 @@ using WebApp.Service.Users;
 
 namespace WebApp.UI.Models.Account
 {
-    public class RegisterModel : CardPageModel
+    public class RegisterModel
     {
         [Localized] private const string UserNameDisplayName = "E-mail address";
         [DisplayName(UserNameDisplayName), Required, EmailAddress, MaxLength(ModelConstants.UserNameMaxLength)]

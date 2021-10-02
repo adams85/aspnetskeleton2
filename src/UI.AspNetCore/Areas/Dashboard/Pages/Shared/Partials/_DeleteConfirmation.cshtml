@@ -1,0 +1,16 @@
+﻿@model Models.IDeletePopupModel
+
+<form method="post" novalidate>
+    <p class="lead">
+        @T["You are about to delete the {0} with identifier '{1}'.", Model.GetItemDisplayName(ViewContext.HttpContext, T), Model.ItemId]
+    </p>
+
+    <p class="text-danger">
+        @T["Are you sure you want to do this?"]
+    </p>
+
+    <div class="mt-4">
+        <button class="btn btn-primary submit-btn px-4 mr-2" type="submit" data-loading-text="@T["Working..."]">@T["Yes"]</button>
+        <a class="btn btn-secondary cancel-btn px-4" href="@Model.ReturnUrl" role="button">@T["No"]</a>
+    </div>
+</form>

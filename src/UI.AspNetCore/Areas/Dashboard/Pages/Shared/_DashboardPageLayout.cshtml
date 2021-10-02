@@ -1,0 +1,56 @@
+﻿@model UI.Models.Layout.ILayoutModelProvider<Models.Layout.DashboardPageLayoutModel>
+
+@inject Infrastructure.Theming.IThemeManager ThemeManager
+
+@{
+    Layout = "_Layout";
+    Model.Layout.BodyCssClasses = "c-app";
+}
+
+@section Metas {
+    @RenderSection("Metas", required: false)
+}
+
+@section Stylesheets {
+    @{ var currentTheme = await ThemeManager.GetCurrentThemeAsync(ViewContext.HttpContext); }
+
+    <link href="~/bundles/css/themes/@currentTheme/dashboard/site.css" rel="stylesheet" />
+
+    @RenderSection("Stylesheets", required: false)
+}
+
+@section ScriptsHead {
+    @RenderSection("ScriptsHead", required: false)
+}
+
+<vc:dashboard-sidebar model="@Model.Layout"></vc:dashboard-sidebar>
+
+<div class="c-wrapper c-fixed-components">
+    <vc:dashboard-header model="@Model.Layout"></vc:dashboard-header>
+
+    <div class="c-body">
+        <main class="c-main">
+            <div class="container-fluid">
+                <div>
+                    @RenderBody()
+                </div>
+            </div>
+        </main>
+
+        <vc:dashboard-footer model="@Model.Layout"></vc:dashboard-footer>
+    </div>
+</div>
+
+@section ScriptsBody {
+    <script>
+        DashboardPageContext = {
+            rootPath: @Html.JavaScriptString(Url.Content("~/" + DashboardConstants.AreaName)),
+            sidebarStateCookieName: @Html.JavaScriptString(Models.Layout.DashboardSidebarModel.SidebarStateCookieName)
+        };
+    </script>
+
+    <script src="~/bundles/js/dashboard/vendor.js"></script>
+    <script src="~/bundles/js/dashboard/site.js"></script>
+
+    @RenderSection("ScriptsBody", required: false)
+}

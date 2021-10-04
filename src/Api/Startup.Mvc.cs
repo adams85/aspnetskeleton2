@@ -3,7 +3,6 @@ using System.Diagnostics;
 using Karambolo.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -22,8 +21,6 @@ namespace WebApp.Api
 
         private void ConfigureMvc(IMvcBuilder builder)
         {
-            builder.Services.ReplaceLast(ServiceDescriptor.Singleton<IModelMetadataProvider, CustomModelMetadataProvider>());
-
             ConfigureModelBinding(builder);
             ConfigureModelValidation(builder);
 
@@ -47,6 +44,8 @@ namespace WebApp.Api
         {
             builder.AddMvcOptions(options =>
             {
+                options.ModelMetadataDetailsProviders.Add(new DataContractMetadataDetailsProvider());
+
                 var index = options.ModelBinderProviders.FindIndex(provider => provider is ComplexTypeModelBinderProvider);
                 Debug.Assert(index >= 0, "Microsoft.AspNetCore.Mvc.MvcOptions.ModelBinderProviders defaults have apparently changed.");
                 options.ModelBinderProviders.Insert(index, new ListQueryModelBinderProvider());

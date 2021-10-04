@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Localization;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.ResponseCaching;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -20,6 +21,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Localization;
 using Microsoft.Net.Http.Headers;
 using WebApp.Api.Infrastructure.Localization;
+using WebApp.Api.Infrastructure.Security;
 using WebApp.Core.Helpers;
 using WebApp.Service.Settings;
 using WebApp.UI.Infrastructure;
@@ -99,9 +101,9 @@ namespace WebApp.UI
 
                 services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                     .Bind(Configuration.GetSection($"{UISecurityOptions.DefaultSectionName}:Authentication"))
-                    .Configure<IAccountManager>((options, accountManager) => options.Events = new UICookieAuthenticationEvents(accountManager));
+                    .Configure<IAccountManager>((options, accountManager) => options.Events = new CustomCookieAuthenticationEvents(accountManager));
 
-                services.AddAuthorization(options => AnonymousOnlyAttribute.AddPolicy(options));
+                services.AddAuthorization(options => AnonymousOnlyAttribute.Configure(options));
 
                 services
                     .ReplaceLast(ServiceDescriptor.Singleton<IAuthorizationPolicyProvider, CustomAuthorizationPolicyProvider>())
@@ -259,9 +261,10 @@ namespace WebApp.UI
                 });
             }
 
-            // we need a custom IPageApplicationModelConvention implementation because PageConventionCollection doesn't provide
-            // a simpler way of global customization (e.g. adding filters to all pages of all areas) currently:
-            // https://github.com/dotnet/aspnetcore/issues/9783
+            /// <remarks>
+            /// We need a custom <see cref="IPageApplicationModelConvention"/> implementation because <see cref="RazorPagesOptions.Conventions"/> provides no easy way to
+            /// apply customizations (e.g. adding some filters) to all pages of all areas currently (see <seealso href="https://github.com/dotnet/aspnetcore/issues/9783">this issue</seealso>).
+            /// </remarks>
             private sealed class GlobalPageApplicationModelConvention : IPageApplicationModelConvention
             {
                 public void Apply(PageApplicationModel model)

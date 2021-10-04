@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using WebApp.Api.Infrastructure.Security;
@@ -13,24 +12,15 @@ namespace WebApp.Api
         {
             services.AddSingleton<IApiSecurityService, ApiSecurityService>();
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication(ApiAuthenticationSchemes.JwtBearer)
                 .AddJwtBearer()
-                .AddCookie(options => options.ForwardChallenge = JwtBearerDefaults.AuthenticationScheme);
+                .AddCookie();
 
-            services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
-                .Configure<IApiSecurityService>((options, securityService) => securityService.ConfigureJwtBearer(options));
+            services.AddOptions<JwtBearerOptions>(ApiAuthenticationSchemes.JwtBearer)
+                .Configure<IApiSecurityService>((options, securityService) => securityService.ConfigureJwtBearerAuthentication(options));
 
-            services.AddAuthorization(ConfigureAuthorization);
-        }
-
-        private void ConfigureAuthorization(AuthorizationOptions options)
-        {
-            // https://stackoverflow.com/questions/43800763/using-multiple-authentication-schemes-in-asp-net-core
-            options.AddPolicy(ApiSecurityService.ApiAuthorizationPolicy, builder =>
-            {
-                builder.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, JwtBearerDefaults.AuthenticationScheme);
-                builder.RequireAuthenticatedUser();
-            });
+            services.AddOptions<CookieAuthenticationOptions>(ApiAuthenticationSchemes.Cookie)
+                .Configure<IApiSecurityService>((options, securityService) => securityService.ConfigureCookieAuthentication(options));
         }
 
         private void ConfigureSecurity(IApplicationBuilder app)

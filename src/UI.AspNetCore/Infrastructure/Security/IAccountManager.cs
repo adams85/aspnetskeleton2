@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using WebApp.Api.Infrastructure.Security;
 using WebApp.Service.Infrastructure.Validation;
 using WebApp.Service.Users;
 using WebApp.UI.Areas.Dashboard.Models.Account;
@@ -8,10 +9,8 @@ using WebApp.UI.Models.Account;
 
 namespace WebApp.UI.Infrastructure.Security
 {
-    public interface IAccountManager
+    public interface IAccountManager : ICachedUserInfoProvider
     {
-        Task<CachedUserInfoData?> GetCachedUserInfo(string userName, bool registerActivity, CancellationToken cancellationToken);
-
         Task<AuthenticateUserStatus> ValidateUserAsync(NetworkCredential credentials, CancellationToken cancellationToken);
         Task<(CreateUserStatus, PasswordRequirementsData?)> CreateUserAsync(RegisterModel model, CancellationToken cancellationToken);
         Task<(ChangePasswordStatus, PasswordRequirementsData?)> ChangePasswordAsync(string userName, ChangePasswordModel model, CancellationToken cancellationToken);

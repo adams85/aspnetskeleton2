@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Karambolo.Common;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WebApp.Service;
@@ -9,6 +11,13 @@ using WebApp.Service.Settings;
 
 namespace WebApp.Api.Infrastructure.ModelBinding
 {
+    /// <summary>
+    /// Ensures paging in list queries.
+    /// </summary>
+    /// <remarks>
+    /// An instance of this class must be added to the <see cref="MvcOptions.ModelBinderProviders"/> list and it must be placed before
+    /// the built-in <see cref="ComplexTypeModelBinderProvider"/>.
+    /// </remarks>
     // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.Core/src/ModelBinding/Binders/ComplexTypeModelBinderProvider.cs
     public class ListQueryModelBinderProvider : IModelBinderProvider
     {

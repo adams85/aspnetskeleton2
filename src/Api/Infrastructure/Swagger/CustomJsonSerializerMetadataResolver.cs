@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
@@ -16,10 +18,10 @@ namespace WebApp.Api.Infrastructure.Swagger
     /// Customizes Swagger JSON schema generation to match the behavior of <see cref="ApiContractSerializer"/> (including <seealso cref="ApiObjectJsonConverterFactory"/>).
     /// </summary>
     /// <remarks>
-    /// Together with <see cref="CustomModelMetadataProvider"/>, this class is necessary for correct Swagger JSON generation.
+    /// Together with <see cref="DataContractMetadataDetailsProvider"/>, this class is necessary for correct Swagger JSON generation.
     /// </remarks>
     // based on: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/v5.5.1/src/Swashbuckle.AspNetCore.SwaggerGen/SchemaGenerator/JsonSerializerDataContractResolver.cs
-    public sealed class CustomJsonSerializerDataContractResolver : IDataContractResolver
+    public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataContractResolver
     {
         private readonly JsonSerializerOptions _serializerOptions;
         private readonly Func<string, string> _convertMemberName;
@@ -32,90 +34,126 @@ namespace WebApp.Api.Infrastructure.Swagger
 
         public DataContract GetDataContractForType(Type type)
         {
-            var underlyingType = type.IsNullable(out Type innerType) ? innerType : type;
-
-            if (s_primitiveTypesAndFormats.ContainsKey(underlyingType))
+            if (type.IsOneOf(typeof(object), typeof(JsonDocument), typeof(JsonElement)))
             {
-                var primitiveTypeAndFormat = s_primitiveTypesAndFormats[underlyingType];
-
-                return new DataContract(
-                    dataType: primitiveTypeAndFormat.Item1,
-                    format: primitiveTypeAndFormat.Item2,
-                    underlyingType: underlyingType);
+                return DataContract.ForDynamic(
+                    underlyingType: type,
+                    jsonConverter: JsonConverterFunc);
             }
 
-            if (underlyingType.IsEnum)
+            if (s_primitiveTypesAndFormats.ContainsKey(type))
             {
-                var enumValues = GetSerializedEnumValuesFor(underlyingType);
+                var primitiveTypeAndFormat = s_primitiveTypesAndFormats[type];
 
-                var primitiveTypeAndFormat = (enumValues.Any(value => value is string))
+                return DataContract.ForPrimitive(
+                    underlyingType: type,
+                    dataType: primitiveTypeAndFormat.Item1,
+                    dataFormat: primitiveTypeAndFormat.Item2,
+                    jsonConverter: JsonConverterFunc);
+            }
+
+            if (type.IsEnum)
+            {
+                var enumValues = type.GetEnumValues();
+
+                //Test to determine if the serializer will treat as string
+                var serializeAsString = (enumValues.Length > 0)
+                    && JsonConverterFunc(enumValues.GetValue(0)).StartsWith("\"", StringComparison.Ordinal);
+
+                var primitiveTypeAndFormat = serializeAsString
                     ? s_primitiveTypesAndFormats[typeof(string)]
-                    : s_primitiveTypesAndFormats[underlyingType.GetEnumUnderlyingType()];
+                    : s_primitiveTypesAndFormats[type.GetEnumUnderlyingType()];
 
-                return new DataContract(
+                return DataContract.ForPrimitive(
+                    underlyingType: type,
                     dataType: primitiveTypeAndFormat.Item1,
-                    format: primitiveTypeAndFormat.Item2,
-                    underlyingType: underlyingType,
-                    enumValues: enumValues);
+                    dataFormat: primitiveTypeAndFormat.Item2,
+                    jsonConverter: JsonConverterFunc);
             }
 
-            if (underlyingType.IsDictionary(out Type keyType, out Type valueType))
+            if (IsSupportedDictionary(type, out Type? keyType, out Type? valueType))
             {
-                if (keyType.IsEnum)
-                    throw new NotSupportedException(
-                        $"Schema cannot be generated for type {underlyingType} as it's not supported by the System.Text.Json serializer.");
-
-                return new DataContract(
-                    dataType: DataType.Object,
-                    underlyingType: underlyingType,
-                    additionalPropertiesType: valueType);
+                return DataContract.ForDictionary(
+                    underlyingType: type,
+                    valueType: valueType,
+                    keys: null, // STJ doesn't currently support dictionaries with enum key types
+                    jsonConverter: JsonConverterFunc);
             }
 
-            if (underlyingType.IsEnumerable(out Type itemType))
+            if (IsSupportedCollection(type, out Type? itemType))
             {
-                return new DataContract(
-                    dataType: DataType.Array,
-                    underlyingType: underlyingType,
-                    arrayItemType: itemType);
+                return DataContract.ForArray(
+                    underlyingType: type,
+                    itemType: itemType,
+                    jsonConverter: JsonConverterFunc);
             }
 
-            if (underlyingType.IsOneOf(typeof(JsonDocument), typeof(JsonElement)))
-            {
-                return new DataContract(
-                    dataType: DataType.Unknown,
-                    underlyingType: underlyingType);
-            }
-
-            return new DataContract(
-                dataType: DataType.Object,
-                underlyingType: underlyingType,
-                properties: GetDataPropertiesFor(underlyingType, out Type extensionDataValueType),
-                additionalPropertiesType: extensionDataValueType);
+            return DataContract.ForObject(
+                underlyingType: type,
+                properties: GetDataPropertiesFor(type, out Type? extensionDataType),
+                extensionDataType: extensionDataType,
+                jsonConverter: JsonConverterFunc);
         }
 
-        private IEnumerable<object> GetSerializedEnumValuesFor(Type enumType)
+        private string JsonConverterFunc(object? value)
         {
-            var underlyingValues = enumType.GetEnumValues().Cast<object>();
-
-            //Test to determine if the serializer will treat as string or not
-            var serializeAsString = underlyingValues.Any()
-                && JsonSerializer.Serialize(underlyingValues.First(), _serializerOptions).StartsWith("\"", StringComparison.Ordinal);
-
-            return serializeAsString
-                ? underlyingValues.Select(value => JsonSerializer.Serialize(value, _serializerOptions).Replace("\"", string.Empty))
-                : underlyingValues;
+            return JsonSerializer.Serialize(value, _serializerOptions);
         }
 
-        private IEnumerable<DataProperty>? GetDataPropertiesFor(Type objectType, out Type extensionDataValueType)
+        public bool IsSupportedDictionary(Type type, [MaybeNullWhen(false)] out Type keyType, [MaybeNullWhen(false)] out Type valueType)
         {
-            extensionDataValueType = null!;
+            if (type.IsConstructedFrom(typeof(IDictionary<,>), out Type constructedType)
+                || type.IsConstructedFrom(typeof(IReadOnlyDictionary<,>), out constructedType))
+            {
+                keyType = constructedType.GenericTypeArguments[0];
+                valueType = constructedType.GenericTypeArguments[1];
+                return true;
+            }
 
-            if (objectType == typeof(object) || !ApiContractSerializer.MetadataProvider.CanSerialize(objectType))
-                return null;
+            if (typeof(IDictionary).IsAssignableFrom(type))
+            {
+                keyType = valueType = typeof(object);
+                return true;
+            }
+
+            keyType = valueType = null;
+            return false;
+        }
+
+        public bool IsSupportedCollection(Type type, [MaybeNullWhen(false)] out Type itemType)
+        {
+            if (type.IsConstructedFrom(typeof(IEnumerable<>), out Type constructedType))
+            {
+                itemType = constructedType.GenericTypeArguments[0];
+                return true;
+            }
+
+            if (type.IsConstructedFrom(typeof(IAsyncEnumerable<>), out constructedType))
+            {
+                itemType = constructedType.GenericTypeArguments[0];
+                return true;
+            }
+
+            if (typeof(IEnumerable).IsAssignableFrom(type))
+            {
+                itemType = typeof(object);
+                return true;
+            }
+
+            itemType = null;
+            return false;
+        }
+
+        private IEnumerable<DataProperty> GetDataPropertiesFor(Type objectType, out Type? extensionDataType)
+        {
+            extensionDataType = null;
+
+            if (!ApiContractSerializer.MetadataProvider.CanSerialize(objectType))
+                return Enumerable.Empty<DataProperty>();
 
             var metaMembers = ApiContractSerializer.MetadataProvider.GetMembers(objectType, out var metaType);
             if (metaType == null)
-                return null;
+                return Enumerable.Empty<DataProperty>();
 
             var dataProperties = new List<DataProperty>();
             var nonNullableContextCache = new Dictionary<Type, bool>();
@@ -123,16 +161,14 @@ namespace WebApp.Api.Infrastructure.Swagger
             foreach (var metaMember in metaMembers)
                 if (metaMember.Member is PropertyInfo property)
                 {
-                    //if (property.GetCustomAttributes<JsonExtensionDataAttribute>().Any() && property.PropertyType.IsDictionary(out Type _, out Type valueType))
+                    //if (propertyInfo.HasAttribute<JsonExtensionDataAttribute>()
+                    //    && propertyInfo.PropertyType.IsConstructedFrom(typeof(IDictionary<,>), out Type constructedDictionary))
                     //{
-                    //    extensionDataValueType = valueType;
+                    //    extensionDataType = constructedDictionary.GenericTypeArguments[1];
                     //    continue;
                     //}
 
                     var name = _convertMemberName(metaMember.Name);
-
-                    var isReadable = property.IsPubliclyReadable();
-                    var isWritable = property.IsPubliclyWritable();
 
                     bool isNullable;
                     if (property.PropertyType.IsValueType)
@@ -146,12 +182,25 @@ namespace WebApp.Api.Infrastructure.Swagger
                         // so we resort to checking for RequiredAttribute in this case
                         isNullable = !property.GetCustomAttributes<System.ComponentModel.DataAnnotations.RequiredAttribute>().Any();
 
+                    var isReadable = property.IsPubliclyReadable();
+                    var isWritable = property.IsPubliclyWritable();
+
+                    //var isSetViaConstructor = property.DeclaringType != null && property.DeclaringType.GetConstructors()
+                    //    .SelectMany(c => c.GetParameters())
+                    //    .Any(p =>
+                    //    {
+                    //        // STJ supports setting via constructor if either underlying OR JSON names match
+                    //        return
+                    //            string.Equals(p.Name, property.Name, StringComparison.OrdinalIgnoreCase) ||
+                    //            string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase);
+                    //    });
+
                     dataProperties.Add(
                         new DataProperty(
                             name: name,
                             isRequired: false,
                             isNullable: isNullable,
-                            isReadOnly: isReadable && !isWritable,
+                            isReadOnly: isReadable && !isWritable /* && !isSetViaConstructor */,
                             isWriteOnly: isWritable && !isReadable,
                             memberType: property.PropertyType,
                             memberInfo: property));

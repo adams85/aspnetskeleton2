@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
 namespace WebApp.UI.Infrastructure.Security
@@ -8,11 +9,11 @@ namespace WebApp.UI.Infrastructure.Security
     {
         private const string PolicyName = "AnonymousOnly";
 
-        public static void AddPolicy(AuthorizationOptions options) => options
+        public static void Configure(AuthorizationOptions options) => options
             .AddPolicy(PolicyName, builder => builder
                 .RequireAssertion(context =>
                 {
-                    if (context.User.Identity.IsAuthenticated)
+                    if (context.User?.Identity?.IsAuthenticated ?? false)
                     {
                         context.Fail();
                         return false;

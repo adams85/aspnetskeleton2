@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +13,7 @@ namespace WebApp.Api.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    [Authorize(ApiSecurityService.ApiAuthorizationPolicy, Roles = nameof(RoleEnum.Administators))]
+    [Authorize(AuthenticationSchemes = ApiAuthenticationSchemes.CookieAndJwtBearer, Roles = nameof(RoleEnum.Administators))]
     public class SettingsController : Controller
     {
         private readonly ICommandDispatcher _commandDispatcher;
@@ -39,14 +37,14 @@ namespace WebApp.Api.Controllers
         [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(void), StatusCodes.Status403Forbidden)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SettingData>>> List([FromQuery] ListSettingsQuery model)
+        public async Task<ActionResult<ListResult<SettingData>>> List([FromQuery] ListSettingsQuery model)
         {
             if (model == null)
                 return BadRequest();
 
             var result = await _queryDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 
-            return Ok(result.Items ?? Enumerable.Empty<SettingData>());
+            return result;
         }
 
         /// <summary>

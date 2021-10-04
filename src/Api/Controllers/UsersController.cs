@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApp.Api.Infrastructure.Security;
 using WebApp.Common.Roles;
+using WebApp.Service;
 using WebApp.Service.Infrastructure;
 using WebApp.Service.Roles;
 using WebApp.Service.Settings;
@@ -13,7 +14,7 @@ namespace WebApp.Api.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    [Authorize(ApiSecurityService.ApiAuthorizationPolicy, Roles = nameof(RoleEnum.Administators))]
+    [Authorize(AuthenticationSchemes = ApiAuthenticationSchemes.CookieAndJwtBearer, Roles = nameof(RoleEnum.Administators))]
     public class UsersController : Controller
     {
         private readonly ICommandDispatcher _commandDispatcher;
@@ -26,15 +27,14 @@ namespace WebApp.Api.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        public async Task<ActionResult<UserData[]>> List([FromQuery] ListUsersQuery model)
+        public async Task<ActionResult<ListResult<UserData>>> List([FromQuery] ListUsersQuery model)
         {
             if (model == null)
                 return BadRequest();
 
             var result = await _queryDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
 
-            return result.Items ?? Array.Empty<UserData>();
+            return result;
         }
 
         [HttpPost]

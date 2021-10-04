@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using WebApp.Api.Infrastructure.Security;
 using WebApp.Api.Infrastructure.Swagger;
 
 namespace WebApp.Api
@@ -29,7 +30,7 @@ namespace WebApp.Api
 
                 // https://stackoverflow.com/questions/56234504/migrating-to-swashbuckle-aspnetcore-version-5
                 // https://stackoverflow.com/questions/43447688/setting-up-swagger-asp-net-core-using-the-authorization-headers-bearer
-                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+                options.AddSecurityDefinition(ApiAuthenticationSchemes.JwtBearer, new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme.<br/>" +
                       "Enter 'Bearer &lt;token&gt;' in the text input below.<br/>" +
@@ -37,7 +38,7 @@ namespace WebApp.Api
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
-                    Scheme = JwtBearerDefaults.AuthenticationScheme
+                    Scheme = ApiAuthenticationSchemes.JwtBearer
                 });
 
                 var securitySchemeRef = new OpenApiSecurityScheme
@@ -45,7 +46,7 @@ namespace WebApp.Api
                     Reference = new OpenApiReference
                     {
                         Type = ReferenceType.SecurityScheme,
-                        Id = JwtBearerDefaults.AuthenticationScheme
+                        Id = ApiAuthenticationSchemes.JwtBearer
                     }
                 };
 
@@ -54,11 +55,13 @@ namespace WebApp.Api
                     [securitySchemeRef] = Array.Empty<string>()
                 });
 
-                // uncomment the following line to enable polymorphic schema generation
-                //options.GeneratePolymorphicSchemas(ApiContractSerializer.MetadataProvider.GetSubTypes, _ => ApiContractSerializer.JsonTypePropertyName);
+                // uncomment the following lines to enable polymorphic schema generation
+                //options.UseOneOfForPolymorphism();
+                //options.SelectSubTypesUsing(ApiContractSerializer.MetadataProvider.GetSubTypes);
+                //options.SelectDiscriminatorNameUsing(_ => ApiContractSerializer.JsonTypePropertyName);
             });
 
-            services.ReplaceLast(ServiceDescriptor.Transient<IDataContractResolver, CustomJsonSerializerDataContractResolver>());
+            services.ReplaceLast(ServiceDescriptor.Transient<ISerializerDataContractResolver, CustomJsonSerializerDataContractResolver>());
         }
 
         private void ConfigureSwagger(IApplicationBuilder app)

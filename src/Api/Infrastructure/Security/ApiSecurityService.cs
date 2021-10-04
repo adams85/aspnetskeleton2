@@ -4,6 +4,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -20,8 +21,6 @@ namespace WebApp.Api.Infrastructure.Security
 {
     public sealed class ApiSecurityService : IApiSecurityService
     {
-        internal const string ApiAuthorizationPolicy = "ApiAuthorization";
-
         internal const string DefaultJwtAudience = "Client";
         internal const string JwtAccessTokenHttpHeaderName = "X-Access-Token";
         internal const string JwtRefreshTokenHttpHeaderName = "X-Refresh-Token";
@@ -88,7 +87,32 @@ namespace WebApp.Api.Infrastructure.Security
             _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
         }
 
-        public void ConfigureJwtBearer(JwtBearerOptions options)
+        public async Task<CachedUserInfoData?> GetCachedUserInfo(string userName, bool registerActivity, CancellationToken cancellationToken)
+        {
+            var result = await _queryDispatcher.DispatchAsync(new GetCachedUserInfoQuery { UserName = userName }, cancellationToken);
+
+            if (result == null)
+                return null;
+
+            if (registerActivity)
+                await _commandDispatcher.DispatchAsync(new RegisterUserActivityCommand
+                {
+                    UserName = result.UserName,
+                    SuccessfulLogin = null,
+                    UIActivity = false,
+                }, CancellationToken.None);
+
+            return result;
+        }
+
+        public void ConfigureCookieAuthentication(CookieAuthenticationOptions options)
+        {
+            options.ForwardChallenge = ApiAuthenticationSchemes.JwtBearer;
+            options.ForwardForbid = ApiAuthenticationSchemes.JwtBearer;
+            options.Events = new CustomCookieAuthenticationEvents(this, ApiAuthenticationSchemes.Cookie);
+        }
+
+        public void ConfigureJwtBearerAuthentication(JwtBearerOptions options)
         {
             var jwtValidationParameters = _jwtValidationParameters.Clone();
             // To support refresh tokens, we have to validate the token lifetime manually.
@@ -101,6 +125,15 @@ namespace WebApp.Api.Infrastructure.Security
             {
                 OnMessageReceived = ExtractJwtRefreshTokenAsync,
                 OnTokenValidated = ValidateJwtTokenAsync,
+                OnChallenge = context =>
+                {
+                    // when both cookie and jwt authentication is allowed, challenge logic of jwt will be executed twice
+                    // because cookie's challenge is forwarded to jwt (see ConfigureCookieAuthentication),
+                    // so we need to detect this to prevent WWW-Authenticate header from being added twice
+                    if (context.HttpContext.Response.StatusCode == StatusCodes.Status401Unauthorized)
+                        context.HandleResponse();
+                    return Task.CompletedTask;
+                }
             };
         }
 
@@ -266,17 +299,11 @@ namespace WebApp.Api.Infrastructure.Security
                 }
             }
 
-            var identity = (ClaimsIdentity)context.Principal.Identity;
+            var identity = (ClaimsIdentity?)context.Principal.Identity!;
             var userName = identity.Name;
 
             CachedUserInfoData? userInfo;
-            try
-            {
-                userInfo = await _queryDispatcher.DispatchAsync(new GetCachedUserInfoQuery
-                {
-                    UserName = userName
-                }, context.HttpContext.RequestAborted);
-            }
+            try { userInfo = await GetCachedUserInfo(userName, registerActivity: true, context.HttpContext.RequestAborted); }
             catch { userInfo = null; }
 
             if (userInfo == null || !userInfo.LoginAllowed)

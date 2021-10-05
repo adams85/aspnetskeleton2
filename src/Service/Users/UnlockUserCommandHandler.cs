@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using WebApp.Core.Helpers;
 
 namespace WebApp.Service.Users
 {
@@ -7,16 +8,19 @@ namespace WebApp.Service.Users
     {
         public override async Task HandleAsync(UnlockUserCommand command, CommandContext context, CancellationToken cancellationToken)
         {
-            var user = await context.DbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
-            RequireExisting(user, c => c.UserName);
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
+            {
+                var user = await dbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
+                RequireExisting(user, c => c.UserName);
 
-            if (!user.IsLockedOut)
-                return;
+                if (!user.IsLockedOut)
+                    return;
 
-            user.IsLockedOut = false;
-            user.PasswordFailuresSinceLastSuccess = 0;
+                user.IsLockedOut = false;
+                user.PasswordFailuresSinceLastSuccess = 0;
 
-            await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }

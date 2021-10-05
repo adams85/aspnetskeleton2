@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Karambolo.Common;
+using WebApp.Core.Helpers;
 
 namespace WebApp.Service.Mailing
 {
@@ -21,18 +22,21 @@ namespace WebApp.Service.Mailing
             var mailTypeDefinition = _mailTypeCatalog.GetDefinition(command.Model.MailType);
             RequireValid(mailTypeDefinition != null, c => c.Model.MailType);
 
-            var validationContext = new MailModelValidationContext(() => Lambda.MemberPath((EnqueueMailCommand c) => c.Model))
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                Model = command.Model,
-                DbContext = context.DbContext,
-            };
+                var validationContext = new MailModelValidationContext(() => Lambda.MemberPath((EnqueueMailCommand c) => c.Model))
+                {
+                    Model = command.Model,
+                    DbContext = dbContext,
+                };
 
-            await mailTypeDefinition!.ValidateModelAsync(validationContext, cancellationToken).ConfigureAwait(false);
+                await mailTypeDefinition!.ValidateModelAsync(validationContext, cancellationToken).ConfigureAwait(false);
 
-            if (validationContext.ErrorCode != null)
-                new ServiceErrorException(validationContext.ErrorCode.Value, validationContext.ErrorArgsFactory?.Invoke());
+                if (validationContext.ErrorCode != null)
+                    new ServiceErrorException(validationContext.ErrorCode.Value, validationContext.ErrorArgsFactory?.Invoke());
 
-            await _mailSenderService.EnqueueItemAsync(command.Model, context.DbContext, cancellationToken).ConfigureAwait(false);
+                await _mailSenderService.EnqueueItemAsync(command.Model, dbContext, null, cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }

@@ -93,7 +93,6 @@ namespace WebApp.Service.Tests.Infrastructure
                     Provider = SqliteProperties.ProviderName,
                     ConnectionString = new SqliteConnectionStringBuilder { DataSource = $"TestContext${_id}", Mode = SqliteOpenMode.Memory, Cache = SqliteCacheMode.Shared }.ToString(),
                 },
-                DbContextLifetime = ServiceLifetime.Transient,
                 EnableSqlLogging = true
             };
         }

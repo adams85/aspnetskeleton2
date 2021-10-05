@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using WebApp.Core.Helpers;
 using WebApp.DataAccess.Entities;
 
 namespace WebApp.Service.Roles
@@ -9,20 +10,23 @@ namespace WebApp.Service.Roles
     {
         public override async Task HandleAsync(CreateRoleCommand command, CommandContext context, CancellationToken cancellationToken)
         {
-            var roleExists = await context.DbContext.Roles.FilterByName(command.RoleName).AnyAsync(cancellationToken).ConfigureAwait(false);
-            RequireUnique(roleExists, c => c.RoleName);
-
-            var role = new Role
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                RoleName = command.RoleName,
-                Description = command.Description,
-            };
+                var roleExists = await dbContext.Roles.FilterByName(command.RoleName).AnyAsync(cancellationToken).ConfigureAwait(false);
+                RequireUnique(roleExists, c => c.RoleName);
 
-            context.DbContext.Roles.Add(role);
+                var role = new Role
+                {
+                    RoleName = command.RoleName,
+                    Description = command.Description,
+                };
 
-            await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                dbContext.Roles.Add(role);
 
-            command.OnKeyGenerated?.Invoke(command, role.Id);
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                command.OnKeyGenerated?.Invoke(command, role.Id);
+            }
         }
     }
 }

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Karambolo.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -18,8 +20,10 @@ namespace WebApp.DataAccess
     internal abstract class EFCoreConfiguration
     {
         private static readonly IReadOnlyDictionary<string, IConfigurationFactory> s_configurationFactories = typeof(EFCoreConfiguration).Assembly.GetTypes()
-            .Where(type => type.IsClass && !type.IsAbstract && type.HasInterface(typeof(IConfigurationFactory)))
-            .Select(type => (IConfigurationFactory)Activator.CreateInstance(type))
+            .Where(type => !type.IsAbstract && type.HasInterface(typeof(IConfigurationFactory)))
+            .Select(type => type.GetConstructor(Type.EmptyTypes))
+            .Where(ctor => ctor != null)
+            .Select(ctor => (IConfigurationFactory)ctor!.Invoke(null))
             .ToDictionary(factory => factory.ProviderName, CachedDelegates.Identity<IConfigurationFactory>.Func);
 
         public static EFCoreConfiguration From(DataAccessOptions options)
@@ -39,21 +43,6 @@ namespace WebApp.DataAccess
 
         protected abstract void ConfigureInternalServices(IServiceCollection internalServices, IServiceProvider applicationServiceProvider);
 
-        protected IServiceCollection ReplaceRelationalTransactionFactory<TDefaultFactory, TExtendedFactory>(IServiceCollection internalServices)
-            where TDefaultFactory : class, IRelationalTransactionFactory
-            where TExtendedFactory : class, IRelationalTransactionFactory
-        {
-            internalServices.ReplaceLast(ServiceDescriptor.Singleton<IRelationalTransactionFactory, TExtendedFactory>(), out var replacedDescriptor);
-
-            Debug.Assert(replacedDescriptor != null &&
-                (replacedDescriptor.ImplementationType ??
-                 replacedDescriptor.ImplementationInstance?.GetType() ??
-                 replacedDescriptor.ImplementationFactory?.GetType().GenericTypeArguments[1]) == typeof(TDefaultFactory),
-                 $"{Options.Database.Provider} doesn't use the expected transaction factory of type {typeof(TDefaultFactory)}.");
-
-            return internalServices;
-        }
-
         protected virtual IServiceProvider CreateInternalServiceProvider(IServiceProvider applicationServiceProvider)
         {
             var internalServices = new ServiceCollection();
@@ -61,14 +50,32 @@ namespace WebApp.DataAccess
             return internalServices.BuildServiceProvider();
         }
 
-        public EFCoreConfiguration ConfigureServices<TContext>(IServiceCollection services) where TContext : DbContext
+        public EFCoreConfiguration ConfigureServices<TContext>(IServiceCollection services) where TContext : PooledDbContext
         {
             services.TryAddSingleton<InternalServiceProviderRegistry>();
 
-            if (Options.DbContextLifetime == null)
-                services.AddDbContextPool<TContext>(ConfigureOptions);
-            else
-                services.AddDbContext<TContext>(ConfigureOptions, Options.DbContextLifetime.Value);
+            // we want to be explicit about DbContext lifetime (that is, we want to manage that instead of DI),
+            // so for now we need to backport the IDbContextFactory concept introduced in .NET 5
+            // TODO: replace the code below with AddPooledDbContextFactory after upgrading to .NET 5+
+
+            services.TryAddSingleton(sp =>
+            {
+                var builder = new DbContextOptionsBuilder<TContext>(new DbContextOptions<TContext>(new Dictionary<Type, IDbContextOptionsExtension>()));
+
+                builder.UseApplicationServiceProvider(sp);
+                PooledDbContextFactory<TContext>.SetMaxPoolSize(builder, Options.DbContextPoolSize ?? PooledDbContextFactory<TContext>.DefaultPoolSize);
+
+                ConfigureOptions(sp, builder);
+
+                return builder.Options;
+            });
+
+            services.AddSingleton<DbContextOptions>(sp => sp.GetRequiredService<DbContextOptions<TContext>>());
+
+            services.TryAddSingleton((IServiceProvider sp) => new DbContextPool<TContext>(sp.GetService<DbContextOptions<TContext>>()));
+
+            services.TryAddSingleton<IDbContextFactory<TContext>>(
+                sp => new PooledDbContextFactory<TContext>(sp.GetRequiredService<DbContextPool<TContext>>()));
 
             return this;
         }

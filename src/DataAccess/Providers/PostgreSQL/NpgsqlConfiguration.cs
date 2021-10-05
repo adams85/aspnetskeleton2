@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
@@ -18,7 +17,7 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
         {
             internalServices.AddEntityFrameworkNpgsql();
 
-            ReplaceRelationalTransactionFactory<RelationalTransactionFactory, ExtendedRelationalTransactionFactory>(internalServices)
+            internalServices
                 .ReplaceLast(ServiceDescriptor.Scoped<INpgsqlRelationalConnection, CustomNpgsqlRelationalConnection>())
                 .ReplaceLast(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomNpgsqlMigrationsSqlGenerator>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, NpgsqlModelCustomizer>())

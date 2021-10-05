@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using WebApp.Core.Helpers;
 
 namespace WebApp.Service.Users
 {
@@ -8,19 +9,22 @@ namespace WebApp.Service.Users
     {
         public override async Task HandleAsync(ApproveUserCommand command, CommandContext context, CancellationToken cancellationToken)
         {
-            var user = await context.DbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
-            RequireExisting(user, c => c.UserName);
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
+            {
+                var user = await dbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
+                RequireExisting(user, c => c.UserName);
 
-            if (user.IsApproved)
-                return;
+                if (user.IsApproved)
+                    return;
 
-            if (command.Verify)
-                RequireValid(string.Equals(user.ConfirmationToken, command.VerificationToken, StringComparison.Ordinal), m => m.VerificationToken);
+                if (command.Verify)
+                    RequireValid(string.Equals(user.ConfirmationToken, command.VerificationToken, StringComparison.Ordinal), m => m.VerificationToken);
 
-            user.ConfirmationToken = null;
-            user.IsApproved = true;
+                user.ConfirmationToken = null;
+                user.IsApproved = true;
 
-            await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using <#= $"{Namespace}.Core.Helpers" #>;
 using <#= $"{Namespace}.DataAccess.Entities" #>;
 
 namespace <#= $"{Namespace}.Service.{Group}" #>
@@ -20,58 +21,58 @@ var resultType = GetResultType();
     {
         public override async Task<<#= resultType #>> HandleAsync(<#= $"{Name}Query" #> query, QueryContext context, CancellationToken cancellationToken)
         {
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
+            {
 <#
 if (!IsList)
 {
 #>
-            Entity entity = await context.DbContext.Entities
-                .FindAsync(new object[] { query.Id }, cancellationToken).ConfigureAwait(false);
+                Entity entity = await dbContext.Entities
+                    .FindAsync(new object[] { query.Id }, cancellationToken).ConfigureAwait(false);
 
-            RequireExisting(entity, q => q.Id);
+                RequireExisting(entity, q => q.Id);
 
-            // ...
+                // ...
 <#
-if (IsProgressReporter)
-{
+    if (IsEventProducer)
+    {
 #>
 
-            query.Progress?.Report(new ProgressEventData
-            {
-                StatusText = "Finished",
-                Progress = 1f
-            });
+                query.OnEvent?.Invoke(query, new ProgressEvent
+                {
+                    Progress = 1f
+                });
 <#
-}
+    }
 #>
 
-            return new <#= resultType #>
-            {
-            };
+                return new <#= resultType #>
+                {
+                };
 <#
 } 
 else 
 {
 #>
-            IQueryable<Entity> entityQuery = context.DbContext.Entities;
+                IQueryable<Entity> entityQuery = dbContext.Entities;
 
-            // ...
+                // ...
 <#
-if (IsProgressReporter)
-{
+    if (IsEventProducer)
+    {
 #>
 
-            query.Progress?.Report(new ProgressEventData
-            {
-                StatusText = "Finished",
-                Progress = 1f
-            });
+                query.OnEvent?.Invoke(query, new ProgressEvent
+                {
+                    Progress = 1f
+                });
 <#
-}
+    }
 #>
 
-            var entityDataQuery = entityQuery.ToData();
+                var entityDataQuery = entityQuery.ToData();
 
-            return await ResultAsync(query, entityDataQuery, cancellationToken).ConfigureAwait(false);
+                return await ResultAsync(query, entityDataQuery, cancellationToken).ConfigureAwait(false);
 <#
 }
 #>

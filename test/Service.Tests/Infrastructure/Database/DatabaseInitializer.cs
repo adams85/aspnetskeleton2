@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using WebApp.DataAccess;
 
 namespace WebApp.Service.Tests.Infrastructure.Database
 {
@@ -15,9 +18,10 @@ namespace WebApp.Service.Tests.Infrastructure.Database
 
         public async Task InitializeAsync(TestContext context, CancellationToken cancellationToken = default)
         {
-            await using (var dbContext = context.CreateWritableDbContext())
-                foreach (var seeder in _seeders)
-                    await seeder.SeedAsync(dbContext, cancellationToken);
+            var dbContextFactory = context.Services.GetRequiredService<IDbContextFactory<WritableDataContext>>();
+
+            foreach (var seeder in _seeders)
+                await seeder.SeedAsync(dbContextFactory, cancellationToken);
         }
     }
 }

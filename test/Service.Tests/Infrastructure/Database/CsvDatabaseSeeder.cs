@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Microsoft.EntityFrameworkCore;
 using WebApp.DataAccess;
 
 namespace WebApp.Service.Tests.Infrastructure.Database
@@ -62,21 +63,24 @@ namespace WebApp.Service.Tests.Infrastructure.Database
             }
         }
 
-        public async Task SeedAsync(WritableDataContext dbContext, CancellationToken cancellationToken = default)
+        public async Task SeedAsync(IDbContextFactory<WritableDataContext> dbContextFactory, CancellationToken cancellationToken = default)
         {
-            foreach (var file in _files)
-                using (var reader = new StreamReader(file.FilePath))
-                using (var csv = new CsvReader(reader, CreateReaderConfiguration(_configureReader, file.ConfigureReader)))
-                {
-                    _initializeReaderContext(csv.Context);
-                    file.InitializeReaderContext?.Invoke(csv.Context);
+            await using (var dbContext = dbContextFactory.CreateDbContext())
+            {
+                foreach (var file in _files)
+                    using (var reader = new StreamReader(file.FilePath))
+                    using (var csv = new CsvReader(reader, CreateReaderConfiguration(_configureReader, file.ConfigureReader)))
+                    {
+                        _initializeReaderContext(csv.Context);
+                        file.InitializeReaderContext?.Invoke(csv.Context);
 
-                    var entities = csv.GetRecords(file.EntityType);
+                        var entities = csv.GetRecords(file.EntityType);
 
-                    dbContext.AddRange(entities);
-                }
+                        dbContext.AddRange(entities);
+                    }
 
-            await dbContext.SaveChangesAsync(cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
 
             static CsvConfiguration CreateReaderConfiguration(Action<CsvConfiguration> applyGlobalConfiguration, Action<CsvConfiguration>? applyFileConfiguration)
             {

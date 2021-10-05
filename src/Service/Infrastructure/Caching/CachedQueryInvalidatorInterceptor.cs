@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Karambolo.Common;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -46,8 +45,7 @@ namespace WebApp.Service.Infrastructure.Caching
         {
             await _next(context, cancellationToken).ConfigureAwait(false);
 
-            if (!context.DbContext.Database.TryRegisterForPendingTransactionCommit(() => InvalidateQueryCache(context)))
-                InvalidateQueryCache(context);
+            InvalidateQueryCache(context);
         }
     }
 }

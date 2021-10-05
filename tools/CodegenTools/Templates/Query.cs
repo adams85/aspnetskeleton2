@@ -18,7 +18,7 @@ namespace CodegenTools.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+    #line 1 "D:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class Query : QueryTemplateBase
     {
@@ -32,14 +32,14 @@ namespace CodegenTools.Templates
             this.Write("using System;\r\nusing System.Collections.Generic;\r\nusing System.Runtime.Serializat" +
                     "ion;\r\n\r\nnamespace ");
             
-            #line 10 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 10 "D:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Namespace}.Service.{Group}"));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n");
             
-            #line 12 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 12 "D:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
 
 if (IsList)
 {
@@ -50,7 +50,7 @@ if (IsList)
             this.Write("    // TODO: Don\'t forget to add the corresponding ProtoInclude attribute to the " +
                     "base class!\r\n");
             
-            #line 17 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 17 "D:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
 
 }
 
@@ -59,38 +59,38 @@ if (IsList)
             #line hidden
             this.Write("    [DataContract]\r\n    public class ");
             
-            #line 21 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 21 "D:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}Query"));
             
             #line default
             #line hidden
             this.Write(" : ");
             
-            #line 21 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 21 "D:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetQueryBaseType(GetResultType())));
             
             #line default
             #line hidden
             
-            #line 21 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(IsProgressReporter ? ", IProgressReporterQuery" : ""));
+            #line 21 "D:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(IsEventProducer ? ", IEventProducerQuery" : ""));
             
             #line default
             #line hidden
             this.Write("\r\n    {\r\n        [DataMember(Order = 1)] public string Property { get; set; } = n" +
                     "ull!;\r\n");
             
-            #line 24 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 24 "D:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
 
-if (IsProgressReporter)
+if (IsEventProducer)
 {
 
             
             #line default
             #line hidden
-            this.Write("\r\n        public IProgress<ProgressEventData>? Progress { get; set; }\r\n");
+            this.Write("\r\n        public Action<IQuery, Event>? OnEvent { get; set; }\r\n");
             
-            #line 30 "d:\Dev\_Skeletons\AspNetSkeleton\V2\tools\CodegenTools\Templates\Query.tt"
+            #line 30 "D:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
 
 }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.Service.Helpers;
 
@@ -17,28 +18,31 @@ namespace WebApp.Service.Users
 
         public override async Task HandleAsync(ChangePasswordCommand command, CommandContext context, CancellationToken cancellationToken)
         {
-            var user = await context.DbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
-            RequireExisting(user, c => c.UserName);
-
-            var now = _clock.UtcNow;
-            if (command.Verify)
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                RequireValid(
-                    now < user.PasswordVerificationTokenExpirationDate && string.Equals(user.PasswordVerificationToken, command.VerificationToken, StringComparison.Ordinal),
-                    c => c.VerificationToken);
+                var user = await dbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
+                RequireExisting(user, c => c.UserName);
 
-                user.PasswordVerificationToken = null;
-                user.PasswordVerificationTokenExpirationDate = null;
+                var now = _clock.UtcNow;
+                if (command.Verify)
+                {
+                    RequireValid(
+                        now < user.PasswordVerificationTokenExpirationDate && string.Equals(user.PasswordVerificationToken, command.VerificationToken, StringComparison.Ordinal),
+                        c => c.VerificationToken);
 
-                user.PasswordFailuresSinceLastSuccess = 0;
-                user.LastPasswordFailureDate = null;
-                user.IsLockedOut = false;
+                    user.PasswordVerificationToken = null;
+                    user.PasswordVerificationTokenExpirationDate = null;
+
+                    user.PasswordFailuresSinceLastSuccess = 0;
+                    user.LastPasswordFailureDate = null;
+                    user.IsLockedOut = false;
+                }
+
+                user.Password = SecurityHelper.HashPassword(command.NewPassword);
+                user.LastPasswordChangedDate = now;
+
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-
-            user.Password = SecurityHelper.HashPassword(command.NewPassword);
-            user.LastPasswordChangedDate = now;
-
-            await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

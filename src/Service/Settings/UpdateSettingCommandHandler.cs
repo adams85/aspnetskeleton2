@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using WebApp.Core.Helpers;
 
 namespace WebApp.Service.Settings
 {
@@ -16,21 +17,24 @@ namespace WebApp.Service.Settings
 
         public override async Task HandleAsync(UpdateSettingCommand command, CommandContext context, CancellationToken cancellationToken)
         {
-            var setting = await context.DbContext.Settings
-                .FirstOrDefaultAsync(setting => setting.Name == command.Name, cancellationToken).ConfigureAwait(false);
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
+            {
+                var setting = await dbContext.Settings
+                    .FirstOrDefaultAsync(setting => setting.Name == command.Name, cancellationToken).ConfigureAwait(false);
 
-            RequireExisting(setting, c => c.Name);
+                RequireExisting(setting, c => c.Name);
 
-            var value = command.Value;
+                var value = command.Value;
 
-            RequireValid(setting.Validate(ref value), c => c.Value);
+                RequireValid(setting.Validate(ref value), c => c.Value);
 
-            setting.Value = value;
+                setting.Value = value;
 
-            var changeCount = await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                var changeCount = await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            if (changeCount > 0)
-                _settingsSource.Invalidate();
+                if (changeCount > 0)
+                    _settingsSource.Invalidate();
+            }
         }
     }
 }

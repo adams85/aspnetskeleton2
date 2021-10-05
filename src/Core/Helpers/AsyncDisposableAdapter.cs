@@ -13,6 +13,7 @@ namespace WebApp.Core.Helpers
         public static AsyncDisposableAdapter<T> From<T>([AllowNull] T value, [MaybeNull, NotNullIfNotNull("value")] out T valueOut) where T : notnull, IDisposable =>
             new AsyncDisposableAdapter<T>(valueOut = value);
 
+        // https://github.com/dotnet/csharplang/discussions/2661
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IAsyncDisposable AsAsyncDisposable<T>(this T value, out T valueOut) where T : notnull, IAsyncDisposable =>
             valueOut = value;

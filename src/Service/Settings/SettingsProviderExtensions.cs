@@ -13,7 +13,7 @@ namespace WebApp.Service.Settings
         [return: MaybeNull]
         public static T Get<T>(this ISettingsProvider provider, SettingEnum setting)
         {
-            Type? type = typeof(T);
+            Type type = typeof(T);
 
             if (type.IsValueType)
             {

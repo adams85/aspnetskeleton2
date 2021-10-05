@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using WebApp.Common.Settings;
+using WebApp.Core.Helpers;
 
 namespace WebApp.Service.Settings
 {
@@ -18,18 +19,21 @@ namespace WebApp.Service.Settings
 
         public override async Task<SettingData?> HandleAsync(GetSettingQuery query, QueryContext context, CancellationToken cancellationToken)
         {
-            var setting = await context.DbContext.Settings.FirstOrDefaultAsync(setting => setting.Name == query.Name, cancellationToken).ConfigureAwait(false);
-
-            Func<string, string?>? nameToDescriptionMapper;
-            if (query.IncludeDescription)
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                var settingEnumStringLocalizer = _stringLocalizerFactory.Create(typeof(SettingEnumConstants));
-                nameToDescriptionMapper = SettingsHelper.BuildNameToDescriptionMapper(settingEnumStringLocalizer);
-            }
-            else
-                nameToDescriptionMapper = null;
+                var setting = await dbContext.Settings.FirstOrDefaultAsync(setting => setting.Name == query.Name, cancellationToken).ConfigureAwait(false);
 
-            return setting?.ToData(nameToDescriptionMapper);
+                Func<string, string?>? nameToDescriptionMapper;
+                if (query.IncludeDescription)
+                {
+                    var settingEnumStringLocalizer = _stringLocalizerFactory.Create(typeof(SettingEnumConstants));
+                    nameToDescriptionMapper = SettingsHelper.BuildNameToDescriptionMapper(settingEnumStringLocalizer);
+                }
+                else
+                    nameToDescriptionMapper = null;
+
+                return setting?.ToData(nameToDescriptionMapper);
+            }
         }
     }
 }

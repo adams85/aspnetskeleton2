@@ -28,7 +28,7 @@ namespace WebApp.Api
                 value => TimeSpan.Parse(value, CultureInfo.InvariantCulture),
                 value => value.ToString(null, CultureInfo.InvariantCulture)));
 
-            // TODO: revise this approach when upgrading to .NET 5 (see https://github.com/dotnet/runtime/issues/1562)
+            // TODO: revise this approach when upgrading to .NET 5+ (see https://github.com/dotnet/runtime/issues/1562)
             options.Converters.Add(new ApiObjectJsonConverterFactory(MetadataProvider));
 
             options.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;

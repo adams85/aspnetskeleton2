@@ -8,7 +8,7 @@
         public string? ResultType { get; set; }
         public string? ListItemType { get; set; }
         public bool UseGenericListResult { get; set; }
-        public bool IsProgressReporter { get; set; }
+        public bool IsEventProducer { get; set; }
 
         public bool IsList => !string.IsNullOrEmpty(ListItemType);
 

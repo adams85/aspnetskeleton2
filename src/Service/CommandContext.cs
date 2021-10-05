@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using WebApp.Core.Helpers;
 using WebApp.DataAccess;
@@ -46,10 +47,9 @@ namespace WebApp.Service
         public virtual OperationExecutionContext ExecutionContext =>
             LazyInitializer.EnsureInitialized(ref _executionContextAccessor, () => ScopedServices.GetRequiredService<IExecutionContextAccessor>())!.ExecutionContext;
 
-        private WritableDataContext? _dbContext;
-        public virtual WritableDataContext DbContext => LazyInitializer.EnsureInitialized(ref _dbContext, () => ScopedServices.GetRequiredService<WritableDataContext>())!;
-
         private IDictionary<object, object>? _properties;
         public virtual IDictionary<object, object> Properties => LazyInitializer.EnsureInitialized(ref _properties, () => new Dictionary<object, object>())!;
+
+        public virtual WritableDataContext CreateDbContext() => ScopedServices.GetRequiredService<IDbContextFactory<WritableDataContext>>().CreateDbContext();
     }
 }

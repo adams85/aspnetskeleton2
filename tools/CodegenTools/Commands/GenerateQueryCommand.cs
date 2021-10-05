@@ -29,8 +29,8 @@ namespace CodegenTools.Commands
         [Option("-g|--generic-list", Description = "Applies to list-enabled queries only. If present, no result type will be generated, but the query will use the generic one (ListResult<T>).")]
         public bool UseGenericListResult { get; set; }
 
-        [Option("-p|--progress-reporter", Description = "If specified, infrastructure for progress notification will be added to the query.")]
-        public bool IsProgressReporter { get; set; }
+        [Option("-e|--event-producer", Description = "If specified, infrastructure for notification of events will be added to the query.")]
+        public bool IsEventProducer { get; set; }
 
         public override Task<int> OnExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken)
         {
@@ -47,7 +47,7 @@ namespace CodegenTools.Commands
                     ResultType = ResultType,
                     ListItemType = ListItemType,
                     UseGenericListResult = UseGenericListResult,
-                    IsProgressReporter = IsProgressReporter,
+                    IsEventProducer = IsEventProducer,
                 }.TransformText();
 
                 Directory.CreateDirectory(templateBasePath);

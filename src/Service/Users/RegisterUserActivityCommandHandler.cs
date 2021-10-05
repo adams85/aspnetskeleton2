@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.Service.Mailing;
@@ -29,61 +30,64 @@ namespace WebApp.Service.Users
 
         public override async Task HandleAsync(RegisterUserActivityCommand command, CommandContext context, CancellationToken cancellationToken)
         {
-            var user = await context.DbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
-            RequireExisting(user, c => c.UserName);
-
-            bool lockedOut = false;
-
-            var now = _clock.UtcNow;
-            if (command.SuccessfulLogin == true)
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                user.PasswordFailuresSinceLastSuccess = 0;
-                user.LastLoginDate = now;
-            }
-            else if (command.SuccessfulLogin == false)
-            {
-                var failures = user.PasswordFailuresSinceLastSuccess;
-                if (_lockoutOptions == null || failures < _lockoutOptions.MaxFailedAccessAttempts)
+                var user = await dbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
+                RequireExisting(user, c => c.UserName);
+
+                bool lockedOut = false;
+
+                var now = _clock.UtcNow;
+                if (command.SuccessfulLogin == true)
                 {
-                    user.PasswordFailuresSinceLastSuccess += 1;
-                    user.LastPasswordFailureDate = now;
+                    user.PasswordFailuresSinceLastSuccess = 0;
+                    user.LastLoginDate = now;
+                }
+                else if (command.SuccessfulLogin == false)
+                {
+                    var failures = user.PasswordFailuresSinceLastSuccess;
+                    if (_lockoutOptions == null || failures < _lockoutOptions.MaxFailedAccessAttempts)
+                    {
+                        user.PasswordFailuresSinceLastSuccess += 1;
+                        user.LastPasswordFailureDate = now;
+                    }
+                    else
+                    {
+                        user.LastPasswordFailureDate = now;
+                        user.LastLockoutDate = now;
+                        user.IsLockedOut = true;
+
+                        lockedOut = true;
+                    }
+                }
+
+                if (command.UIActivity)
+                    user.LastActivityDate = now;
+
+                if (lockedOut)
+                {
+                    await using ((await dbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false)).AsAsyncDisposable(out var transaction).ConfigureAwait(false))
+                    using (var transactionCommittedCts = new CancellationTokenSource())
+                    {
+                        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                        await _mailSenderService.EnqueueItemAsync(new UserLockedOutMailModel
+                        {
+                            Culture = context.ExecutionContext.Culture.Name,
+                            UICulture = context.ExecutionContext.UICulture.Name,
+                            Name = user.Profile?.FirstName,
+                            UserName = user.UserName,
+                            Email = user.Email,
+                        }, dbContext, new CancellationChangeToken(transactionCommittedCts.Token), cancellationToken).ConfigureAwait(false);
+
+                        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+
+                        transactionCommittedCts.Cancel();
+                    }
                 }
                 else
-                {
-                    user.LastPasswordFailureDate = now;
-                    user.LastLockoutDate = now;
-                    user.IsLockedOut = true;
-
-                    lockedOut = true;
-                }
+                    await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-
-            if (command.UIActivity)
-                user.LastActivityDate = now;
-
-            if (lockedOut)
-            {
-                await using (AsyncDisposableAdapter.From<IDbContextTransaction>(
-                    await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false),
-                    out var transaction).ConfigureAwait(false))
-                {
-                    await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                    await _mailSenderService.EnqueueItemAsync(new UserLockedOutMailModel
-                    {
-                        Culture = context.ExecutionContext.Culture.Name,
-                        UICulture = context.ExecutionContext.UICulture.Name,
-                        Name = user.Profile?.FirstName,
-                        UserName = user.UserName,
-                        Email = user.Email,
-                    }, context.DbContext, cancellationToken).ConfigureAwait(false);
-
-                    if (transaction != null)
-                        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-                }
-            }
-            else
-                await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

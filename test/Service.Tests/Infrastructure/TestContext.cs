@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using WebApp.Core.Helpers;
 using WebApp.DataAccess;
@@ -57,13 +58,11 @@ namespace WebApp.Service.Tests.Infrastructure
         /// <summary>
         /// Creates a read-only EF data context for data access (in case EF Core services were added to the container during configuration).
         /// </summary>
-        public ReadOnlyDataContext CreateReadOnlyDbContext() =>
-            Services.GetRequiredService<ReadOnlyDataContext>();
+        public ReadOnlyDataContext CreateReadOnlyDbContext() => Services.GetRequiredService<IDbContextFactory<ReadOnlyDataContext>>().CreateDbContext();
 
         /// <summary>
         /// Creates a writable EF data context for data access (in case EF Core services were added to the container during configuration).
         /// </summary>
-        public WritableDataContext CreateWritableDbContext() =>
-            Services.GetRequiredService<WritableDataContext>();
+        public WritableDataContext CreateWritableDbContext() => Services.GetRequiredService<IDbContextFactory<WritableDataContext>>().CreateDbContext();
     }
 }

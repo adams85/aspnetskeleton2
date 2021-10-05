@@ -10,15 +10,15 @@ using System.Runtime.Serialization;
 namespace <#= $"{Namespace}.Service.{Group}" #>
 {
     [DataContract]
-    public class <#= $"{Name}Command" #> : <#= IsKeyGenerator ? "IKeyGeneratorCommand" : "ICommand" #><#= IsProgressReporter ? ", IProgressReporterCommand" : "" #>
+    public class <#= $"{Name}Command" #> : <#= IsKeyGenerator ? "IKeyGeneratorCommand" : "ICommand" #><#= IsEventProducer ? ", IEventProducerCommand" : "" #>
     {
         [DataMember(Order = 1)] public string Property { get; set; } = null!;
 <#
-if (IsProgressReporter)
+if (IsEventProducer)
 {
 #>
 
-        public IProgress<ProgressEventData>? Progress { get; set; }
+        public Action<ICommand, Event>? OnEvent { get; set; }
 <#
 }
 #>

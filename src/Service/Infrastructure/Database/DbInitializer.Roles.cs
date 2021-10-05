@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using WebApp.Common.Roles;
 using WebApp.Core.Helpers;
+using WebApp.DataAccess;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Helpers;
 
@@ -14,9 +14,11 @@ namespace WebApp.Service.Infrastructure.Database
 {
     public partial class DbInitializer
     {
-        public async Task SeedRolesAsync(CancellationToken cancellationToken)
+        public async Task SeedRolesAsync(WritableDataContext dbContext, CancellationToken cancellationToken)
         {
-            var roles = await _context.Roles.ToDictionarySafeAsync(entity => entity.RoleName, AsExistingEntity, _caseInsensitiveComparer, cancellationToken).ConfigureAwait(false);
+            var dbProperties = dbContext.GetDbProperties();
+
+            var roles = await dbContext.Roles.ToDictionarySafeAsync(entity => entity.RoleName, AsExistingEntity, dbProperties.CaseInsensitiveComparer, cancellationToken).ConfigureAwait(false);
 
             foreach (var (roleName, enumMetadata) in EnumMetadata<RoleEnum>.Members)
             {
@@ -29,9 +31,9 @@ namespace WebApp.Service.Infrastructure.Database
                         description: descriptionAttribute.Description);
             }
 
-            _context.Roles.AddRange(GetEntitesToAdd(roles.Values));
+            dbContext.Roles.AddRange(GetEntitesToAdd(roles.Values));
             foreach (var entity in GetEntitesToRemove(roles.Values))
-                _context.Roles.Remove(entity);
+                dbContext.Roles.Remove(entity);
         }
 
         private static void AddOrUpdateRole(Dictionary<string, EntityInfo<Role>> roles, int id, string roleName, string? description)

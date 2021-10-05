@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Primitives;
 using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.Service.Helpers;
@@ -27,38 +27,41 @@ namespace WebApp.Service.Users
 
         public override async Task HandleAsync(ResetPasswordCommand command, CommandContext context, CancellationToken cancellationToken)
         {
-            var userWithProfile = await
-            (
-                from u in context.DbContext.Users.FilterByName(command.UserName)
-                select new { User = u, u.Profile }
-            ).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-
-            RequireExisting(userWithProfile, c => c.UserName);
-
-            var user = userWithProfile.User;
-
-            user.PasswordVerificationToken = SecurityHelper.GenerateToken(_guidProvider);
-            user.PasswordVerificationTokenExpirationDate = _clock.UtcNow + command.TokenExpirationTimeSpan;
-
-            await using (AsyncDisposableAdapter.From<IDbContextTransaction>(
-                await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false),
-                out var transaction).ConfigureAwait(false))
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                var userWithProfile = await
+                (
+                    from u in dbContext.Users.FilterByName(command.UserName)
+                    select new { User = u, u.Profile }
+                ).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
-                await _mailSenderService.EnqueueItemAsync(new PasswordResetMailModel
+                RequireExisting(userWithProfile, c => c.UserName);
+
+                var user = userWithProfile.User;
+
+                user.PasswordVerificationToken = SecurityHelper.GenerateToken(_guidProvider);
+                user.PasswordVerificationTokenExpirationDate = _clock.UtcNow + command.TokenExpirationTimeSpan;
+
+                await using ((await dbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false)).AsAsyncDisposable(out var transaction).ConfigureAwait(false))
+                using (var transactionCommittedCts = new CancellationTokenSource())
                 {
-                    Culture = context.ExecutionContext.Culture.Name,
-                    UICulture = context.ExecutionContext.UICulture.Name,
-                    Name = userWithProfile.Profile?.FirstName,
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    VerificationToken = user.PasswordVerificationToken,
-                    VerificationTokenExpirationDate = user.PasswordVerificationTokenExpirationDate.Value,
-                }, context.DbContext, cancellationToken).ConfigureAwait(false);
+                    await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                if (transaction != null)
+                    await _mailSenderService.EnqueueItemAsync(new PasswordResetMailModel
+                    {
+                        Culture = context.ExecutionContext.Culture.Name,
+                        UICulture = context.ExecutionContext.UICulture.Name,
+                        Name = userWithProfile.Profile?.FirstName,
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        VerificationToken = user.PasswordVerificationToken,
+                        VerificationTokenExpirationDate = user.PasswordVerificationTokenExpirationDate.Value,
+                    }, dbContext, new CancellationChangeToken(transactionCommittedCts.Token), cancellationToken).ConfigureAwait(false);
+
                     await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+
+                    transactionCommittedCts.Cancel();
+                }
             }
         }
     }

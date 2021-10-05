@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Primitives;
 using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.DataAccess.Entities;
@@ -27,65 +27,68 @@ namespace WebApp.Service.Users
 
         public override async Task HandleAsync(CreateUserCommand command, CommandContext context, CancellationToken cancellationToken)
         {
-            var userExists = await context.DbContext.Users.FilterByName(command.UserName).AnyAsync(cancellationToken).ConfigureAwait(false);
-            RequireUnique(userExists, c => c.UserName);
-
-            var emailExists = await context.DbContext.Users.FilterByEmail(command.Email).AnyAsync(cancellationToken).ConfigureAwait(false);
-            RequireUnique(emailExists, c => c.Email);
-
-            var user = new User();
-
-            user.UserName = command.UserName;
-            user.Email = command.Email;
-            user.Password = SecurityHelper.HashPassword(command.Password);
-            user.IsApproved = command.IsApproved;
-            if (!command.IsApproved)
-                user.ConfirmationToken = SecurityHelper.GenerateToken(_guidProvider);
-
-            var now = _clock.UtcNow;
-            user.CreateDate = now;
-            user.LastPasswordChangedDate = now;
-            user.PasswordFailuresSinceLastSuccess = 0;
-            user.IsLockedOut = false;
-
-            context.DbContext.Users.Add(user);
-
-            if (command.CreateProfile)
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                var profile = new Profile();
+                var userExists = await dbContext.Users.FilterByName(command.UserName).AnyAsync(cancellationToken).ConfigureAwait(false);
+                RequireUnique(userExists, c => c.UserName);
 
-                profile.FirstName = command.FirstName;
-                profile.LastName = command.LastName;
+                var emailExists = await dbContext.Users.FilterByEmail(command.Email).AnyAsync(cancellationToken).ConfigureAwait(false);
+                RequireUnique(emailExists, c => c.Email);
 
-                user.Profile = profile;
-            }
+                var user = new User();
 
-            if (!command.IsApproved)
-            {
-                await using (AsyncDisposableAdapter.From<IDbContextTransaction>(
-                    await context.DbContext.Database.TryBeginTransactionAsync(cancellationToken).ConfigureAwait(false),
-                    out var transaction).ConfigureAwait(false))
+                user.UserName = command.UserName;
+                user.Email = command.Email;
+                user.Password = SecurityHelper.HashPassword(command.Password);
+                user.IsApproved = command.IsApproved;
+                if (!command.IsApproved)
+                    user.ConfirmationToken = SecurityHelper.GenerateToken(_guidProvider);
+
+                var now = _clock.UtcNow;
+                user.CreateDate = now;
+                user.LastPasswordChangedDate = now;
+                user.PasswordFailuresSinceLastSuccess = 0;
+                user.IsLockedOut = false;
+
+                dbContext.Users.Add(user);
+
+                if (command.CreateProfile)
                 {
-                    await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    var profile = new Profile();
 
-                    await _mailSenderService.EnqueueItemAsync(new UnapprovedUserCreatedMailModel
-                    {
-                        Culture = context.ExecutionContext.Culture.Name,
-                        UICulture = context.ExecutionContext.UICulture.Name,
-                        Name = user.Profile?.FirstName,
-                        UserName = user.UserName,
-                        Email = user.Email,
-                        VerificationToken = user.ConfirmationToken!,
-                    }, context.DbContext, cancellationToken).ConfigureAwait(false);
+                    profile.FirstName = command.FirstName;
+                    profile.LastName = command.LastName;
 
-                    if (transaction != null)
-                        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+                    user.Profile = profile;
                 }
-            }
-            else
-                await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            command.OnKeyGenerated?.Invoke(command, user.Id);
+                if (!command.IsApproved)
+                {
+                    await using ((await dbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false)).AsAsyncDisposable(out var transaction).ConfigureAwait(false))
+                    using (var transactionCommittedCts = new CancellationTokenSource())
+                    {
+                        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                        await _mailSenderService.EnqueueItemAsync(new UnapprovedUserCreatedMailModel
+                        {
+                            Culture = context.ExecutionContext.Culture.Name,
+                            UICulture = context.ExecutionContext.UICulture.Name,
+                            Name = user.Profile?.FirstName,
+                            UserName = user.UserName,
+                            Email = user.Email,
+                            VerificationToken = user.ConfirmationToken!,
+                        }, dbContext, new CancellationChangeToken(transactionCommittedCts.Token), cancellationToken).ConfigureAwait(false);
+
+                        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+
+                        transactionCommittedCts.Cancel();
+                    }
+                }
+                else
+                    await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                command.OnKeyGenerated?.Invoke(command, user.Id);
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using MimeKit;
 using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
@@ -37,7 +38,7 @@ namespace WebApp.Service.Mailing
         private readonly NetworkCredential? _smtpCredentials;
 
         private readonly Func<MailTransport> _smtpClientFactory;
-        private MailTransport _smtpClient;
+        private MailTransport? _smtpClient;
 
         private readonly ushort _batchSize;
         private readonly TimeSpan _maxSleepTime;
@@ -84,8 +85,6 @@ namespace WebApp.Service.Mailing
                 _smtpClientFactory = () => new SmtpClient { Timeout = checked((int)smtpTimeout.TotalMilliseconds) };
             }
 
-            _smtpClient = _smtpClientFactory();
-
             var optionsValue = options?.Value;
             _batchSize = optionsValue?.BatchSize ?? MailSenderServiceOptions.DefaultBatchSize;
 
@@ -104,18 +103,16 @@ namespace WebApp.Service.Mailing
             _logger = logger ?? (ILogger)NullLogger.Instance;
         }
 
-        public override void Dispose()
-        {
-            _smtpClient.Dispose();
-            base.Dispose();
-        }
-
         private event EventHandler? Enqueued;
 
         private void WakeProcessor() => Enqueued?.Invoke(this, EventArgs.Empty);
 
-        public async Task EnqueueItemAsync(MailModel model, WritableDataContext dbContext, CancellationToken cancellationToken)
+        public async Task EnqueueItemAsync(MailModel model, WritableDataContext dbContext, IChangeToken? transactionCommittedToken, CancellationToken cancellationToken)
         {
+            var hasPendingTransaction = dbContext.Database.HasPendingTransaction();
+            if (hasPendingTransaction && transactionCommittedToken == null)
+                throw new ArgumentNullException(nameof(transactionCommittedToken), "A change token signalling on successful commit must be supplied when a transaction is present.");
+
             var mailTypeDefinition = _mailTypeCatalog.GetDefinition(model.MailType, throwIfNotFound: true)!;
 
             var serializedMailModel = mailTypeDefinition.SerializeModel(model);
@@ -131,7 +128,9 @@ namespace WebApp.Service.Mailing
 
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            if (!dbContext.Database.TryRegisterForPendingTransactionCommit(WakeProcessor))
+            if (hasPendingTransaction)
+                transactionCommittedToken!.RegisterChangeCallback(state => ((MailSenderService)state).WakeProcessor(), this);
+            else
                 WakeProcessor();
         }
 
@@ -151,7 +150,7 @@ namespace WebApp.Service.Mailing
             return queueItems.AsAsyncEnumerable();
         }
 
-        private async Task RemoveItemAsync(WritableDataContext dbContext, Mail mail, CancellationToken cancellationToken)
+        private async Task RemoveItemAsync(Mail mail, WritableDataContext dbContext, CancellationToken cancellationToken)
         {
             dbContext.MailQueue.Remove(mail.QueueItem);
 
@@ -171,7 +170,7 @@ namespace WebApp.Service.Mailing
             return currentDueDate + retryTime;
         }
 
-        private async Task RegisterItemFailureAsync(WritableDataContext dbContext, MailQueueItem queueItem, bool canRetry, CancellationToken cancellationToken)
+        private async Task RegisterItemFailureAsync(MailQueueItem queueItem, bool canRetry, WritableDataContext dbContext, CancellationToken cancellationToken)
         {
             queueItem.DueDate = canRetry ? GetRetryDueDate(queueItem.CreationDate, queueItem.DueDate!.Value) : (DateTime?)null;
 
@@ -246,47 +245,47 @@ namespace WebApp.Service.Mailing
             return produceMailTasks;
         }
 
-        private async Task HandleMailErrorAsync(WritableDataContext dbContext, Mail mail, CancellationToken cancellationToken)
+        private async Task HandleMailErrorAsync(Mail mail, WritableDataContext dbContext, CancellationToken cancellationToken)
         {
             switch (mail.Error)
             {
                 case MailTypeNotSupportedException ex:
                     _logger.LogError(ex.InnerException, "Mail type '{TYPE}' is not supported. Queue item id: {ID}.", mail.QueueItem.MailType, mail.QueueItem.Id);
-                    await RegisterItemFailureAsync(dbContext, mail.QueueItem, canRetry: false, cancellationToken).ConfigureAwait(false);
+                    await RegisterItemFailureAsync(mail.QueueItem, canRetry: false, dbContext, cancellationToken).ConfigureAwait(false);
                     return;
                 case MailModelSerializationException ex:
                     _logger.LogError(ex.InnerException, "Model of mail type '{TYPE}' could not be deserialized. Queue item id: {ID}.", mail.QueueItem.MailType, mail.QueueItem.Id);
-                    await RegisterItemFailureAsync(dbContext, mail.QueueItem, canRetry: false, cancellationToken).ConfigureAwait(false);
+                    await RegisterItemFailureAsync(mail.QueueItem, canRetry: false, dbContext, cancellationToken).ConfigureAwait(false);
                     return;
                 default:
                     _logger.LogError(mail.Error, "Producing MIME message of mail type '{TYPE}' failed. Queue item id: {ID}.", mail.QueueItem.MailType, mail.QueueItem.Id);
-                    await RegisterItemFailureAsync(dbContext, mail.QueueItem, canRetry: false, cancellationToken).ConfigureAwait(false);
+                    await RegisterItemFailureAsync(mail.QueueItem, canRetry: false, dbContext, cancellationToken).ConfigureAwait(false);
                     return;
             }
         }
 
-        private async Task SendMailAsync(WritableDataContext dbContext, Mail mail, CancellationToken cancellationToken)
+        private async Task SendMailAsync(Mail mail, WritableDataContext dbContext, CancellationToken cancellationToken)
         {
             try
             {
-                await _smtpClient.SendAsync(mail.Message!, cancellationToken).ConfigureAwait(false);
+                await _smtpClient!.SendAsync(mail.Message!, cancellationToken).ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex.InnerException, "Sending MIME message of mail type '{TYPE}' failed. Queue item id: {ID}.", mail.QueueItem.MailType, mail.QueueItem.Id);
-                await RegisterItemFailureAsync(dbContext, mail.QueueItem, canRetry: false, cancellationToken).ConfigureAwait(false);
+                await RegisterItemFailureAsync(mail.QueueItem, canRetry: false, dbContext, cancellationToken).ConfigureAwait(false);
                 return;
             }
             catch (CommandException ex)
             {
                 _logger.LogError(ex.InnerException, "Sending MIME message of mail type '{TYPE}' failed. Queue item id: {ID}.", mail.QueueItem.MailType, mail.QueueItem.Id);
-                await RegisterItemFailureAsync(dbContext, mail.QueueItem, canRetry: true, cancellationToken).ConfigureAwait(false);
+                await RegisterItemFailureAsync(mail.QueueItem, canRetry: true, dbContext, cancellationToken).ConfigureAwait(false);
                 return;
             }
 
             // cancellation token is not passed since mails should be sent and deleted without interruption,
             // otherwise they could be sent multiple times
-            await RemoveItemAsync(dbContext, mail, default).ConfigureAwait(false);
+            await RemoveItemAsync(mail, dbContext, default).ConfigureAwait(false);
         }
 
         private async Task SendMailsAsync(IReadOnlyList<Task<Mail>> produceMailTasks, WritableDataContext dbContext, CancellationToken cancellationToken)
@@ -299,7 +298,7 @@ namespace WebApp.Service.Mailing
 
                     if (mail.Message != null)
                     {
-                        if (!_smtpClient.IsConnected)
+                        if (!_smtpClient!.IsConnected)
                         {
                             try
                             {
@@ -317,10 +316,10 @@ namespace WebApp.Service.Mailing
                                 await _smtpClient.AuthenticateAsync(_smtpCredentials, cancellationToken).ConfigureAwait(false);
                         }
 
-                        await SendMailAsync(dbContext, mail, cancellationToken).ConfigureAwait(false);
+                        await SendMailAsync(mail, dbContext, cancellationToken).ConfigureAwait(false);
                     }
                     else if (mail.Error != null)
-                        await HandleMailErrorAsync(dbContext, mail, cancellationToken).ConfigureAwait(false);
+                        await HandleMailErrorAsync(mail, dbContext, cancellationToken).ConfigureAwait(false);
                     else
                         // we should never get here
                         throw new InvalidOperationException();
@@ -328,7 +327,7 @@ namespace WebApp.Service.Mailing
             }
             finally
             {
-                if (_smtpClient.IsConnected)
+                if (_smtpClient!.IsConnected)
                     await _smtpClient.DisconnectAsync(quit: true, cancellationToken).ConfigureAwait(false);
             }
         }
@@ -336,9 +335,8 @@ namespace WebApp.Service.Mailing
         private async Task ProcessAsync(CancellationToken cancellationToken)
         {
             await using (AsyncDisposableAdapter.From(_serviceScopeFactory.CreateScope(), out var scope).ConfigureAwait(false))
+            await using (scope.ServiceProvider.GetRequiredService<IDbContextFactory<WritableDataContext>>().CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<WritableDataContext>();
-
                 IReadOnlyList<Task<Mail>> produceMailTasks;
                 do
                 {
@@ -356,9 +354,10 @@ namespace WebApp.Service.Mailing
         }
 
         // https://blog.stephencleary.com/2020/05/backgroundservice-gotcha-startup.html
-        // TODO: revise this workaround when upgrading to .NET 5 (https://github.com/dotnet/runtime/issues/36063)
+        // TODO: revise this workaround when upgrading to .NET 5+ (https://github.com/dotnet/runtime/issues/36063)
         protected override Task ExecuteAsync(CancellationToken stoppingToken) => Task.Run(async () =>
         {
+            using (_smtpClient = _smtpClientFactory())
             // TODO: revise this approach when https://github.com/dotnet/runtime/issues/35962 gets resolved
             using (var wakeEvent = new AutoResetEvent(false))
             using (Observable

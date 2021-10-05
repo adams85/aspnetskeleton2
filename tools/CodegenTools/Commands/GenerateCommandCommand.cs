@@ -23,8 +23,8 @@ namespace CodegenTools.Commands
         [Option("-k|--key-generator", Description = "If specified, infrastructure for notification of auto-generated IDs will be added to the command.")]
         public bool IsKeyGenerator { get; set; }
 
-        [Option("-p|--progress-reporter", Description = "If specified, infrastructure for progress notification will be added to the command.")]
-        public bool IsProgressReporter { get; set; }
+        [Option("-e|--event-producer", Description = "If specified, infrastructure for notification of events will be added to the command.")]
+        public bool IsEventProducer { get; set; }
 
         public override Task<int> OnExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken)
         {
@@ -39,7 +39,7 @@ namespace CodegenTools.Commands
                     Group = Group,
                     Name = Name,
                     IsKeyGenerator = IsKeyGenerator,
-                    IsProgressReporter = IsProgressReporter,
+                    IsEventProducer = IsEventProducer,
                 }.TransformText();
 
                 Directory.CreateDirectory(templateBasePath);

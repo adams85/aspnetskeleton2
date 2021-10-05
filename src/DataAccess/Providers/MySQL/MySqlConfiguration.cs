@@ -17,7 +17,7 @@ namespace WebApp.DataAccess.Providers.MySQL
         {
             internalServices.AddEntityFrameworkMySql();
 
-            ReplaceRelationalTransactionFactory<MySqlRelationalTransactionFactory, CustomMySqlRelationalTransactionFactory>(internalServices)
+            internalServices
                 .ReplaceLast(ServiceDescriptor.Scoped<IMySqlRelationalConnection, CustomMySqlRelationalConnection>())
                 .ReplaceLast(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomMySqlMigrationsSqlGenerator>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, MySqlModelCustomizer>())

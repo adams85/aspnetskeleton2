@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using CsvHelper.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WebApp.Core.Infrastructure;
+using WebApp.DataAccess;
 using WebApp.Service.Infrastructure.Database;
 using WebApp.Service.Tests.Infrastructure.Database;
 
@@ -31,14 +33,16 @@ namespace WebApp.Service.Tests.Infrastructure
 
         public TestDatabaseBuilder SeedDefaults()
         {
-            return AddSeeder(sp => new DelegatedDatabaseSeeder((ctx, ct) =>
-                new DbInitializer(
-                    ctx,
+            return AddSeeder(sp =>
+            {
+                var dbInitializer = new DbInitializer(
+                    sp.GetRequiredService<IDbContextFactory<WritableDataContext>>(),
                     sp.GetRequiredService<IOptions<DbInitializerOptions>>(),
                     sp.GetService<IClock>(),
-                    sp.GetService<ILogger<DbInitializer>>())
-                .SeedAsync(ct)));
+                    sp.GetService<ILogger<DbInitializer>>());
 
+                return new DelegatedDatabaseSeeder(dbInitializer.SeedAsync);
+            });
         }
 
         public TestDatabaseBuilder SeedDataset(IEnumerable<CsvFile> files, Action<IReaderConfiguration>? configureReader = null)

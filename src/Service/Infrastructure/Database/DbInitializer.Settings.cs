@@ -7,8 +7,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using WebApp.Common.Settings;
 using WebApp.Core.Helpers;
+using WebApp.DataAccess;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Helpers;
 
@@ -16,9 +18,11 @@ namespace WebApp.Service.Infrastructure.Database
 {
     public partial class DbInitializer
     {
-        public async Task SeedSettingsAsync(CancellationToken cancellationToken)
+        public async Task SeedSettingsAsync(WritableDataContext dbContext, CancellationToken cancellationToken)
         {
-            var settings = await _context.Settings.ToDictionarySafeAsync(entity => entity.Name, AsExistingEntity, _caseSensitiveComparer, cancellationToken).ConfigureAwait(false);
+            var dbProperties = dbContext.GetDbProperties();
+
+            var settings = await dbContext.Settings.ToDictionarySafeAsync(entity => entity.Name, AsExistingEntity, dbProperties.CaseSensitiveComparer, cancellationToken).ConfigureAwait(false);
 
             foreach (var (settingName, enumMetadata) in EnumMetadata<SettingEnum>.Members)
             {
@@ -36,8 +40,8 @@ namespace WebApp.Service.Infrastructure.Database
                     maxValue: Convert.ToString(rangeAttribute?.Maximum, CultureInfo.InvariantCulture));
             }
 
-            _context.Settings.AddRange(GetEntitesToAdd(settings.Values));
-            _context.Settings.RemoveRange(GetEntitesToRemove(settings.Values));
+            dbContext.Settings.AddRange(GetEntitesToAdd(settings.Values));
+            dbContext.Settings.RemoveRange(GetEntitesToRemove(settings.Values));
         }
 
         private static void AddOrUpdateSetting(Dictionary<string, EntityInfo<Setting>> settings, string name, string? defaultValue, string? minValue, string? maxValue)

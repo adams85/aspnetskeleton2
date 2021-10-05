@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
 using WebApp.Service.Helpers;
 
@@ -19,23 +20,26 @@ namespace WebApp.Service.Users
 
         public override async Task HandleAsync(UpdateJwtRefreshTokenCommand command, CommandContext context, CancellationToken cancellationToken)
         {
-            var user = await context.DbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
-            RequireExisting(user, c => c.UserName);
-
-            var now = _clock.UtcNow;
-            if (command.Verify)
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                RequireValid(
-                    now < user.JwtRefreshTokenExpirationDate && string.Equals(user.JwtRefreshToken, command.VerificationToken, StringComparison.Ordinal),
-                    c => c.VerificationToken);
+                var user = await dbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
+                RequireExisting(user, c => c.UserName);
+
+                var now = _clock.UtcNow;
+                if (command.Verify)
+                {
+                    RequireValid(
+                        now < user.JwtRefreshTokenExpirationDate && string.Equals(user.JwtRefreshToken, command.VerificationToken, StringComparison.Ordinal),
+                        c => c.VerificationToken);
+                }
+
+                user.JwtRefreshToken = SecurityHelper.GenerateToken(_guidProvider);
+                user.JwtRefreshTokenExpirationDate = now + command.TokenExpirationTimeSpan;
+
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                command.OnKeyGenerated?.Invoke(command, user.JwtRefreshToken);
             }
-
-            user.JwtRefreshToken = SecurityHelper.GenerateToken(_guidProvider);
-            user.JwtRefreshTokenExpirationDate = now + command.TokenExpirationTimeSpan;
-
-            await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            command.OnKeyGenerated?.Invoke(command, user.JwtRefreshToken);
         }
     }
 }

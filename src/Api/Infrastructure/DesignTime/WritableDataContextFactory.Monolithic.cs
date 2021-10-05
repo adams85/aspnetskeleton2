@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using WebApp.DataAccess;
@@ -18,9 +19,9 @@ namespace WebApp.Api.Infrastructure.DesignTime
             Environment.SetEnvironmentVariable($"DATABASE__{nameof(DbInitializerOptions.Seed).ToUpperInvariant()}", seed.ToString(), EnvironmentVariableTarget.Process);
 
             var scope = Program.CreateHostBuilder(args).Build().Services.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<WritableDataContext>();
-            var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider, context);
+            var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
 
+            var context = scope.ServiceProvider.GetRequiredService<IDbContextFactory<WritableDataContext>>().CreateDbContext();
             context.Disposing += (s, e) => dbInitializer.InitializeAsync(designTime: true, default).GetAwaiter().GetResult();
 
             return context;

@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using WebApp.Core.Helpers;
 
 namespace WebApp.Service.Roles
 {
@@ -8,18 +9,21 @@ namespace WebApp.Service.Roles
     {
         public override async Task HandleAsync(DeleteRoleCommand command, CommandContext context, CancellationToken cancellationToken)
         {
-            var role = await context.DbContext.Roles.GetByNameAsync(command.RoleName, cancellationToken).ConfigureAwait(false);
-            RequireExisting(role, c => c.RoleName);
-
-            if (!command.DeletePopulatedRole)
+            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                var hasUsers = await context.DbContext.UserRoles.AnyAsync(ur => ur.RoleId == role.Id, cancellationToken).ConfigureAwait(false);
-                RequireIndependent(hasUsers, c => c.RoleName);
+                var role = await dbContext.Roles.GetByNameAsync(command.RoleName, cancellationToken).ConfigureAwait(false);
+                RequireExisting(role, c => c.RoleName);
+
+                if (!command.DeletePopulatedRole)
+                {
+                    var hasUsers = await dbContext.UserRoles.AnyAsync(ur => ur.RoleId == role.Id, cancellationToken).ConfigureAwait(false);
+                    RequireIndependent(hasUsers, c => c.RoleName);
+                }
+
+                dbContext.Roles.Remove(role);
+
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-
-            context.DbContext.Roles.Remove(role);
-
-            await context.DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

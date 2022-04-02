@@ -12,7 +12,7 @@ using WebApp.UI.Helpers;
 namespace WebApp.UI.Areas.Dashboard.Pages.Settings
 {
     // this page is created for the sake of completeness (settings cannot be deleted)
-    [Authorize(Roles = nameof(RoleEnum.Administators))]
+    [Authorize(Roles = nameof(RoleEnum.Administrators))]
     public class DeleteModel : DeletePageModel<DeleteModel.PageDescriptorClass, SettingData>
     {
         private readonly IQueryDispatcher _queryDispatcher;

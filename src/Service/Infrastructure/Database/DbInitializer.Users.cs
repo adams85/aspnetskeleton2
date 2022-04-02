@@ -25,7 +25,7 @@ namespace WebApp.Service.Infrastructure.Database
                 .AsAsyncEnumerable()
                 .ToDictionarySafeAsync(entity => entity.UserName, AsExistingEntity, dbProperties.CaseInsensitiveComparer, cancellationToken).ConfigureAwait(false);
 
-            var adminRole = dbContext.Roles.Local.First(r => r.RoleName == nameof(RoleEnum.Administators));
+            var adminRole = dbContext.Roles.Local.First(r => r.RoleName == nameof(RoleEnum.Administrators));
 
             var utcNow = _clock.UtcNow;
 

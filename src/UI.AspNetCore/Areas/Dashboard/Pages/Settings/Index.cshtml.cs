@@ -16,7 +16,7 @@ using WebApp.UI.Models;
 
 namespace WebApp.UI.Areas.Dashboard.Pages.Settings
 {
-    [Authorize(Roles = nameof(RoleEnum.Administators))]
+    [Authorize(Roles = nameof(RoleEnum.Administrators))]
     public class IndexModel : ListPageModel<IndexModel.PageDescriptorClass, ListSettingsQuery, ListResult<SettingData>, SettingData>
     {
         public static LocalizedHtmlString GetDescription(SettingData data) =>

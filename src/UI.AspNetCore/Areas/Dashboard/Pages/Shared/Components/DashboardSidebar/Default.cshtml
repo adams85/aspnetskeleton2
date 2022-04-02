@@ -41,7 +41,7 @@
         new NavigationGroup
         {
             GetTitle = (httpContext, t) => t["Administrators"],
-            IsVisibleAsync = httpContext => Task.FromResult(httpContext.User.IsInRole(nameof(RoleEnum.Administators))),
+            IsVisibleAsync = httpContext => Task.FromResult(httpContext.User.IsInRole(nameof(RoleEnum.Administrators))),
             Items =
             {
                 new NavigationItem(Settings.IndexModel.PageDescriptor) { IconCssClass = "fa-wrench" },

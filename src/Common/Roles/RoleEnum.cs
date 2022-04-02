@@ -6,7 +6,7 @@ namespace WebApp.Common.Roles
     [DataContract]
     public enum RoleEnum
     {
-        [Description("Administators")]
-        [EnumMember] Administators = 1,
+        [Description("Administrators")]
+        [EnumMember] Administrators = 1,
     }
 }

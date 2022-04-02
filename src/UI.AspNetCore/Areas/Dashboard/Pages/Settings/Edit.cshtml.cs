@@ -14,7 +14,7 @@ using WebApp.UI.Helpers;
 
 namespace WebApp.UI.Areas.Dashboard.Pages.Settings
 {
-    [Authorize(Roles = nameof(RoleEnum.Administators))]
+    [Authorize(Roles = nameof(RoleEnum.Administrators))]
     public class EditModel : EditPageModel<EditModel.PageDescriptorClass, SettingData>
     {
         private readonly IQueryDispatcher _queryDispatcher;

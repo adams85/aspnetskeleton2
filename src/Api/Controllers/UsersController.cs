@@ -14,7 +14,7 @@ namespace WebApp.Api.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    [Authorize(AuthenticationSchemes = ApiAuthenticationSchemes.CookieAndJwtBearer, Roles = nameof(RoleEnum.Administators))]
+    [Authorize(AuthenticationSchemes = ApiAuthenticationSchemes.CookieAndJwtBearer, Roles = nameof(RoleEnum.Administrators))]
     public class UsersController : Controller
     {
         private readonly ICommandDispatcher _commandDispatcher;

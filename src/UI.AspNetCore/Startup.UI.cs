@@ -189,7 +189,7 @@ namespace WebApp.UI
 
                 #endregion
 
-                if (!IsRunningBehindProxy)
+                if (!IsRunningBehindProxy && !Environment.IsDevelopment())
                     app.UseHttpsRedirection();
 
                 #region Response compression

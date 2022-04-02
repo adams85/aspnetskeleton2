@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using WebApp.Api.Infrastructure;
 using WebApp.Api.Infrastructure.ErrorHandling;
@@ -99,7 +100,7 @@ namespace WebApp.Api
 
             app.UseMiddleware<ApiErrorHandlerMiddleware>();
 
-            if (!IsRunningBehindProxy)
+            if (!IsRunningBehindProxy && !Environment.IsDevelopment())
                 app.UseHttpsRedirection();
 
             app.UseWhen(_ => settingsProvider.EnableSwagger(), ConfigureSwagger);

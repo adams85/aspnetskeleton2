@@ -16,7 +16,7 @@ namespace WebApp.Service.Users
                 switch (query.Identifier)
                 {
                     case UserIdentifier.Key keyIdentifier:
-                        user = await dbContext.FindAsync<User>(new object[] { keyIdentifier.Value }, cancellationToken).ConfigureAwait(false);
+                        user = await dbContext.Users.FindAsync(new object[] { keyIdentifier.Value }, cancellationToken).ConfigureAwait(false);
                         break;
                     case UserIdentifier.Name nameIdentifier:
                         user = await dbContext.Users.GetByNameAsync(nameIdentifier.Value, cancellationToken).ConfigureAwait(false);

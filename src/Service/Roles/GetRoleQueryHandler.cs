@@ -17,7 +17,7 @@ namespace WebApp.Service.Roles
                 switch (query.Identifier)
                 {
                     case RoleIdentifier.Key keyIdentifier:
-                        role = await dbContext.FindAsync<Role>(new[] { keyIdentifier.Value }, cancellationToken).ConfigureAwait(false);
+                        role = await dbContext.Roles.FindAsync(new object[] { keyIdentifier.Value }, cancellationToken).ConfigureAwait(false);
                         break;
                     case RoleIdentifier.Name nameIdentifier:
                         role = await dbContext.Roles.GetByNameAsync(nameIdentifier.Value, cancellationToken).ConfigureAwait(false);

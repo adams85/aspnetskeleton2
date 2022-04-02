@@ -19,6 +19,7 @@ namespace WebApp.Service.Infrastructure
                 .InvalidatedBy<AddUsersToRolesCommand, GetCachedUserInfoQueryInvalidatorInterceptor>()
                 .InvalidatedBy<RemoveUsersFromRolesCommand, GetCachedUserInfoQueryInvalidatorInterceptor>()
                 .InvalidatedBy<DeleteRoleCommand>()
+                .WithScope(query => query.UserName)
                 .WithSlidingExpiration(defaultCacheOptions.SlidingExpiration);
 
             return builder;

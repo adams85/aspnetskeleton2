@@ -65,5 +65,10 @@ namespace WebApp.Service.Users
         {
             return source.FilterByEmail(email).FirstOrDefaultAsync(cancellationToken);
         }
+
+        public static bool ValidateJwtRefreshToken(this User user, string token, DateTime utcNow)
+        {
+            return utcNow < user.JwtRefreshTokenExpirationDate && string.Equals(user.JwtRefreshToken, token, StringComparison.Ordinal);
+        }
     }
 }

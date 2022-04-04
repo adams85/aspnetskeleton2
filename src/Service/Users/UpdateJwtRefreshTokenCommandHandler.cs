@@ -27,11 +27,7 @@ namespace WebApp.Service.Users
 
                 var now = _clock.UtcNow;
                 if (command.Verify)
-                {
-                    RequireValid(
-                        now < user.JwtRefreshTokenExpirationDate && string.Equals(user.JwtRefreshToken, command.VerificationToken, StringComparison.Ordinal),
-                        c => c.VerificationToken);
-                }
+                    RequireValid(user.ValidateJwtRefreshToken(command.VerificationToken!, now), c => c.VerificationToken);
 
                 user.JwtRefreshToken = SecurityHelper.GenerateToken(_guidProvider);
                 user.JwtRefreshTokenExpirationDate = now + command.TokenExpirationTimeSpan;

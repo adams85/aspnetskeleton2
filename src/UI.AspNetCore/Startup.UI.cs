@@ -95,13 +95,17 @@ namespace WebApp.UI
 
                 #region Security
 
-                // https://docs.microsoft.com/en-us/aspnet/core/security/authentication/cookie
-                services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .AddCookie();
+                services.AddSingleton<ICachedUserInfoProvider>(sp => sp.GetRequiredService<IAccountManager>());
 
+                // https://docs.microsoft.com/en-us/aspnet/core/security/authentication/cookie
+                services.AddAuthentication(UIAuthenticationSchemes.Cookie)
+                    .AddCookie(UIAuthenticationSchemes.Cookie);
+
+                services.AddSingleton<CustomCookieAuthenticationEvents>();
                 services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                     .Bind(Configuration.GetSection($"{UISecurityOptions.DefaultSectionName}:Authentication"))
-                    .Configure<IAccountManager>((options, accountManager) => options.Events = new CustomCookieAuthenticationEvents(accountManager));
+                    .Configure(options =>
+                        CustomCookieAuthenticationEvents.ConfigureOptions<CustomCookieAuthenticationEvents>(options));
 
                 services.AddAuthorization(options => AnonymousOnlyAttribute.Configure(options));
 

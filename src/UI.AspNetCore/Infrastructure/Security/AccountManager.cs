@@ -29,7 +29,7 @@ namespace WebApp.UI.Infrastructure.Security
             _passwordTokenExpirationTime = optionsValue?.PasswordTokenExpirationTime ?? UISecurityOptions.DefaultPasswordTokenExpirationTime;
         }
 
-        public async Task<CachedUserInfoData?> GetCachedUserInfo(string userName, bool registerActivity, CancellationToken cancellationToken)
+        public async Task<CachedUserInfoData?> GetCachedUserInfoAsync(string userName, bool registerActivity, CancellationToken cancellationToken)
         {
             var result = await _queryDispatcher.DispatchAsync(new GetCachedUserInfoQuery { UserName = userName }, cancellationToken);
 

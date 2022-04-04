@@ -28,9 +28,12 @@
 
   <ItemGroup>
     <None Remove="Translations\**\*.po" />
-    <Content Include="Translations\*\*.po;Translations\.ensuredir">
+    <Content Include="Translations\*\*.po">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Translations\.ensuredir">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

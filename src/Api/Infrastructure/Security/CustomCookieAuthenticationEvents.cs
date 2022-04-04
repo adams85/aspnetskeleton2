@@ -8,13 +8,16 @@ namespace WebApp.Api.Infrastructure.Security
 {
     public class CustomCookieAuthenticationEvents : CookieAuthenticationEvents
     {
-        private readonly ICachedUserInfoProvider _cachedUserInfoProvider;
-        private readonly string _scheme;
+        public static void ConfigureOptions<TEvents>(CookieAuthenticationOptions options)
+        {
+            options.EventsType = typeof(TEvents);
+        }
 
-        public CustomCookieAuthenticationEvents(ICachedUserInfoProvider cachedUserInfoProvider, string scheme = CookieAuthenticationDefaults.AuthenticationScheme)
+        private readonly ICachedUserInfoProvider _cachedUserInfoProvider;
+
+        public CustomCookieAuthenticationEvents(ICachedUserInfoProvider cachedUserInfoProvider)
         {
             _cachedUserInfoProvider = cachedUserInfoProvider ?? throw new ArgumentNullException(nameof(cachedUserInfoProvider));
-            _scheme = scheme;
         }
 
         public override async Task ValidatePrincipal(CookieValidatePrincipalContext context)
@@ -22,7 +25,7 @@ namespace WebApp.Api.Infrastructure.Security
             var identity = (ClaimsIdentity?)context.Principal.Identity!;
             var userName = identity.Name;
 
-            var userInfo = await _cachedUserInfoProvider.GetCachedUserInfo(userName, registerActivity: true, context.HttpContext.RequestAborted);
+            var userInfo = await _cachedUserInfoProvider.GetCachedUserInfoAsync(userName, registerActivity: true, context.HttpContext.RequestAborted);
 
             if (userInfo != null && userInfo.LoginAllowed)
             {
@@ -30,7 +33,7 @@ namespace WebApp.Api.Infrastructure.Security
             }
             else
             {
-                await context.HttpContext.SignOutAsync(_scheme);
+                await context.HttpContext.SignOutAsync(context.Scheme.Name);
                 context.RejectPrincipal();
             }
         }

@@ -6,6 +6,6 @@ namespace WebApp.Api.Infrastructure.Security
 {
     public interface ICachedUserInfoProvider
     {
-        Task<CachedUserInfoData?> GetCachedUserInfo(string userName, bool registerActivity, CancellationToken cancellationToken);
+        Task<CachedUserInfoData?> GetCachedUserInfoAsync(string userName, bool registerActivity, CancellationToken cancellationToken);
     }
 }

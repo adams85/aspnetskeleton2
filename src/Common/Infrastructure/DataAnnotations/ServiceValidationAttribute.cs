@@ -47,7 +47,7 @@ namespace System.ComponentModel.DataAnnotations
         protected virtual string FormatErrorMessageFallback(string localizedName, ITextLocalizer textLocalizer, IServiceProvider? serviceProvider) =>
             base.FormatErrorMessage(localizedName, textLocalizer, serviceProvider);
 
-        protected sealed override ValidationResult IsValid(object? value, ValidationContext validationContext)
+        protected sealed override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             var validator = GetValidator(validationContext);
 
@@ -62,7 +62,7 @@ namespace System.ComponentModel.DataAnnotations
 
         private delegate string FormatErrorMessageDelegate(object validator, string localizedName, ITextLocalizer textLocalizer, ServiceValidationAttribute validationAttribute);
 
-        private delegate ValidationResult IsValidDelegate(object validator, object? value, ValidationContext validationContext, ValidationAttribute validationAttribute);
+        private delegate ValidationResult? IsValidDelegate(object validator, object? value, ValidationContext validationContext, ValidationAttribute validationAttribute);
 
         private sealed class ValidatorHelper
         {
@@ -76,7 +76,7 @@ namespace System.ComponentModel.DataAnnotations
                 where TAttribute : ServiceValidationAttribute =>
                 ((IValidator<TAttribute>)validator).FormatErrorMessage(localizedName, textLocalizer, (TAttribute)validationAttribute);
 
-            private static ValidationResult InvokeIsValid<TAttribute>(object validator, object? value, ValidationContext validationContext, ValidationAttribute validationAttribute)
+            private static ValidationResult? InvokeIsValid<TAttribute>(object validator, object? value, ValidationContext validationContext, ValidationAttribute validationAttribute)
                 where TAttribute : ServiceValidationAttribute =>
                 ((IValidator<TAttribute>)validator).IsValid(value, validationContext, (TAttribute)validationAttribute);
 

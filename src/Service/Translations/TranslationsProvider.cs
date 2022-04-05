@@ -33,7 +33,7 @@ namespace WebApp.Service.Translations
 
         private readonly TimeSpan _delayOnRefreshError;
 
-        private readonly TaskCompletionSource<object?> _initializedTcs;
+        private readonly TaskCompletionSource _initializedTcs;
         private readonly IDisposable _refreshSubscription;
 
         private bool _resetting;
@@ -53,7 +53,7 @@ namespace WebApp.Service.Translations
 
             _lastEvents = new Dictionary<(string, string), (TranslationsChangedEvent, POCatalog?)>(s_translationsKeyComparer);
 
-            _initializedTcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _initializedTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // event listener doesn't provide guaranteed delivery (currently), so we might miss some change notifications during a dropout;
             // thus, we should also refresh the internal cache after connection has been restored
@@ -77,7 +77,7 @@ namespace WebApp.Service.Translations
                         if (Refresh(initialEvents, @event))
                         {
                             if (initialEvents != null)
-                                _initializedTcs.TrySetResult(null);
+                                _initializedTcs.TrySetResult();
 
                             _logger.LogInformation("Internal cache was refreshed.");
                         }

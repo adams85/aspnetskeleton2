@@ -86,7 +86,7 @@ namespace WebApp.Service.Infrastructure
 
             string? textToLocalize = null;
 
-            var validationAttribute = (ExtendedValidationAttribute)validationEx.ValidationAttribute;
+            var validationAttribute = (ExtendedValidationAttribute)validationEx.ValidationAttribute!;
             var formattedErrorMessage = validationAttribute.FormatErrorMessage(nameof(command.OrderBy), new DelegatedTextLocalizer((hint, args) =>
             {
                 textToLocalize = hint;

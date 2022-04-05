@@ -52,16 +52,16 @@ namespace WebApp.UI.Areas.Dashboard.Models.DataTables
 
         public Func<object, object?> GetRowId { get; set; } = item => null;
 
-        private Func<IUrlHelper, object?, string> _generateDisplayUrl = (url, values) => url.Page("./Index", values);
-        public Func<IUrlHelper, object?, string> GenerateDisplayUrl
+        private Func<IUrlHelper, object?, string?> _generateDisplayUrl = (url, values) => url.Page("./Index", values);
+        public Func<IUrlHelper, object?, string?> GenerateDisplayUrl
         {
             get => _generateDisplayUrl;
             set => (_generateDisplayUrl, _returnUrlRouteValues) = (value, null);
         }
 
-        public Func<IUrlHelper, object?, string> GenerateCreateUrl { get; set; } = (url, values) => url.Page("./Create", values);
-        public Func<IUrlHelper, object?, string> GenerateEditUrl { get; set; } = (url, values) => url.Page("./Edit", values);
-        public Func<IUrlHelper, object?, string> GenerateDeleteUrl { get; set; } = (url, values) => url.Page("./Delete", values);
+        public Func<IUrlHelper, object?, string?> GenerateCreateUrl { get; set; } = (url, values) => url.Page("./Create", values);
+        public Func<IUrlHelper, object?, string?> GenerateEditUrl { get; set; } = (url, values) => url.Page("./Edit", values);
+        public Func<IUrlHelper, object?, string?> GenerateDeleteUrl { get; set; } = (url, values) => url.Page("./Delete", values);
 
         private object? _returnUrlRouteValues;
         public Func<IUrlHelper, object> GetReturnUrlRouteValues { get; set; }

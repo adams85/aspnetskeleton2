@@ -1,28 +1,37 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
+using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.PostgreSQL
 {
     internal sealed class NpgsqlModelCustomizer : RelationalModelCustomizer
     {
-        private readonly Version? _postgresVersion;
+        private readonly string _caseSensitiveCollation;
+        private readonly string _caseInsensitiveCollation;
 
-        public NpgsqlModelCustomizer(ModelCustomizerDependencies dependencies, INpgsqlOptions npgsqlOptions) : base(dependencies)
+        public NpgsqlModelCustomizer(IDbProperties dbProperties, ModelCustomizerDependencies dependencies) : base(dependencies)
         {
-            _postgresVersion = npgsqlOptions.PostgresVersion;
+            if (dbProperties == null)
+                throw new ArgumentNullException(nameof(dbProperties));
+
+            _caseSensitiveCollation = dbProperties.CaseSensitiveCollation;
+            _caseInsensitiveCollation = dbProperties.CaseInsensitiveCollation;
         }
 
         public override void Customize(ModelBuilder modelBuilder, DbContext context)
         {
             base.Customize(modelBuilder, context);
 
-            // enabling case insensitive texts:
-            // https://github.com/npgsql/efcore.pg/issues/406#issuecomment-561367654
+            // https://www.npgsql.org/efcore/misc/collations-and-case-sensitivity.html?tabs=data-annotations
+            modelBuilder.HasCollation(nameof(IDbProperties.CaseSensitiveCollation), locale: _caseSensitiveCollation, provider: "icu", deterministic: false);
+            modelBuilder.HasCollation(nameof(IDbProperties.CaseInsensitiveCollation), locale: _caseInsensitiveCollation, provider: "icu", deterministic: false);
+
+            modelBuilder.UseDefaultColumnCollation(nameof(IDbProperties.CaseSensitiveCollation));
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
                 foreach (var property in entityType.GetProperties())
@@ -33,13 +42,9 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
                             var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
                             var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
                             if (caseInsensitive)
-                                property.SetColumnType("citext");
+                                property.SetCollation(_caseInsensitiveCollation);
                         }
                     }
-
-            // NOTE: prior to v9.1 citext must be enabled manually (preferably, on template1, otherwise the initial migration will fail)
-            if (_postgresVersion == null || _postgresVersion >= new Version(9, 1))
-                modelBuilder.HasPostgresExtension("citext");
         }
     }
 }

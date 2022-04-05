@@ -6,11 +6,10 @@ using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.Extensions.Localization;
-using WebApp.Api.Infrastructure.Localization;
 
 namespace WebApp.Api.Infrastructure.DataAnnotations
 {
-    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.DataAnnotations/src/ValidatableObjectAdapter.cs
+    // based on: https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.DataAnnotations/src/ValidatableObjectAdapter.cs
     public sealed class CustomValidatableObjectAdapter : IModelValidator
     {
         private readonly IValidationAttributeAdapterProvider _validationAttributeAdapterProvider;
@@ -74,7 +73,7 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
             }
         }
 
-        private string GetErrorMessage(ModelValidationContext validationContext, ValidationContext context, ValidationResult result, string? memberName = null)
+        private string? GetErrorMessage(ModelValidationContext validationContext, ValidationContext context, ValidationResult result, string? memberName = null)
         {
             if (result is ExtendedValidationResult extendedValidationResult)
             {
@@ -82,9 +81,9 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
                 if (adapter != null)
                 {
                     ModelMetadata? memberModelMetadata;
-                    if (memberName != null && (memberModelMetadata = validationContext.ModelMetadata.Properties[memberName]) != null)
+                    if (memberName != null && (memberModelMetadata = validationContext.ModelMetadata.Properties[memberName]) != null && memberModelMetadata.PropertyGetter != null)
                     {
-                        var memberValue = memberModelMetadata.PropertyGetter(validationContext.Model);
+                        var memberValue = memberModelMetadata.PropertyGetter(validationContext.Model!);
                         validationContext = new ModelValidationContext(validationContext.ActionContext, memberModelMetadata, validationContext.MetadataProvider, validationContext.Model, memberValue);
                     }
 

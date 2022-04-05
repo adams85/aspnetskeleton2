@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -7,8 +8,6 @@ namespace WebApp.Api
     internal sealed class DelegatedStringJsonConverter<T> : JsonConverter<T>
         where T : notnull
     {
-        private static readonly bool s_typeAllowsNull = !typeof(T).IsValueType || Nullable.GetUnderlyingType(typeof(T)) != null;
-
         private readonly Func<string, T> _parse;
         private readonly Func<T, string> _toString;
 
@@ -18,21 +17,22 @@ namespace WebApp.Api
             _toString = toString;
         }
 
+        public override bool HandleNull => false;
+
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            // null tokens are handled by the framework except when the expected type is a non-nullable value type
-            // https://github.com/dotnet/corefx/blob/v3.1.18/src/System.Text.Json/src/System/Text/Json/Serialization/JsonSerializer.Read.HandleNull.cs#L58
-            if (!s_typeAllowsNull && reader.TokenType == JsonTokenType.Null)
-                throw new JsonException($"{typeof(T)} does not accept null values.");
+            // null tokens should be handled by the framework (as we overridden the HandleNull property to return false)
+            Debug.Assert(reader.TokenType != JsonTokenType.Null);
 
-            return _parse(reader.GetString());
+            return _parse(reader.GetString()!);
         }
 
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
-            // value is presumably not null here as null values are handled by the framework
+            // null values should be handled by the framework (as we overridden the HandleNull property to return false)
+            Debug.Assert(!(value is null));
 
-            writer.WriteStringValue(_toString(value));
+            writer.WriteStringValue(_toString(value!));
         }
     }
 }

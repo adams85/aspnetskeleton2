@@ -53,7 +53,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
                 IsActive = (_, currentPage) => currentPage == page;
             }
 
-            public Func<IUrlHelper, string> GetUrl { get; set; } = null!;
+            public Func<IUrlHelper, string?> GetUrl { get; set; } = null!;
             public Func<HttpContext, PageDescriptor?, bool> IsActive { get; set; } = null!;
         }
 

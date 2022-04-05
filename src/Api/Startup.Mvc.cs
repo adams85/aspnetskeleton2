@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using WebApp.Api.Infrastructure.DataAnnotations;
 using WebApp.Api.Infrastructure.ModelBinding;
 using WebApp.Service.Infrastructure.Localization;
+using WebApp.Service.Settings;
 
 namespace WebApp.Api
 {
@@ -42,14 +43,15 @@ namespace WebApp.Api
 
         public void ConfigureModelBinding(IMvcBuilder builder)
         {
-            builder.AddMvcOptions(options =>
-            {
-                options.ModelMetadataDetailsProviders.Add(new DataContractMetadataDetailsProvider());
+            builder.Services.AddOptions<MvcOptions>()
+                .Configure<ISettingsProvider>((options, settingsProvider) =>
+                {
+                    options.ModelMetadataDetailsProviders.Add(new DataContractMetadataDetailsProvider());
 
-                var index = options.ModelBinderProviders.FindIndex(provider => provider is ComplexTypeModelBinderProvider);
-                Debug.Assert(index >= 0, "Microsoft.AspNetCore.Mvc.MvcOptions.ModelBinderProviders defaults have apparently changed.");
-                options.ModelBinderProviders.Insert(index, new ListQueryModelBinderProvider());
-            });
+                    var index = options.ModelBinderProviders.FindIndex(provider => provider is ComplexObjectModelBinderProvider);
+                    Debug.Assert(index >= 0, "Microsoft.AspNetCore.Mvc.MvcOptions.ModelBinderProviders defaults have apparently changed.");
+                    options.ModelBinderProviders.Insert(index, new ListQueryModelBinderProvider(options.ModelBinderProviders[index], settingsProvider));
+                });
         }
 
         public void ConfigureModelValidation(IMvcBuilder builder)

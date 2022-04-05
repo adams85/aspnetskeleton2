@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -38,7 +39,7 @@ namespace WebApp.Service.Translations
         private readonly TimeSpan _delayOnWatcherError;
 
         private readonly Dictionary<(string Location, string Culture), FileInfo> _files;
-        private readonly TaskCompletionSource<object?> _initializedTcs;
+        private readonly TaskCompletionSource _initializedTcs;
         private readonly IDisposable _notifySubscription;
 
         private Exception? _previousObtainFilesException;
@@ -57,14 +58,14 @@ namespace WebApp.Service.Translations
 
             _files = new Dictionary<(string, string), FileInfo>();
 
-            _initializedTcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _initializedTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
             var loadFiles = PollFiles()
                 .Catch<(string[] filePaths, Exception? exception), DirectoryNotFoundException>(_ => Observable.Empty<(string[], Exception?)>())
                 .SelectMany(item => item.filePaths.Select(filePath => (filePath, item.exception)).ToObservable())
                 .SelectMany(item => LoadFile(item.filePath, item.exception)
                     .Catch<(string, TranslationsChangedEvent), Exception>(ex => Observable.Empty<(string, TranslationsChangedEvent)>()))
-                .Do(CachedDelegates.Noop<(string, TranslationsChangedEvent)>.Action, ex => _initializedTcs.TrySetException(ex), () => _initializedTcs.TrySetResult(null));
+                .Do(CachedDelegates.Noop<(string, TranslationsChangedEvent)>.Action, ex => _initializedTcs.TrySetException(ex), () => _initializedTcs.TrySetResult());
 
             if (_reloadOnChange)
             {
@@ -239,6 +240,7 @@ namespace WebApp.Service.Translations
                 return _files.Values.Select(file => file.LastEvent).ToArray();
         }
 
+        [DoesNotReturn]
         public void Invalidate(string? location, string? culture) => throw new NotSupportedException();
 
         private sealed class FileInfo

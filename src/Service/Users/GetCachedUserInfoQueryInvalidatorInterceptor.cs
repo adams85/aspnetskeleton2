@@ -37,7 +37,7 @@ namespace WebApp.Service.Users
             if (ArrayUtils.IsNullOrEmpty(userNames))
                 return Task.CompletedTask;
 
-            var tasks = Array.ConvertAll(userNames, un => Cache.RemoveScopeAsync(QueryCacherInterceptor.GetCacheScope(queryType, un), cancellationToken));
+            var tasks = Array.ConvertAll(userNames!, un => Cache.RemoveScopeAsync(QueryCacherInterceptor.GetCacheScope(queryType, un), cancellationToken));
             return Task.WhenAll(tasks);
         }
     }

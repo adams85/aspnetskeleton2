@@ -51,7 +51,7 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var (status, passwordRequirements) = await accountManager.ChangePasswordAsync(HttpContext.User.Identity.Name!, ChangePasswordModel, HttpContext.RequestAborted);
+                var (status, passwordRequirements) = await accountManager.ChangePasswordAsync(HttpContext.User.Identity!.Name!, ChangePasswordModel, HttpContext.RequestAborted);
 
                 if (status == ChangePasswordStatus.Success)
                     return RedirectToPage(null, ChangePasswordHandler);
@@ -71,7 +71,11 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Account
                         ModelState.AddModelError(nameof(ChangePasswordModel) + "." + nameof(Models.Account.ChangePasswordModel.NewPassword), _t.LocalizePasswordRequirements(passwordRequirements));
                         return;
                     default:
-                        ModelState[nameof(ChangePasswordModel) + "." + nameof(Models.Account.ChangePasswordModel.CurrentPassword)].ValidationState = ModelValidationState.Invalid;
+                        var key = nameof(ChangePasswordModel) + "." + nameof(Models.Account.ChangePasswordModel.CurrentPassword);
+                        if (ModelState.TryGetValue(key, out var entry))
+                            entry.ValidationState = ModelValidationState.Invalid;
+                        else
+                            ModelState.AddModelError(key, string.Empty);
                         return;
                 }
             }

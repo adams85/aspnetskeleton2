@@ -19,20 +19,15 @@ namespace WebApp.DataAccess.Providers.MySQL
 
             internalServices
                 .ReplaceLast(ServiceDescriptor.Scoped<IMySqlRelationalConnection, CustomMySqlRelationalConnection>())
-                .ReplaceLast(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomMySqlMigrationsSqlGenerator>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, MySqlModelCustomizer>())
                 .AddSingleton<IDbProperties>(new MySqlProperties(Options.Database));
         }
 
         protected override void ConfigureOptionsCore(DbContextOptionsBuilder optionsBuilder, IServiceProvider internalServiceProvider, IServiceProvider applicationServiceProvider)
         {
-            var serverVersion = Options.Database.ServerVersion;
+            var serverVersion = ServerVersion.Parse(Options.Database.ServerVersion);
 
-            optionsBuilder.UseMySql(Options.Database.ConnectionString, options =>
-            {
-                if (serverVersion != null)
-                    options.ServerVersion(serverVersion);
-            });
+            optionsBuilder.UseMySql(Options.Database.ConnectionString, serverVersion);
         }
 
         public sealed class Factory : IConfigurationFactory

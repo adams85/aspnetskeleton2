@@ -30,7 +30,7 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings
 
         public override string? EditorTemplateName => UIUrlHelper.GetRelativePath(PageContext.ActionDescriptor.RelativePath, "EditorTemplates/SettingEditModel.cshtml");
 
-        protected override string DefaultReturnUrl => Url.Page(IndexModel.PageDescriptor.PageName, new { area = IndexModel.PageDescriptor.AreaName });
+        protected override string DefaultReturnUrl => Url.Page(IndexModel.PageDescriptor.PageName, new { area = IndexModel.PageDescriptor.AreaName })!;
 
         public async Task<IActionResult> OnGet([FromRoute] string id, [FromQuery] string? returnUrl)
         {

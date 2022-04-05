@@ -19,7 +19,10 @@ namespace WebApp.Service.Infrastructure.Localization
         }
 
         public IStringLocalizer Create(Type resourceSource) =>
-            Create(null, resourceSource.GetAssociatedAssemblyName() ?? resourceSource.Assembly.GetName().Name);
+            Create(null,
+                resourceSource.GetAssociatedAssemblyName() ??
+                resourceSource.Assembly.GetName().Name ??
+                throw new ArgumentException($"Location cannot be determined for the type {resourceSource}.", nameof(resourceSource)));
 
         public IStringLocalizer Create(string? baseName, string location) =>
             new POStringLocalizer(_translationsProvider, location, logger: _loggerFactory.CreateLogger<POStringLocalizer>());

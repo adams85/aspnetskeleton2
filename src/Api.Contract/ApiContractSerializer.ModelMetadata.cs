@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ProtoBuf.Meta;
+using static ProtoBuf.Meta.TypeModel;
 
 namespace WebApp.Api
 {
@@ -15,6 +17,8 @@ namespace WebApp.Api
             {
                 _typeModel = typeModel;
             }
+
+            public bool ShouldSerializeAsList(Type type) => typeof(IEnumerable).IsAssignableFrom(type) && !_typeModel[type].IgnoreListHandling;
 
             public bool CanSerialize(Type type) => _typeModel.CanSerialize(type);
 

@@ -21,7 +21,7 @@ namespace WebApp.Service.Settings
         private readonly TimeSpan _delayOnRefreshError;
 
         private readonly object _gate;
-        private readonly TaskCompletionSource<object?> _initializedTcs;
+        private readonly TaskCompletionSource _initializedTcs;
         private readonly IDisposable _refreshSubscription;
 
         private bool _resetting;
@@ -40,7 +40,7 @@ namespace WebApp.Service.Settings
             _delayOnRefreshError = optionsValue?.DelayOnRefreshError ?? SettingsProviderOptions.DefaultDelayOnRefreshError;
 
             _gate = new object();
-            _initializedTcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _initializedTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // event listener doesn't provide guaranteed delivery (currently), so we might miss some change notifications during a dropout;
             // thus, we should also refresh the internal cache after connection has been restored
@@ -64,7 +64,7 @@ namespace WebApp.Service.Settings
                         if (Refresh(isInitial, @event))
                         {
                             if (isInitial)
-                                _initializedTcs.TrySetResult(null);
+                                _initializedTcs.TrySetResult();
 
                             _logger.LogInformation("Internal cache was refreshed.");
                         }

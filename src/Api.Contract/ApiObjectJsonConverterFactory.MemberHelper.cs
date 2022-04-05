@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using ProtoBuf.Meta;
 
 namespace WebApp.Api
@@ -24,13 +26,42 @@ namespace WebApp.Api
         private abstract class MemberHelper<TContainer, TMember> : MemberHelper<TContainer>
             where TContainer : notnull
         {
-            protected MemberHelper() { }
+            protected MemberHelper()
+            {
+                CanBeNull = default(TMember) is null;
+            }
+
+            protected bool CanBeNull { get; }
 
             protected abstract bool IsReadable { get; }
             protected abstract bool IsWritable { get; }
 
-            protected abstract void Get(ref TContainer container, out TMember value);
-            protected abstract void Set(ref TContainer container, in TMember value);
+            // based on: https://github.com/dotnet/runtime/blob/v6.0.3/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/Metadata/JsonPropertyInfo.cs#L167
+            private bool IsIgnored(bool write, JsonSerializerOptions options)
+            {
+#pragma warning disable SYSLIB0020 // JsonSerializerOptions.IgnoreNullValues is obsolete
+                if (options.IgnoreNullValues)
+                {
+                    if (CanBeNull)
+                        return true;
+                }
+                else if (options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull)
+                {
+                    if (CanBeNull && write)
+                        return true;
+                }
+                else if (options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingDefault)
+                {
+                    if (write)
+                        return true;
+                }
+#pragma warning restore SYSLIB0020
+
+                return false;
+            }
+
+            protected abstract void Get(ref TContainer container, [MaybeNull] out TMember value);
+            protected abstract void Set(ref TContainer container, [AllowNull] in TMember value);
 
             public sealed override void Read(ref TContainer container, ref Utf8JsonReader reader, JsonSerializerOptions options)
             {
@@ -38,7 +69,7 @@ namespace WebApp.Api
                 {
                     var value = JsonSerializer.Deserialize<TMember>(ref reader, options);
 
-                    if (!options.IgnoreNullValues || !(value is null))
+                    if (!IsIgnored(write: false, options))
                         Set(ref container, in value);
                 }
                 else
@@ -51,7 +82,7 @@ namespace WebApp.Api
                 {
                     Get(ref container, out var value);
 
-                    if (!options.IgnoreNullValues || !(value is null))
+                    if (!IsIgnored(write: true, options))
                     {
                         writer.WritePropertyName(memberName);
                         JsonSerializer.Serialize(writer, value, options);
@@ -107,16 +138,17 @@ namespace WebApp.Api
             protected override bool IsReadable => _getter != null;
             protected override bool IsWritable => _setter != null;
 
-            protected override void Get(ref TContainer container, out TMember value) => value = _getter!(container);
-            protected override void Set(ref TContainer container, in TMember value) => _setter!(container, value);
+            protected override void Get(ref TContainer container, [MaybeNull] out TMember value) => value = _getter!(container);
+            protected override void Set(ref TContainer container, [AllowNull] in TMember value) => _setter!(container, value!);
         }
 
         private sealed class StructMemberHelper<TContainer, TMember> : MemberHelper<TContainer, TMember>
             where TContainer : struct
         {
+            [return: MaybeNull]
             private delegate TMember Getter(ref TContainer container);
 
-            private delegate void Setter(ref TContainer container, TMember value);
+            private delegate void Setter(ref TContainer container, [AllowNull] TMember value);
 
             private static Getter? BuildGetter(ValueMember member)
             {
@@ -128,7 +160,7 @@ namespace WebApp.Api
                     case FieldInfo field:
                         // we want to avoid run-time code generation in contract assemblies but field getter delegates cannot be created without that,
                         // so we resort to reflection as public fields are uncommon in DTOs anyway
-                        return (ref TContainer container) => (TMember)field.GetValueDirect(__makeref(container));
+                        return ((ref TContainer container) => (TMember)field.GetValueDirect(__makeref(container)))!;
                     default:
                         throw new ArgumentException(null, nameof(member));
                 }
@@ -144,7 +176,7 @@ namespace WebApp.Api
                     case FieldInfo field:
                         // we want to avoid run-time code generation in contract assemblies but field setter delegates cannot be created without that,
                         // so we resort to reflection as public fields are uncommon in DTOs anyway
-                        return !field.IsInitOnly ? (ref TContainer container, TMember value) => field.SetValueDirect(__makeref(container), value) : (Setter?)null;
+                        return !field.IsInitOnly ? ((ref TContainer container, TMember value) => field.SetValueDirect(__makeref(container), value))! : (Setter?)null;
                     default:
                         throw new ArgumentException(null, nameof(member));
                 }
@@ -162,8 +194,8 @@ namespace WebApp.Api
             protected override bool IsReadable => _getter != null;
             protected override bool IsWritable => _setter != null;
 
-            protected override void Get(ref TContainer container, out TMember value) => value = _getter!(ref container);
-            protected override void Set(ref TContainer container, in TMember value) => _setter!(ref container, value);
+            protected override void Get(ref TContainer container, [MaybeNull] out TMember value) => value = _getter!(ref container);
+            protected override void Set(ref TContainer container, [AllowNull] in TMember value) => _setter!(ref container, value);
         }
     }
 }

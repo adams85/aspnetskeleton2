@@ -56,7 +56,7 @@ namespace WebApp.Service.Infrastructure.Validation
         public string FormatErrorMessage(string localizedName, ITextLocalizer textLocalizer, PasswordAttribute validationAttribute) =>
             validationAttribute.FormatErrorMessage(localizedName, textLocalizer);
 
-        public ValidationResult IsValid(object? value, ValidationContext validationContext, PasswordAttribute validationAttribute)
+        public ValidationResult? IsValid(object? value, ValidationContext validationContext, PasswordAttribute validationAttribute)
         {
             if (!(value is string stringValue))
                 return ValidationResult.Success;
@@ -70,7 +70,7 @@ namespace WebApp.Service.Infrastructure.Validation
             if (IsValidPassword(stringValue))
                 return ValidationResult.Success;
 
-            var result = new ExtendedValidationResult(validationAttribute, validationContext, new[] { validationContext.MemberName });
+            var result = new ExtendedValidationResult(validationAttribute, validationContext, new[] { validationContext.MemberName! });
 
             if (_passwordRequirements != null)
                 result.Properties[PasswordRequirementsPropertyKey] = _passwordRequirements;

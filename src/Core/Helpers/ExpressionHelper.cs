@@ -16,7 +16,7 @@ namespace WebApp.Core.Helpers
             Func<MethodCallExpression, Type, Expression>? convertReturnValue = null)
             where TDelegate : Delegate
         {
-            var delegateInvokeMethod = typeof(TDelegate).GetMethod(nameof(Action.Invoke));
+            var delegateInvokeMethod = typeof(TDelegate).GetMethod(nameof(Action.Invoke))!;
 
             var delegateParams = delegateInvokeMethod.GetParameters()
                 .Select(param => Expression.Parameter(param.ParameterType))

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Text;
@@ -56,6 +57,8 @@ namespace WebApp.Service.Mailing
 
         public override int? SslCipherStrength => null;
 
+        public override TlsCipherSuite? SslCipherSuite => null;
+
         public override HashAlgorithmType? SslHashAlgorithm => null;
 
         public override int? SslHashStrength => null;
@@ -71,7 +74,7 @@ namespace WebApp.Service.Mailing
                     recipients.Add(mailbox);
         }
 
-        private static MailboxAddress GetMessageSender(MimeMessage message)
+        private static MailboxAddress? GetMessageSender(MimeMessage message)
         {
             if (message.ResentSender != null)
                 return message.ResentSender;
@@ -106,7 +109,7 @@ namespace WebApp.Service.Mailing
             return recipients;
         }
 
-        private async Task WriteAsync(FormatOptions options, MimeMessage message, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
+        private async Task<string> WriteAsync(FormatOptions options, MimeMessage message, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
         {
             var format = options.Clone();
             format.HiddenHeaders.Add(HeaderId.ContentLength);
@@ -135,17 +138,17 @@ namespace WebApp.Service.Mailing
                         progress.Report(numWritten, numWritten);
                     }
 
-                    return;
+                    return string.Empty;
                 }
             }
         }
 
-        public override void Send(FormatOptions options, MimeMessage message, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
+        public override string Send(FormatOptions options, MimeMessage message, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
         {
-            SendAsync(options, message, cancellationToken, progress).GetAwaiter().GetResult();
+            return SendAsync(options, message, cancellationToken, progress).GetAwaiter().GetResult();
         }
 
-        public override Task SendAsync(FormatOptions options, MimeMessage message, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
+        public override Task<string> SendAsync(FormatOptions options, MimeMessage message, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
         {
             var recipients = GetMessageRecipients(message);
             var sender = GetMessageSender(message);
@@ -159,12 +162,12 @@ namespace WebApp.Service.Mailing
             return WriteAsync(options, message, cancellationToken, progress);
         }
 
-        public override void Send(FormatOptions options, MimeMessage message, MailboxAddress sender, IEnumerable<MailboxAddress> recipients, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
+        public override string Send(FormatOptions options, MimeMessage message, MailboxAddress sender, IEnumerable<MailboxAddress> recipients, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
         {
-            SendAsync(options, message, sender, recipients, cancellationToken, progress).GetAwaiter().GetResult();
+            return SendAsync(options, message, sender, recipients, cancellationToken, progress).GetAwaiter().GetResult();
         }
 
-        public override Task SendAsync(FormatOptions options, MimeMessage message, MailboxAddress sender, IEnumerable<MailboxAddress> recipients, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
+        public override Task<string> SendAsync(FormatOptions options, MimeMessage message, MailboxAddress sender, IEnumerable<MailboxAddress> recipients, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
         {
             var unique = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var rcpts = new List<MailboxAddress>();

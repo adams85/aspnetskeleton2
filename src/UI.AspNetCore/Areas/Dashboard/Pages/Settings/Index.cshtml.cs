@@ -19,8 +19,11 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings
     [Authorize(Roles = nameof(RoleEnum.Administrators))]
     public class IndexModel : ListPageModel<IndexModel.PageDescriptorClass, ListSettingsQuery, ListResult<SettingData>, SettingData>
     {
-        public static LocalizedHtmlString GetDescription(SettingData data) =>
-            new LocalizedHtmlString(data.Description, data.Description, false, data.DefaultValue, data.MinValue, data.MaxValue);
+        public static LocalizedHtmlString GetDescription(SettingData data)
+        {
+            var description = data.Description ?? string.Empty;
+            return new LocalizedHtmlString(description, description, isResourceNotFound: false, data.DefaultValue!, data.MinValue!, data.MaxValue!);
+        }
 
         private readonly IQueryDispatcher _queryDispatcher;
 

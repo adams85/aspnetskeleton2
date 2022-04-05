@@ -20,7 +20,7 @@ namespace WebApp.Api.Infrastructure.Swagger
     /// <remarks>
     /// Together with <see cref="DataContractMetadataDetailsProvider"/>, this class is necessary for correct Swagger JSON generation.
     /// </remarks>
-    // based on: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/v5.5.1/src/Swashbuckle.AspNetCore.SwaggerGen/SchemaGenerator/JsonSerializerDataContractResolver.cs
+    // based on: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/v6.3.0/src/Swashbuckle.AspNetCore.SwaggerGen/SchemaGenerator/JsonSerializerDataContractResolver.cs
     public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataContractResolver
     {
         private readonly JsonSerializerOptions _serializerOptions;
@@ -71,7 +71,7 @@ namespace WebApp.Api.Infrastructure.Swagger
                     jsonConverter: JsonConverterFunc);
             }
 
-            if (IsSupportedDictionary(type, out Type? keyType, out Type? valueType))
+            if (IsSupportedDictionary(type, out Type? keyType, out Type? valueType) && ApiContractSerializer.MetadataProvider.ShouldSerializeAsList(type))
             {
                 return DataContract.ForDictionary(
                     underlyingType: type,
@@ -80,7 +80,7 @@ namespace WebApp.Api.Infrastructure.Swagger
                     jsonConverter: JsonConverterFunc);
             }
 
-            if (IsSupportedCollection(type, out Type? itemType))
+            if (IsSupportedCollection(type, out Type? itemType) && ApiContractSerializer.MetadataProvider.ShouldSerializeAsList(type))
             {
                 return DataContract.ForArray(
                     underlyingType: type,
@@ -228,11 +228,9 @@ namespace WebApp.Api.Infrastructure.Swagger
             [typeof(char)] = (DataType.String, null),
             [typeof(DateTime)] = (DataType.String, "date-time"),
             [typeof(DateTimeOffset)] = (DataType.String, "date-time"),
+            [typeof(TimeSpan)] = (DataType.String, "date-span"),
             [typeof(Guid)] = (DataType.String, "uuid"),
             [typeof(Uri)] = (DataType.String, "uri"),
-            // TimeSpan is not supported out-of-the-box by System.Json.Text currently (https://github.com/dotnet/runtime/issues/29932),
-            // but Api.Contract defines a converter for this type (see ApiContractSerializer.Configuration)
-            [typeof(TimeSpan)] = (DataType.String, "date-span")
         };
     }
 }

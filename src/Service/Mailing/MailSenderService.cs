@@ -354,7 +354,7 @@ namespace WebApp.Service.Mailing
         }
 
         // https://blog.stephencleary.com/2020/05/backgroundservice-gotcha-startup.html
-        // TODO: revise this workaround when upgrading to .NET 5+ (https://github.com/dotnet/runtime/issues/36063)
+        // TODO: revise this workaround when upgrading to .NET 7+ (https://github.com/dotnet/runtime/issues/36063)
         protected override Task ExecuteAsync(CancellationToken stoppingToken) => Task.Run(async () =>
         {
             using (_smtpClient = _smtpClientFactory())

@@ -24,7 +24,7 @@ namespace WebApp.Service.Tests.UnitTests.Users
             var command = new AddUsersToRolesCommand
             {
                 UserNames = new[] { "JohnDoe" },
-                RoleNames = new[] { nameof(RoleEnum.Administators) },
+                RoleNames = new[] { nameof(RoleEnum.Administrators) },
             };
 
             var commandContext = new CommandContext(command, testContext.Services);
@@ -36,7 +36,7 @@ namespace WebApp.Service.Tests.UnitTests.Users
             await using (var dbContext = testContext.CreateReadOnlyDbContext())
             {
                 var user = await dbContext.Users
-                    .Include(user => user.Roles).ThenInclude(userRole => userRole.Role)
+                    .Include(user => user.Roles!).ThenInclude(userRole => userRole.Role)
                     .FirstAsync(user => user.UserName == command.UserNames[0]);
 
                 Assert.Equal(1, user.Roles?.Count);

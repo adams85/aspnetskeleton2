@@ -14,9 +14,9 @@ namespace WebApp.DataAccess.Providers.SqlServer
         // SQL Server ignores trailing whitespace
         private string? Normalize(string? value) => value?.TrimEnd(' ');
 
-        public override int Compare(string x, string y) => _stringComparer.Compare(Normalize(x), Normalize(y));
+        public override int Compare(string? x, string? y) => _stringComparer.Compare(Normalize(x), Normalize(y));
 
-        public override bool Equals(string x, string y) => _stringComparer.Equals(Normalize(x), Normalize(y));
+        public override bool Equals(string? x, string? y) => _stringComparer.Equals(Normalize(x), Normalize(y));
 
         public override int GetHashCode(string obj) => _stringComparer.GetHashCode(Normalize(obj) ?? string.Empty);
     }

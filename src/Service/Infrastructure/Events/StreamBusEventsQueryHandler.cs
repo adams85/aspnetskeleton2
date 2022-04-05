@@ -18,9 +18,9 @@ namespace WebApp.Service.Infrastructure.Events
         {
             int eventCount = 0;
 
-            var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            using (var ctr = cancellationToken.Register(() => tcs.TrySetResult(null)))
+            using (var ctr = cancellationToken.Register(() => tcs.TrySetResult()))
             using (var subscription = SubscribeToEventBus())
                 await tcs.Task.ConfigureAwait(false);
 

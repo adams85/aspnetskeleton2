@@ -7,6 +7,6 @@ namespace WebApp.Common.Infrastructure.Validation
         where TAttribute : ServiceValidationAttribute
     {
         string FormatErrorMessage(string localizedName, ITextLocalizer textLocalizer, TAttribute validationAttribute);
-        ValidationResult IsValid(object? value, ValidationContext validationContext, TAttribute validationAttribute);
+        ValidationResult? IsValid(object? value, ValidationContext validationContext, TAttribute validationAttribute);
     }
 }

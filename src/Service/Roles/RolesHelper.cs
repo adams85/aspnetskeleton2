@@ -36,7 +36,7 @@ namespace WebApp.Service.Roles
             return source.Where(GetFilterByNameWhere(name, pattern));
         }
 
-        public static Task<Role> GetByNameAsync(this IQueryable<Role> source, string name, CancellationToken cancellationToken)
+        public static Task<Role?> GetByNameAsync(this IQueryable<Role> source, string name, CancellationToken cancellationToken)
         {
             return source.FilterByName(name).FirstOrDefaultAsync(cancellationToken);
         }

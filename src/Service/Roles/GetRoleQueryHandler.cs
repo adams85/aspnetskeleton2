@@ -13,7 +13,7 @@ namespace WebApp.Service.Roles
         {
             await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                Role role;
+                Role? role;
                 switch (query.Identifier)
                 {
                     case RoleIdentifier.Key keyIdentifier:

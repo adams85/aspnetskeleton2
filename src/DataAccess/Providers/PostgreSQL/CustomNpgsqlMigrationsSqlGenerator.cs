@@ -10,21 +10,21 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
 {
     internal sealed class CustomNpgsqlMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerator
     {
-        private readonly string _dbEncoding;
-        private readonly string _dbCollation;
+        private readonly string? _characterEncoding;
 
-        public CustomNpgsqlMigrationsSqlGenerator(IDbProperties dbProperties, MigrationsSqlGeneratorDependencies dependencies, IMigrationsAnnotationProvider migrationsAnnotations, INpgsqlOptions npgsqlOptions)
-            : base(dependencies, migrationsAnnotations, npgsqlOptions)
+        public CustomNpgsqlMigrationsSqlGenerator(IDbProperties dbProperties, MigrationsSqlGeneratorDependencies dependencies, INpgsqlOptions npgsqlOptions) : base(dependencies, npgsqlOptions)
         {
             if (dbProperties == null)
                 throw new ArgumentNullException(nameof(dbProperties));
 
-            _dbEncoding = dbProperties.CharacterEncoding ?? NpgsqlProperties.DefaultCharacterEncodingName;
-            _dbCollation = dbProperties.CaseSensitiveCollation;
+            _characterEncoding = dbProperties.CharacterEncoding;
         }
 
-        // based on: https://github.com/npgsql/efcore.pg/blob/v3.1.11/src/EFCore.PG/Migrations/NpgsqlMigrationsSqlGenerator.cs#L731
-        protected override void Generate(NpgsqlCreateDatabaseOperation operation, IModel? model, MigrationCommandListBuilder builder)
+        // based on: https://github.com/npgsql/efcore.pg/blob/v6.0.3/src/EFCore.PG/Migrations/NpgsqlMigrationsSqlGenerator.cs#L906
+        protected override void Generate(
+            NpgsqlCreateDatabaseOperation operation,
+            IModel? model,
+            MigrationCommandListBuilder builder)
         {
             if (operation == null)
                 throw new ArgumentNullException(nameof(operation));
@@ -36,33 +36,39 @@ namespace WebApp.DataAccess.Providers.PostgreSQL
                 .Append("CREATE DATABASE ")
                 .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(operation.Name));
 
-            if (operation.Template != null)
+            if (!string.IsNullOrEmpty(operation.Template))
             {
                 builder
-                    .Append(" TEMPLATE ")
+                    .AppendLine()
+                    .Append("TEMPLATE ")
                     .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(operation.Template));
             }
 
-            if (operation.Tablespace != null)
+            if (!string.IsNullOrEmpty(operation.Tablespace))
             {
                 builder
-                    .Append(" TABLESPACE ")
+                    .AppendLine()
+                    .Append("TABLESPACE ")
                     .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(operation.Tablespace));
             }
 
-            builder
-                .Append(" ENCODING ")
-                .Append('\'').Append(_dbEncoding).Append('\'');
+            if (!string.IsNullOrEmpty(operation.Collation))
+            {
+                builder
+                    .AppendLine()
+                    .Append("LC_COLLATE ")
+                    .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(operation.Collation));
+            }
 
-            builder
-                .Append(" LC_COLLATE ")
-                .Append('\'').Append(_dbCollation).Append('\'');
+            if (!string.IsNullOrEmpty(_characterEncoding))
+            {
+                builder
+                    .AppendLine()
+                    .Append("ENCODING ")
+                    .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(_characterEncoding));
+            }
 
-            builder
-                .Append(" LC_CTYPE ")
-                .Append('\'').Append(_dbCollation).Append('\'');
-
-            builder.AppendLine(';');
+            builder.AppendLine(";");
 
             EndStatement(builder, suppressTransaction: true);
         }

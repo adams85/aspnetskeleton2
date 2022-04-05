@@ -20,7 +20,7 @@ namespace POTools.Services.Extracting
                 if (!builder.Features.OfType<SectionDirectivePass>().Any())
                     SectionDirective.Register(builder);
 
-                IRazorTargetExtensionFeature razorTargetExtensionFeature = builder.Features.OfType<IRazorTargetExtensionFeature>().FirstOrDefault();
+                IRazorTargetExtensionFeature? razorTargetExtensionFeature = builder.Features.OfType<IRazorTargetExtensionFeature>().FirstOrDefault();
                 if (razorTargetExtensionFeature == null || !razorTargetExtensionFeature.TargetExtensions.OfType<TemplateTargetExtension>().Any())
                 {
                     // required for successfully parsing documents containing Templated Razor Delegates

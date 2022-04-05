@@ -38,7 +38,7 @@ namespace WebApp.Service.Tests.Infrastructure
                 var dbInitializer = new DbInitializer(
                     sp.GetRequiredService<IDbContextFactory<WritableDataContext>>(),
                     sp.GetRequiredService<IOptions<DbInitializerOptions>>(),
-                    sp.GetService<IClock>(),
+                    sp.GetRequiredService<IClock>(),
                     sp.GetService<ILogger<DbInitializer>>());
 
                 return new DelegatedDatabaseSeeder(dbInitializer.SeedAsync);

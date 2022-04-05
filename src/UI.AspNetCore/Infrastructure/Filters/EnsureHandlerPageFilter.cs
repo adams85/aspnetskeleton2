@@ -7,7 +7,7 @@ namespace WebApp.UI.Infrastructure.Filters
     public sealed class EnsureHandlerPageFilter : IPageFilter, IOrderedFilter
     {
         // let HandleOptionsRequestsPageFilter run first
-        // https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.RazorPages/src/Infrastructure/HandleOptionsRequestsPageFilter.cs#L30
+        // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.RazorPages/src/Infrastructure/HandleOptionsRequestsPageFilter.cs#L30
         public int Order => 2000;
 
         public void OnPageHandlerSelected(PageHandlerSelectedContext context) { }

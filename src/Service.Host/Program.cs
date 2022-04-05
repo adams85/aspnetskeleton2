@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +29,7 @@ namespace WebApp.Service.Host
                 {
                     webBuilder
                         .ConfigureKestrel(options => options.ConfigureEndpointDefaults(listenOptions => listenOptions.Protocols = HttpProtocols.Http2))
-                        .UseStartup<Startup>();
+                        .UseStartup(context => new Startup(context.Configuration, context.HostingEnvironment));
                 })
                 .UseWindowsService()
                 .UseSystemd();

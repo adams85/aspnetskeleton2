@@ -22,8 +22,5 @@ namespace WebApp.Api.Infrastructure.Localization
         string ITextLocalizer.this[string hint, params object[] args] => _stringLocalizer[hint, args].Value;
 
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) => _stringLocalizer.GetAllStrings(includeParentCultures);
-
-        [Obsolete("This method is obsolete. Use `CurrentCulture` and `CurrentUICulture` instead.")]
-        public IStringLocalizer WithCulture(CultureInfo culture) => new TextLocalizerAdapter(_stringLocalizer.WithCulture(culture));
     }
 }

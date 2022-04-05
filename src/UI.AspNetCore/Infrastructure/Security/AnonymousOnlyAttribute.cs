@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
@@ -22,8 +23,8 @@ namespace WebApp.UI.Infrastructure.Security
                     return true;
                 }));
 
-        string? IAuthorizeData.AuthenticationSchemes { get => null; set => throw new NotSupportedException(); }
-        string? IAuthorizeData.Policy { get => PolicyName; set => throw new NotSupportedException(); }
-        string? IAuthorizeData.Roles { get => null; set => throw new NotSupportedException(); }
+        string? IAuthorizeData.AuthenticationSchemes { get => null; [DoesNotReturn] set => throw new NotSupportedException(); }
+        string? IAuthorizeData.Policy { get => PolicyName; [DoesNotReturn] set => throw new NotSupportedException(); }
+        string? IAuthorizeData.Roles { get => null; [DoesNotReturn] set => throw new NotSupportedException(); }
     }
 }

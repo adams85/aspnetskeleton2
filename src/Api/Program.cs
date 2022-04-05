@@ -34,7 +34,7 @@ namespace WebApp.Api
                 .ConfigureLogging(ConfigureLogging)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup(context => new Startup(context.Configuration, context.HostingEnvironment));
                 })
                 .UseWindowsService()
                 .UseSystemd();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -18,21 +19,25 @@ namespace WebApp.DataAccess
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
+        [DoesNotReturn]
         public override int SaveChanges()
         {
             throw ChangesNotAllowedError();
         }
 
+        [DoesNotReturn]
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
             throw ChangesNotAllowedError();
         }
 
+        [DoesNotReturn]
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
             throw ChangesNotAllowedError();
         }
 
+        [DoesNotReturn]
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             throw ChangesNotAllowedError();

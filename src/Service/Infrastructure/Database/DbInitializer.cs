@@ -83,7 +83,7 @@ namespace WebApp.Service.Infrastructure.Database
         /// </summary>
         private async Task SeedDbObjectsAsync(WritableDataContext dbContext, CancellationToken cancellationToken)
         {
-            var operations = new CustomDbObjects(dbContext.Model, dbContext.Database.ProviderName).GetAllDbObjectsOperations(dropIfExists: true, create: true);
+            var operations = new CustomDbObjects(dbContext.Model, dbContext.Database.ProviderName!).GetAllDbObjectsOperations(dropIfExists: true, create: true);
 
             var commands = dbContext.Database.GenerateMigrationCommands(operations);
 

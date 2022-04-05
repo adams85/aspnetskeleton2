@@ -77,7 +77,7 @@ namespace WebApp.Service.Infrastructure
             public InterceptorChain(CommandDispatcher dispatcher, Type commandType)
             {
                 var handlerInvokerInterceptorType = typeof(HandlerInvokerInterceptor<>).MakeGenericType(commandType);
-                var interceptor = (ICommandInterceptor)Activator.CreateInstance(handlerInvokerInterceptorType);
+                var interceptor = (ICommandInterceptor)Activator.CreateInstance(handlerInvokerInterceptorType)!;
                 var executionDelegate = BuildExecutionDelegate(interceptor);
 
                 for (var i = dispatcher._interceptorFactories.Count - 1; i >= 0; i--)

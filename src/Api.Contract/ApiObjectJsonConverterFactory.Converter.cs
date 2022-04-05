@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -31,6 +32,8 @@ namespace WebApp.Api
                 _factory = factory;
                 _options = options;
             }
+
+            public override bool HandleNull => false;
 
             private IReadOnlyDictionary<string, MemberHelper<T>>? _members;
             private IReadOnlyDictionary<string, MemberHelper<T>> Members =>
@@ -90,7 +93,7 @@ namespace WebApp.Api
                     if (reader.TokenType != JsonTokenType.PropertyName)
                         throw new JsonException(UnexpectedTokenMessage);
 
-                    var propertyName = reader.GetString();
+                    var propertyName = reader.GetString()!;
                     if (Members.TryGetValue(propertyName, out var member))
                         member.Read(ref value, ref reader, options);
                     else
@@ -104,10 +107,8 @@ namespace WebApp.Api
 
             public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
-                // null tokens are handled by the framework except when the expected type is a non-nullable value type
-                // https://github.com/dotnet/corefx/blob/v3.1.18/src/System.Text.Json/src/System/Text/Json/Serialization/JsonSerializer.Read.HandleNull.cs#L58
-                if (!s_typeAllowsNull && reader.TokenType == JsonTokenType.Null)
-                    throw new JsonException($"{typeof(T)} does not accept null values.");
+                // null tokens should be handled by the framework (as we overridden the HandleNull property to return false)
+                Debug.Assert(reader.TokenType != JsonTokenType.Null);
 
                 if (reader.TokenType != JsonTokenType.StartObject)
                     throw new JsonException(UnexpectedTokenMessage);
@@ -155,7 +156,8 @@ namespace WebApp.Api
 
             public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
             {
-                // value is presumably not null here as null values are handled by the framework
+                // null values should be handled by the framework (as we overridden the HandleNull property to return false)
+                Debug.Assert(!(value is null));
 
                 var actualType = value!.GetType();
 

@@ -17,7 +17,7 @@ namespace WebApp.Service.Users
                     query.RoleName != null ?
                     (
                         from r in dbContext.Roles.FilterByName(query.RoleName)
-                        from ur in r.Users
+                        from ur in r.Users!
                         select ur.User
                     ) :
                     dbContext.Users;

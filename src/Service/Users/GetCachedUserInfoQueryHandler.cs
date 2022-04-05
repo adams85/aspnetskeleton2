@@ -30,7 +30,7 @@ namespace WebApp.Service.Users
                 {
                     var rolesLinq =
                         from u in dbContext.Users.Where(u => u.Id == result.UserId)
-                        from ur in u.Roles
+                        from ur in u.Roles!
                         select ur.Role.RoleName;
 
                     result.Roles = await rolesLinq.ToArrayAsync(cancellationToken).ConfigureAwait(false);

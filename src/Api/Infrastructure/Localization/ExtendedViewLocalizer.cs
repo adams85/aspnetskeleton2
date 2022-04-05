@@ -14,7 +14,7 @@ using WebApp.Core.Helpers;
 
 namespace WebApp.Api.Infrastructure.Localization
 {
-    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.Localization/src/ViewLocalizer.cs
+    // based on: https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Localization/src/ViewLocalizer.cs
     public sealed class ExtendedViewLocalizer : IViewLocalizer, IViewContextAware
     {
         private readonly IHtmlLocalizerFactory _localizerFactory;
@@ -34,9 +34,6 @@ namespace WebApp.Api.Infrastructure.Localization
         public LocalizedString GetString(string name) => _localizer!.GetString(name);
 
         public LocalizedString GetString(string name, params object[] values) => _localizer!.GetString(name, values);
-
-        [Obsolete("This method is obsolete. Use `CurrentCulture` and `CurrentUICulture` instead.")]
-        public IHtmlLocalizer WithCulture(CultureInfo culture) => _localizer!.WithCulture(culture);
 
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) =>
             _localizer!.GetAllStrings(includeParentCultures);

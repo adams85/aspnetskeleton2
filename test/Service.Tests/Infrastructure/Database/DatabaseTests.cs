@@ -71,7 +71,7 @@ namespace WebApp.Service.Tests.Infrastructure.Database
                         .SingleOrDefaultAsync(user => user.UserName == ApplicationConstants.BuiltInRootUserName);
 
                     Assert.NotNull(admin);
-                    Assert.NotNull(admin.Profile);
+                    Assert.NotNull(admin!.Profile);
                 }
             }
         }

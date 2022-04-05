@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
@@ -59,6 +60,7 @@ namespace WebApp.UI.Infrastructure.Hosting
         public IWebHostEnvironment Environment { get; }
         public Assembly? EntryAssembly { get; }
 
+        public bool IsMainBranch => BranchPredicate == null;
         public abstract Func<HttpContext, bool>? BranchPredicate { get; }
 
         public AutofacServiceProvider? TenantServices { get; private set; }
@@ -75,7 +77,7 @@ namespace WebApp.UI.Infrastructure.Hosting
 
                 // HACK: IWebHostEnvironment is registered in the root container but we need to register a temporary instance for the time of tenant services configuration
                 // because discovery of default application parts relies on IWebHostEnvironment.ApplicationName
-                // https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L81
+                // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L80
                 var dummyWebHostEnvironmentService = ServiceDescriptor.Singleton<IWebHostEnvironment>(new DummyWebHostEnvironment { ApplicationName = EntryAssembly?.GetName().Name });
 
                 services.Add(dummyWebHostEnvironmentService);
@@ -92,8 +94,11 @@ namespace WebApp.UI.Infrastructure.Hosting
 
         private sealed class DummyWebHostEnvironment : HostingEnvironment, IWebHostEnvironment
         {
-            public IFileProvider? WebRootFileProvider { get; set; }
-            public string? WebRootPath { get; set; }
+            [AllowNull]
+            public IFileProvider WebRootFileProvider { get; set; }
+
+            [AllowNull]
+            public string WebRootPath { get; set; }
         }
     }
 }

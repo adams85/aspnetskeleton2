@@ -55,7 +55,7 @@ namespace WebApp.Service.Infrastructure.Validation
             ResetValidationContext(validationContext, propertyMetadata.PropertyName);
 
             var value = propertyMetadata.ValueAccessor(validationContext.ObjectInstance);
-            ValidationResult validationResult;
+            ValidationResult? validationResult;
 
             RequiredAttribute? requiredAttribute = propertyMetadata.ValidationAttributes.OfType<RequiredAttribute>().FirstOrDefault();
 
@@ -68,7 +68,7 @@ namespace WebApp.Service.Infrastructure.Validation
             {
                 validationResult = requiredAttribute.GetValidationResult(value, validationContext);
                 if (validationResult != ValidationResult.Success)
-                    throw CreateValidationException(validationResult, requiredAttribute, value, memberPathBase);
+                    throw CreateValidationException(validationResult!, requiredAttribute, value, memberPathBase);
             }
 
             for (int i = 0, n = propertyMetadata.ValidationAttributes.Count; i < n; i++)
@@ -79,7 +79,7 @@ namespace WebApp.Service.Infrastructure.Validation
 
                 validationResult = validationAttribute.GetValidationResult(value, validationContext);
                 if (validationResult != ValidationResult.Success)
-                    throw CreateValidationException(validationResult, validationAttribute, value, memberPathBase);
+                    throw CreateValidationException(validationResult!, validationAttribute, value, memberPathBase);
             }
 
             if (ShouldVisitObject(value, level))
@@ -99,7 +99,7 @@ namespace WebApp.Service.Infrastructure.Validation
 
                 var validationResult = validationAttribute.GetValidationResult(validationContext.ObjectInstance, validationContext);
                 if (validationResult != ValidationResult.Success)
-                    throw CreateValidationException(validationResult, validationAttribute, validationContext.ObjectInstance, memberPathBase);
+                    throw CreateValidationException(validationResult!, validationAttribute, validationContext.ObjectInstance, memberPathBase);
             }
 
             if (validationContext.ObjectInstance is IValidatableObject validatableObject)

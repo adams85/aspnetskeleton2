@@ -5,7 +5,7 @@
 
 @{
     var user = ViewContext.HttpContext.User;
-    var userName = user.GetFirstName() ?? user.Identity.Name;
+    var userName = user.GetFirstName() ?? user.Identity!.Name!;
 }
 
 <div class="row">

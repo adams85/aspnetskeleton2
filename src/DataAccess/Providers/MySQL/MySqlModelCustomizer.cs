@@ -1,26 +1,35 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
-using Pomelo.EntityFrameworkCore.MySql.Extensions;
 using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.MySQL
 {
     internal sealed class MySqlModelCustomizer : RelationalModelCustomizer
     {
-        private readonly IDbProperties _dbProperties;
+        private readonly string _caseSensitiveCollation;
+        private readonly string _caseInsensitiveCollation;
+        private readonly string? _characterEncoding;
 
-        public MySqlModelCustomizer(ModelCustomizerDependencies dependencies, IDbProperties dbProperties) : base(dependencies)
+        public MySqlModelCustomizer(IDbProperties dbProperties, ModelCustomizerDependencies dependencies) : base(dependencies)
         {
-            _dbProperties = dbProperties ?? throw new ArgumentNullException(nameof(dbProperties));
+            if (dbProperties == null)
+                throw new ArgumentNullException(nameof(dbProperties));
+
+            _caseSensitiveCollation = dbProperties.CaseSensitiveCollation;
+            _caseInsensitiveCollation = dbProperties.CaseInsensitiveCollation;
+            _characterEncoding = dbProperties.CharacterEncoding;
         }
 
         public override void Customize(ModelBuilder modelBuilder, DbContext context)
         {
             base.Customize(modelBuilder, context);
+
+            modelBuilder.HasCharSet(_characterEncoding);
+            modelBuilder.UseCollation(_caseSensitiveCollation);
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
                 foreach (var property in entityType.GetProperties())
@@ -30,7 +39,8 @@ namespace WebApp.DataAccess.Providers.MySQL
                         {
                             var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
                             var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
-                            property.SetCollation(caseInsensitive ? _dbProperties.CaseInsensitiveCollation : _dbProperties.CaseSensitiveCollation);
+                            if (caseInsensitive)
+                                property.SetCollation(_caseInsensitiveCollation);
                         }
                     }
         }

@@ -43,15 +43,17 @@ namespace WebApp.Service.Infrastructure
                 throw new InvalidOperationException($"{CultureNameHeaderName} and {UICultureNameHeaderName} headers must always be specified.");
 
             var httpContext = context.GetHttpContext();
+            ClaimsIdentity identity;
 
             if (identityAuthenticationTypeEntry != null && identityNameEntry != null)
             {
                 var nameClaim = new Claim(ClaimTypes.Name, Encoding.UTF8.GetString(identityNameEntry.ValueBytes));
-                var identity = new ClaimsIdentity(new[] { nameClaim }, identityAuthenticationTypeEntry.Value);
-                httpContext.User = new ClaimsPrincipal(identity);
+                identity = new ClaimsIdentity(new[] { nameClaim }, identityAuthenticationTypeEntry.Value);
             }
             else
-                httpContext.User = null;
+                identity = new ClaimsIdentity();
+
+            httpContext.User = new ClaimsPrincipal(identity);
 
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(cultureNameEntry.Value);
             CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(uiCultureNameEntry.Value);

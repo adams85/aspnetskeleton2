@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -27,7 +28,8 @@ namespace WebApp.Api
             public override byte[] Serialize(object? obj, Type type) => System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(obj, type, s_options);
             public override byte[] Serialize<T>(T obj) => System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(obj, s_options);
 
-            public override object Deserialize(ArraySegment<byte> bytes, Type type) => System.Text.Json.JsonSerializer.Deserialize(bytes, type, s_options);
+            public override object? Deserialize(ArraySegment<byte> bytes, Type type) => System.Text.Json.JsonSerializer.Deserialize(bytes, type, s_options);
+            [return: MaybeNull]
             public override T Deserialize<T>(ArraySegment<byte> bytes) => System.Text.Json.JsonSerializer.Deserialize<T>(bytes, s_options);
         }
 
@@ -38,7 +40,8 @@ namespace WebApp.Api
             public override void Serialize(Stream stream, object? obj, Type type) => TypeModel.Serialize(stream, obj);
             public override void Serialize<T>(Stream stream, T obj) => TypeModel.Serialize(stream, obj);
 
-            public override object Deserialize(Stream stream, Type type) => TypeModel.Deserialize(stream, null, type);
+            public override object? Deserialize(Stream stream, Type type) => TypeModel.Deserialize(stream, null, type);
+            [return: MaybeNull]
             public override T Deserialize<T>(Stream stream) => (T)TypeModel.Deserialize(stream, null, typeof(T));
         }
     }

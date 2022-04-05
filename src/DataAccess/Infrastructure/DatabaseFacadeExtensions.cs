@@ -62,7 +62,8 @@ namespace Microsoft.EntityFrameworkCore
             var modelDiffer = database.GetInfrastructure().GetRequiredService<IMigrationsModelDiffer>();
             IDatabaseFacadeDependenciesAccessor dependenciesAccessor = database;
             var model = dependenciesAccessor.Context.Model;
-            var operations = modelDiffer.GetDifferences(null, model);
+            var relationalModel = database.GetService<IDesignTimeModel>().Model.GetRelationalModel();
+            var operations = modelDiffer.GetDifferences(null, relationalModel);
             return database.GenerateMigrationCommands(operations.ToArray(), model);
         }
 

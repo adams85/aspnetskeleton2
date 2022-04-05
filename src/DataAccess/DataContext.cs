@@ -4,7 +4,7 @@ using WebApp.DataAccess.Entities;
 
 namespace WebApp.DataAccess
 {
-    public abstract class DataContext : PooledDbContext
+    public abstract class DataContext : DbContext
     {
         protected DataContext(DbContextOptions options)
             : base(options) { }

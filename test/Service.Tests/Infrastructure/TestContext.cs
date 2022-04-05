@@ -20,9 +20,8 @@ namespace WebApp.Service.Tests.Infrastructure
         private static string GetBasePath()
         {
             // https://stackoverflow.com/questions/23515736/how-to-refer-to-test-files-from-xunit-tests-in-visual-studio
-            var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().CodeBase!);
-            var codeBasePath = Uri.UnescapeDataString(codeBaseUrl.AbsolutePath);
-            return Path.GetDirectoryName(codeBasePath) ?? string.Empty;
+            var location = Assembly.GetExecutingAssembly().Location;
+            return Path.GetDirectoryName(location) ?? string.Empty;
         }
 
         private readonly IServiceProvider _services;

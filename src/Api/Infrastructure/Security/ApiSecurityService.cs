@@ -41,7 +41,7 @@ namespace WebApp.Api.Infrastructure.Security
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
 
             var jwtBearerOptionsValue = (jwtBearerOptions ?? throw new ArgumentNullException(nameof(jwtBearerOptions))).Get(ApiAuthenticationSchemes.JwtBearer);
-            _jwtIssuerSigningCredentials = new SigningCredentials(jwtBearerOptionsValue.TokenValidationParameters.IssuerSigningKey, SecurityAlgorithms.RsaSha256Signature);
+            _jwtIssuerSigningCredentials = new SigningCredentials(jwtBearerOptionsValue.TokenValidationParameters.IssuerSigningKey, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
 
             var optionsValue = options?.Value;
             _jwtAccessTokenExpirationTime = optionsValue?.JwtAccessTokenExpirationTime ?? ApiSecurityOptions.DefaultJwtAccessTokenExpirationTime;

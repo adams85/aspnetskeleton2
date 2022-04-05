@@ -9,7 +9,7 @@ namespace WebApp.UI.Infrastructure
         public RuntimeCompilationAwareValueCache(IActionDescriptorCollectionProvider actionDescriptorCollectionProvider)
             : base(
                 (actionDescriptorCollectionProvider ?? throw new ArgumentNullException(nameof(actionDescriptorCollectionProvider))) is ActionDescriptorCollectionProvider provider ?
-                provider.GetChangeToken! :
+                provider.GetChangeToken :
                 (Func<IChangeToken>?)null)
         {
         }

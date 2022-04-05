@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace POTools.Services.Resources
         {
             var xmlSerializer = new XmlSerializer(typeof(root));
             using (var xmlReader = XmlReader.Create(reader))
-                _root = (root)xmlSerializer.Deserialize(xmlReader);
+                _root = (root?)xmlSerializer.Deserialize(xmlReader) ?? new root { Items = Array.Empty<object>() };
         }
 
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()

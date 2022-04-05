@@ -23,12 +23,7 @@ namespace WebApp.Api
         {
             options.Converters.Add(new JsonStringEnumConverter());
 
-            // TODO: remove the custom converter when https://github.com/dotnet/runtime/issues/29932 gets resolved
-            options.Converters.Add(new DelegatedStringJsonConverter<TimeSpan>(
-                value => TimeSpan.Parse(value, CultureInfo.InvariantCulture),
-                value => value.ToString(null, CultureInfo.InvariantCulture)));
-
-            // TODO: revise this approach when upgrading to .NET 5+ (see https://github.com/dotnet/runtime/issues/1562)
+            // TODO: revise this approach when upgrading to .NET 7+ (see https://github.com/dotnet/runtime/issues/1562)
             options.Converters.Add(new ApiObjectJsonConverterFactory(MetadataProvider));
 
             options.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;

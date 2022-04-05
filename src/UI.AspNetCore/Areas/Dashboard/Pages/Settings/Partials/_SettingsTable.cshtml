@@ -8,7 +8,7 @@
 @inject IGlobalRazorHelpers<Pages.Shared.Helpers.IDataTableHelpers> DataTableHelpers
 
 @{
-    var pageModel = (IndexModel)ViewData[nameof(IndexModel)];
+    var pageModel = (IndexModel)ViewData[nameof(IndexModel)]!;
     var tableModel = CreateTableModel(pageModel);
     DataTableHelpers.Instance.Table(tableModel);
 }

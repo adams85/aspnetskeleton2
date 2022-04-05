@@ -82,7 +82,7 @@ namespace WebApp.Service.Infrastructure
                 var resultType = QueryContext.GetResultType(queryType);
 
                 var handlerInvokerInterceptorType = typeof(HandlerInvokerInterceptor<,>).MakeGenericType(queryType, resultType);
-                var interceptor = (IQueryInterceptor)Activator.CreateInstance(handlerInvokerInterceptorType);
+                var interceptor = (IQueryInterceptor)Activator.CreateInstance(handlerInvokerInterceptorType)!;
                 var executionDelegate = BuildExecutionDelegate(interceptor);
 
                 for (var i = dispatcher._interceptorFactories.Count - 1; i >= 0; i--)

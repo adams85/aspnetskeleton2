@@ -72,9 +72,9 @@ namespace WebApp.UI
 
             foreach (var tenant in tenants)
                 if (tenant != mainBranchTenant)
-                    app.MapWhen(tenant.BranchPredicate, branch =>
+                    app.MapWhen(tenant.BranchPredicate!, branch =>
                     {
-                        branch.ApplicationServices = tenant.TenantServices;
+                        branch.ApplicationServices = tenant.TenantServices!;
 
                         branch.UseMiddleware<BranchRequestServicesMiddleware>(tenant);
 
@@ -99,7 +99,7 @@ namespace WebApp.UI
 
                 if (mainBranchTenant != null)
                 {
-                    app.ApplicationServices = mainBranchTenant.TenantServices;
+                    app.ApplicationServices = mainBranchTenant.TenantServices!;
 
                     app.UseMiddleware<BranchRequestServicesMiddleware>(mainBranchTenant);
                 }
@@ -117,8 +117,8 @@ namespace WebApp.UI
             public BranchRequestServicesMiddleware(RequestDelegate next, Tenant tenant)
             {
                 _next = next;
-                _serviceScopeFactory = tenant.TenantServices.GetRequiredService<IServiceScopeFactory>();
-                _httpContextAccessor = tenant.TenantServices.GetService<IHttpContextAccessor>();
+                _serviceScopeFactory = tenant.TenantServices!.GetRequiredService<IServiceScopeFactory>();
+                _httpContextAccessor = tenant.TenantServices!.GetService<IHttpContextAccessor>();
             }
 
             public async Task Invoke(HttpContext context)

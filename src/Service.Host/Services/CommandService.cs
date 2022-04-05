@@ -38,7 +38,9 @@ namespace WebApp.Service.Host.Services
             if (!commandType.HasInterface(typeof(ICommand)))
                 throw new ArgumentException("Command type is invalid.", nameof(request));
 
-            var command = (ICommand)ServiceHostContractSerializer.Default.Deserialize(request.SerializedCommand ?? Array.Empty<byte>(), commandType);
+            var command = (ICommand?)ServiceHostContractSerializer.Default.Deserialize(request.SerializedCommand ?? Array.Empty<byte>(), commandType);
+            if (command == null)
+                throw new ArgumentException("Command is not specified.", nameof(request));
 
             ServiceErrorException? errorException = null;
 

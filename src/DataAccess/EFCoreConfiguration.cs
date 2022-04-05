@@ -50,32 +50,12 @@ namespace WebApp.DataAccess
             return internalServices.BuildServiceProvider();
         }
 
-        public EFCoreConfiguration ConfigureServices<TContext>(IServiceCollection services) where TContext : PooledDbContext
+        public EFCoreConfiguration ConfigureServices<TContext>(IServiceCollection services) where TContext : DbContext
         {
             services.TryAddSingleton<InternalServiceProviderRegistry>();
 
             // we want to be explicit about DbContext lifetime (that is, we want to manage that instead of DI),
-            // so for now we need to backport the IDbContextFactory concept introduced in .NET 5
-            // TODO: replace the code below with AddPooledDbContextFactory after upgrading to .NET 5+
-
-            services.TryAddSingleton(sp =>
-            {
-                var builder = new DbContextOptionsBuilder<TContext>(new DbContextOptions<TContext>(new Dictionary<Type, IDbContextOptionsExtension>()));
-
-                builder.UseApplicationServiceProvider(sp);
-                PooledDbContextFactory<TContext>.SetMaxPoolSize(builder, Options.DbContextPoolSize ?? PooledDbContextFactory<TContext>.DefaultPoolSize);
-
-                ConfigureOptions(sp, builder);
-
-                return builder.Options;
-            });
-
-            services.AddSingleton<DbContextOptions>(sp => sp.GetRequiredService<DbContextOptions<TContext>>());
-
-            services.TryAddSingleton((IServiceProvider sp) => new DbContextPool<TContext>(sp.GetService<DbContextOptions<TContext>>()));
-
-            services.TryAddSingleton<IDbContextFactory<TContext>>(
-                sp => new PooledDbContextFactory<TContext>(sp.GetRequiredService<DbContextPool<TContext>>()));
+            services.AddPooledDbContextFactory<TContext>(ConfigureOptions, Options.DbContextPoolSize ?? DbContextPool<DbContext>.DefaultPoolSize);
 
             return this;
         }

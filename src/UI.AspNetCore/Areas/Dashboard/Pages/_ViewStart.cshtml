@@ -1,4 +1,6 @@
-﻿@model UI.Models.Layout.ILayoutModelProvider<UI.Models.Layout.LayoutModel>
+﻿@attribute [AssociatedAssemblyName(ApplicationConstants.AssemblyNamePrefix + ".UI.AspNetCore")]
+
+@model UI.Models.Layout.ILayoutModelProvider<UI.Models.Layout.LayoutModel>
 
 @{
     Model.Layout.Initialize(ViewContext, T);

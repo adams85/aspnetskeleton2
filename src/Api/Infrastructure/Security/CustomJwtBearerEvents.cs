@@ -103,8 +103,8 @@ namespace WebApp.Api.Infrastructure.Security
                 }
             }
 
-            var identity = (ClaimsIdentity)context.Principal.Identity;
-            var userName = identity.Name;
+            var identity = (ClaimsIdentity)context.Principal!.Identity!;
+            var userName = identity.Name!;
 
             CachedUserInfoData? userInfo;
             try { userInfo = await GetCachedUserInfoAsync(userName, registerActivity: true, context.HttpContext.RequestAborted); }

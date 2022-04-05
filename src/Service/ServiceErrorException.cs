@@ -31,7 +31,7 @@ namespace WebApp.Service
 
             var field = typeof(ServiceErrorCode).GetField(name);
 
-            var description = field.GetCustomAttribute<DescriptionAttribute>()?.Description;
+            var description = field!.GetCustomAttribute<DescriptionAttribute>()?.Description;
             return description != null ? string.Format(description, Args) : GetDefaultErrorDescription();
         }
 

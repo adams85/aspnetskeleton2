@@ -22,7 +22,7 @@ namespace WebApp.Service.Settings
         private readonly ILogger _logger;
 
         private readonly object _gate;
-        private readonly TaskCompletionSource<object?> _initializedTcs;
+        private readonly TaskCompletionSource _initializedTcs;
         private readonly IDisposable _notifySubscription;
 
         private Action? _onInvalidate;
@@ -37,10 +37,10 @@ namespace WebApp.Service.Settings
             _logger = logger ?? (ILogger)NullLogger.Instance;
 
             _gate = new object();
-            _initializedTcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _initializedTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
             var initialize = Load()
-                .Do(CachedDelegates.Noop<SettingsChangedEvent>.Action, ex => _initializedTcs.TrySetException(ex), () => _initializedTcs.TrySetResult(null));
+                .Do(CachedDelegates.Noop<SettingsChangedEvent>.Action, ex => _initializedTcs.TrySetException(ex), () => _initializedTcs.TrySetResult());
 
             _notifySubscription = initialize
                 .Concat(Observable

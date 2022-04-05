@@ -12,7 +12,7 @@ namespace WebApp.Service.Users
         {
             await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
             {
-                User user;
+                User? user;
                 switch (query.Identifier)
                 {
                     case UserIdentifier.Key keyIdentifier:

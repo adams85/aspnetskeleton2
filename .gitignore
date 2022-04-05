@@ -306,4 +306,4 @@ __pycache__/
 /src/UI.AspNetCore/wwwroot/bundles
 /src/UI.AspNetCore/wwwroot/lib
 /src/UI.AspNetCore/wwwroot/js
-*.Development.db
+*.Development.db*

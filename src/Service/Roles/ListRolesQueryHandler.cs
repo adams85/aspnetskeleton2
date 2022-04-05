@@ -18,7 +18,7 @@ namespace WebApp.Service.Roles
                 if (query.UserName != null)
                     linq =
                         from u in dbContext.Users.FilterByName(query.UserName)
-                        from ur in u.Roles
+                        from ur in u.Roles!
                         select ur.Role;
                 else
                     linq = dbContext.Roles;

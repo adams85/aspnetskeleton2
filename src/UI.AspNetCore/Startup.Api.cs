@@ -27,7 +27,7 @@ namespace WebApp.UI
             protected override bool ShouldResolveFromRoot(ServiceDescriptor service) =>
                 // AddDataAnnotationsLocalization calls AddLocalization under the hood, that is, it adds base localization services,
                 // but those are already registered in the root container and we need those shared instances
-                // https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L14
+                // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L14
                 service.ServiceType == typeof(IStringLocalizerFactory) || service.ServiceType == typeof(IStringLocalizer<>);
 
             public override void ConfigureServices(IServiceCollection services) => _apiStartup.ConfigureAppServices(services);

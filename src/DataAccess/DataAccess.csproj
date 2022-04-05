@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>WebApp.DataAccess</AssemblyName>
     <RootNamespace>WebApp.DataAccess</RootNamespace>
 
@@ -19,8 +19,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SQLite'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SqlServer'" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.11" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'PostgreSQL'" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.2.6" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'MySQL'" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.3" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'PostgreSQL'" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.1" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'MySQL'" />
   </ItemGroup>
 
   <ItemGroup>

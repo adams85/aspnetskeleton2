@@ -13,7 +13,7 @@ namespace WebApp.Service
             return s_resultTypes.GetOrAdd(queryType, type =>
             {
                 Type? interfaceType;
-                try { interfaceType = type.GetInterface(typeof(IQuery<>).FullName); }
+                try { interfaceType = type.GetInterface(typeof(IQuery<>).FullName!); }
                 catch (AmbiguousMatchException) { interfaceType = null; }
 
                 if (interfaceType == null)

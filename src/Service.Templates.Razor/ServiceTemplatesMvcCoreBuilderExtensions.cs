@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.FileProviders;
 using WebApp.Service.Infrastructure.Templating;
 

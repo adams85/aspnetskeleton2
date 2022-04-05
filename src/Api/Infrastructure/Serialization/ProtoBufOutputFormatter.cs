@@ -20,7 +20,7 @@ namespace WebApp.Api.Infrastructure.Serialization
                 SupportedMediaTypes.Add(new MediaTypeHeaderValue(contentType));
         }
 
-        protected override bool CanWriteType(Type type) => ApiContractSerializer.MetadataProvider.CanSerialize(type);
+        protected override bool CanWriteType(Type? type) => type != null ? ApiContractSerializer.MetadataProvider.CanSerialize(type) : false;
 
         public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
         {
@@ -34,7 +34,7 @@ namespace WebApp.Api.Infrastructure.Serialization
 
             await using (fileBufferingWriteStream)
             {
-                ApiContractSerializer.ProtoBuf.Serialize(writeStream, context.Object, context.ObjectType);
+                ApiContractSerializer.ProtoBuf.Serialize(writeStream, context.Object, context.ObjectType!);
 
                 if (fileBufferingWriteStream != null)
                 {

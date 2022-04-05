@@ -22,8 +22,8 @@ namespace WebApp.Api.Infrastructure.Security
 
         public override async Task ValidatePrincipal(CookieValidatePrincipalContext context)
         {
-            var identity = (ClaimsIdentity?)context.Principal.Identity!;
-            var userName = identity.Name;
+            var identity = (ClaimsIdentity?)context.Principal!.Identity!;
+            var userName = identity.Name!;
 
             var userInfo = await _cachedUserInfoProvider.GetCachedUserInfoAsync(userName, registerActivity: true, context.HttpContext.RequestAborted);
 

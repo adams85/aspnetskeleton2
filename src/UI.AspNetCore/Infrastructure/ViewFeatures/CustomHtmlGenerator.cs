@@ -45,9 +45,9 @@ namespace WebApp.UI.Infrastructure.ViewFeatures
         private static TagBuilder AddBootstrapValidationCssClasses(ViewContext viewContext, string expression, TagBuilder tagBuilder)
         {
             // we need to get the model property key from the expression, which functionality is buried in an internal class unfortunately
-            // (https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.ViewFeatures/src/NameAndIdProvider.cs#L147)
+            // (https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.ViewFeatures/src/NameAndIdProvider.cs#L147)
             // however, this internal API is exposed via the IHtmlHelper.Name method:
-            // (https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.ViewFeatures/src/HtmlHelper.cs#L451)
+            // (https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.ViewFeatures/src/HtmlHelper.cs#L478)
             var htmlHelper = GetHtmlHelperFor(viewContext);
             var fullName = htmlHelper.Name(expression);
 

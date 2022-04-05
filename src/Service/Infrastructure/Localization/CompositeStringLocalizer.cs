@@ -43,7 +43,7 @@ namespace WebApp.Service.Infrastructure.Localization
                     _logger.TranslationNotAvailable(name, CurrentCulture, searchedLocation);
                     NullStringLocalizer.Instance.TryLocalize(name, out var _, out value);
                 }
-                return new LocalizedString(name, value, resourceNotFound, searchedLocation);
+                return new LocalizedString(name, value!, resourceNotFound, searchedLocation);
             }
         }
 
@@ -59,7 +59,7 @@ namespace WebApp.Service.Infrastructure.Localization
                     _logger.TranslationNotAvailable(name, CurrentCulture, searchedLocation);
                     NullStringLocalizer.Instance.TryLocalize(name, arguments, out var _, out value);
                 }
-                return new LocalizedString(name, value, resourceNotFound, searchedLocation);
+                return new LocalizedString(name, value!, resourceNotFound, searchedLocation);
             }
         }
 
@@ -165,9 +165,5 @@ namespace WebApp.Service.Infrastructure.Localization
 
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) =>
             _stringLocalizers.SelectMany(localizer => localizer.GetAllStrings());
-
-        [Obsolete("This method is obsolete. Use `CurrentCulture` and `CurrentUICulture` instead.")]
-        public IStringLocalizer WithCulture(CultureInfo culture) =>
-            new CompositeStringLocalizer(_stringLocalizers.Select(localizer => localizer.WithCulture(culture)), _culture, _logger as ILogger<CompositeStringLocalizer>);
     }
 }

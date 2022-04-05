@@ -43,7 +43,7 @@ namespace WebApp.Service.Users
             return source.Where(GetFilterByNameWhere(name, pattern));
         }
 
-        public static Task<User> GetByNameAsync(this IQueryable<User> source, string name, CancellationToken cancellationToken)
+        public static Task<User?> GetByNameAsync(this IQueryable<User> source, string name, CancellationToken cancellationToken)
         {
             return source.FilterByName(name).FirstOrDefaultAsync(cancellationToken);
         }
@@ -61,7 +61,7 @@ namespace WebApp.Service.Users
             return source.Where(GetFilterByEmailWhere(email, pattern));
         }
 
-        public static Task<User> GetByEmailAsync(this IQueryable<User> source, string email, CancellationToken cancellationToken)
+        public static Task<User?> GetByEmailAsync(this IQueryable<User> source, string email, CancellationToken cancellationToken)
         {
             return source.FilterByEmail(email).FirstOrDefaultAsync(cancellationToken);
         }

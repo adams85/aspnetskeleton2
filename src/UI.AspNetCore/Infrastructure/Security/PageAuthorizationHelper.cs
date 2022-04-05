@@ -19,24 +19,7 @@ namespace WebApp.UI.Infrastructure.Security
 {
     public sealed class PageAuthorizationHelper : IPageAuthorizationHelper, IDisposable
     {
-        private static Func<PageActionDescriptor, EndpointMetadataCollection, Task<CompiledPageActionDescriptor>> BuildLoadPageAsync(PageLoader pageLoader)
-        {
-            var pageLoaderType = pageLoader.GetType();
-
-            MethodInfo? loadAsyncMethod =
-                pageLoaderType.FullName == "Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure.DefaultPageLoader" ?
-                pageLoaderType.GetMethod("LoadAsync", 0, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null,
-                    new Type[] { typeof(PageActionDescriptor), typeof(EndpointMetadataCollection) }, null) :
-                null;
-
-            Debug.Assert(loadAsyncMethod != null, "Microsoft.AspNetCore.Mvc.RazorPages internals have apparently changed.");
-
-            return (Func<PageActionDescriptor, EndpointMetadataCollection, Task<CompiledPageActionDescriptor>>)Delegate.CreateDelegate(
-                typeof(Func<PageActionDescriptor, EndpointMetadataCollection, Task<CompiledPageActionDescriptor>>), pageLoader, loadAsyncMethod);
-        }
-
         private readonly EndpointDataSource _endpointDataSource;
-        private readonly Func<PageActionDescriptor, EndpointMetadataCollection, Task<CompiledPageActionDescriptor>> _loadPageAsync;
         private readonly IAuthorizationPolicyProvider _policyProvider;
 
         private readonly ConcurrentDictionary<(string, string?), Endpoint> _endpointCache;
@@ -45,7 +28,6 @@ namespace WebApp.UI.Infrastructure.Security
         public PageAuthorizationHelper(EndpointDataSource endpointDataSource, PageLoader pageLoader, IAuthorizationPolicyProvider policyProvider)
         {
             _endpointDataSource = endpointDataSource;
-            _loadPageAsync = BuildLoadPageAsync(pageLoader ?? throw new ArgumentNullException(nameof(pageLoader)));
             _policyProvider = policyProvider;
 
             _endpointCache = new ConcurrentDictionary<(string, string?), Endpoint>();
@@ -98,13 +80,10 @@ namespace WebApp.UI.Infrastructure.Security
         public async Task<bool> CheckAccessAllowedAsync(HttpContext httpContext, string pageName, string? areaName)
         {
             var endpoint = FindActionDescriptor(_endpointDataSource.Endpoints, pageName, areaName);
-            var actionDescriptor = endpoint.Metadata.GetMetadata<PageActionDescriptor>()!;
 
-            var compiledActionDescriptor = await _loadPageAsync(actionDescriptor, endpoint.Metadata);
+            // based on: https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Security/Authorization/Policy/src/AuthorizationMiddleware.cs#L44
 
-            // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Security/Authorization/Policy/src/AuthorizationMiddleware.cs#L29
-
-            var endpointMetadata = compiledActionDescriptor.Endpoint.Metadata;
+            var endpointMetadata = endpoint.Metadata;
 
             // Allow Anonymous skips all authorization
             if (endpointMetadata.GetMetadata<IAllowAnonymous>() != null)

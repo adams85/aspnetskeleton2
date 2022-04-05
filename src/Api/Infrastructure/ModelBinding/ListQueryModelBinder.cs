@@ -1,20 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using Microsoft.Extensions.Logging;
 using WebApp.Service;
 using WebApp.Service.Settings;
 
 namespace WebApp.Api.Infrastructure.ModelBinding
 {
-    public class ListQueryModelBinder : ComplexTypeModelBinder, IModelBinder
+    public class ListQueryModelBinder : IModelBinder
     {
+        private readonly IModelBinder _complexObjectModelBinder;
         private readonly ISettingsProvider _settingsProvider;
 
-        public ListQueryModelBinder(IDictionary<ModelMetadata, IModelBinder> propertyBinders, ISettingsProvider settingsProvider, ILoggerFactory loggerFactory, bool allowValidatingTopLevelNodes)
-            : base(propertyBinders, loggerFactory, allowValidatingTopLevelNodes)
+        public ListQueryModelBinder(IModelBinder complexObjectModelBinder, ISettingsProvider settingsProvider)
         {
+            _complexObjectModelBinder = complexObjectModelBinder;
             _settingsProvider = settingsProvider;
         }
 
@@ -26,7 +24,7 @@ namespace WebApp.Api.Infrastructure.ModelBinding
 
         Task IModelBinder.BindModelAsync(ModelBindingContext bindingContext)
         {
-            var bindModelTask = BindModelAsync(bindingContext);
+            var bindModelTask = _complexObjectModelBinder.BindModelAsync(bindingContext);
 
             if (bindModelTask.IsCompletedSuccessfully)
             {

@@ -42,7 +42,7 @@ namespace WebApp.Service.Roles
                 var roleAndUserIdPairs = await
                 (
                     from r in dbContext.Roles.Where(roleWhereBuilder)
-                    from ur in r.Users.DefaultIfEmpty()
+                    from ur in r.Users!.DefaultIfEmpty()
                     select ValueTuple.Create(r.Id, (int?)ur.UserId)
                 ).ToArrayAsync<(int RoleId, int? UserId)>(cancellationToken).ConfigureAwait(false);
 

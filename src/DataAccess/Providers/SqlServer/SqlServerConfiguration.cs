@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -18,9 +17,7 @@ namespace WebApp.DataAccess.Providers.SqlServer
             internalServices.AddEntityFrameworkSqlServer();
 
             internalServices
-                .ReplaceLast(ServiceDescriptor.Scoped<ISqlServerConnection, CustomSqlServerRelationalConnection>())
-                .ReplaceLast(ServiceDescriptor.Singleton<IMigrationsAnnotationProvider, CustomSqlServerMigrationsAnnotationProvider>())
-                .ReplaceLast(ServiceDescriptor.Scoped<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>())
+                .ReplaceLast(ServiceDescriptor.Scoped<ISqlServerConnection, CustomSqlServerConnection>())
                 .ReplaceLast(ServiceDescriptor.Singleton<IModelCustomizer, SqlServerModelCustomizer>())
                 .AddSingleton<IDbProperties>(new SqlServerProperties(Options.Database));
         }

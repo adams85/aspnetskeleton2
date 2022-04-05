@@ -38,7 +38,9 @@ namespace WebApp.Service.Host.Services
             if (!queryType.HasClosedInterface(typeof(IQuery<>)))
                 throw new ArgumentException("Query type is invalid.", nameof(request));
 
-            var query = (IQuery)ServiceHostContractSerializer.Default.Deserialize(request.SerializedQuery ?? Array.Empty<byte>(), queryType);
+            var query = (IQuery?)ServiceHostContractSerializer.Default.Deserialize(request.SerializedQuery ?? Array.Empty<byte>(), queryType);
+            if (query == null)
+                throw new ArgumentException("Query is not specified.", nameof(request));
 
             object? result = null;
             ServiceErrorException? errorException = null;

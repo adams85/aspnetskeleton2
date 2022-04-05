@@ -19,7 +19,7 @@ namespace WebApp.Service.Mailing
         public abstract Task ValidateModelAsync(MailModelValidationContext context, CancellationToken cancellationToken);
 
         public virtual byte[] SerializeModel(MailModel model) => InternalSerializer.MailModel.Serialize((TModel)model);
-        public virtual MailModel DeserializeModel(byte[] bytes) => InternalSerializer.MailModel.Deserialize<TModel>(bytes);
+        public virtual MailModel DeserializeModel(byte[] bytes) => InternalSerializer.MailModel.Deserialize<TModel>(bytes)!;
 
         public virtual IMailMessageProducer CreateMailMessageProducer(IServiceProvider serviceProvider) => (TProducer)s_producerFactory(serviceProvider, null);
     }

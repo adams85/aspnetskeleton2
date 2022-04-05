@@ -1,20 +1,25 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
 using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.Sqlite
 {
     internal sealed class SqliteModelCustomizer : RelationalModelCustomizer
     {
-        private readonly IDbProperties _dbProperties;
+        private readonly string _caseSensitiveCollation;
+        private readonly string _caseInsensitiveCollation;
 
-        public SqliteModelCustomizer(ModelCustomizerDependencies dependencies, IDbProperties dbProperties) : base(dependencies)
+        public SqliteModelCustomizer(IDbProperties dbProperties, ModelCustomizerDependencies dependencies) : base(dependencies)
         {
-            _dbProperties = dbProperties ?? throw new ArgumentNullException(nameof(dbProperties));
+            if (dbProperties == null)
+                throw new ArgumentNullException(nameof(dbProperties));
+
+            _caseSensitiveCollation = dbProperties.CaseSensitiveCollation;
+            _caseInsensitiveCollation = dbProperties.CaseInsensitiveCollation;
         }
 
         public override void Customize(ModelBuilder modelBuilder, DbContext context)
@@ -29,7 +34,7 @@ namespace WebApp.DataAccess.Providers.Sqlite
                         {
                             var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
                             var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
-                            property.SetColumnType(caseInsensitive ? "TEXT COLLATE " + _dbProperties.CaseInsensitiveCollation : "TEXT COLLATE " + _dbProperties.CaseSensitiveCollation);
+                            property.SetColumnType("TEXT COLLATE " + (caseInsensitive ? _caseInsensitiveCollation : _caseSensitiveCollation));
                         }
 
                         if (Type.GetTypeCode(Nullable.GetUnderlyingType(property.ClrType) ?? property.ClrType) == TypeCode.Decimal)

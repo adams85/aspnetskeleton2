@@ -21,8 +21,7 @@ namespace WebApp.Service.Infrastructure.Database
         public async Task SeedSettingsAsync(WritableDataContext dbContext, CancellationToken cancellationToken)
         {
             var dbProperties = dbContext.GetDbProperties();
-
-            var settings = await dbContext.Settings.ToDictionarySafeAsync(entity => entity.Name, AsExistingEntity, dbProperties.CaseSensitiveComparer, cancellationToken).ConfigureAwait(false);
+            var settings = await dbContext.Settings.AsAsyncEnumerable().ToDictionarySafeAsync(entity => entity.Name, AsExistingEntity, dbProperties.CaseSensitiveComparer, cancellationToken).ConfigureAwait(false);
 
             foreach (var (settingName, enumMetadata) in EnumMetadata<SettingEnum>.Members)
             {

@@ -9,7 +9,7 @@ namespace WebApp.UI.Helpers
     public static partial class HtmlHelperExtensions
     {
         // based on: https://github.com/dncuug/X.PagedList/blob/68345177ef1de43b2538134378d9abe6292ff83d/src/X.PagedList.Web.Common/HtmlHelper.cs
-        public static IHtmlContent Pager(this IHtmlHelper htmlHelper, in PagerInfo info, Func<int, string> generatePageUrl, PagerRenderOptions options)
+        public static IHtmlContent Pager(this IHtmlHelper htmlHelper, in PagerInfo info, Func<int, string?> generatePageUrl, PagerRenderOptions options)
         {
             if (options.Display == false || options.Display == null && info.PageCount <= 1)
                 return HtmlString.Empty;
@@ -130,7 +130,7 @@ namespace WebApp.UI.Helpers
             return li;
         }
 
-        private static TagBuilder First(in PagerInfo info, Func<int, string> generatePageUrl, PagerRenderOptions options)
+        private static TagBuilder First(in PagerInfo info, Func<int, string?> generatePageUrl, PagerRenderOptions options)
         {
             const int targetPageNumber = 1;
             var first = new TagBuilder("a");
@@ -149,7 +149,7 @@ namespace WebApp.UI.Helpers
             return WrapInListItem(first, options, "pager-skipToFirst");
         }
 
-        private static TagBuilder Previous(in PagerInfo info, Func<int, string> generatePageUrl, PagerRenderOptions options)
+        private static TagBuilder Previous(in PagerInfo info, Func<int, string?> generatePageUrl, PagerRenderOptions options)
         {
             var targetPageNumber = info.PageNumber - 1;
             var previous = new TagBuilder("a");
@@ -170,7 +170,7 @@ namespace WebApp.UI.Helpers
             return WrapInListItem(previous, options, options.PreviousElementClass);
         }
 
-        private static TagBuilder Page(int i, in PagerInfo info, Func<int, string> generatePageUrl, PagerRenderOptions options)
+        private static TagBuilder Page(int i, in PagerInfo info, Func<int, string?> generatePageUrl, PagerRenderOptions options)
         {
             var format = options.FunctionToDisplayEachPageNumber ?? (pageNumber => string.Format(options.LinkToIndividualPageFormat, pageNumber));
 
@@ -191,7 +191,7 @@ namespace WebApp.UI.Helpers
             return WrapInListItem(page, options);
         }
 
-        private static TagBuilder Next(in PagerInfo info, Func<int, string> generatePageUrl, PagerRenderOptions options)
+        private static TagBuilder Next(in PagerInfo info, Func<int, string?> generatePageUrl, PagerRenderOptions options)
         {
             var targetPageNumber = info.PageNumber + 1;
             var next = new TagBuilder("a");
@@ -214,7 +214,7 @@ namespace WebApp.UI.Helpers
             return WrapInListItem(next, options, options.NextElementClass);
         }
 
-        private static TagBuilder Last(in PagerInfo info, Func<int, string> generatePageUrl, PagerRenderOptions options)
+        private static TagBuilder Last(in PagerInfo info, Func<int, string?> generatePageUrl, PagerRenderOptions options)
         {
             var targetPageNumber = info.PageCount;
             var last = new TagBuilder("a");
@@ -233,7 +233,7 @@ namespace WebApp.UI.Helpers
             return WrapInListItem(last, options, "pager-skipToLast");
         }
 
-        private static TagBuilder PreviousEllipsis(in PagerInfo info, Func<int, string> generatePageUrl, PagerRenderOptions options, int firstPageToDisplay)
+        private static TagBuilder PreviousEllipsis(in PagerInfo info, Func<int, string?> generatePageUrl, PagerRenderOptions options, int firstPageToDisplay)
         {
             var previous = new TagBuilder("a");
 
@@ -256,7 +256,7 @@ namespace WebApp.UI.Helpers
             return WrapInListItem(previous, options, options.EllipsesElementClass);
         }
 
-        private static TagBuilder NextEllipsis(in PagerInfo info, Func<int, string> generatePageUrl, PagerRenderOptions options, int lastPageToDisplay)
+        private static TagBuilder NextEllipsis(in PagerInfo info, Func<int, string?> generatePageUrl, PagerRenderOptions options, int lastPageToDisplay)
         {
             var next = new TagBuilder("a");
 

@@ -11,7 +11,7 @@ using WebApp.UI.Helpers;
 
 namespace WebApp.UI.Areas.Dashboard.Pages.Settings
 {
-    // this page is created for the sake of completeness (settings cannot be deleted)
+    // this page is created for the sake of demonstration (settings cannot be deleted)
     [Authorize(Roles = nameof(RoleEnum.Administrators))]
     public class DeleteModel : DeletePageModel<DeleteModel.PageDescriptorClass, SettingData>
     {
@@ -24,7 +24,7 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings
             _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
         }
 
-        protected override string DefaultReturnUrl => Url.Page(IndexModel.PageDescriptor.PageName, new { area = IndexModel.PageDescriptor.AreaName });
+        protected override string DefaultReturnUrl => Url.Page(IndexModel.PageDescriptor.PageName, new { area = IndexModel.PageDescriptor.AreaName })!;
 
         public async Task<IActionResult> OnGet([FromRoute] string id, [FromQuery] string? returnUrl)
         {

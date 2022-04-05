@@ -20,9 +20,9 @@ namespace WebApp.Api.Infrastructure.ModelBinding
 
         private static bool IsSerializedProperty(ModelMetadataIdentity propertyKey)
         {
-            var property = propertyKey.PropertyInfo;
+            var property = propertyKey.PropertyInfo!;
 
-            foreach (var member in ApiContractSerializer.MetadataProvider.GetMembers(propertyKey.ContainerType, out var _))
+            foreach (var member in ApiContractSerializer.MetadataProvider.GetMembers(propertyKey.ContainerType!, out var _))
                 if (member.Member.HasSameMetadataDefinitionAs(property))
                     return true;
 
@@ -32,7 +32,7 @@ namespace WebApp.Api.Infrastructure.ModelBinding
         public void CreateBindingMetadata(BindingMetadataProviderContext context)
         {
             if (context.Key.MetadataKind == ModelMetadataKind.Property && context.BindingMetadata.IsBindingAllowed &&
-                ApiContractSerializer.MetadataProvider.CanSerialize(context.Key.ContainerType) && !IsSerializedProperty(context.Key))
+                ApiContractSerializer.MetadataProvider.CanSerialize(context.Key.ContainerType!) && !IsSerializedProperty(context.Key))
             {
                 context.BindingMetadata.IsBindingAllowed = false;
             }
@@ -41,7 +41,7 @@ namespace WebApp.Api.Infrastructure.ModelBinding
         public void CreateValidationMetadata(ValidationMetadataProviderContext context)
         {
             if (context.Key.MetadataKind == ModelMetadataKind.Property &&
-                ApiContractSerializer.MetadataProvider.CanSerialize(context.Key.ContainerType) && !IsSerializedProperty(context.Key))
+                ApiContractSerializer.MetadataProvider.CanSerialize(context.Key.ContainerType!) && !IsSerializedProperty(context.Key))
             {
                 context.ValidationMetadata.PropertyValidationFilter = s_validateNeverFilter;
             }

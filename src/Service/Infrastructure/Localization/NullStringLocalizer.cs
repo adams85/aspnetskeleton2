@@ -64,9 +64,7 @@ namespace WebApp.Service.Infrastructure.Localization
             return true;
         }
 
+        [DoesNotReturn]
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) => throw new NotSupportedException();
-
-        [Obsolete("This method is obsolete. Use `CurrentCulture` and `CurrentUICulture` instead.")]
-        public IStringLocalizer WithCulture(CultureInfo culture) => this;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using ProtoBuf.Meta;
 
@@ -18,7 +19,8 @@ namespace WebApp.Service.Infrastructure.Serialization
             public override void Serialize(Stream stream, object? obj, Type type) => s_typeModel.Serialize(stream, obj);
             public override void Serialize<T>(Stream stream, T obj) => s_typeModel.Serialize(stream, obj);
 
-            public override object Deserialize(Stream stream, Type type) => s_typeModel.Deserialize(stream, null, type);
+            public override object? Deserialize(Stream stream, Type type) => s_typeModel.Deserialize(stream, null, type);
+            [return: MaybeNull]
             public override T Deserialize<T>(Stream stream) => (T)s_typeModel.Deserialize(stream, null, typeof(T));
         }
     }

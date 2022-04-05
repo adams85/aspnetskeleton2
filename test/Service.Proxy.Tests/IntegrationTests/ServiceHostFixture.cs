@@ -23,9 +23,9 @@ namespace WebApp.Service.Proxy.Tests.IntegrationTests
             return null;
         }
 
-        private static Process StartProcess(string? command, string? args, string? workingDir)
+        private static Process StartProcess(string command, string? args, string? workingDir)
         {
-            var processInfo = new ProcessStartInfo(command, args)
+            var processInfo = new ProcessStartInfo(command, args!)
             {
                 WorkingDirectory = workingDir,
                 RedirectStandardInput = true,
@@ -35,7 +35,7 @@ namespace WebApp.Service.Proxy.Tests.IntegrationTests
                 UseShellExecute = false,
             };
 
-            var process = Process.Start(processInfo);
+            var process = Process.Start(processInfo) ?? throw new InvalidOperationException("Process could not be started.");
 
             process.OutputDataReceived += (_, e) => Debug.WriteLine(e.Data);
             process.BeginOutputReadLine();
@@ -79,14 +79,14 @@ namespace WebApp.Service.Proxy.Tests.IntegrationTests
 
             _serviceHostProcess = StartProcess(command, args, workingDir);
 
-            var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
             void StartupListener(object _, DataReceivedEventArgs e)
             {
-                if (e.Data.Contains("Application started. Press Ctrl+C to shut down."))
+                if (e.Data?.Contains("Application started. Press Ctrl+C to shut down.") ?? false)
                 {
                     _serviceHostProcess.OutputDataReceived -= StartupListener;
-                    tcs.TrySetResult(null);
+                    tcs.TrySetResult();
                 }
             }
 

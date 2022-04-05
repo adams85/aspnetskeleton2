@@ -18,7 +18,7 @@ namespace WebApp.Service.Infrastructure.Database
         {
             var dbProperties = dbContext.GetDbProperties();
 
-            var roles = await dbContext.Roles.ToDictionarySafeAsync(entity => entity.RoleName, AsExistingEntity, dbProperties.CaseInsensitiveComparer, cancellationToken).ConfigureAwait(false);
+            var roles = await dbContext.Roles.AsAsyncEnumerable().ToDictionarySafeAsync(entity => entity.RoleName, AsExistingEntity, dbProperties.CaseInsensitiveComparer, cancellationToken).ConfigureAwait(false);
 
             foreach (var (roleName, enumMetadata) in EnumMetadata<RoleEnum>.Members)
             {

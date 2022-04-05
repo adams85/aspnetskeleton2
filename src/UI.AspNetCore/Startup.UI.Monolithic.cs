@@ -16,7 +16,7 @@ namespace WebApp.UI
                 // and add this fake registration which delegates the service resolution to the UI tenant container.
                 // This is an ugly trick but we cannot do much better. It's not something hazardous though since ITemplateRenderer is a transient service and
                 // the root container and tenant containers have the same lifetime.
-                sp.GetRequiredService<Tenants>()[UITenantId]!.TenantServices.GetRequiredService<ITemplateRenderer>());
+                sp.GetRequiredService<Tenants>()[UITenantId]!.TenantServices!.GetRequiredService<ITemplateRenderer>());
         }
 
         private partial class UITenant

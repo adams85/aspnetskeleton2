@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace WebApp.Service
@@ -12,10 +13,10 @@ namespace WebApp.Service
         public abstract void Serialize<T>(Stream stream, T obj);
         public abstract byte[] Serialize<T>(T obj);
 
-        public abstract object Deserialize(Stream stream, Type type);
-        public abstract object Deserialize(ArraySegment<byte> bytes, Type type);
-        public abstract T Deserialize<T>(Stream stream);
-        public abstract T Deserialize<T>(ArraySegment<byte> bytes);
+        public abstract object? Deserialize(Stream stream, Type type);
+        public abstract object? Deserialize(ArraySegment<byte> bytes, Type type);
+        [return: MaybeNull] public abstract T Deserialize<T>(Stream stream);
+        [return: MaybeNull] public abstract T Deserialize<T>(ArraySegment<byte> bytes);
 
         public abstract class StreamBased : SerializerBase
         {
@@ -35,12 +36,13 @@ namespace WebApp.Service
                 return ms.ToArray();
             }
 
-            public sealed override object Deserialize(ArraySegment<byte> bytes, Type type)
+            public sealed override object? Deserialize(ArraySegment<byte> bytes, Type type)
             {
                 using var ms = new MemoryStream(bytes.Array, bytes.Offset, bytes.Count);
                 return Deserialize(ms, type);
             }
 
+            [return: MaybeNull]
             public sealed override T Deserialize<T>(ArraySegment<byte> bytes)
             {
                 using var ms = new MemoryStream(bytes.Array, bytes.Offset, bytes.Count);
@@ -64,13 +66,14 @@ namespace WebApp.Service
                 stream.Write(bytes, 0, bytes.Length);
             }
 
-            public sealed override object Deserialize(Stream stream, Type type)
+            public sealed override object? Deserialize(Stream stream, Type type)
             {
                 using var ms = new MemoryStream();
                 stream.CopyTo(ms);
                 return Deserialize(new ArraySegment<byte>(ms.GetBuffer(), 0, (int)ms.Length), type);
             }
 
+            [return: MaybeNull]
             public sealed override T Deserialize<T>(Stream stream)
             {
                 using var ms = new MemoryStream();

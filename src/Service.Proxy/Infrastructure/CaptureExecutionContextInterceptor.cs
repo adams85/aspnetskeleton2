@@ -39,8 +39,8 @@ namespace WebApp.Service.Infrastructure
             var identity = executionContext.User?.Identity;
             if (identity != null && identity.IsAuthenticated)
             {
-                headers.Add(IdentityAuthenticationTypeHeaderName, identity.AuthenticationType);
-                headers.Add(IdentityNameHeaderName, Encoding.UTF8.GetBytes(identity.Name));
+                headers.Add(IdentityAuthenticationTypeHeaderName, identity.AuthenticationType!);
+                headers.Add(IdentityNameHeaderName, Encoding.UTF8.GetBytes(identity.Name!));
             }
 
             headers.Add(CultureNameHeaderName, executionContext.Culture.Name);

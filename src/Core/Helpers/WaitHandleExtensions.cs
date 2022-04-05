@@ -43,12 +43,12 @@ namespace WebApp.Core.Helpers
             var tcs = new TaskCompletionSource<bool>();
 
             var registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(handle,
-                (state, timedOut) => ((TaskCompletionSource<bool>)state).TrySetResult(!timedOut),
+                (state, timedOut) => ((TaskCompletionSource<bool>)state!).TrySetResult(!timedOut),
                 tcs, timeout, executeOnlyOnce: true);
 
             try
             {
-                using (token.Register(state => ((TaskCompletionSource<bool>)state).TrySetCanceled(), tcs, useSynchronizationContext: false))
+                using (token.Register(state => ((TaskCompletionSource<bool>)state!).TrySetCanceled(), tcs, useSynchronizationContext: false))
                     return await tcs.Task.ConfigureAwait(false);
             }
             finally { registeredWaitHandle.Unregister(null); }

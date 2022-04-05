@@ -38,9 +38,11 @@ namespace WebApp.Api
                     typeToConvert != typeof(object) &&
                     typeToConvert != typeof(ValueType) &&
                     typeToConvert != typeof(Enum) &&
+                    typeToConvert != typeof(Delegate) &&
                     typeToConvert != typeof(string) &&
                     typeToConvert != typeof(Uri) &&
-                    typeToConvert != typeof(Delegate);
+                    typeToConvert != typeof(Version) &&
+                    typeToConvert != typeof(JsonDocument);
 
             if (typeToConvert.IsValueType)
                 if (typeToConvert.IsGenericType)
@@ -57,8 +59,6 @@ namespace WebApp.Api
                         typeToConvert != typeof(decimal) &&
                         typeToConvert != typeof(DateTime) &&
                         typeToConvert != typeof(DateTimeOffset) &&
-                        // TimeSpan is not supported out-of-the-box by System.Json.Text currently (https://github.com/dotnet/runtime/issues/29932),
-                        // but Api.Contract defines a converter for this type (see ApiContractSerializer.Configuration)
                         typeToConvert != typeof(TimeSpan) &&
                         typeToConvert != typeof(Guid) &&
                         typeToConvert != typeof(JsonElement);
@@ -67,8 +67,7 @@ namespace WebApp.Api
         }
 
         public override bool CanConvert(Type typeToConvert) =>
-            CanConvertCore(typeToConvert) &&
-            Array.Find(typeToConvert.GetInterfaces(), type => type == typeof(IEnumerable)) == null;
+            CanConvertCore(typeToConvert) && !_modelMetadataProvider.ShouldSerializeAsList(typeToConvert);
 
         public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options) =>
             (JsonConverter)Activator.CreateInstance(typeof(Converter<>).MakeGenericType(typeToConvert), this, options);

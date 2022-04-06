@@ -49,8 +49,8 @@ namespace WebApp.Service.Infrastructure
             switch (response)
             {
                 case CommandResponse.Success successResponse:
-                    if (command is IKeyGeneratorCommand keyGeneratorCommand && successResponse.Key?.ValueUntyped != null)
-                        keyGeneratorCommand.OnKeyGenerated?.Invoke(command, successResponse.Key.ValueUntyped);
+                    if (command is IKeyGeneratorCommand keyGeneratorCommand && successResponse.Key?.Value != null)
+                        keyGeneratorCommand.OnKeyGenerated?.Invoke(command, successResponse.Key.Value);
 
                     return;
                 case CommandResponse.Failure failureResponse:

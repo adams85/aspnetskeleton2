@@ -7,7 +7,7 @@ namespace WebApp.Service
     public partial class ServiceErrorException : ApplicationException
     {
         internal static ServiceErrorException From(ServiceErrorData data) =>
-            new ServiceErrorException(data.ErrorCode, data.Args != null ? Array.ConvertAll(data.Args, arg => arg.ValueUntyped) : null);
+            new ServiceErrorException(data.ErrorCode, data.Args != null ? Array.ConvertAll(data.Args, arg => arg.Value) : null);
 
         internal ServiceErrorException(ServiceErrorCode errorCode)
             : this(errorCode, null) { }

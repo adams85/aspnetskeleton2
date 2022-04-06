@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using ProtoBuf;
 using WebApp.Service.Infrastructure.Validation;
@@ -30,23 +31,30 @@ namespace WebApp.Service
         public static ServiceErrorArgData From(object value)
         {
             var key = (ServiceErrorArgData)Activator.CreateInstance(typeof(ServiceErrorArgData<>).MakeGenericType(value.GetType()))!;
-            key.ValueUntyped = value;
+            key.ValueInternal = value;
             return key;
         }
 
-        public static ServiceErrorArgData<T> From<T>(T value) => new ServiceErrorArgData<T> { Value = value };
+        public static ServiceErrorArgData<T> From<T>([DisallowNull] T value) => new ServiceErrorArgData<T> { Value = value };
 
-        public abstract object ValueUntyped { get; set; }
+        protected abstract object ValueInternal { get; set; }
+
+        public object Value
+        {
+            get => ValueInternal;
+            set => ValueInternal = value;
+        }
     }
 
     [DataContract]
     public class ServiceErrorArgData<T> : ServiceErrorArgData
     {
-        [DataMember(Order = 1)] public T Value { get; set; } = default!;
+        [NotNull]
+        [DataMember(Order = 1)] public new T Value { get; set; } = default!;
 
-        public override object ValueUntyped
+        protected override object ValueInternal
         {
-            get => Value!;
+            get => Value;
             set => Value = (T)value;
         }
     }

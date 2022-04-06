@@ -27,11 +27,10 @@ namespace WebApp.Service.Users
                     result.Status = AuthenticateUserStatus.Unapproved;
                 else if (user.IsLockedOut)
                     result.Status = AuthenticateUserStatus.LockedOut;
+                else if (user.Password != null && SecurityHelper.VerifyHashedPassword(user.Password, query.Password) == PasswordVerificationResult.Success)
+                    result.Status = AuthenticateUserStatus.Successful;
                 else
-                    result.Status =
-                        user.Password != null && SecurityHelper.VerifyHashedPassword(user.Password, query.Password) == PasswordVerificationResult.Success ?
-                        AuthenticateUserStatus.Successful :
-                        AuthenticateUserStatus.Failed;
+                    result.Status = AuthenticateUserStatus.Failed;
 
                 return result;
             }

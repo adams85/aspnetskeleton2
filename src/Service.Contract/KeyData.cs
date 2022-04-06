@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using ProtoBuf;
 
@@ -14,23 +15,30 @@ namespace WebApp.Service
         public static KeyData From(object value)
         {
             var key = (KeyData)Activator.CreateInstance(typeof(KeyData<>).MakeGenericType(value.GetType()))!;
-            key.ValueUntyped = value;
+            key.ValueInternal = value;
             return key;
         }
 
-        public static KeyData<T> From<T>(T value) => new KeyData<T> { Value = value };
+        public static KeyData<T> From<T>([DisallowNull] T value) => new KeyData<T> { Value = value };
 
-        public abstract object ValueUntyped { get; set; }
+        protected abstract object ValueInternal { get; set; }
+
+        public object Value
+        {
+            get => ValueInternal;
+            set => ValueInternal = value;
+        }
     }
 
     [DataContract]
     public sealed class KeyData<T> : KeyData
     {
-        [DataMember(Order = 1)] public T Value { get; set; } = default!;
+        [NotNull]
+        [DataMember(Order = 1)] public new T Value { get; set; } = default!;
 
-        public override object ValueUntyped
+        protected override object ValueInternal
         {
-            get => Value!;
+            get => Value;
             set => Value = (T)value;
         }
     }

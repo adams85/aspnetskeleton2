@@ -34,8 +34,8 @@ namespace WebApp.Service
             Require(
                 @param != null &&
                 (emptyAllowed ||
-                    (!(@param is string paramString) || paramString.Length > 0) &&
-                    (!(@param is ICollection paramCollection) || paramCollection.Count > 0)),
+                    (@param is not string paramString || paramString.Length > 0) &&
+                    (@param is not ICollection paramCollection || paramCollection.Count > 0)),
                 ServiceErrorCode.ParamNotSpecified, memberPathExpression);
 
             Debug.Assert(@param != null);

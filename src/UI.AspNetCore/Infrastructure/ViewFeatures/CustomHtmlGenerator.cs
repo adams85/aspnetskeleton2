@@ -18,14 +18,14 @@ namespace WebApp.UI.Infrastructure.ViewFeatures
         {
             const string htmlHelperViewDataKey = nameof(CustomHtmlGenerator) + "_" + nameof(IHtmlHelper);
 
-            if (!viewContext.ViewData.TryGetValue(htmlHelperViewDataKey, out var htmlHelperObj) || !(htmlHelperObj is IHtmlHelper htmlHelper))
+            if (!viewContext.ViewData.TryGetValue(htmlHelperViewDataKey, out var htmlHelperObj) || htmlHelperObj is not IHtmlHelper htmlHelper)
                 viewContext.ViewData[htmlHelperViewDataKey] = htmlHelper = GetViewHtmlHelper(viewContext) ?? CreateHtmlHelper(viewContext);
 
             return htmlHelper;
 
             static IHtmlHelper? GetViewHtmlHelper(ViewContext viewContext)
             {
-                if (!(viewContext.View is RazorView razorView))
+                if (viewContext.View is not RazorView razorView)
                     return null;
 
                 dynamic razorPage = razorView.RazorPage;

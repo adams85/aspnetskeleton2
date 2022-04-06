@@ -9,7 +9,7 @@ namespace WebApp.Service.Mailing.Users
 
         public override Task ValidateModelAsync(MailModelValidationContext context, CancellationToken cancellationToken)
         {
-            if (!(context.Model is PasswordResetMailModel model))
+            if (context.Model is not PasswordResetMailModel model)
                 context.SetError(ServiceErrorCode.ParamNotValid);
 
             return Task.CompletedTask;

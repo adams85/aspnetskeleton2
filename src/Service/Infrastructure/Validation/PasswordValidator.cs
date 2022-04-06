@@ -58,7 +58,7 @@ namespace WebApp.Service.Infrastructure.Validation
 
         public ValidationResult? IsValid(object? value, ValidationContext validationContext, PasswordAttribute validationAttribute)
         {
-            if (!(value is string stringValue))
+            if (value is not string stringValue)
                 return ValidationResult.Success;
 
             if (_passwordRequirements == null)

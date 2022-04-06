@@ -29,7 +29,7 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
                 return Enumerable.Empty<ModelValidationResult>();
             }
 
-            if (!(model is IValidatableObject validatable))
+            if (model is not IValidatableObject validatable)
             {
                 throw new InvalidOperationException($"The model object inside the metadata claimed to be compatible with '{typeof(IValidatableObject).Name}', but was actually '{model.GetType()}'.");
             }

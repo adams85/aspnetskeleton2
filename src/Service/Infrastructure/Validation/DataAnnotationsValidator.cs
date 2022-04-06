@@ -135,8 +135,8 @@ namespace WebApp.Service.Infrastructure.Validation
                     type != typeof(object) &&
                     type != typeof(string) &&
                     type != typeof(Uri) &&
-                    !(instance is Delegate) &&
-                    !(instance is MemberInfo);
+                    instance is not Delegate &&
+                    instance is not MemberInfo;
             }
         }
 

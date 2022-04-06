@@ -45,7 +45,7 @@ namespace WebApp.Service.Mailing
 
         public async Task<MimeMessage> ProduceAsync(MailModel model, CancellationToken cancellationToken)
         {
-            if (!(model is TModel concreteModel))
+            if (model is not TModel concreteModel)
                 throw new ArgumentException($"Model instance is not compatible with type {typeof(TModel)}.", nameof(model));
 
             var result = new MimeMessage();

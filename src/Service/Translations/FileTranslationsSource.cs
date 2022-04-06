@@ -144,7 +144,7 @@ namespace WebApp.Service.Translations
             var previousException = Interlocked.Exchange(ref _previousObtainFilesException, ex);
             if (ex is DirectoryNotFoundException)
             {
-                if (!(previousException is DirectoryNotFoundException))
+                if (previousException is not DirectoryNotFoundException)
                     _logger.LogWarning("Directory of translations at \"{PATH}\" does not exist. Translations will not be available.", _translationsBasePath);
             }
             else if (_previousObtainFilesException?.ToString() != ex.ToString())

@@ -8,7 +8,7 @@ namespace WebApp.Api.Infrastructure.DataAnnotations
 
         public static void AdjustToMvcLocalization(this ValidationAttribute attribute)
         {
-            if (!(attribute is ExtendedValidationAttribute) &&
+            if (attribute is not ExtendedValidationAttribute &&
                 attribute.ErrorMessageResourceType == null &&
                 string.IsNullOrEmpty(attribute.ErrorMessageResourceName) &&
                 string.IsNullOrEmpty(attribute.ErrorMessage))

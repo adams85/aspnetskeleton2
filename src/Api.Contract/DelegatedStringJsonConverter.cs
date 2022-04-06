@@ -30,7 +30,7 @@ namespace WebApp.Api
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
             // null values should be handled by the framework (as we overridden the HandleNull property to return false)
-            Debug.Assert(!(value is null));
+            Debug.Assert(value is not null);
 
             writer.WriteStringValue(_toString(value!));
         }

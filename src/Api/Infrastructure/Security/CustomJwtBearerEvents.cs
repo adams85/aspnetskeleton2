@@ -96,7 +96,7 @@ namespace WebApp.Api.Infrastructure.Security
             try { Validators.ValidateLifetime(notBefore, expires, jwtToken, context.Options.TokenValidationParameters); }
             catch (SecurityTokenValidationException ex)
             {
-                if (!(ex is SecurityTokenExpiredException) || (refreshToken = GetRefreshToken(context)) == null)
+                if (ex is not SecurityTokenExpiredException || (refreshToken = GetRefreshToken(context)) == null)
                 {
                     context.Fail(ex);
                     return;

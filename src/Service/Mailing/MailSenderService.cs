@@ -206,7 +206,7 @@ namespace WebApp.Service.Mailing
             {
                 message = await mailMessageProducer.ProduceAsync(mailModel, cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception ex) when (!(ex is OperationCanceledException))
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return new Mail(queueItem, null, ex);
             }
@@ -304,7 +304,7 @@ namespace WebApp.Service.Mailing
                             {
                                 await _smtpClient.ConnectAsync(_smtpHost, _smtpPort, _smtpSecurity, cancellationToken).ConfigureAwait(false);
                             }
-                            catch (Exception ex) when (!(ex is OperationCanceledException))
+                            catch (Exception ex) when (ex is not OperationCanceledException)
                             {
                                 var smtpClient = _smtpClient;
                                 _smtpClient = _smtpClientFactory();
@@ -380,7 +380,7 @@ namespace WebApp.Service.Mailing
 
                         previousException = null;
                     }
-                    catch (Exception ex) when (!(ex is OperationCanceledException))
+                    catch (Exception ex) when (ex is not OperationCanceledException)
                     {
                         // basic protection against littering the log with identical, recurring exceptions (e.g. db connection errors, etc.)
                         if (previousException?.ToString() != ex.ToString())

@@ -12,27 +12,20 @@ namespace WebApp.UI.Areas.Dashboard.Models
         public const string DeletePopupPartialViewName = "Partials/_DeletePopup";
         public const string DeleteConfirmationPartialViewName = "Partials/_DeleteConfirmation";
 
-        public DeletePageDescriptor()
-        {
-            GetDefaultTitle = (httpContext, t) => t["Delete {0}", GetItemDisplayName(httpContext, t)];
-        }
+        public virtual string GetItemDisplayName(HttpContext httpContext, IHtmlLocalizer t) =>
+            t["Item"].Value;
 
-        public virtual Func<HttpContext, IHtmlLocalizer, string> GetItemDisplayName { get; } = (_, t) => t["Item"].Value;
-        public override Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle { get; }
+        public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) =>
+            t["Delete {0}", GetItemDisplayName(httpContext, t)];
     }
 
     public abstract class DeletePageDescriptor<TItem> : DeletePageDescriptor
     {
-        public DeletePageDescriptor()
+        public override string GetItemDisplayName(HttpContext httpContext, IHtmlLocalizer t)
         {
-            GetItemDisplayName = (httpContext, t) =>
-            {
-                var modelMetadataProvider = httpContext.RequestServices.GetRequiredService<IModelMetadataProvider>();
-                var itemDisplayName = modelMetadataProvider.GetMetadataForType(typeof(TItem))?.DisplayName;
-                return itemDisplayName ?? base.GetItemDisplayName(httpContext, t);
-            };
+            var modelMetadataProvider = httpContext.RequestServices.GetRequiredService<IModelMetadataProvider>();
+            var itemDisplayName = modelMetadataProvider.GetMetadataForType(typeof(TItem))?.DisplayName;
+            return itemDisplayName ?? base.GetItemDisplayName(httpContext, t);
         }
-
-        public override Func<HttpContext, IHtmlLocalizer, string> GetItemDisplayName { get; }
     }
 }

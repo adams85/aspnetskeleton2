@@ -13,57 +13,30 @@ namespace WebApp.UI.Models
 {
     public abstract class PageDescriptor
     {
-        private static readonly ConcurrentDictionary<Type, PageDescriptor> s_pageDescriptorCache = new ConcurrentDictionary<Type, PageDescriptor>();
+        private static readonly MethodInfo s_getMethodDefinition = new Func<PageDescriptor>(Get<Pages.IndexModel>).Method.GetGenericMethodDefinition();
+        private static readonly ConcurrentDictionary<Type, Func<PageDescriptor>> s_pageDescriptorAccessorCache = new ConcurrentDictionary<Type, Func<PageDescriptor>>();
 
-        public static PageDescriptor Get(Type providerType) => s_pageDescriptorCache.GetOrAdd(providerType, providerType =>
+        public static PageDescriptor Get(Type providerType) => s_pageDescriptorAccessorCache.GetOrAdd(providerType, providerType =>
         {
             if (!providerType.HasInterface(typeof(IPageDescriptorProvider)))
                 throw new ArgumentException($"Type does not implement {typeof(IPageDescriptorProvider)}.", nameof(providerType));
+            
+            var getMethod = s_getMethodDefinition.MakeGenericMethod(providerType);
+            return (Func<PageDescriptor>)Delegate.CreateDelegate(typeof(Func<PageDescriptor>), getMethod);
+        })();
 
-            var staticProviderAttribute = providerType.GetCustomAttribute<StaticPageDescriptorProviderAttribute>(inherit: true);
+        public static PageDescriptor Get<TProvider>() where TProvider : IPageDescriptorProvider => TProvider.PageDescriptorStatic;
 
-            if (staticProviderAttribute != null)
-            {
-                const BindingFlags bindingFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy;
-
-                var field = providerType.GetField(staticProviderAttribute.MemberName, bindingFlags);
-                if (field != null)
-                    return (PageDescriptor)field.GetValue(null)!;
-
-                var property = providerType.GetProperty(staticProviderAttribute.MemberName, bindingFlags);
-                if (property != null)
-                    return (PageDescriptor)property.GetValue(null)!;
-
-                throw new ArgumentException($"Type does not have a static member named '{staticProviderAttribute.MemberName}'.", nameof(providerType));
-            }
-            else
-            {
-                ConstructorInfo? ctor;
-                if (providerType.IsAbstract || (ctor = providerType.GetConstructor(Type.EmptyTypes)) == null)
-                    throw new ArgumentException("Type is abstract or does not have a parameterless constructor.", nameof(providerType));
-
-                var provider = (IPageDescriptorProvider)ctor.Invoke(Array.Empty<object?>());
-                return provider.PageDescriptor;
-            }
-        });
-
-        public static PageDescriptor Get<TProvider>() where TProvider : IPageDescriptorProvider => Get(typeof(TProvider));
-
-        public PageDescriptor()
-        {
-            IsAccessAllowedAsync = httpContext =>
-                httpContext.RequestServices.GetRequiredService<IPageAuthorizationHelper>().CheckAccessAllowedAsync(httpContext, PageName, AreaName);
-        }
+        protected PageDescriptor() { }
 
         public abstract string PageName { get; }
         public virtual string AreaName => string.Empty;
 
-        public virtual Func<HttpContext, Task<AuthorizationPolicy>>? GetAuthorizationPolicyAsync => null;
-
-        public virtual Func<HttpContext, Task<bool>> IsAccessAllowedAsync { get; }
+        public virtual Task<bool> IsAccessAllowedAsync(HttpContext httpContext) =>
+            httpContext.RequestServices.GetRequiredService<IPageAuthorizationHelper>().CheckAccessAllowedAsync(httpContext, PageName, AreaName);
 
         public virtual string? LayoutName => null;
 
-        public abstract Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle { get; }
+        public abstract LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer htmlLocalizer);
     }
 }

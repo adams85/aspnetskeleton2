@@ -22,7 +22,8 @@ namespace WebApp.UI.Pages
         public sealed class PageDescriptorClass : PageDescriptor
         {
             public override string PageName => "/Error";
-            public override Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle { get; } = (_, t) => t["Error"];
+
+            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["Error"];
         }
     }
 }

@@ -281,7 +281,7 @@ namespace WebApp.UI
                     {
                         var pageDescriptor = PageDescriptor.Get(pageDescriptorProviderType);
 
-                        if (pageDescriptor.GetAuthorizationPolicyAsync != null)
+                        if (pageDescriptor is IDynamicAuthorizationPolicyProvider)
                         {
                             var policyName = CustomAuthorizationPolicyProvider.AuthorizePagePolicyPrefix + pageDescriptorProviderType.AssemblyQualifiedNameWithoutAssemblyDetails();
                             model.EndpointMetadata.Add(new AuthorizeAttribute(policyName));

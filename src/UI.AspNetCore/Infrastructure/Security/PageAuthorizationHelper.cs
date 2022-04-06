@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +18,7 @@ namespace WebApp.UI.Infrastructure.Security
     public sealed class PageAuthorizationHelper : IPageAuthorizationHelper, IDisposable
     {
         private readonly EndpointDataSource _endpointDataSource;
+        private readonly PageLoader _pageLoader;
         private readonly IAuthorizationPolicyProvider _policyProvider;
 
         private readonly ConcurrentDictionary<(string, string?), Endpoint> _endpointCache;
@@ -27,8 +26,9 @@ namespace WebApp.UI.Infrastructure.Security
 
         public PageAuthorizationHelper(EndpointDataSource endpointDataSource, PageLoader pageLoader, IAuthorizationPolicyProvider policyProvider)
         {
-            _endpointDataSource = endpointDataSource;
-            _policyProvider = policyProvider;
+            _endpointDataSource = endpointDataSource ?? throw new ArgumentNullException(nameof(endpointDataSource));
+            _pageLoader = pageLoader ?? throw new ArgumentNullException(nameof(pageLoader));
+            _policyProvider = policyProvider ?? throw new ArgumentNullException(nameof(policyProvider));
 
             _endpointCache = new ConcurrentDictionary<(string, string?), Endpoint>();
 
@@ -81,9 +81,13 @@ namespace WebApp.UI.Infrastructure.Security
         {
             var endpoint = FindActionDescriptor(_endpointDataSource.Endpoints, pageName, areaName);
 
+            // we need to load the page to ensure that it's endpoint metadata is populated (see GlobalPageApplicationModelConvention)
+            var actionDescriptor = endpoint.Metadata.GetMetadata<PageActionDescriptor>()!;
+            var compiledActionDescriptor = await _pageLoader.LoadAsync(actionDescriptor, endpoint.Metadata);
+
             // based on: https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Security/Authorization/Policy/src/AuthorizationMiddleware.cs#L44
 
-            var endpointMetadata = endpoint.Metadata;
+            var endpointMetadata = compiledActionDescriptor.Endpoint?.Metadata ?? endpoint.Metadata;
 
             // Allow Anonymous skips all authorization
             if (endpointMetadata.GetMetadata<IAllowAnonymous>() != null)

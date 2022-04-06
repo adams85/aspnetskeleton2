@@ -16,7 +16,8 @@ namespace WebApp.UI.Pages
         public sealed class PageDescriptorClass : PageDescriptor
         {
             public override string PageName => "/Index";
-            public override Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle => throw new NotSupportedException();
+
+            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => throw new NotSupportedException();
         }
     }
 }

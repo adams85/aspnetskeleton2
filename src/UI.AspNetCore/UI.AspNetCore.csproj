@@ -5,6 +5,7 @@
     <AssemblyName>WebApp.UI.AspNetCore</AssemblyName>
     <RootNamespace>WebApp.UI</RootNamespace>
 
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <UseDesignTimeBundling>false</UseDesignTimeBundling>
   </PropertyGroup>
 
@@ -66,6 +67,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.1.161" />
+    <PackageReference Include="System.Runtime.Experimental" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>

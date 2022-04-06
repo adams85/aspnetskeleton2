@@ -31,7 +31,8 @@ namespace WebApp.UI.Pages.Account
         public sealed class PageDescriptorClass : PageDescriptor
         {
             public override string PageName => "/Account/Verify";
-            public override Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle { get; } = (_, t) => t["Account Verification"];
+
+            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["Account Verification"];
         }
     }
 }

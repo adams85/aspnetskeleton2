@@ -28,7 +28,7 @@ namespace WebApp.UI.Models.Layout
         public object? BodyCssClasses { get; set; }
 
         protected virtual LocalizedHtmlString? GetActualTitle(HttpContext httpContext, IHtmlLocalizer htmlLocalizer) =>
-            Title ?? (GetTitle ?? PageDescriptor?.GetDefaultTitle)?.Invoke(httpContext, htmlLocalizer);
+            Title ?? GetTitle?.Invoke(httpContext, htmlLocalizer) ?? PageDescriptor?.GetDefaultTitle(httpContext, htmlLocalizer);
 
         protected virtual string? GetActualLayoutName(HttpContext httpContext) =>
             LayoutName ?? PageDescriptor?.LayoutName;

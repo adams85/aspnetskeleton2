@@ -35,7 +35,8 @@ namespace WebApp.UI.Areas.Dashboard.Pages
         {
             public override string PageName => "/Index";
             public override string AreaName => DashboardConstants.AreaName;
-            public override Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle { get; } = (_, t) => t["Overview"];
+
+            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["Overview"];
         }
     }
 }

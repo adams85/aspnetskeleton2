@@ -4,12 +4,8 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace WebApp.UI.Models
 {
-    public abstract class BasePageModel : PageModel, IPageDescriptorProvider
+    public abstract class BasePageModel : PageModel
     {
-        PageDescriptor IPageDescriptorProvider.PageDescriptor => GetPageDescriptor();
-
-        protected abstract PageDescriptor GetPageDescriptor();
-
         public virtual NoContentResult NoContent()
         {
             return new NoContentResult();
@@ -27,12 +23,13 @@ namespace WebApp.UI.Models
         }
     }
 
-    [StaticPageDescriptorProvider(nameof(PageDescriptor))]
-    public abstract class BasePageModel<TPageDescriptor> : BasePageModel
+    public abstract class BasePageModel<TPageDescriptor> : BasePageModel, IPageDescriptorProvider
         where TPageDescriptor : PageDescriptor, new()
     {
-        public static readonly TPageDescriptor PageDescriptor = new TPageDescriptor();
+        public static TPageDescriptor PageDescriptor { get; } = new TPageDescriptor();
 
-        protected sealed override PageDescriptor GetPageDescriptor() => PageDescriptor;
+        static PageDescriptor IPageDescriptorProvider.PageDescriptorStatic => PageDescriptor;
+
+        PageDescriptor IPageDescriptorProvider.PageDescriptor => PageDescriptor;
     }
 }

@@ -24,7 +24,8 @@ namespace WebApp.UI.Pages.Account
         public sealed class PageDescriptorClass : PageDescriptor
         {
             public override string PageName => "/Account/Logout";
-            public override Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle => throw new NotSupportedException();
+
+            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => throw new NotSupportedException();
         }
     }
 }

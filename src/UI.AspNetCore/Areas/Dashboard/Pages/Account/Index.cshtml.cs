@@ -85,7 +85,8 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Account
         {
             public override string PageName => "/Account/Index";
             public override string AreaName => DashboardConstants.AreaName;
-            public override Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle { get; } = (_, t) => t["Account Settings"];
+
+            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["Account Settings"];
         }
     }
 }

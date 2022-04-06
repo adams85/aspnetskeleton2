@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -61,7 +60,8 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings
         {
             public override string PageName => "/Settings/Index";
             public override string AreaName => DashboardConstants.AreaName;
-            public override Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle { get; } = (_, t) => t["Application Settings"];
+
+            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["Application Settings"];
         }
     }
 }

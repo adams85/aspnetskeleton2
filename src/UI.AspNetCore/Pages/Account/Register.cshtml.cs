@@ -90,7 +90,8 @@ namespace WebApp.UI.Pages.Account
         public sealed class PageDescriptorClass : PageDescriptor
         {
             public override string PageName => "/Account/Register";
-            public override Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetDefaultTitle { get; } = (_, t) => t["Create an Account"];
+
+            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["Create an Account"];
         }
     }
 }

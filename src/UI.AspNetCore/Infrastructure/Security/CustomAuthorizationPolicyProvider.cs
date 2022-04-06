@@ -29,7 +29,7 @@ namespace WebApp.UI.Infrastructure.Security
                 var pageDescriptorProviderType = Type.GetType(policyName.Substring(AuthorizePagePolicyPrefix.Length), throwOnError: true)!;
                 var pageDescriptor = PageDescriptor.Get(pageDescriptorProviderType);
 
-                return pageDescriptor.GetAuthorizationPolicyAsync!(httpContext)!;
+                return ((IDynamicAuthorizationPolicyProvider)pageDescriptor).GetAuthorizationPolicyAsync(httpContext);
             }
 
             return base.GetPolicyAsync(policyName);

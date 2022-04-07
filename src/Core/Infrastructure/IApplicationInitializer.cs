@@ -1,4 +1,3 @@
-﻿namespace WebApp.Core.Infrastructure
-{
-    public interface IApplicationInitializer : IInitializable { }
-}
+﻿namespace WebApp.Core.Infrastructure;
+
+public interface IApplicationInitializer : IInitializable { }

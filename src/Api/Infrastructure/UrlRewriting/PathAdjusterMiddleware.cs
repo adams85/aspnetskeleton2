@@ -4,57 +4,56 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace WebApp.Api.Infrastructure.UrlRewriting
+namespace WebApp.Api.Infrastructure.UrlRewriting;
+
+public sealed class PathAdjusterMiddleware
 {
-    public sealed class PathAdjusterMiddleware
+    private static bool AdjustPath(HttpRequest request, PathString originalPrefix, PathString newPrefix)
     {
-        private static bool AdjustPath(HttpRequest request, PathString originalPrefix, PathString newPrefix)
+        bool isMatch;
+        if (originalPrefix.HasValue)
         {
-            bool isMatch;
-            if (originalPrefix.HasValue)
+            if (request.PathBase.HasValue)
             {
-                if (request.PathBase.HasValue)
-                {
-                    isMatch = request.PathBase.StartsWithSegments(originalPrefix, out var remaining);
-                    if (isMatch)
-                        request.PathBase = remaining;
-                }
-                else
-                {
-                    isMatch = request.Path.StartsWithSegments(originalPrefix, out var remaining);
-                    if (isMatch)
-                        request.Path = remaining;
-                }
+                isMatch = request.PathBase.StartsWithSegments(originalPrefix, out var remaining);
+                if (isMatch)
+                    request.PathBase = remaining;
             }
             else
-                isMatch = true;
-
-            if (isMatch && newPrefix.HasValue)
-                request.PathBase = newPrefix + request.PathBase;
-
-            return isMatch;
+            {
+                isMatch = request.Path.StartsWithSegments(originalPrefix, out var remaining);
+                if (isMatch)
+                    request.Path = remaining;
+            }
         }
+        else
+            isMatch = true;
 
-        private readonly RequestDelegate _next;
+        if (isMatch && newPrefix.HasValue)
+            request.PathBase = newPrefix + request.PathBase;
 
-        private readonly Func<HttpRequest, bool>[] _pathAdjusters;
+        return isMatch;
+    }
 
-        public PathAdjusterMiddleware(RequestDelegate next, IOptions<PathAdjusterOptions>? options)
-        {
-            _next = next ?? throw new ArgumentNullException(nameof(next));
+    private readonly RequestDelegate _next;
 
-            _pathAdjusters = (options?.Value?.PathAdjustments ?? Enumerable.Empty<PathAdjustment>())
-                .Select(adj => new Func<HttpRequest, bool>(req => AdjustPath(req, adj.OriginalPrefix, adj.NewPrefix)))
-                .ToArray();
-        }
+    private readonly Func<HttpRequest, bool>[] _pathAdjusters;
 
-        public Task Invoke(HttpContext context)
-        {
-            for (int i = 0, n = _pathAdjusters.Length; i < n; i++)
-                if (_pathAdjusters[i](context.Request))
-                    break;
+    public PathAdjusterMiddleware(RequestDelegate next, IOptions<PathAdjusterOptions>? options)
+    {
+        _next = next ?? throw new ArgumentNullException(nameof(next));
 
-            return _next(context);
-        }
+        _pathAdjusters = (options?.Value?.PathAdjustments ?? Enumerable.Empty<PathAdjustment>())
+            .Select(adj => new Func<HttpRequest, bool>(req => AdjustPath(req, adj.OriginalPrefix, adj.NewPrefix)))
+            .ToArray();
+    }
+
+    public Task Invoke(HttpContext context)
+    {
+        for (int i = 0, n = _pathAdjusters.Length; i < n; i++)
+            if (_pathAdjusters[i](context.Request))
+                break;
+
+        return _next(context);
     }
 }

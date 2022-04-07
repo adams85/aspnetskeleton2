@@ -1,6 +1,5 @@
-﻿namespace WebApp.Service
-{
-    public interface IQuery { }
+﻿namespace WebApp.Service;
 
-    public interface IQuery<out TResult> : IQuery { }
-}
+public interface IQuery { }
+
+public interface IQuery<out TResult> : IQuery { }

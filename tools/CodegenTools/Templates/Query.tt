@@ -7,28 +7,27 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace <#= $"{Namespace}.Service.{Group}" #>
-{
+namespace <#= $"{Namespace}.Service.{Group}" #>;
+
 <#
 if (IsList)
 {
 #>
-    // TODO: Don't forget to add the corresponding ProtoInclude attribute to the base class!
+// TODO: Don't forget to add the corresponding ProtoInclude attribute to the base class!
 <#
 }
 #>
-    [DataContract]
-    public record class <#= $"{Name}Query" #> : <#= GetQueryBaseType(GetResultType()) #><#= IsEventProducer ? ", IEventProducerQuery" : "" #>
-    {
-        [DataMember(Order = 1)] public string Property { get; init; } = null!;
+[DataContract]
+public record class <#= $"{Name}Query" #> : <#= GetQueryBaseType(GetResultType()) #><#= IsEventProducer ? ", IEventProducerQuery" : "" #>
+{
+    [DataMember(Order = 1)] public string Property { get; init; } = null!;
 <#
 if (IsEventProducer)
 {
 #>
 
-        public Action<IQuery, Event>? OnEvent { get; set; }
+    public Action<IQuery, Event>? OnEvent { get; set; }
 <#
 }
 #>
-    }
 }

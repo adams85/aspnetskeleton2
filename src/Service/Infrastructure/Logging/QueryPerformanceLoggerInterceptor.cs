@@ -6,67 +6,66 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using WebApp.Core.Infrastructure;
 
-namespace WebApp.Service.Infrastructure.Logging
+namespace WebApp.Service.Infrastructure.Logging;
+
+internal sealed class QueryPerformanceLoggerInterceptor : IQueryInterceptor
 {
-    internal sealed class QueryPerformanceLoggerInterceptor : IQueryInterceptor
+    private readonly QueryExecutionDelegate _next;
+    private readonly IGuidProvider _guidProvider;
+    private readonly ILogger _logger;
+
+    public QueryPerformanceLoggerInterceptor(QueryExecutionDelegate next, IGuidProvider guidProvider, ILogger<QueryPerformanceLoggerInterceptor>? logger)
     {
-        private readonly QueryExecutionDelegate _next;
-        private readonly IGuidProvider _guidProvider;
-        private readonly ILogger _logger;
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
+        _logger = logger ?? (ILogger)NullLogger.Instance;
+    }
 
-        public QueryPerformanceLoggerInterceptor(QueryExecutionDelegate next, IGuidProvider guidProvider, ILogger<QueryPerformanceLoggerInterceptor>? logger)
+    public async Task<object?> InvokeAsync(QueryContext context, CancellationToken cancellationToken)
+    {
+        using (_logger.BeginScope(new LogScopeState(context.QueryType, _guidProvider.NewGuid())))
         {
-            _next = next ?? throw new ArgumentNullException(nameof(next));
-            _guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
-            _logger = logger ?? (ILogger)NullLogger.Instance;
-        }
+            _logger.LogInformation("{QUERY_NAME} execution started.", context.QueryType.Name);
 
-        public async Task<object?> InvokeAsync(QueryContext context, CancellationToken cancellationToken)
-        {
-            using (_logger.BeginScope(new LogScopeState(context.QueryType, _guidProvider.NewGuid())))
+            var startTimestamp = Stopwatch.GetTimestamp();
+            Exception? exception = null;
+            try
             {
-                _logger.LogInformation("{QUERY_NAME} execution started.", context.QueryType.Name);
-
-                var startTimestamp = Stopwatch.GetTimestamp();
-                Exception? exception = null;
-                try
-                {
-                    return await _next(context, cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                    throw;
-                }
-                finally
-                {
-                    var endTimestamp = Stopwatch.GetTimestamp();
-                    var elapsed = TimeSpan.FromSeconds((endTimestamp - startTimestamp) / (double)Stopwatch.Frequency);
-
-                    _logger.LogInformation("{QUERY_NAME} execution ended with {STATUS} in {ELAPSED}.", context.QueryType.Name, GetOperationStatus(exception), elapsed);
-                }
+                return await _next(context, cancellationToken).ConfigureAwait(false);
             }
-
-            static string GetOperationStatus(Exception? ex) => ex switch
+            catch (Exception ex)
             {
-                null => "success",
-                OperationCanceledException _ => "cancellation",
-                ServiceErrorException serviceErrorEx => $"failure ({serviceErrorEx.ErrorCode})",
-                _ => "unexpected error"
-            };
+                exception = ex;
+                throw;
+            }
+            finally
+            {
+                var endTimestamp = Stopwatch.GetTimestamp();
+                var elapsed = TimeSpan.FromSeconds((endTimestamp - startTimestamp) / (double)Stopwatch.Frequency);
+
+                _logger.LogInformation("{QUERY_NAME} execution ended with {STATUS} in {ELAPSED}.", context.QueryType.Name, GetOperationStatus(exception), elapsed);
+            }
         }
 
-        private struct LogScopeState
+        static string GetOperationStatus(Exception? ex) => ex switch
         {
-            private readonly Type _queryType;
-            private readonly Guid _executionId;
+            null => "success",
+            OperationCanceledException _ => "cancellation",
+            ServiceErrorException serviceErrorEx => $"failure ({serviceErrorEx.ErrorCode})",
+            _ => "unexpected error"
+        };
+    }
 
-            private string? _cachedToString;
+    private struct LogScopeState
+    {
+        private readonly Type _queryType;
+        private readonly Guid _executionId;
 
-            public LogScopeState(Type queryType, Guid executionId) =>
-                (_queryType, _executionId, _cachedToString) = (queryType, executionId, null);
+        private string? _cachedToString;
 
-            public override string ToString() => _cachedToString ??= $"{_queryType}, ExecutionId:{_executionId}";
-        }
+        public LogScopeState(Type queryType, Guid executionId) =>
+            (_queryType, _executionId, _cachedToString) = (queryType, executionId, null);
+
+        public override string ToString() => _cachedToString ??= $"{_queryType}, ExecutionId:{_executionId}";
     }
 }

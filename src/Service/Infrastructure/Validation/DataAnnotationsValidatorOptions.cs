@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace WebApp.Service.Infrastructure.Validation
+namespace WebApp.Service.Infrastructure.Validation;
+
+[Flags]
+public enum DataAnnotationsValidatorOptions
 {
-    [Flags]
-    public enum DataAnnotationsValidatorOptions
-    {
-        None = 0,
-        SuppressImplicitRequiredAttributeForNonNullableRefTypes = 0x1
-    }
+    None = 0,
+    SuppressImplicitRequiredAttributeForNonNullableRefTypes = 0x1
 }

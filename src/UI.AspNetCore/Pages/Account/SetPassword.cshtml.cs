@@ -11,66 +11,65 @@ using WebApp.UI.Infrastructure.Localization;
 using WebApp.UI.Infrastructure.Security;
 using WebApp.UI.Models;
 
-namespace WebApp.UI.Pages.Account
+namespace WebApp.UI.Pages.Account;
+
+[AnonymousOnly]
+public class SetPasswordModel : CardPageModel<SetPasswordModel.PageDescriptorClass>
 {
-    [AnonymousOnly]
-    public class SetPasswordModel : CardPageModel<SetPasswordModel.PageDescriptorClass>
+    private readonly IAccountManager _accountManager;
+    private readonly IStringLocalizer _t;
+
+    public SetPasswordModel(IAccountManager accountManager, IStringLocalizer<SetPasswordModel>? stringLocalizer)
     {
-        private readonly IAccountManager _accountManager;
-        private readonly IStringLocalizer _t;
+        _accountManager = accountManager ?? throw new ArgumentNullException(nameof(accountManager));
+        _t = stringLocalizer ?? (IStringLocalizer)NullStringLocalizer.Instance;
+    }
 
-        public SetPasswordModel(IAccountManager accountManager, IStringLocalizer<SetPasswordModel>? stringLocalizer)
+    private Models.Account.SetPasswordModel? _model;
+    [BindProperty]
+    public Models.Account.SetPasswordModel Model
+    {
+        get => _model ??= new Models.Account.SetPasswordModel();
+        set => _model = value;
+    }
+
+    public bool? Success { get; private set; }
+
+    public void OnGet(string s)
+    {
+        if (s != null)
+            Success = Convert.ToBoolean(int.Parse(s, CultureInfo.InvariantCulture));
+    }
+
+    public async Task<IActionResult> OnPost([FromQuery] string u, [FromQuery] string v)
+    {
+        if (ModelState.IsValid)
         {
-            _accountManager = accountManager ?? throw new ArgumentNullException(nameof(accountManager));
-            _t = stringLocalizer ?? (IStringLocalizer)NullStringLocalizer.Instance;
+            var (status, passwordRequirements) = await _accountManager.SetPasswordAsync(u, v, Model, HttpContext.RequestAborted);
+
+            if (status != ChangePasswordStatus.InvalidNewPassword)
+                return RedirectToPage(new { s = Convert.ToInt32(status == ChangePasswordStatus.Success) });
+
+            AddModelError(status, passwordRequirements);
         }
 
-        private Models.Account.SetPasswordModel? _model;
-        [BindProperty]
-        public Models.Account.SetPasswordModel Model
-        {
-            get => _model ??= new Models.Account.SetPasswordModel();
-            set => _model = value;
-        }
+        return Page();
 
-        public bool? Success { get; private set; }
-
-        public void OnGet(string s)
+        void AddModelError(ChangePasswordStatus status, PasswordRequirementsData? passwordRequirements)
         {
-            if (s != null)
-                Success = Convert.ToBoolean(int.Parse(s, CultureInfo.InvariantCulture));
-        }
-
-        public async Task<IActionResult> OnPost([FromQuery] string u, [FromQuery] string v)
-        {
-            if (ModelState.IsValid)
+            switch (status)
             {
-                var (status, passwordRequirements) = await _accountManager.SetPasswordAsync(u, v, Model, HttpContext.RequestAborted);
-
-                if (status != ChangePasswordStatus.InvalidNewPassword)
-                    return RedirectToPage(new { s = Convert.ToInt32(status == ChangePasswordStatus.Success) });
-
-                AddModelError(status, passwordRequirements);
-            }
-
-            return Page();
-
-            void AddModelError(ChangePasswordStatus status, PasswordRequirementsData? passwordRequirements)
-            {
-                switch (status)
-                {
-                    case ChangePasswordStatus.InvalidNewPassword:
-                        ModelState.AddModelError(nameof(Model) + "." + nameof(Models.Account.SetPasswordModel.NewPassword), _t.LocalizePasswordRequirements(passwordRequirements));
-                        return;
-                }
+                case ChangePasswordStatus.InvalidNewPassword:
+                    ModelState.AddModelError(nameof(Model) + "." + nameof(Models.Account.SetPasswordModel.NewPassword), _t.LocalizePasswordRequirements(passwordRequirements));
+                    return;
             }
         }
+    }
 
-        public sealed class PageDescriptorClass : PageDescriptor
-        {
-            public override string PageName => "/Account/SetPassword";
+    public sealed class PageDescriptorClass : PageDescriptor
+    {
+        public override string PageName => "/Account/SetPassword";
 
-            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["New Password"];
-        }
+        public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["New Password"];
     }
 }

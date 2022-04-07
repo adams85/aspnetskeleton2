@@ -9,49 +9,48 @@ using WebApp.Service.Settings;
 using WebApp.UI.Areas.Dashboard.Models;
 using WebApp.UI.Helpers;
 
-namespace WebApp.UI.Areas.Dashboard.Pages.Settings
+namespace WebApp.UI.Areas.Dashboard.Pages.Settings;
+
+// this page is created for the sake of demonstration (settings cannot be deleted)
+[Authorize(Roles = nameof(RoleEnum.Administrators))]
+public class DeleteModel : DeletePageModel<DeleteModel.PageDescriptorClass, SettingData>
 {
-    // this page is created for the sake of demonstration (settings cannot be deleted)
-    [Authorize(Roles = nameof(RoleEnum.Administrators))]
-    public class DeleteModel : DeletePageModel<DeleteModel.PageDescriptorClass, SettingData>
+    private readonly IQueryDispatcher _queryDispatcher;
+    private readonly ICommandDispatcher _commandDispatcher;
+
+    public DeleteModel(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher)
     {
-        private readonly IQueryDispatcher _queryDispatcher;
-        private readonly ICommandDispatcher _commandDispatcher;
+        _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
+        _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
+    }
 
-        public DeleteModel(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher)
+    protected override string DefaultReturnUrl => Url.Page(IndexModel.PageDescriptor.PageName, new { area = IndexModel.PageDescriptor.AreaName })!;
+
+    public async Task<IActionResult> OnGet([FromRoute] string id, [FromQuery] string? returnUrl)
+    {
+        var item = await _queryDispatcher.DispatchAsync(new GetSettingQuery
         {
-            _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
-            _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
-        }
+            Name = id,
+            IncludeDescription = true
+        }, HttpContext.RequestAborted);
 
-        protected override string DefaultReturnUrl => Url.Page(IndexModel.PageDescriptor.PageName, new { area = IndexModel.PageDescriptor.AreaName })!;
+        if (item == null)
+            return NotFound();
 
-        public async Task<IActionResult> OnGet([FromRoute] string id, [FromQuery] string? returnUrl)
-        {
-            var item = await _queryDispatcher.DispatchAsync(new GetSettingQuery
-            {
-                Name = id,
-                IncludeDescription = true
-            }, HttpContext.RequestAborted);
+        ItemId = item.Name;
+        ReturnUrl = returnUrl;
 
-            if (item == null)
-                return NotFound();
+        return HttpContext.Request.IsAjaxRequest() ? Partial(DeletePageDescriptor.DeletePopupPartialViewName, this) : Page();
+    }
 
-            ItemId = item.Name;
-            ReturnUrl = returnUrl;
+    public Task<IActionResult> OnPost([FromRoute] string id, [FromQuery] string? returnUrl)
+    {
+        throw new NotImplementedException();
+    }
 
-            return HttpContext.Request.IsAjaxRequest() ? Partial(DeletePageDescriptor.DeletePopupPartialViewName, this) : Page();
-        }
-
-        public Task<IActionResult> OnPost([FromRoute] string id, [FromQuery] string? returnUrl)
-        {
-            throw new NotImplementedException();
-        }
-
-        public sealed class PageDescriptorClass : DeletePageDescriptor<SettingData>
-        {
-            public override string PageName => "/Settings/Delete";
-            public override string AreaName => DashboardConstants.AreaName;
-        }
+    public sealed class PageDescriptorClass : DeletePageDescriptor<SettingData>
+    {
+        public override string PageName => "/Settings/Delete";
+        public override string AreaName => DashboardConstants.AreaName;
     }
 }

@@ -1,13 +1,12 @@
-﻿namespace WebApp.UI.Infrastructure.Security
+﻿namespace WebApp.UI.Infrastructure.Security;
+
+public enum ChangePasswordStatus
 {
-    public enum ChangePasswordStatus
-    {
-        UnexpectedError = -1,
-        Success,
-        UserNotExists,
-        UserUnapproved,
-        UserLockedOut,
-        InvalidCredentials,
-        InvalidNewPassword,
-    }
+    UnexpectedError = -1,
+    Success,
+    UserNotExists,
+    UserUnapproved,
+    UserLockedOut,
+    InvalidCredentials,
+    InvalidNewPassword,
 }

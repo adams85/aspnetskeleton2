@@ -10,72 +10,71 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Net.Http.Headers;
 using ProtoBuf;
 
-namespace WebApp.Api.Infrastructure.Serialization
+namespace WebApp.Api.Infrastructure.Serialization;
+
+// based on: https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.NewtonsoftJson/src/NewtonsoftJsonInputFormatter.cs
+public sealed class ProtoBufInputFormatter : InputFormatter
 {
-    // based on: https://github.com/dotnet/aspnetcore/blob/v3.1.18/src/Mvc/Mvc.NewtonsoftJson/src/NewtonsoftJsonInputFormatter.cs
-    public sealed class ProtoBufInputFormatter : InputFormatter
+    private const int DefaultMemoryThreshold = 1024 * 30;
+
+    private readonly MvcOptions _mvcOptions;
+    private readonly ILogger _logger;
+
+    public ProtoBufInputFormatter(ProtoBufFormatterOptions options, MvcOptions mvcOptions, ILogger<ProtoBufInputFormatter> logger)
     {
-        private const int DefaultMemoryThreshold = 1024 * 30;
+        _mvcOptions = mvcOptions;
+        _logger = logger ?? (ILogger)NullLogger.Instance;
 
-        private readonly MvcOptions _mvcOptions;
-        private readonly ILogger _logger;
+        foreach (var contentType in options.SupportedContentTypes)
+            SupportedMediaTypes.Add(new MediaTypeHeaderValue(contentType));
+    }
 
-        public ProtoBufInputFormatter(ProtoBufFormatterOptions options, MvcOptions mvcOptions, ILogger<ProtoBufInputFormatter> logger)
+    protected override bool CanReadType(Type type) => ApiContractSerializer.MetadataProvider.CanSerialize(type);
+
+    public override async Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context)
+    {
+        var request = context.HttpContext.Request;
+
+        var readStream = request.Body;
+        FileBufferingReadStream? fileBufferingReadStream = null;
+
+        if (readStream.CanSeek)
         {
-            _mvcOptions = mvcOptions;
-            _logger = logger ?? (ILogger)NullLogger.Instance;
+            var position = request.Body.Position;
+            await readStream.DrainAsync(CancellationToken.None);
+            readStream.Position = position;
+        }
+        else if (!_mvcOptions.SuppressOutputFormatterBuffering)
+        {
+            var memoryThreshold = DefaultMemoryThreshold;
+            var contentLength = request.ContentLength.GetValueOrDefault();
+            if (contentLength > 0 && contentLength < memoryThreshold)
+                memoryThreshold = (int)contentLength;
 
-            foreach (var contentType in options.SupportedContentTypes)
-                SupportedMediaTypes.Add(new MediaTypeHeaderValue(contentType));
+            readStream = fileBufferingReadStream = new FileBufferingReadStream(request.Body, memoryThreshold);
         }
 
-        protected override bool CanReadType(Type type) => ApiContractSerializer.MetadataProvider.CanSerialize(type);
+        object? model = null;
+        Exception? exception = null;
 
-        public override async Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context)
+        await using (fileBufferingReadStream)
         {
-            var request = context.HttpContext.Request;
-
-            var readStream = request.Body;
-            FileBufferingReadStream? fileBufferingReadStream = null;
-
-            if (readStream.CanSeek)
+            if (fileBufferingReadStream != null)
             {
-                var position = request.Body.Position;
                 await readStream.DrainAsync(CancellationToken.None);
-                readStream.Position = position;
-            }
-            else if (!_mvcOptions.SuppressOutputFormatterBuffering)
-            {
-                var memoryThreshold = DefaultMemoryThreshold;
-                var contentLength = request.ContentLength.GetValueOrDefault();
-                if (contentLength > 0 && contentLength < memoryThreshold)
-                    memoryThreshold = (int)contentLength;
-
-                readStream = fileBufferingReadStream = new FileBufferingReadStream(request.Body, memoryThreshold);
+                readStream.Seek(0, SeekOrigin.Begin);
             }
 
-            object? model = null;
-            Exception? exception = null;
-
-            await using (fileBufferingReadStream)
-            {
-                if (fileBufferingReadStream != null)
-                {
-                    await readStream.DrainAsync(CancellationToken.None);
-                    readStream.Seek(0, SeekOrigin.Begin);
-                }
-
-                try { model = ApiContractSerializer.ProtoBuf.Deserialize(readStream, context.ModelType); }
-                catch (ProtoException ex) { exception = ex; }
-            }
-
-            if (exception != null)
-            {
-                _logger.LogDebug(exception, "ProtoBuf input formatter threw an exception.");
-                return InputFormatterResult.Failure();
-            }
-
-            return InputFormatterResult.Success(model);
+            try { model = ApiContractSerializer.ProtoBuf.Deserialize(readStream, context.ModelType); }
+            catch (ProtoException ex) { exception = ex; }
         }
+
+        if (exception != null)
+        {
+            _logger.LogDebug(exception, "ProtoBuf input formatter threw an exception.");
+            return InputFormatterResult.Failure();
+        }
+
+        return InputFormatterResult.Success(model);
     }
 }

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace WebApp.Service.Infrastructure
+namespace WebApp.Service.Infrastructure;
+
+internal class QueryDispatcherOptions
 {
-    internal class QueryDispatcherOptions
-    {
-        public List<(Predicate<Type> QueryTypeFilter, QueryInterceptorFactory InterceptorFactory)> InterceptorFactories { get; } =
-            new List<(Predicate<Type>, QueryInterceptorFactory)>();
-    }
+    public List<(Predicate<Type> QueryTypeFilter, QueryInterceptorFactory InterceptorFactory)> InterceptorFactories { get; } =
+        new List<(Predicate<Type>, QueryInterceptorFactory)>();
 }

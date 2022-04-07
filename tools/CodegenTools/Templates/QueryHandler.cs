@@ -52,7 +52,7 @@ namespace CodegenTools.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n{\r\n");
+            this.Write(";\r\n\r\n");
             
             #line 17 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
 
@@ -61,7 +61,7 @@ var resultType = GetResultType();
             
             #line default
             #line hidden
-            this.Write("    internal sealed class ");
+            this.Write("internal sealed class ");
             
             #line 20 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}QueryHandler"));
@@ -75,7 +75,7 @@ var resultType = GetResultType();
             
             #line default
             #line hidden
-            this.Write("\r\n    {\r\n        public override async Task<");
+            this.Write("\r\n{\r\n    public override async Task<");
             
             #line 22 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resultType));
@@ -89,9 +89,9 @@ var resultType = GetResultType();
             
             #line default
             #line hidden
-            this.Write(" query, QueryContext context, CancellationToken cancellationToken)\r\n        {\r\n  " +
-                    "          await using (context.CreateDbContext().AsAsyncDisposable(out var dbCon" +
-                    "text).ConfigureAwait(false))\r\n            {\r\n");
+            this.Write(" query, QueryContext context, CancellationToken cancellationToken)\r\n    {\r\n      " +
+                    "  await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).Co" +
+                    "nfigureAwait(false))\r\n        {\r\n");
             
             #line 26 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
 
@@ -101,9 +101,9 @@ if (!IsList)
             
             #line default
             #line hidden
-            this.Write("                Entity entity = await dbContext.Entities\r\n                    .Fi" +
-                    "ndAsync(new object[] { query.Id }, cancellationToken).ConfigureAwait(false);\r\n\r\n" +
-                    "                RequireExisting(entity, q => q.Id);\r\n\r\n                // ...\r\n");
+            this.Write("            Entity entity = await dbContext.Entities\r\n                .FindAsync(" +
+                    "new object[] { query.Id }, cancellationToken).ConfigureAwait(false);\r\n\r\n        " +
+                    "    RequireExisting(entity, q => q.Id);\r\n\r\n            // ...\r\n");
             
             #line 36 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
 
@@ -113,8 +113,8 @@ if (!IsList)
             
             #line default
             #line hidden
-            this.Write("\r\n                query.OnEvent?.Invoke(query, new ProgressEvent\r\n               " +
-                    " {\r\n                    Progress = 1f\r\n                });\r\n");
+            this.Write("\r\n            query.OnEvent?.Invoke(query, new ProgressEvent\r\n            {\r\n    " +
+                    "            Progress = 1f\r\n            });\r\n");
             
             #line 45 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
 
@@ -123,14 +123,14 @@ if (!IsList)
             
             #line default
             #line hidden
-            this.Write("\r\n                return new ");
+            this.Write("\r\n            return new ");
             
             #line 49 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resultType));
             
             #line default
             #line hidden
-            this.Write("\r\n                {\r\n                };\r\n");
+            this.Write("\r\n            {\r\n            };\r\n");
             
             #line 52 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
 
@@ -141,8 +141,8 @@ else
             
             #line default
             #line hidden
-            this.Write("                IQueryable<Entity> entityQuery = dbContext.Entities;\r\n\r\n         " +
-                    "       // ...\r\n\r\n                var dataQuery = entityQuery.ToData();\r\n");
+            this.Write("            IQueryable<Entity> entityQuery = dbContext.Entities;\r\n\r\n            /" +
+                    "/ ...\r\n\r\n            var dataQuery = entityQuery.ToData();\r\n");
             
             #line 62 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
 
@@ -153,16 +153,16 @@ else
             #line default
             #line hidden
             this.Write(@"
-                var items = await ToArrayAsync(ApplyPagingAndOrdering(query, dataQuery), cancellationToken).ConfigureAwait(false);
+            var items = await ToArrayAsync(ApplyPagingAndOrdering(query, dataQuery), cancellationToken).ConfigureAwait(false);
 
-                var totalItemCount = await GetTotalItemCountAsync(query, dataQuery, items, cancellationToken).ConfigureAwait(false);
+            var totalItemCount = await GetTotalItemCountAsync(query, dataQuery, items, cancellationToken).ConfigureAwait(false);
 
-                query.OnEvent?.Invoke(query, new ProgressEvent
-                {
-                    Progress = 1f
-                });
+            query.OnEvent?.Invoke(query, new ProgressEvent
+            {
+                Progress = 1f
+            });
 
-                return Result(items, totalItemCount, query.PageIndex, query.PageSize, query.MaxPageSize);
+            return Result(items, totalItemCount, query.PageIndex, query.PageSize, query.MaxPageSize);
 ");
             
             #line 77 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
@@ -174,8 +174,8 @@ else
             
             #line default
             #line hidden
-            this.Write("\r\n                return await ResultAsync(query, dataQuery, cancellationToken).C" +
-                    "onfigureAwait(false);\r\n");
+            this.Write("\r\n            return await ResultAsync(query, dataQuery, cancellationToken).Confi" +
+                    "gureAwait(false);\r\n");
             
             #line 84 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\QueryHandler.tt"
 
@@ -185,7 +185,7 @@ else
             
             #line default
             #line hidden
-            this.Write("            }\r\n        }\r\n    }\r\n}\r\n");
+            this.Write("        }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
     }

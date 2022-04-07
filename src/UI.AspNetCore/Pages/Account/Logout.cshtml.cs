@@ -6,26 +6,25 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
 using WebApp.UI.Models;
 
-namespace WebApp.UI.Pages.Account
+namespace WebApp.UI.Pages.Account;
+
+public class LogoutModel : BasePageModel<LogoutModel.PageDescriptorClass>
 {
-    public class LogoutModel : BasePageModel<LogoutModel.PageDescriptorClass>
+    private async Task<IActionResult> LogoutAsync()
     {
-        private async Task<IActionResult> LogoutAsync()
-        {
-            await HttpContext.SignOutAsync();
+        await HttpContext.SignOutAsync();
 
-            return RedirectToPage(IndexModel.PageDescriptor.PageName, new { area = IndexModel.PageDescriptor.AreaName });
-        }
+        return RedirectToPage(IndexModel.PageDescriptor.PageName, new { area = IndexModel.PageDescriptor.AreaName });
+    }
 
-        public Task<IActionResult> OnGet() => LogoutAsync();
+    public Task<IActionResult> OnGet() => LogoutAsync();
 
-        public Task<IActionResult> OnPost() => LogoutAsync();
+    public Task<IActionResult> OnPost() => LogoutAsync();
 
-        public sealed class PageDescriptorClass : PageDescriptor
-        {
-            public override string PageName => "/Account/Logout";
+    public sealed class PageDescriptorClass : PageDescriptor
+    {
+        public override string PageName => "/Account/Logout";
 
-            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => throw new NotSupportedException();
-        }
+        public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => throw new NotSupportedException();
     }
 }

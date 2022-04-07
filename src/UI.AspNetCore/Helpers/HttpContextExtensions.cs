@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace WebApp.UI.Helpers
+namespace WebApp.UI.Helpers;
+
+public static class HttpContextExtensions
 {
-    public static class HttpContextExtensions
-    {
-        public static bool IsAjaxRequest(this HttpRequest httpRequest) =>
-            httpRequest.Headers["X-Requested-With"] == "XMLHttpRequest";
-    }
+    public static bool IsAjaxRequest(this HttpRequest httpRequest) =>
+        httpRequest.Headers["X-Requested-With"] == "XMLHttpRequest";
 }

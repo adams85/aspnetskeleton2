@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace WebApp.UI.Infrastructure.ViewFeatures
+namespace WebApp.UI.Infrastructure.ViewFeatures;
+
+public class GlobalRazorHelpersOptions
 {
-    public class GlobalRazorHelpersOptions
-    {
-        public Dictionary<Type, string> HelpersTypeViewPathMappings { get; } = new Dictionary<Type, string>();
-    }
+    public Dictionary<Type, string> HelpersTypeViewPathMappings { get; } = new Dictionary<Type, string>();
 }

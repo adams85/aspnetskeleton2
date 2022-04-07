@@ -7,15 +7,14 @@ using WebApp.Service.Users;
 using WebApp.UI.Areas.Dashboard.Models.Account;
 using WebApp.UI.Models.Account;
 
-namespace WebApp.UI.Infrastructure.Security
+namespace WebApp.UI.Infrastructure.Security;
+
+public interface IAccountManager : ICachedUserInfoProvider
 {
-    public interface IAccountManager : ICachedUserInfoProvider
-    {
-        Task<AuthenticateUserStatus> ValidateUserAsync(NetworkCredential credentials, CancellationToken cancellationToken);
-        Task<(CreateUserStatus, PasswordRequirementsData?)> CreateUserAsync(RegisterModel model, CancellationToken cancellationToken);
-        Task<(ChangePasswordStatus, PasswordRequirementsData?)> ChangePasswordAsync(string userName, ChangePasswordModel model, CancellationToken cancellationToken);
-        Task<bool> VerifyUserAsync(string userName, string verificationToken, CancellationToken cancellationToken);
-        Task<bool> ResetPasswordAsync(ResetPasswordModel model, CancellationToken cancellationToken);
-        Task<(ChangePasswordStatus, PasswordRequirementsData?)> SetPasswordAsync(string userName, string verificationToken, SetPasswordModel model, CancellationToken cancellationToken);
-    }
+    Task<AuthenticateUserStatus> ValidateUserAsync(NetworkCredential credentials, CancellationToken cancellationToken);
+    Task<(CreateUserStatus, PasswordRequirementsData?)> CreateUserAsync(RegisterModel model, CancellationToken cancellationToken);
+    Task<(ChangePasswordStatus, PasswordRequirementsData?)> ChangePasswordAsync(string userName, ChangePasswordModel model, CancellationToken cancellationToken);
+    Task<bool> VerifyUserAsync(string userName, string verificationToken, CancellationToken cancellationToken);
+    Task<bool> ResetPasswordAsync(ResetPasswordModel model, CancellationToken cancellationToken);
+    Task<(ChangePasswordStatus, PasswordRequirementsData?)> SetPasswordAsync(string userName, string verificationToken, SetPasswordModel model, CancellationToken cancellationToken);
 }

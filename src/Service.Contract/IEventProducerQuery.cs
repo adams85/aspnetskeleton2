@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace WebApp.Service
+namespace WebApp.Service;
+
+public interface IEventProducerQuery
 {
-    public interface IEventProducerQuery
-    {
-        Action<IQuery, Event>? OnEvent { get; set; }
-    }
+    Action<IQuery, Event>? OnEvent { get; set; }
 }

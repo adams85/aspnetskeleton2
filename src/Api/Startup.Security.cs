@@ -7,38 +7,37 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WebApp.Api.Infrastructure.Security;
 
-namespace WebApp.Api
+namespace WebApp.Api;
+
+public partial class Startup
 {
-    public partial class Startup
+    private void ConfigureSecurityServices(IServiceCollection services)
     {
-        private void ConfigureSecurityServices(IServiceCollection services)
-        {
-            services.AddSingleton<IApiSecurityService, ApiSecurityService>();
-            services.AddSingleton<ICachedUserInfoProvider>(sp => sp.GetRequiredService<IApiSecurityService>());
+        services.AddSingleton<IApiSecurityService, ApiSecurityService>();
+        services.AddSingleton<ICachedUserInfoProvider>(sp => sp.GetRequiredService<IApiSecurityService>());
 
-            services.AddAuthentication(ApiAuthenticationSchemes.JwtBearer)
-                .AddJwtBearer(ApiAuthenticationSchemes.JwtBearer, CachedDelegates.Noop<JwtBearerOptions>.Action)
-                .AddCookie(ApiAuthenticationSchemes.Cookie);
+        services.AddAuthentication(ApiAuthenticationSchemes.JwtBearer)
+            .AddJwtBearer(ApiAuthenticationSchemes.JwtBearer, CachedDelegates.Noop<JwtBearerOptions>.Action)
+            .AddCookie(ApiAuthenticationSchemes.Cookie);
 
-            services.AddOptions<JwtBearerOptions>(ApiAuthenticationSchemes.JwtBearer)
-                .Configure<IOptions<ApiSecurityOptions>, ILogger<IApiSecurityService>>((options, securityOptions, logger) =>
-                    CustomJwtBearerEvents.ConfigureOptions(options, securityOptions, logger));
+        services.AddOptions<JwtBearerOptions>(ApiAuthenticationSchemes.JwtBearer)
+            .Configure<IOptions<ApiSecurityOptions>, ILogger<IApiSecurityService>>((options, securityOptions, logger) =>
+                CustomJwtBearerEvents.ConfigureOptions(options, securityOptions, logger));
 
-            services.AddSingleton<CustomCookieAuthenticationEvents>();
-            services.AddOptions<CookieAuthenticationOptions>(ApiAuthenticationSchemes.Cookie)
-                .Configure(options =>
-                    CustomCookieAuthenticationEvents.ConfigureOptions<CustomCookieAuthenticationEvents>(options));
-        }
+        services.AddSingleton<CustomCookieAuthenticationEvents>();
+        services.AddOptions<CookieAuthenticationOptions>(ApiAuthenticationSchemes.Cookie)
+            .Configure(options =>
+                CustomCookieAuthenticationEvents.ConfigureOptions<CustomCookieAuthenticationEvents>(options));
+    }
 
-        private void ConfigureSecurity(IApplicationBuilder app)
-        {
-            // https://garywoodfine.com/asp-net-core-2-2-jwt-authentication-tutorial/
-            app.UseCors(builder => builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
+    private void ConfigureSecurity(IApplicationBuilder app)
+    {
+        // https://garywoodfine.com/asp-net-core-2-2-jwt-authentication-tutorial/
+        app.UseCors(builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 
-            app.UseAuthorization();
-        }
+        app.UseAuthorization();
     }
 }

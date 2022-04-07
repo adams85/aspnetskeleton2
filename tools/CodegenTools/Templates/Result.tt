@@ -7,11 +7,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace <#= $"{Namespace}.Service.{Group}" #>
+namespace <#= $"{Namespace}.Service.{Group}" #>;
+
+[DataContract]
+public record class <#= $"{Name}Result" #><#= IsList ? $" : ListResult<{ListItemType}>" : "" #>
 {
-    [DataContract]
-    public record class <#= $"{Name}Result" #><#= IsList ? $" : ListResult<{ListItemType}>" : "" #>
-    {
-        [DataMember(Order = 1)] public string Property { get; init; } = null!;
-    }
+    [DataMember(Order = 1)] public string Property { get; init; } = null!;
 }

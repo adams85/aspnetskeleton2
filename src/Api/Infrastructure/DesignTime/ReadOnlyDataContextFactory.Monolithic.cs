@@ -2,13 +2,12 @@
 using Microsoft.EntityFrameworkCore.Design;
 using WebApp.DataAccess;
 
-namespace WebApp.Api.Infrastructure.DesignTime
+namespace WebApp.Api.Infrastructure.DesignTime;
+
+internal class ReadOnlyDataContextFactory : IDesignTimeDbContextFactory<ReadOnlyDataContext>
 {
-    internal class ReadOnlyDataContextFactory : IDesignTimeDbContextFactory<ReadOnlyDataContext>
+    public ReadOnlyDataContext CreateDbContext(string[] args)
     {
-        public ReadOnlyDataContext CreateDbContext(string[] args)
-        {
-            throw new InvalidOperationException($"Use {nameof(WritableDataContext)} for EF Core database migrations.");
-        }
+        throw new InvalidOperationException($"Use {nameof(WritableDataContext)} for EF Core database migrations.");
     }
 }

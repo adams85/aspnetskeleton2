@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace WebApp.UI.Infrastructure.ViewFeatures
+namespace WebApp.UI.Infrastructure.ViewFeatures;
+
+public interface IGlobalRazorHelpersFactory
 {
-    public interface IGlobalRazorHelpersFactory
-    {
-        dynamic Create(string helpersViewPath, ViewContext viewContext);
-        THelpers Create<THelpers>(ViewContext viewContext) where THelpers : class;
-    }
+    dynamic Create(string helpersViewPath, ViewContext viewContext);
+    THelpers Create<THelpers>(ViewContext viewContext) where THelpers : class;
 }

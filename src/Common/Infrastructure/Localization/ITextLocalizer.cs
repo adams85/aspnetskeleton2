@@ -1,8 +1,7 @@
-﻿namespace WebApp.Common.Infrastructure.Localization
+﻿namespace WebApp.Common.Infrastructure.Localization;
+
+public interface ITextLocalizer
 {
-    public interface ITextLocalizer
-    {
-        string this[string hint] { get; }
-        string this[string hint, params object[] args] { get; }
-    }
+    string this[string hint] { get; }
+    string this[string hint, params object[] args] { get; }
 }

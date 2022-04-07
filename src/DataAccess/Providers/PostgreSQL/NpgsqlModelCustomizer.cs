@@ -7,44 +7,43 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 using WebApp.DataAccess.Infrastructure;
 
-namespace WebApp.DataAccess.Providers.PostgreSQL
+namespace WebApp.DataAccess.Providers.PostgreSQL;
+
+internal sealed class NpgsqlModelCustomizer : RelationalModelCustomizer
 {
-    internal sealed class NpgsqlModelCustomizer : RelationalModelCustomizer
+    private readonly string _caseSensitiveCollation;
+    private readonly string _caseInsensitiveCollation;
+
+    public NpgsqlModelCustomizer(IDbProperties dbProperties, ModelCustomizerDependencies dependencies) : base(dependencies)
     {
-        private readonly string _caseSensitiveCollation;
-        private readonly string _caseInsensitiveCollation;
+        if (dbProperties == null)
+            throw new ArgumentNullException(nameof(dbProperties));
 
-        public NpgsqlModelCustomizer(IDbProperties dbProperties, ModelCustomizerDependencies dependencies) : base(dependencies)
-        {
-            if (dbProperties == null)
-                throw new ArgumentNullException(nameof(dbProperties));
+        _caseSensitiveCollation = dbProperties.CaseSensitiveCollation;
+        _caseInsensitiveCollation = dbProperties.CaseInsensitiveCollation;
+    }
 
-            _caseSensitiveCollation = dbProperties.CaseSensitiveCollation;
-            _caseInsensitiveCollation = dbProperties.CaseInsensitiveCollation;
-        }
+    public override void Customize(ModelBuilder modelBuilder, DbContext context)
+    {
+        base.Customize(modelBuilder, context);
 
-        public override void Customize(ModelBuilder modelBuilder, DbContext context)
-        {
-            base.Customize(modelBuilder, context);
+        // https://www.npgsql.org/efcore/misc/collations-and-case-sensitivity.html?tabs=data-annotations
+        modelBuilder.HasCollation(nameof(IDbProperties.CaseSensitiveCollation), locale: _caseSensitiveCollation, provider: "icu", deterministic: false);
+        modelBuilder.HasCollation(nameof(IDbProperties.CaseInsensitiveCollation), locale: _caseInsensitiveCollation, provider: "icu", deterministic: false);
 
-            // https://www.npgsql.org/efcore/misc/collations-and-case-sensitivity.html?tabs=data-annotations
-            modelBuilder.HasCollation(nameof(IDbProperties.CaseSensitiveCollation), locale: _caseSensitiveCollation, provider: "icu", deterministic: false);
-            modelBuilder.HasCollation(nameof(IDbProperties.CaseInsensitiveCollation), locale: _caseInsensitiveCollation, provider: "icu", deterministic: false);
+        modelBuilder.UseDefaultColumnCollation(nameof(IDbProperties.CaseSensitiveCollation));
 
-            modelBuilder.UseDefaultColumnCollation(nameof(IDbProperties.CaseSensitiveCollation));
-
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-                foreach (var property in entityType.GetProperties())
-                    if (property.PropertyInfo != null)
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            foreach (var property in entityType.GetProperties())
+                if (property.PropertyInfo != null)
+                {
+                    if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
                     {
-                        if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
-                        {
-                            var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
-                            var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
-                            if (caseInsensitive)
-                                property.SetCollation(_caseInsensitiveCollation);
-                        }
+                        var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
+                        var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
+                        if (caseInsensitive)
+                            property.SetCollation(_caseInsensitiveCollation);
                     }
-        }
+                }
     }
 }

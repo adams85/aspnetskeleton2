@@ -37,7 +37,7 @@ namespace CodegenTools.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n{\r\n");
+            this.Write(";\r\n\r\n");
             
             #line 12 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
 
@@ -47,8 +47,8 @@ if (IsList)
             
             #line default
             #line hidden
-            this.Write("    // TODO: Don\'t forget to add the corresponding ProtoInclude attribute to the " +
-                    "base class!\r\n");
+            this.Write("// TODO: Don\'t forget to add the corresponding ProtoInclude attribute to the base" +
+                    " class!\r\n");
             
             #line 17 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
 
@@ -57,7 +57,7 @@ if (IsList)
             
             #line default
             #line hidden
-            this.Write("    [DataContract]\r\n    public record class ");
+            this.Write("[DataContract]\r\npublic record class ");
             
             #line 21 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}Query"));
@@ -77,8 +77,8 @@ if (IsList)
             
             #line default
             #line hidden
-            this.Write("\r\n    {\r\n        [DataMember(Order = 1)] public string Property { get; init; } = " +
-                    "null!;\r\n");
+            this.Write("\r\n{\r\n    [DataMember(Order = 1)] public string Property { get; init; } = null!;\r\n" +
+                    "");
             
             #line 24 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
 
@@ -88,7 +88,7 @@ if (IsEventProducer)
             
             #line default
             #line hidden
-            this.Write("\r\n        public Action<IQuery, Event>? OnEvent { get; set; }\r\n");
+            this.Write("\r\n    public Action<IQuery, Event>? OnEvent { get; set; }\r\n");
             
             #line 30 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Query.tt"
 
@@ -97,7 +97,7 @@ if (IsEventProducer)
             
             #line default
             #line hidden
-            this.Write("    }\r\n}\r\n");
+            this.Write("}\r\n");
             return this.GenerationEnvironment.ToString();
         }
     }

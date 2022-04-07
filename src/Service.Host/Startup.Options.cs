@@ -1,30 +1,29 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace WebApp.Service.Host
+namespace WebApp.Service.Host;
+
+public partial class Startup
 {
-    public partial class Startup
+    private ServiceProvider BuildImmediateOptionsProvider()
     {
-        private ServiceProvider BuildImmediateOptionsProvider()
-        {
-            var optionsServices = new ServiceCollection().AddOptions();
-            ConfigureImmediateOptions(optionsServices);
-            return optionsServices.BuildServiceProvider();
-        }
+        var optionsServices = new ServiceCollection().AddOptions();
+        ConfigureImmediateOptions(optionsServices);
+        return optionsServices.BuildServiceProvider();
+    }
 
-        partial void ConfigureServiceLayerImmediateOptionsPartial(IServiceCollection services);
+    partial void ConfigureServiceLayerImmediateOptionsPartial(IServiceCollection services);
 
-        private void ConfigureImmediateOptions(IServiceCollection services)
-        {
-            ConfigureServiceLayerImmediateOptionsPartial(services);
-        }
+    private void ConfigureImmediateOptions(IServiceCollection services)
+    {
+        ConfigureServiceLayerImmediateOptionsPartial(services);
+    }
 
-        partial void ConfigureServiceLayerOptionsPartial(IServiceCollection services);
+    partial void ConfigureServiceLayerOptionsPartial(IServiceCollection services);
 
-        private void ConfigureOptions(IServiceCollection services)
-        {
-            ConfigureImmediateOptions(services);
+    private void ConfigureOptions(IServiceCollection services)
+    {
+        ConfigureImmediateOptions(services);
 
-            ConfigureServiceLayerOptionsPartial(services);
-        }
+        ConfigureServiceLayerOptionsPartial(services);
     }
 }

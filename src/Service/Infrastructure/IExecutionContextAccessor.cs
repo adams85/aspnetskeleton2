@@ -1,7 +1,6 @@
-﻿namespace WebApp.Service.Infrastructure
+﻿namespace WebApp.Service.Infrastructure;
+
+public interface IExecutionContextAccessor
 {
-    public interface IExecutionContextAccessor
-    {
-        OperationExecutionContext ExecutionContext { get; }
-    }
+    OperationExecutionContext ExecutionContext { get; }
 }

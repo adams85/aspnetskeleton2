@@ -15,64 +15,63 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using WebApp.DataAccess.Infrastructure;
 
-namespace Microsoft.EntityFrameworkCore
+namespace Microsoft.EntityFrameworkCore;
+
+public static class DatabaseFacadeExtensions
 {
-    public static class DatabaseFacadeExtensions
+    private static bool HasPendingTransaction(this DatabaseFacade database, out Transaction? activeTransaction)
     {
-        private static bool HasPendingTransaction(this DatabaseFacade database, out Transaction? activeTransaction)
+        IDatabaseFacadeDependenciesAccessor dependenciesAccessor = database;
+        var transactionManager = dependenciesAccessor.Dependencies.TransactionManager as IExtendedDbContextTransactionManager;
+        Debug.Assert(transactionManager != null, $"{nameof(IDbContextTransactionManager)} of provider {database.ProviderName} does not implement {typeof(IExtendedDbContextTransactionManager)}.");
+
+        if (database.CurrentTransaction != null)
         {
-            IDatabaseFacadeDependenciesAccessor dependenciesAccessor = database;
-            var transactionManager = dependenciesAccessor.Dependencies.TransactionManager as IExtendedDbContextTransactionManager;
-            Debug.Assert(transactionManager != null, $"{nameof(IDbContextTransactionManager)} of provider {database.ProviderName} does not implement {typeof(IExtendedDbContextTransactionManager)}.");
-
-            if (database.CurrentTransaction != null)
-            {
-                activeTransaction = null;
-                return true;
-            }
-
-            if (transactionManager.SupportsAmbientTransactions)
-            {
-                activeTransaction = (transactionManager is ITransactionEnlistmentManager ? database.GetEnlistedTransaction() : null) ?? Transaction.Current;
-                if (activeTransaction != null && activeTransaction.TransactionInformation.Status == TransactionStatus.Active)
-                    return true;
-            }
-
             activeTransaction = null;
-            return false;
+            return true;
         }
 
-        public static bool HasPendingTransaction(this DatabaseFacade database) => database.HasPendingTransaction(out var _);
-
-        private static IReadOnlyList<MigrationCommand> GenerateMigrationCommands(this DatabaseFacade database, IReadOnlyList<MigrationOperation> operations, IModel model)
+        if (transactionManager.SupportsAmbientTransactions)
         {
-            var sqlGenerator = database.GetInfrastructure().GetRequiredService<IMigrationsSqlGenerator>();
-            return sqlGenerator.Generate(operations, model);
+            activeTransaction = (transactionManager is ITransactionEnlistmentManager ? database.GetEnlistedTransaction() : null) ?? Transaction.Current;
+            if (activeTransaction != null && activeTransaction.TransactionInformation.Status == TransactionStatus.Active)
+                return true;
         }
 
-        public static IReadOnlyList<MigrationCommand> GenerateMigrationCommands(this DatabaseFacade database, IEnumerable<MigrationOperation> operations)
-        {
-            IDatabaseFacadeDependenciesAccessor dependenciesAccessor = database;
-            var model = dependenciesAccessor.Context.Model;
-            return database.GenerateMigrationCommands(operations.ToArray(), model);
-        }
+        activeTransaction = null;
+        return false;
+    }
 
-        public static IReadOnlyList<MigrationCommand> GenerateAllMigrationCommands(this DatabaseFacade database)
-        {
-            var modelDiffer = database.GetInfrastructure().GetRequiredService<IMigrationsModelDiffer>();
-            IDatabaseFacadeDependenciesAccessor dependenciesAccessor = database;
-            var model = dependenciesAccessor.Context.Model;
-            var relationalModel = database.GetService<IDesignTimeModel>().Model.GetRelationalModel();
-            var operations = modelDiffer.GetDifferences(null, relationalModel);
-            return database.GenerateMigrationCommands(operations.ToArray(), model);
-        }
+    public static bool HasPendingTransaction(this DatabaseFacade database) => database.HasPendingTransaction(out var _);
 
-        public static Task ExecuteMigrationCommandsAsync(this DatabaseFacade database, IEnumerable<MigrationCommand> commands, CancellationToken cancellationToken)
-        {
-            var infrastructure = database.GetInfrastructure();
-            var commandExecutor = infrastructure.GetRequiredService<IMigrationCommandExecutor>();
-            var connection = infrastructure.GetRequiredService<IRelationalConnection>();
-            return commandExecutor.ExecuteNonQueryAsync(commands, connection, cancellationToken);
-        }
+    private static IReadOnlyList<MigrationCommand> GenerateMigrationCommands(this DatabaseFacade database, IReadOnlyList<MigrationOperation> operations, IModel model)
+    {
+        var sqlGenerator = database.GetInfrastructure().GetRequiredService<IMigrationsSqlGenerator>();
+        return sqlGenerator.Generate(operations, model);
+    }
+
+    public static IReadOnlyList<MigrationCommand> GenerateMigrationCommands(this DatabaseFacade database, IEnumerable<MigrationOperation> operations)
+    {
+        IDatabaseFacadeDependenciesAccessor dependenciesAccessor = database;
+        var model = dependenciesAccessor.Context.Model;
+        return database.GenerateMigrationCommands(operations.ToArray(), model);
+    }
+
+    public static IReadOnlyList<MigrationCommand> GenerateAllMigrationCommands(this DatabaseFacade database)
+    {
+        var modelDiffer = database.GetInfrastructure().GetRequiredService<IMigrationsModelDiffer>();
+        IDatabaseFacadeDependenciesAccessor dependenciesAccessor = database;
+        var model = dependenciesAccessor.Context.Model;
+        var relationalModel = database.GetService<IDesignTimeModel>().Model.GetRelationalModel();
+        var operations = modelDiffer.GetDifferences(null, relationalModel);
+        return database.GenerateMigrationCommands(operations.ToArray(), model);
+    }
+
+    public static Task ExecuteMigrationCommandsAsync(this DatabaseFacade database, IEnumerable<MigrationCommand> commands, CancellationToken cancellationToken)
+    {
+        var infrastructure = database.GetInfrastructure();
+        var commandExecutor = infrastructure.GetRequiredService<IMigrationCommandExecutor>();
+        var connection = infrastructure.GetRequiredService<IRelationalConnection>();
+        return commandExecutor.ExecuteNonQueryAsync(commands, connection, cancellationToken);
     }
 }

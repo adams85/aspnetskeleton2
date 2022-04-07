@@ -1,9 +1,8 @@
 ﻿using System.Runtime.Serialization;
 
-namespace WebApp.Service.Settings
+namespace WebApp.Service.Settings;
+
+[DataContract]
+public record class GetLatestSettingsQuery : IQuery<SettingsChangedEvent>
 {
-    [DataContract]
-    public record class GetLatestSettingsQuery : IQuery<SettingsChangedEvent>
-    {
-    }
 }

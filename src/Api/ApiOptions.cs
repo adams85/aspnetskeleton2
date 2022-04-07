@@ -1,7 +1,6 @@
-﻿namespace WebApp.Api
+﻿namespace WebApp.Api;
+
+public class ApiOptions
 {
-    public class ApiOptions
-    {
-        public const string DefaultSectionName = "Application:Api";
-    }
+    public const string DefaultSectionName = "Application:Api";
 }

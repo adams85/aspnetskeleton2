@@ -14,79 +14,78 @@ using WebApp.UI.Infrastructure.Localization;
 using WebApp.UI.Infrastructure.Security;
 using WebApp.UI.Models;
 
-namespace WebApp.UI.Areas.Dashboard.Pages.Account
+namespace WebApp.UI.Areas.Dashboard.Pages.Account;
+
+[Authorize]
+public class IndexModel : DashboardPageModel<IndexModel.PageDescriptorClass>
 {
-    [Authorize]
-    public class IndexModel : DashboardPageModel<IndexModel.PageDescriptorClass>
+    public const string ChangePasswordHandler = "ChangePassword";
+
+    private readonly IStringLocalizer _t;
+
+    public IndexModel(IStringLocalizer<IndexModel>? stringLocalizer)
     {
-        public const string ChangePasswordHandler = "ChangePassword";
+        _t = stringLocalizer ?? (IStringLocalizer)NullStringLocalizer.Instance;
+    }
 
-        private readonly IStringLocalizer _t;
+    private ChangePasswordModel? _changePasswordModel;
+    [BindProperty]
+    public ChangePasswordModel ChangePasswordModel
+    {
+        get => _changePasswordModel ??= new ChangePasswordModel();
+        set => _changePasswordModel = value;
+    }
 
-        public IndexModel(IStringLocalizer<IndexModel>? stringLocalizer)
+    public bool? ChangePasswordSuccess { get; private set; }
+
+    public void OnGet()
+    {
+    }
+
+    public void OnGetChangePassword()
+    {
+        ChangePasswordSuccess = true;
+    }
+
+    public async Task<IActionResult> OnPostChangePassword([FromServices] IAccountManager accountManager)
+    {
+        if (ModelState.IsValid)
         {
-            _t = stringLocalizer ?? (IStringLocalizer)NullStringLocalizer.Instance;
+            var (status, passwordRequirements) = await accountManager.ChangePasswordAsync(HttpContext.User.Identity!.Name!, ChangePasswordModel, HttpContext.RequestAborted);
+
+            if (status == ChangePasswordStatus.Success)
+                return RedirectToPage(null, ChangePasswordHandler);
+
+            AddModelError(status, passwordRequirements);
         }
 
-        private ChangePasswordModel? _changePasswordModel;
-        [BindProperty]
-        public ChangePasswordModel ChangePasswordModel
-        {
-            get => _changePasswordModel ??= new ChangePasswordModel();
-            set => _changePasswordModel = value;
-        }
+        ChangePasswordSuccess = false;
 
-        public bool? ChangePasswordSuccess { get; private set; }
+        return Page();
 
-        public void OnGet()
+        void AddModelError(ChangePasswordStatus status, PasswordRequirementsData? passwordRequirements)
         {
-        }
-
-        public void OnGetChangePassword()
-        {
-            ChangePasswordSuccess = true;
-        }
-
-        public async Task<IActionResult> OnPostChangePassword([FromServices] IAccountManager accountManager)
-        {
-            if (ModelState.IsValid)
+            switch (status)
             {
-                var (status, passwordRequirements) = await accountManager.ChangePasswordAsync(HttpContext.User.Identity!.Name!, ChangePasswordModel, HttpContext.RequestAborted);
-
-                if (status == ChangePasswordStatus.Success)
-                    return RedirectToPage(null, ChangePasswordHandler);
-
-                AddModelError(status, passwordRequirements);
-            }
-
-            ChangePasswordSuccess = false;
-
-            return Page();
-
-            void AddModelError(ChangePasswordStatus status, PasswordRequirementsData? passwordRequirements)
-            {
-                switch (status)
-                {
-                    case ChangePasswordStatus.InvalidNewPassword:
-                        ModelState.AddModelError(nameof(ChangePasswordModel) + "." + nameof(Models.Account.ChangePasswordModel.NewPassword), _t.LocalizePasswordRequirements(passwordRequirements));
-                        return;
-                    default:
-                        var key = nameof(ChangePasswordModel) + "." + nameof(Models.Account.ChangePasswordModel.CurrentPassword);
-                        if (ModelState.TryGetValue(key, out var entry))
-                            entry.ValidationState = ModelValidationState.Invalid;
-                        else
-                            ModelState.AddModelError(key, string.Empty);
-                        return;
-                }
+                case ChangePasswordStatus.InvalidNewPassword:
+                    ModelState.AddModelError(nameof(ChangePasswordModel) + "." + nameof(Models.Account.ChangePasswordModel.NewPassword), _t.LocalizePasswordRequirements(passwordRequirements));
+                    return;
+                default:
+                    var key = nameof(ChangePasswordModel) + "." + nameof(Models.Account.ChangePasswordModel.CurrentPassword);
+                    if (ModelState.TryGetValue(key, out var entry))
+                        entry.ValidationState = ModelValidationState.Invalid;
+                    else
+                        ModelState.AddModelError(key, string.Empty);
+                    return;
             }
         }
+    }
 
-        public sealed class PageDescriptorClass : PageDescriptor
-        {
-            public override string PageName => "/Account/Index";
-            public override string AreaName => DashboardConstants.AreaName;
+    public sealed class PageDescriptorClass : PageDescriptor
+    {
+        public override string PageName => "/Account/Index";
+        public override string AreaName => DashboardConstants.AreaName;
 
-            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["Account Settings"];
-        }
+        public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["Account Settings"];
     }
 }

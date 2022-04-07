@@ -6,43 +6,42 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using WebApp.DataAccess.Infrastructure;
 
-namespace WebApp.DataAccess.Providers.MySQL
+namespace WebApp.DataAccess.Providers.MySQL;
+
+internal sealed class MySqlModelCustomizer : RelationalModelCustomizer
 {
-    internal sealed class MySqlModelCustomizer : RelationalModelCustomizer
+    private readonly string _caseSensitiveCollation;
+    private readonly string _caseInsensitiveCollation;
+    private readonly string? _characterEncoding;
+
+    public MySqlModelCustomizer(IDbProperties dbProperties, ModelCustomizerDependencies dependencies) : base(dependencies)
     {
-        private readonly string _caseSensitiveCollation;
-        private readonly string _caseInsensitiveCollation;
-        private readonly string? _characterEncoding;
+        if (dbProperties == null)
+            throw new ArgumentNullException(nameof(dbProperties));
 
-        public MySqlModelCustomizer(IDbProperties dbProperties, ModelCustomizerDependencies dependencies) : base(dependencies)
-        {
-            if (dbProperties == null)
-                throw new ArgumentNullException(nameof(dbProperties));
+        _caseSensitiveCollation = dbProperties.CaseSensitiveCollation;
+        _caseInsensitiveCollation = dbProperties.CaseInsensitiveCollation;
+        _characterEncoding = dbProperties.CharacterEncoding;
+    }
 
-            _caseSensitiveCollation = dbProperties.CaseSensitiveCollation;
-            _caseInsensitiveCollation = dbProperties.CaseInsensitiveCollation;
-            _characterEncoding = dbProperties.CharacterEncoding;
-        }
+    public override void Customize(ModelBuilder modelBuilder, DbContext context)
+    {
+        base.Customize(modelBuilder, context);
 
-        public override void Customize(ModelBuilder modelBuilder, DbContext context)
-        {
-            base.Customize(modelBuilder, context);
+        modelBuilder.HasCharSet(_characterEncoding);
+        modelBuilder.UseCollation(_caseSensitiveCollation);
 
-            modelBuilder.HasCharSet(_characterEncoding);
-            modelBuilder.UseCollation(_caseSensitiveCollation);
-
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-                foreach (var property in entityType.GetProperties())
-                    if (property.PropertyInfo != null)
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            foreach (var property in entityType.GetProperties())
+                if (property.PropertyInfo != null)
+                {
+                    if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
                     {
-                        if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
-                        {
-                            var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
-                            var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
-                            if (caseInsensitive)
-                                property.SetCollation(_caseInsensitiveCollation);
-                        }
+                        var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
+                        var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
+                        if (caseInsensitive)
+                            property.SetCollation(_caseInsensitiveCollation);
                     }
-        }
+                }
     }
 }

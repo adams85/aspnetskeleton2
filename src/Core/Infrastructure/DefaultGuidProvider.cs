@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace WebApp.Core.Infrastructure
+namespace WebApp.Core.Infrastructure;
+
+public sealed class DefaultGuidProvider : IGuidProvider
 {
-    public sealed class DefaultGuidProvider : IGuidProvider
-    {
-        public Guid NewGuid() => Guid.NewGuid();
-    }
+    public Guid NewGuid() => Guid.NewGuid();
 }

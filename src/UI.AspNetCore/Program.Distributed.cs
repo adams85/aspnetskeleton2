@@ -1,9 +1,8 @@
 ﻿using WebApp.Core;
 
-namespace WebApp.UI
+namespace WebApp.UI;
+
+public partial class Program
 {
-    public partial class Program
-    {
-        public static readonly ApplicationArchitecture Architecture = ApplicationArchitecture.Distributed;
-    }
+    public static readonly ApplicationArchitecture Architecture = ApplicationArchitecture.Distributed;
 }

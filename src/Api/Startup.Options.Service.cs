@@ -8,36 +8,35 @@ using WebApp.Service.Infrastructure.Database;
 using WebApp.Service.Mailing;
 
 #if SERVICE_HOST
-namespace WebApp.Service.Host
+namespace WebApp.Service.Host;
 #else
-namespace WebApp.Api
+namespace WebApp.Api;
 #endif
+
+public partial class Startup
 {
-    public partial class Startup
+    partial void ConfigureServiceLayerImmediateOptionsPartial(IServiceCollection services)
     {
-        partial void ConfigureServiceLayerImmediateOptionsPartial(IServiceCollection services)
-        {
-            var dbOptionsSection = Configuration.GetSection(DbOptions.DefaultSectionName);
-            services.Configure<DbOptions>(dbOptionsSection);
+        var dbOptionsSection = Configuration.GetSection(DbOptions.DefaultSectionName);
+        services.Configure<DbOptions>(dbOptionsSection);
 
-            services.AddOptions<DataAccessOptions>()
-                .Configure<IOptions<DbOptions>>((options, dbOptions) =>
-                {
-                    options.Database = dbOptions.Value;
-                    options.EnableSqlLogging = dbOptionsSection.GetValue(nameof(options.EnableSqlLogging), defaultValue: false);
-                });
-        }
+        services.AddOptions<DataAccessOptions>()
+            .Configure<IOptions<DbOptions>>((options, dbOptions) =>
+            {
+                options.Database = dbOptions.Value;
+                options.EnableSqlLogging = dbOptionsSection.GetValue(nameof(options.EnableSqlLogging), defaultValue: false);
+            });
+    }
 
-        partial void ConfigureServiceLayerOptionsPartial(IServiceCollection services)
-        {
-            services.Configure<DbInitializerOptions>(Configuration.GetSection(DbInitializerOptions.DefaultSectionName));
+    partial void ConfigureServiceLayerOptionsPartial(IServiceCollection services)
+    {
+        services.Configure<DbInitializerOptions>(Configuration.GetSection(DbInitializerOptions.DefaultSectionName));
 
-            services.Configure<ApplicationOptions>(Configuration.GetSection(ApplicationOptions.DefaultSectionName));
+        services.Configure<ApplicationOptions>(Configuration.GetSection(ApplicationOptions.DefaultSectionName));
 
-            services.Configure<PasswordOptions>(Configuration.GetSection("Security:Passwords"));
-            services.Configure<LockoutOptions>(Configuration.GetSection("Security:Lockout"));
+        services.Configure<PasswordOptions>(Configuration.GetSection("Security:Passwords"));
+        services.Configure<LockoutOptions>(Configuration.GetSection("Security:Lockout"));
 
-            services.Configure<SmtpOptions>(Configuration.GetSection(SmtpOptions.DefaultSectionName));
-        }
+        services.Configure<SmtpOptions>(Configuration.GetSection(SmtpOptions.DefaultSectionName));
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace WebApp.Service.Infrastructure.Events
+namespace WebApp.Service.Infrastructure.Events;
+
+internal interface IEventPublisher
 {
-    internal interface IEventPublisher
-    {
-        void Publish(Event @event);
-        IDisposable PublishMany(IObservable<Event> events);
-    }
+    void Publish(Event @event);
+    IDisposable PublishMany(IObservable<Event> events);
 }

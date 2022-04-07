@@ -2,13 +2,12 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
-namespace WebApp.DataAccess.Migrations
+namespace WebApp.DataAccess.Migrations;
+
+public partial class CustomDbObjects
 {
-    public partial class CustomDbObjects
+    public IEnumerable<MigrationOperation> GetViewOperations(bool dropIfExists, bool create)
     {
-        public IEnumerable<MigrationOperation> GetViewOperations(bool dropIfExists, bool create)
-        {
-            return Enumerable.Empty<MigrationOperation>();
-        }
+        return Enumerable.Empty<MigrationOperation>();
     }
 }

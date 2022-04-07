@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace WebApp.Service
+namespace WebApp.Service;
+
+public interface IEventProducerCommand
 {
-    public interface IEventProducerCommand
-    {
-        Action<ICommand, Event>? OnEvent { get; set; }
-    }
+    Action<ICommand, Event>? OnEvent { get; set; }
 }

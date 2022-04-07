@@ -5,30 +5,29 @@ using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
-namespace WebApp.UI.Infrastructure.Theming
+namespace WebApp.UI.Infrastructure.Theming;
+
+public sealed class ThemeProvider : IThemeProvider
 {
-    public sealed class ThemeProvider : IThemeProvider
+    private const string ThemesDirPath = "/themes";
+
+    public static readonly PathString ThemesBasePath = "/scss";
+
+    private readonly IWebHostEnvironment _env;
+
+    private IReadOnlyList<string>? _themes;
+
+    public ThemeProvider(IWebHostEnvironment env)
     {
-        private const string ThemesDirPath = "/themes";
-
-        public static readonly PathString ThemesBasePath = "/scss";
-
-        private readonly IWebHostEnvironment _env;
-
-        private IReadOnlyList<string>? _themes;
-
-        public ThemeProvider(IWebHostEnvironment env)
-        {
-            _env = env ?? throw new ArgumentNullException(nameof(env));
-        }
-
-        public IReadOnlyList<string> GetThemes() => LazyInitializer.EnsureInitialized(ref _themes, () =>
-            _env.WebRootFileProvider.GetDirectoryContents(GetThemePath(ThemesBasePath).Value)
-                .Where(fileInfo => fileInfo.IsDirectory)
-                .Select(fileInfo => fileInfo.Name)
-                .ToArray());
-
-        public PathString GetThemePath(PathString basePath, string? name = null) =>
-            basePath + new PathString(name != null ? ThemesDirPath + "/" + name : ThemesDirPath);
+        _env = env ?? throw new ArgumentNullException(nameof(env));
     }
+
+    public IReadOnlyList<string> GetThemes() => LazyInitializer.EnsureInitialized(ref _themes, () =>
+        _env.WebRootFileProvider.GetDirectoryContents(GetThemePath(ThemesBasePath).Value)
+            .Where(fileInfo => fileInfo.IsDirectory)
+            .Select(fileInfo => fileInfo.Name)
+            .ToArray());
+
+    public PathString GetThemePath(PathString basePath, string? name = null) =>
+        basePath + new PathString(name != null ? ThemesDirPath + "/" + name : ThemesDirPath);
 }

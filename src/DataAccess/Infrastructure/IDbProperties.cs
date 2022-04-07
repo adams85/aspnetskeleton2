@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Data;
 
-namespace WebApp.DataAccess.Infrastructure
+namespace WebApp.DataAccess.Infrastructure;
+
+public interface IDbProperties
 {
-    public interface IDbProperties
-    {
-        string Provider { get; }
+    string Provider { get; }
 
-        IsolationLevel SnaphsotIsolationLevel { get; }
+    IsolationLevel SnaphsotIsolationLevel { get; }
 
-        string? CharacterEncoding { get; }
+    string? CharacterEncoding { get; }
 
-        string CaseSensitiveCollation { get; }
-        StringComparer CaseSensitiveComparer { get; }
+    string CaseSensitiveCollation { get; }
+    StringComparer CaseSensitiveComparer { get; }
 
-        string CaseInsensitiveCollation { get; }
-        StringComparer CaseInsensitiveComparer { get; }
-    }
+    string CaseInsensitiveCollation { get; }
+    StringComparer CaseInsensitiveComparer { get; }
 }

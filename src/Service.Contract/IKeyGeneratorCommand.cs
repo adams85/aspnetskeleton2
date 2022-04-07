@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace WebApp.Service
+namespace WebApp.Service;
+
+public interface IKeyGeneratorCommand : ICommand
 {
-    public interface IKeyGeneratorCommand : ICommand
-    {
-        Action<ICommand, object>? OnKeyGenerated { get; set; }
-    }
+    Action<ICommand, object>? OnKeyGenerated { get; set; }
 }

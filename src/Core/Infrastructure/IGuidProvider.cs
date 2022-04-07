@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace WebApp.Core.Infrastructure
+namespace WebApp.Core.Infrastructure;
+
+public interface IGuidProvider
 {
-    public interface IGuidProvider
-    {
-        Guid NewGuid();
-    }
+    Guid NewGuid();
 }

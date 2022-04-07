@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using WebApp.Service;
 
-namespace WebApp.Api
+namespace WebApp.Api;
+
+public partial class Startup
 {
-    public partial class Startup
+    partial void ConfigureImmediateOptionsPartial(IServiceCollection services)
     {
-        partial void ConfigureImmediateOptionsPartial(IServiceCollection services)
-        {
-            services.Configure<ServiceProxyApplicationOptions>(Configuration.GetSection(ServiceProxyApplicationOptions.DefaultSectionName));
-        }
+        services.Configure<ServiceProxyApplicationOptions>(Configuration.GetSection(ServiceProxyApplicationOptions.DefaultSectionName));
     }
 }

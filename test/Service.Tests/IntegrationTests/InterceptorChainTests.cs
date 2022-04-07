@@ -8,56 +8,55 @@ using WebApp.Service.Users;
 using WebApp.Tests.Helpers;
 using Xunit;
 
-namespace WebApp.Service.Infrastructure
+namespace WebApp.Service.Infrastructure;
+
+public class InterceptorChainTests
 {
-    public class InterceptorChainTests
+    [Fact]
+    public async Task CommandDataAnnotationsValidatorInterceptorTest()
     {
-        [Fact]
-        public async Task CommandDataAnnotationsValidatorInterceptorTest()
-        {
-            var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
-                .AddServices(services =>
-                {
-                    services.AddSingleton<IHostApplicationLifetime>(NullHostApplicationLifetime.Instance);
-                    services.AddServiceLayer(new OptionsProvider(builder.CreateDataAccessOptions()));
-                })
-                .AddDatabase(addDataAccessServices: false));
+        var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
+            .AddServices(services =>
+            {
+                services.AddSingleton<IHostApplicationLifetime>(NullHostApplicationLifetime.Instance);
+                services.AddServiceLayer(new OptionsProvider(builder.CreateDataAccessOptions()));
+            })
+            .AddDatabase(addDataAccessServices: false));
 
-            await using var testContext = await testContextBuilder.BuildAsync();
+        await using var testContext = await testContextBuilder.BuildAsync();
 
-            var command = new AddUsersToRolesCommand { UserNames = new string[] { }, RoleNames = new string[] { "x" } };
+        var command = new AddUsersToRolesCommand { UserNames = new string[] { }, RoleNames = new string[] { "x" } };
 
-            var commandDispatcher = testContext.Services.GetRequiredService<ICommandDispatcher>();
+        var commandDispatcher = testContext.Services.GetRequiredService<ICommandDispatcher>();
 
-            var ex = await Assert.ThrowsAsync<ServiceErrorException>(
-                async () => await commandDispatcher.DispatchAsync(command, default));
+        var ex = await Assert.ThrowsAsync<ServiceErrorException>(
+            async () => await commandDispatcher.DispatchAsync(command, default));
 
-            Assert.Equal(ServiceErrorCode.ParamNotValid, ex.ErrorCode);
-            Assert.Equal(new[] { nameof(command.UserNames) }, ex.Args);
-        }
+        Assert.Equal(ServiceErrorCode.ParamNotValid, ex.ErrorCode);
+        Assert.Equal(new[] { nameof(command.UserNames) }, ex.Args);
+    }
 
-        [Fact]
-        public async Task QueryDataAnnotationsValidatorInterceptorTest()
-        {
-            var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
-                .AddServices(services =>
-                {
-                    services.AddSingleton<IHostApplicationLifetime>(NullHostApplicationLifetime.Instance);
-                    services.AddServiceLayer(new OptionsProvider(builder.CreateDataAccessOptions()));
-                })
-                .AddDatabase(addDataAccessServices: false));
+    [Fact]
+    public async Task QueryDataAnnotationsValidatorInterceptorTest()
+    {
+        var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
+            .AddServices(services =>
+            {
+                services.AddSingleton<IHostApplicationLifetime>(NullHostApplicationLifetime.Instance);
+                services.AddServiceLayer(new OptionsProvider(builder.CreateDataAccessOptions()));
+            })
+            .AddDatabase(addDataAccessServices: false));
 
-            await using var testContext = await testContextBuilder.BuildAsync();
+        await using var testContext = await testContextBuilder.BuildAsync();
 
-            var query = new GetUserQuery { };
+        var query = new GetUserQuery { };
 
-            var queryDispatcher = testContext.Services.GetRequiredService<IQueryDispatcher>();
+        var queryDispatcher = testContext.Services.GetRequiredService<IQueryDispatcher>();
 
-            var ex = await Assert.ThrowsAsync<ServiceErrorException>(
-                async () => await queryDispatcher.DispatchAsync(query, default));
+        var ex = await Assert.ThrowsAsync<ServiceErrorException>(
+            async () => await queryDispatcher.DispatchAsync(query, default));
 
-            Assert.Equal(ServiceErrorCode.ParamNotSpecified, ex.ErrorCode);
-            Assert.Equal(new[] { nameof(query.Identifier) }, ex.Args);
-        }
+        Assert.Equal(ServiceErrorCode.ParamNotSpecified, ex.ErrorCode);
+        Assert.Equal(new[] { nameof(query.Identifier) }, ex.Args);
     }
 }

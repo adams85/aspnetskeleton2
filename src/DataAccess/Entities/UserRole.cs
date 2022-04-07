@@ -1,35 +1,34 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace WebApp.DataAccess.Entities
+namespace WebApp.DataAccess.Entities;
+
+/// <summary>
+/// Entity for joining users and roles.
+/// </summary>
+public class UserRole
 {
-    /// <summary>
-    /// Entity for joining users and roles.
-    /// </summary>
-    public class UserRole
+    public int UserId { get; set; }
+    public User User { get; set; } = null!;
+
+    public int RoleId { get; set; }
+    public Role Role { get; set; } = null!;
+
+    internal sealed class Configuration : IEntityTypeConfiguration<UserRole>
     {
-        public int UserId { get; set; }
-        public User User { get; set; } = null!;
-
-        public int RoleId { get; set; }
-        public Role Role { get; set; } = null!;
-
-        internal sealed class Configuration : IEntityTypeConfiguration<UserRole>
+        public void Configure(EntityTypeBuilder<UserRole> builder)
         {
-            public void Configure(EntityTypeBuilder<UserRole> builder)
-            {
-                builder.HasKey(e => new { e.UserId, e.RoleId });
+            builder.HasKey(e => new { e.UserId, e.RoleId });
 
-                builder
-                    .HasOne(e => e.User)
-                    .WithMany(e => e.Roles)
-                    .HasForeignKey(e => e.UserId);
+            builder
+                .HasOne(e => e.User)
+                .WithMany(e => e.Roles)
+                .HasForeignKey(e => e.UserId);
 
-                builder
-                    .HasOne(e => e.Role)
-                    .WithMany(e => e.Users)
-                    .HasForeignKey(e => e.RoleId);
-            }
+            builder
+                .HasOne(e => e.Role)
+                .WithMany(e => e.Users)
+                .HasForeignKey(e => e.RoleId);
         }
     }
 }

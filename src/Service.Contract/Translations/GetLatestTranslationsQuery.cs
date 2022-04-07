@@ -1,9 +1,8 @@
 ﻿using System.Runtime.Serialization;
 
-namespace WebApp.Service.Translations
+namespace WebApp.Service.Translations;
+
+[DataContract]
+public record class GetLatestTranslationsQuery : IQuery<TranslationsChangedEvent[]?>
 {
-    [DataContract]
-    public record class GetLatestTranslationsQuery : IQuery<TranslationsChangedEvent[]?>
-    {
-    }
 }

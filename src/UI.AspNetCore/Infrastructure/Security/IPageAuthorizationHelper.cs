@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace WebApp.UI.Infrastructure.Security
+namespace WebApp.UI.Infrastructure.Security;
+
+public interface IPageAuthorizationHelper
 {
-    public interface IPageAuthorizationHelper
-    {
-        Task<bool> CheckAccessAllowedAsync(HttpContext httpContext, string pageRoute, string areaName);
-    }
+    Task<bool> CheckAccessAllowedAsync(HttpContext httpContext, string pageRoute, string areaName);
 }

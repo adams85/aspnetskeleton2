@@ -1,7 +1,6 @@
-﻿namespace WebApp.UI.Models.Layout
+﻿namespace WebApp.UI.Models.Layout;
+
+public interface ILayoutModelProvider<out TLayoutModel> where TLayoutModel : LayoutModel
 {
-    public interface ILayoutModelProvider<out TLayoutModel> where TLayoutModel : LayoutModel
-    {
-        TLayoutModel Layout { get; }
-    }
+    TLayoutModel Layout { get; }
 }

@@ -37,7 +37,7 @@ namespace CodegenTools.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n{\r\n    [DataContract]\r\n    public record class ");
+            this.Write(";\r\n\r\n[DataContract]\r\npublic record class ");
             
             #line 13 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Result.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}Result"));
@@ -50,8 +50,8 @@ namespace CodegenTools.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n    {\r\n        [DataMember(Order = 1)] public string Property { get; init; } = " +
-                    "null!;\r\n    }\r\n}\r\n");
+            this.Write("\r\n{\r\n    [DataMember(Order = 1)] public string Property { get; init; } = null!;\r\n" +
+                    "}\r\n");
             return this.GenerationEnvironment.ToString();
         }
     }

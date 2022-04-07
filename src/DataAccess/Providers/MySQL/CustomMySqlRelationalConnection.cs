@@ -2,13 +2,12 @@
 using Pomelo.EntityFrameworkCore.MySql.Storage.Internal;
 using WebApp.DataAccess.Infrastructure;
 
-namespace WebApp.DataAccess.Providers.MySQL
-{
-    internal sealed class CustomMySqlRelationalConnection : MySqlRelationalConnection, IExtendedDbContextTransactionManager
-    {
-        public CustomMySqlRelationalConnection(RelationalConnectionDependencies dependencies)
-            : base(dependencies) { }
+namespace WebApp.DataAccess.Providers.MySQL;
 
-        bool IExtendedDbContextTransactionManager.SupportsAmbientTransactions => SupportsAmbientTransactions;
-    }
+internal sealed class CustomMySqlRelationalConnection : MySqlRelationalConnection, IExtendedDbContextTransactionManager
+{
+    public CustomMySqlRelationalConnection(RelationalConnectionDependencies dependencies)
+        : base(dependencies) { }
+
+    bool IExtendedDbContextTransactionManager.SupportsAmbientTransactions => SupportsAmbientTransactions;
 }

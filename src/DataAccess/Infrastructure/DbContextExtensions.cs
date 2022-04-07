@@ -2,13 +2,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using WebApp.DataAccess.Infrastructure;
 
-namespace Microsoft.EntityFrameworkCore
+namespace Microsoft.EntityFrameworkCore;
+
+public static class DbContextExtensions
 {
-    public static class DbContextExtensions
+    public static IDbProperties GetDbProperties(this DbContext context)
     {
-        public static IDbProperties GetDbProperties(this DbContext context)
-        {
-            return context.GetInfrastructure().GetRequiredService<IDbProperties>();
-        }
+        return context.GetInfrastructure().GetRequiredService<IDbProperties>();
     }
 }

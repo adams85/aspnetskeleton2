@@ -8,41 +8,40 @@ using WebApp.Core.Helpers;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Helpers;
 
-namespace WebApp.Service.Settings
+namespace WebApp.Service.Settings;
+
+internal sealed class ListSettingsQueryHandler : ListQueryHandler<ListSettingsQuery, SettingData>
 {
-    internal sealed class ListSettingsQueryHandler : ListQueryHandler<ListSettingsQuery, SettingData>
+    private readonly IStringLocalizerFactory _stringLocalizerFactory;
+
+    public ListSettingsQueryHandler(IStringLocalizerFactory stringLocalizerFactory)
     {
-        private readonly IStringLocalizerFactory _stringLocalizerFactory;
+        _stringLocalizerFactory = stringLocalizerFactory ?? throw new ArgumentNullException(nameof(stringLocalizerFactory));
+    }
 
-        public ListSettingsQueryHandler(IStringLocalizerFactory stringLocalizerFactory)
+    public override async Task<ListResult<SettingData>> HandleAsync(ListSettingsQuery query, QueryContext context, CancellationToken cancellationToken)
+    {
+        await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
         {
-            _stringLocalizerFactory = stringLocalizerFactory ?? throw new ArgumentNullException(nameof(stringLocalizerFactory));
-        }
+            IQueryable<Setting> linq = dbContext.Settings;
 
-        public override async Task<ListResult<SettingData>> HandleAsync(ListSettingsQuery query, QueryContext context, CancellationToken cancellationToken)
-        {
-            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
-            {
-                IQueryable<Setting> linq = dbContext.Settings;
+            if (query.NamePattern != null)
+                linq = linq.Where(setting => setting.Name!.ToLower().Contains(query.NamePattern.ToLower()));
 
-                if (query.NamePattern != null)
-                    linq = linq.Where(setting => setting.Name!.ToLower().Contains(query.NamePattern.ToLower()));
+            if (query.ValuePattern != null)
+                linq = linq.Where(setting => setting.Value!.ToLower().Contains(query.ValuePattern.ToLower()));
 
-                if (query.ValuePattern != null)
-                    linq = linq.Where(setting => setting.Value!.ToLower().Contains(query.ValuePattern.ToLower()));
+            var settingEnumStringLocalizer = _stringLocalizerFactory.Create(typeof(SettingEnumConstants));
 
-                var settingEnumStringLocalizer = _stringLocalizerFactory.Create(typeof(SettingEnumConstants));
+            // we translate descriptions at this point and include them in the query because we want to enable sorting/filtering on DB-side
+            var nameToDescriptionMapper = SettingsHelper.BuildNameToDescriptionMapperExpression(settingEnumStringLocalizer);
 
-                // we translate descriptions at this point and include them in the query because we want to enable sorting/filtering on DB-side
-                var nameToDescriptionMapper = SettingsHelper.BuildNameToDescriptionMapperExpression(settingEnumStringLocalizer);
+            var resultLinq = linq.ToData(nameToDescriptionMapper);
 
-                var resultLinq = linq.ToData(nameToDescriptionMapper);
+            if (query.DescriptionPattern != null)
+                resultLinq = resultLinq.Where(setting => setting.Description!.ToLower().Contains(query.DescriptionPattern.ToLower()));
 
-                if (query.DescriptionPattern != null)
-                    resultLinq = resultLinq.Where(setting => setting.Description!.ToLower().Contains(query.DescriptionPattern.ToLower()));
-
-                return await ResultAsync(query, resultLinq, cancellationToken).ConfigureAwait(false);
-            }
+            return await ResultAsync(query, resultLinq, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -1,8 +1,7 @@
-﻿namespace WebApp.Core
+﻿namespace WebApp.Core;
+
+public enum ApplicationArchitecture
 {
-    public enum ApplicationArchitecture
-    {
-        Monolithic,
-        Distributed,
-    }
+    Monolithic,
+    Distributed,
 }

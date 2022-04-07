@@ -10,53 +10,52 @@ using WebApp.Service.Infrastructure.Localization;
 using WebApp.Service.Settings;
 using WebApp.Service.Translations;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class ServiceProxyServiceCollectionExtensions
 {
-    public static class ServiceProxyServiceCollectionExtensions
+    public static IServiceCollection AddServiceLayer(this IServiceCollection services, IServiceProvider optionsProvider)
     {
-        public static IServiceCollection AddServiceLayer(this IServiceCollection services, IServiceProvider optionsProvider)
+        services.AddCoreServices();
+
+        services.AddSingleton<IEventListener, ServiceHostEventListener>();
+
+        services.AddSingleton<ISettingsProvider, SettingsProvider>();
+
+        services.AddSingleton<ITranslationsProvider, TranslationsProvider>();
+
+        services
+            .AddSingleton(sp =>
+                sp.GetRequiredService<ISettingsProvider>().EnableLocalization() ?
+                ActivatorUtilities.CreateInstance<POStringLocalizerFactory>(sp) :
+                (IStringLocalizerFactory)NullStringLocalizerFactory.Instance)
+            .AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+
+        services.AddApplicationInitializers();
+
+        services.AddSingleton<IExecutionContextAccessor, DefaultExecutionContextAccessor>();
+
+        services.AddSingleton<IServiceHostGrpcServiceFactory, ServiceHostGrpcServiceFactory>();
+        services.AddSingleton<IQueryDispatcher, ServiceHostQueryDispatcher>();
+        services.AddSingleton<ICommandDispatcher, ServiceHostCommandDispatcher>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddApplicationInitializers(this IServiceCollection services)
+    {
+        services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(() =>
         {
-            services.AddCoreServices();
+            GrpcClientFactory.AllowUnencryptedHttp2 = true;
+        }));
 
-            services.AddSingleton<IEventListener, ServiceHostEventListener>();
-
-            services.AddSingleton<ISettingsProvider, SettingsProvider>();
-
-            services.AddSingleton<ITranslationsProvider, TranslationsProvider>();
-
-            services
-                .AddSingleton(sp =>
-                    sp.GetRequiredService<ISettingsProvider>().EnableLocalization() ?
-                    ActivatorUtilities.CreateInstance<POStringLocalizerFactory>(sp) :
-                    (IStringLocalizerFactory)NullStringLocalizerFactory.Instance)
-                .AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
-
-            services.AddApplicationInitializers();
-
-            services.AddSingleton<IExecutionContextAccessor, DefaultExecutionContextAccessor>();
-
-            services.AddSingleton<IServiceHostGrpcServiceFactory, ServiceHostGrpcServiceFactory>();
-            services.AddSingleton<IQueryDispatcher, ServiceHostQueryDispatcher>();
-            services.AddSingleton<ICommandDispatcher, ServiceHostCommandDispatcher>();
-
-            return services;
-        }
-
-        private static IServiceCollection AddApplicationInitializers(this IServiceCollection services)
+        services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(ct =>
         {
-            services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(() =>
-            {
-                GrpcClientFactory.AllowUnencryptedHttp2 = true;
-            }));
+            var settingsProvider = sp.GetRequiredService<ISettingsProvider>();
+            var translationsProvider = sp.GetRequiredService<ITranslationsProvider>();
+            return Task.WhenAll(settingsProvider.Initialization, translationsProvider.Initialization).AsCancelable(ct);
+        }));
 
-            services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(ct =>
-            {
-                var settingsProvider = sp.GetRequiredService<ISettingsProvider>();
-                var translationsProvider = sp.GetRequiredService<ITranslationsProvider>();
-                return Task.WhenAll(settingsProvider.Initialization, translationsProvider.Initialization).AsCancelable(ct);
-            }));
-
-            return services;
-        }
+        return services;
     }
 }

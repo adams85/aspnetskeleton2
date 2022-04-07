@@ -7,41 +7,40 @@ using WebApp.Service.Tests.Infrastructure;
 using WebApp.Service.Tests.TestData;
 using Xunit;
 
-namespace WebApp.Service.Tests.UnitTests.Users
+namespace WebApp.Service.Tests.UnitTests.Users;
+
+public class AddUsersToRolesCommandTests
 {
-    public class AddUsersToRolesCommandTests
+    [Fact]
+    public async Task AddSingleUserToSingleRole()
     {
-        [Fact]
-        public async Task AddSingleUserToSingleRole()
+        var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
+            .AddDatabase()
+                .SeedDefaults()
+                .SeedDataset(Datasets.Dataset1));
+
+        await using var testContext = await testContextBuilder.BuildAsync();
+
+        var command = new AddUsersToRolesCommand
         {
-            var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
-                .AddDatabase()
-                    .SeedDefaults()
-                    .SeedDataset(Datasets.Dataset1));
+            UserNames = new[] { "JohnDoe" },
+            RoleNames = new[] { nameof(RoleEnum.Administrators) },
+        };
 
-            await using var testContext = await testContextBuilder.BuildAsync();
+        var commandContext = new CommandContext(command, testContext.Services);
 
-            var command = new AddUsersToRolesCommand
-            {
-                UserNames = new[] { "JohnDoe" },
-                RoleNames = new[] { nameof(RoleEnum.Administrators) },
-            };
+        var handler = ActivatorUtilities.CreateInstance<AddUsersToRolesCommandHandler>(testContext.Services);
 
-            var commandContext = new CommandContext(command, testContext.Services);
+        await handler.HandleAsync(command, commandContext, default);
 
-            var handler = ActivatorUtilities.CreateInstance<AddUsersToRolesCommandHandler>(testContext.Services);
+        await using (var dbContext = testContext.CreateReadOnlyDbContext())
+        {
+            var user = await dbContext.Users
+                .Include(user => user.Roles!).ThenInclude(userRole => userRole.Role)
+                .FirstAsync(user => user.UserName == command.UserNames[0]);
 
-            await handler.HandleAsync(command, commandContext, default);
-
-            await using (var dbContext = testContext.CreateReadOnlyDbContext())
-            {
-                var user = await dbContext.Users
-                    .Include(user => user.Roles!).ThenInclude(userRole => userRole.Role)
-                    .FirstAsync(user => user.UserName == command.UserNames[0]);
-
-                Assert.Equal(1, user.Roles?.Count);
-                Assert.Contains(user.Roles, userRole => userRole.Role.RoleName == command.RoleNames[0]);
-            }
+            Assert.Equal(1, user.Roles?.Count);
+            Assert.Contains(user.Roles, userRole => userRole.Role.RoleName == command.RoleNames[0]);
         }
     }
 }

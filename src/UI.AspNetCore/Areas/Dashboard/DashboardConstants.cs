@@ -1,7 +1,6 @@
-﻿namespace WebApp.UI.Areas.Dashboard
+﻿namespace WebApp.UI.Areas.Dashboard;
+
+public static class DashboardConstants
 {
-    public static class DashboardConstants
-    {
-        public const string AreaName = "Dashboard";
-    }
+    public const string AreaName = "Dashboard";
 }

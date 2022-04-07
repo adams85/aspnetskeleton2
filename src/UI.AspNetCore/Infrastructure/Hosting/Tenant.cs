@@ -13,92 +13,91 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting.Internal;
 using WebApp.Core.Helpers;
 
-namespace WebApp.UI.Infrastructure.Hosting
+namespace WebApp.UI.Infrastructure.Hosting;
+
+public abstract class Tenant : IDisposable, IAsyncDisposable
 {
-    public abstract class Tenant : IDisposable, IAsyncDisposable
+    protected static Func<HttpContext, bool> CreatePathPrefixBranchPredicate(PathString prefix) => ctx =>
     {
-        protected static Func<HttpContext, bool> CreatePathPrefixBranchPredicate(PathString prefix) => ctx =>
+        var request = ctx.Request;
+
+        if (!request.Path.StartsWithSegments(prefix, out var remaining))
+            return false;
+
+        request.PathBase += prefix;
+        request.Path = remaining;
+        return true;
+    };
+
+    public Tenant(string id, IConfiguration configuration, IWebHostEnvironment environment, Assembly? entryAssembly = null)
+    {
+        Id = id;
+        Configuration = configuration;
+        Environment = environment;
+        EntryAssembly = entryAssembly;
+    }
+
+    public void Dispose()
+    {
+        if (TenantServices != null)
         {
-            var request = ctx.Request;
-
-            if (!request.Path.StartsWithSegments(prefix, out var remaining))
-                return false;
-
-            request.PathBase += prefix;
-            request.Path = remaining;
-            return true;
-        };
-
-        public Tenant(string id, IConfiguration configuration, IWebHostEnvironment environment, Assembly? entryAssembly = null)
-        {
-            Id = id;
-            Configuration = configuration;
-            Environment = environment;
-            EntryAssembly = entryAssembly;
+            TenantServices.Dispose();
+            TenantServices = null;
         }
+    }
 
-        public void Dispose()
+    public async ValueTask DisposeAsync()
+    {
+        if (TenantServices != null)
         {
-            if (TenantServices != null)
-            {
-                TenantServices.Dispose();
-                TenantServices = null;
-            }
+            await TenantServices.DisposeAsync();
+            TenantServices = null;
         }
+    }
 
-        public async ValueTask DisposeAsync()
+    public string Id { get; }
+    public IConfiguration Configuration { get; }
+    public IWebHostEnvironment Environment { get; }
+    public Assembly? EntryAssembly { get; }
+
+    public bool IsMainBranch => BranchPredicate == null;
+    public abstract Func<HttpContext, bool>? BranchPredicate { get; }
+
+    public AutofacServiceProvider? TenantServices { get; private set; }
+
+    public abstract void ConfigureServices(IServiceCollection services);
+
+    protected virtual bool ShouldResolveFromRoot(ServiceDescriptor service) => false;
+
+    public void InitializeServices(AutofacServiceProvider rootServices)
+    {
+        TenantServices ??= new AutofacServiceProvider(rootServices.LifetimeScope.BeginLifetimeScope(builder =>
         {
-            if (TenantServices != null)
-            {
-                await TenantServices.DisposeAsync();
-                TenantServices = null;
-            }
-        }
+            var services = new ServiceCollection();
 
-        public string Id { get; }
-        public IConfiguration Configuration { get; }
-        public IWebHostEnvironment Environment { get; }
-        public Assembly? EntryAssembly { get; }
+            // HACK: IWebHostEnvironment is registered in the root container but we need to register a temporary instance for the time of tenant services configuration
+            // because discovery of default application parts relies on IWebHostEnvironment.ApplicationName
+            // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L80
+            var dummyWebHostEnvironmentService = ServiceDescriptor.Singleton<IWebHostEnvironment>(new DummyWebHostEnvironment { ApplicationName = EntryAssembly?.GetName().Name });
 
-        public bool IsMainBranch => BranchPredicate == null;
-        public abstract Func<HttpContext, bool>? BranchPredicate { get; }
+            services.Add(dummyWebHostEnvironmentService);
 
-        public AutofacServiceProvider? TenantServices { get; private set; }
+            ConfigureServices(services);
 
-        public abstract void ConfigureServices(IServiceCollection services);
+            services.RemoveAll((service, _) => service == dummyWebHostEnvironmentService || ShouldResolveFromRoot(service));
 
-        protected virtual bool ShouldResolveFromRoot(ServiceDescriptor service) => false;
+            builder.Populate(services);
+        }));
+    }
 
-        public void InitializeServices(AutofacServiceProvider rootServices)
-        {
-            TenantServices ??= new AutofacServiceProvider(rootServices.LifetimeScope.BeginLifetimeScope(builder =>
-            {
-                var services = new ServiceCollection();
+    public abstract void Configure(IApplicationBuilder app);
 
-                // HACK: IWebHostEnvironment is registered in the root container but we need to register a temporary instance for the time of tenant services configuration
-                // because discovery of default application parts relies on IWebHostEnvironment.ApplicationName
-                // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L80
-                var dummyWebHostEnvironmentService = ServiceDescriptor.Singleton<IWebHostEnvironment>(new DummyWebHostEnvironment { ApplicationName = EntryAssembly?.GetName().Name });
+    private sealed class DummyWebHostEnvironment : HostingEnvironment, IWebHostEnvironment
+    {
+        [AllowNull]
+        public IFileProvider WebRootFileProvider { get; set; }
 
-                services.Add(dummyWebHostEnvironmentService);
-
-                ConfigureServices(services);
-
-                services.RemoveAll((service, _) => service == dummyWebHostEnvironmentService || ShouldResolveFromRoot(service));
-
-                builder.Populate(services);
-            }));
-        }
-
-        public abstract void Configure(IApplicationBuilder app);
-
-        private sealed class DummyWebHostEnvironment : HostingEnvironment, IWebHostEnvironment
-        {
-            [AllowNull]
-            public IFileProvider WebRootFileProvider { get; set; }
-
-            [AllowNull]
-            public string WebRootPath { get; set; }
-        }
+        [AllowNull]
+        public string WebRootPath { get; set; }
     }
 }

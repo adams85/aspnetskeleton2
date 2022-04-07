@@ -37,7 +37,7 @@ namespace CodegenTools.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n{\r\n    [DataContract]\r\n    public record class ");
+            this.Write(";\r\n\r\n[DataContract]\r\npublic record class ");
             
             #line 13 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Command.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}Command"));
@@ -57,8 +57,8 @@ namespace CodegenTools.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n    {\r\n        [DataMember(Order = 1)] public string Property { get; init; } = " +
-                    "null!;\r\n");
+            this.Write("\r\n{\r\n    [DataMember(Order = 1)] public string Property { get; init; } = null!;\r\n" +
+                    "");
             
             #line 16 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Command.tt"
 
@@ -68,7 +68,7 @@ if (IsEventProducer)
             
             #line default
             #line hidden
-            this.Write("\r\n        public Action<ICommand, Event>? OnEvent { get; set; }\r\n");
+            this.Write("\r\n    public Action<ICommand, Event>? OnEvent { get; set; }\r\n");
             
             #line 22 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Command.tt"
 
@@ -86,7 +86,7 @@ if (IsKeyGenerator)
             
             #line default
             #line hidden
-            this.Write("\r\n        public Action<ICommand, object>? OnKeyGenerated { get; set; }\r\n");
+            this.Write("\r\n    public Action<ICommand, object>? OnKeyGenerated { get; set; }\r\n");
             
             #line 31 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\Command.tt"
 
@@ -95,7 +95,7 @@ if (IsKeyGenerator)
             
             #line default
             #line hidden
-            this.Write("    }\r\n}\r\n");
+            this.Write("}\r\n");
             return this.GenerationEnvironment.ToString();
         }
     }

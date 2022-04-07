@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace WebApp.UI.Infrastructure.Security
+namespace WebApp.UI.Infrastructure.Security;
+
+public class UISecurityOptions
 {
-    public class UISecurityOptions
-    {
-        public const string DefaultSectionName = "Security:UI";
+    public const string DefaultSectionName = "Security:UI";
 
-        public static readonly TimeSpan DefaultPasswordTokenExpirationTime = TimeSpan.FromDays(1);
+    public static readonly TimeSpan DefaultPasswordTokenExpirationTime = TimeSpan.FromDays(1);
 
-        public TimeSpan? PasswordTokenExpirationTime { get; set; }
-    }
+    public TimeSpan? PasswordTokenExpirationTime { get; set; }
 }

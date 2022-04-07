@@ -1,11 +1,10 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebApp.Service.Translations
+namespace WebApp.Service.Translations;
+
+internal interface ITranslationsSource
 {
-    internal interface ITranslationsSource
-    {
-        Task<TranslationsChangedEvent[]> GetLatestVersionAsync(CancellationToken cancellationToken);
-        void Invalidate(string? location, string? culture);
-    }
+    Task<TranslationsChangedEvent[]> GetLatestVersionAsync(CancellationToken cancellationToken);
+    void Invalidate(string? location, string? culture);
 }

@@ -5,25 +5,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
 using WebApp.UI.Models;
 
-namespace WebApp.UI.Pages
+namespace WebApp.UI.Pages;
+
+[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+public class ErrorModel : CardPageModel<ErrorModel.PageDescriptorClass>
 {
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public class ErrorModel : CardPageModel<ErrorModel.PageDescriptorClass>
+    public string? RequestId { get; private set; }
+
+    public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    public void OnGet()
     {
-        public string? RequestId { get; private set; }
+        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+    }
 
-        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+    public sealed class PageDescriptorClass : PageDescriptor
+    {
+        public override string PageName => "/Error";
 
-        public void OnGet()
-        {
-            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-        }
-
-        public sealed class PageDescriptorClass : PageDescriptor
-        {
-            public override string PageName => "/Error";
-
-            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["Error"];
-        }
+        public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => t["Error"];
     }
 }

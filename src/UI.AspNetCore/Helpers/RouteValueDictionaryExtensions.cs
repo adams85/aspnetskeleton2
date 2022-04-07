@@ -2,14 +2,13 @@
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 
-namespace WebApp.UI.Helpers
+namespace WebApp.UI.Helpers;
+
+public static class RouteValueDictionaryExtensions
 {
-    public static class RouteValueDictionaryExtensions
+    public static void Merge(this RouteValueDictionary routeValues, IEnumerable<KeyValuePair<string, StringValues>> items)
     {
-        public static void Merge(this RouteValueDictionary routeValues, IEnumerable<KeyValuePair<string, StringValues>> items)
-        {
-            foreach (var (key, value) in items)
-                routeValues.TryAdd(key, value);
-        }
+        foreach (var (key, value) in items)
+            routeValues.TryAdd(key, value);
     }
 }

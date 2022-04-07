@@ -12,69 +12,68 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Localization;
 using WebApp.Core.Helpers;
 
-namespace WebApp.Api.Infrastructure.Localization
+namespace WebApp.Api.Infrastructure.Localization;
+
+// based on: https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Localization/src/ViewLocalizer.cs
+public sealed class ExtendedViewLocalizer : IViewLocalizer, IViewContextAware
 {
-    // based on: https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Localization/src/ViewLocalizer.cs
-    public sealed class ExtendedViewLocalizer : IViewLocalizer, IViewContextAware
+    private readonly IHtmlLocalizerFactory _localizerFactory;
+    private readonly string _applicationName;
+    private IHtmlLocalizer? _localizer;
+
+    public ExtendedViewLocalizer(IHtmlLocalizerFactory localizerFactory, IWebHostEnvironment hostingEnvironment)
     {
-        private readonly IHtmlLocalizerFactory _localizerFactory;
-        private readonly string _applicationName;
-        private IHtmlLocalizer? _localizer;
+        _localizerFactory = localizerFactory ?? throw new ArgumentNullException(nameof(localizerFactory));
+        _applicationName = (hostingEnvironment ?? throw new ArgumentNullException(nameof(hostingEnvironment))).ApplicationName;
+    }
 
-        public ExtendedViewLocalizer(IHtmlLocalizerFactory localizerFactory, IWebHostEnvironment hostingEnvironment)
+    public LocalizedHtmlString this[string key] => _localizer![key];
+
+    public LocalizedHtmlString this[string key, params object[] arguments] => _localizer![key, arguments];
+
+    public LocalizedString GetString(string name) => _localizer!.GetString(name);
+
+    public LocalizedString GetString(string name, params object[] values) => _localizer!.GetString(name, values);
+
+    public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) =>
+        _localizer!.GetAllStrings(includeParentCultures);
+
+    public void Contextualize(ViewContext viewContext)
+    {
+        if (viewContext == null)
+            throw new ArgumentNullException(nameof(viewContext));
+
+        // Given a view path "/Views/Home/Index.cshtml" we want a baseName like "MyApplication.Views.Home.Index"
+        var path = viewContext.ExecutingFilePath;
+
+        if (string.IsNullOrEmpty(path))
         {
-            _localizerFactory = localizerFactory ?? throw new ArgumentNullException(nameof(localizerFactory));
-            _applicationName = (hostingEnvironment ?? throw new ArgumentNullException(nameof(hostingEnvironment))).ApplicationName;
+            path = viewContext.View.Path;
         }
 
-        public LocalizedHtmlString this[string key] => _localizer![key];
+        Debug.Assert(!string.IsNullOrEmpty(path), "Couldn't determine a path for the view");
 
-        public LocalizedHtmlString this[string key, params object[] arguments] => _localizer![key, arguments];
+        var location =
+            (viewContext.View as RazorView)?.RazorPage.GetType().GetAssociatedAssemblyName() ??
+            _applicationName;
 
-        public LocalizedString GetString(string name) => _localizer!.GetString(name);
+        _localizer = _localizerFactory.Create(BuildBaseName(path, location), location);
+    }
 
-        public LocalizedString GetString(string name, params object[] values) => _localizer!.GetString(name, values);
+    private static string BuildBaseName(string path, string location)
+    {
+        var extension = Path.GetExtension(path);
+        var startIndex = path[0] == '/' || path[0] == '\\' ? 1 : 0;
+        var length = path.Length - startIndex - extension.Length;
+        var capacity = length + location.Length + 1;
+        var builder = new StringBuilder(path, startIndex, length, capacity);
 
-        public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) =>
-            _localizer!.GetAllStrings(includeParentCultures);
+        builder.Replace('/', '.').Replace('\\', '.');
 
-        public void Contextualize(ViewContext viewContext)
-        {
-            if (viewContext == null)
-                throw new ArgumentNullException(nameof(viewContext));
+        // Prepend the application name
+        builder.Insert(0, '.');
+        builder.Insert(0, location);
 
-            // Given a view path "/Views/Home/Index.cshtml" we want a baseName like "MyApplication.Views.Home.Index"
-            var path = viewContext.ExecutingFilePath;
-
-            if (string.IsNullOrEmpty(path))
-            {
-                path = viewContext.View.Path;
-            }
-
-            Debug.Assert(!string.IsNullOrEmpty(path), "Couldn't determine a path for the view");
-
-            var location =
-                (viewContext.View as RazorView)?.RazorPage.GetType().GetAssociatedAssemblyName() ??
-                _applicationName;
-
-            _localizer = _localizerFactory.Create(BuildBaseName(path, location), location);
-        }
-
-        private static string BuildBaseName(string path, string location)
-        {
-            var extension = Path.GetExtension(path);
-            var startIndex = path[0] == '/' || path[0] == '\\' ? 1 : 0;
-            var length = path.Length - startIndex - extension.Length;
-            var capacity = length + location.Length + 1;
-            var builder = new StringBuilder(path, startIndex, length, capacity);
-
-            builder.Replace('/', '.').Replace('\\', '.');
-
-            // Prepend the application name
-            builder.Insert(0, '.');
-            builder.Insert(0, location);
-
-            return builder.ToString();
-        }
+        return builder.ToString();
     }
 }

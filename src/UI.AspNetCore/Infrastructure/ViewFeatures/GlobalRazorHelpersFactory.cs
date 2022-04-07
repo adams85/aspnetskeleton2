@@ -7,66 +7,65 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.Extensions.Options;
 
-namespace WebApp.UI.Infrastructure.ViewFeatures
+namespace WebApp.UI.Infrastructure.ViewFeatures;
+
+public sealed class GlobalRazorHelpersFactory : IGlobalRazorHelpersFactory
 {
-    public sealed class GlobalRazorHelpersFactory : IGlobalRazorHelpersFactory
+    private readonly ICompositeViewEngine _viewEngine;
+    private readonly IRazorPageActivator _razorPageActivator;
+
+    private readonly ConcurrentDictionary<Type, string> _helpersTypeViewPathMappings;
+
+    public GlobalRazorHelpersFactory(ICompositeViewEngine viewEngine, IRazorPageActivator razorPageActivator, IOptions<GlobalRazorHelpersOptions>? options)
     {
-        private readonly ICompositeViewEngine _viewEngine;
-        private readonly IRazorPageActivator _razorPageActivator;
+        _viewEngine = viewEngine ?? throw new ArgumentNullException(nameof(viewEngine));
+        _razorPageActivator = razorPageActivator ?? throw new ArgumentNullException(nameof(razorPageActivator));
 
-        private readonly ConcurrentDictionary<Type, string> _helpersTypeViewPathMappings;
+        var optionsValue = options?.Value;
+        _helpersTypeViewPathMappings = new ConcurrentDictionary<Type, string>(optionsValue?.HelpersTypeViewPathMappings ?? Enumerable.Empty<KeyValuePair<Type, string>>());
+    }
 
-        public GlobalRazorHelpersFactory(ICompositeViewEngine viewEngine, IRazorPageActivator razorPageActivator, IOptions<GlobalRazorHelpersOptions>? options)
+    public IRazorPage CreateRazorPage(string helpersViewPath, ViewContext viewContext)
+    {
+        var viewEngineResult = _viewEngine.GetView(viewContext.ExecutingFilePath, helpersViewPath, isMainPage: false);
+
+        var originalLocations = viewEngineResult.SearchedLocations;
+
+        if (!viewEngineResult.Success)
+            viewEngineResult = _viewEngine.FindView(viewContext, helpersViewPath, isMainPage: false);
+
+        if (!viewEngineResult.Success)
         {
-            _viewEngine = viewEngine ?? throw new ArgumentNullException(nameof(viewEngine));
-            _razorPageActivator = razorPageActivator ?? throw new ArgumentNullException(nameof(razorPageActivator));
+            var locations = string.Empty;
 
-            var optionsValue = options?.Value;
-            _helpersTypeViewPathMappings = new ConcurrentDictionary<Type, string>(optionsValue?.HelpersTypeViewPathMappings ?? Enumerable.Empty<KeyValuePair<Type, string>>());
+            if (originalLocations.Any())
+                locations = Environment.NewLine + string.Join(Environment.NewLine, originalLocations);
+
+            if (viewEngineResult.SearchedLocations.Any())
+                locations += Environment.NewLine + string.Join(Environment.NewLine, viewEngineResult.SearchedLocations);
+
+            throw new InvalidOperationException($"The Razor helpers view '{helpersViewPath}' was not found. The following locations were searched:{locations}");
         }
 
-        public IRazorPage CreateRazorPage(string helpersViewPath, ViewContext viewContext)
-        {
-            var viewEngineResult = _viewEngine.GetView(viewContext.ExecutingFilePath, helpersViewPath, isMainPage: false);
+        var razorPage = ((RazorView)viewEngineResult.View).RazorPage;
 
-            var originalLocations = viewEngineResult.SearchedLocations;
+        razorPage.ViewContext = viewContext;
 
-            if (!viewEngineResult.Success)
-                viewEngineResult = _viewEngine.FindView(viewContext, helpersViewPath, isMainPage: false);
+        // we need to save and restore the original view data dictionary as it is changed by IRazorPageActivator.Activate
+        // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Razor/src/RazorPagePropertyActivator.cs#L54
+        var originalViewData = viewContext.ViewData;
+        try { _razorPageActivator.Activate(razorPage, viewContext); }
+        finally { viewContext.ViewData = originalViewData; }
 
-            if (!viewEngineResult.Success)
-            {
-                var locations = string.Empty;
+        return razorPage;
+    }
 
-                if (originalLocations.Any())
-                    locations = Environment.NewLine + string.Join(Environment.NewLine, originalLocations);
+    public dynamic Create(string helpersViewPath, ViewContext viewContext) => CreateRazorPage(helpersViewPath, viewContext);
 
-                if (viewEngineResult.SearchedLocations.Any())
-                    locations += Environment.NewLine + string.Join(Environment.NewLine, viewEngineResult.SearchedLocations);
+    public THelpers Create<THelpers>(ViewContext viewContext) where THelpers : class
+    {
+        var helpersViewPath = _helpersTypeViewPathMappings.GetOrAdd(typeof(THelpers), type => "Helpers/_" + (type.Name.StartsWith("I", StringComparison.Ordinal) ? type.Name.Substring(1) : type.Name));
 
-                throw new InvalidOperationException($"The Razor helpers view '{helpersViewPath}' was not found. The following locations were searched:{locations}");
-            }
-
-            var razorPage = ((RazorView)viewEngineResult.View).RazorPage;
-
-            razorPage.ViewContext = viewContext;
-
-            // we need to save and restore the original view data dictionary as it is changed by IRazorPageActivator.Activate
-            // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Razor/src/RazorPagePropertyActivator.cs#L54
-            var originalViewData = viewContext.ViewData;
-            try { _razorPageActivator.Activate(razorPage, viewContext); }
-            finally { viewContext.ViewData = originalViewData; }
-
-            return razorPage;
-        }
-
-        public dynamic Create(string helpersViewPath, ViewContext viewContext) => CreateRazorPage(helpersViewPath, viewContext);
-
-        public THelpers Create<THelpers>(ViewContext viewContext) where THelpers : class
-        {
-            var helpersViewPath = _helpersTypeViewPathMappings.GetOrAdd(typeof(THelpers), type => "Helpers/_" + (type.Name.StartsWith("I", StringComparison.Ordinal) ? type.Name.Substring(1) : type.Name));
-
-            return (THelpers)CreateRazorPage(helpersViewPath, viewContext);
-        }
+        return (THelpers)CreateRazorPage(helpersViewPath, viewContext);
     }
 }

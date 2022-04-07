@@ -10,141 +10,140 @@ using WebApp.Service.Helpers;
 using WebApp.Service.Infrastructure;
 using WebApp.Service.Infrastructure.Events;
 
-namespace WebApp.Service.Settings
+namespace WebApp.Service.Settings;
+
+internal sealed class SettingsProvider : ISettingsProvider, IDisposable
 {
-    internal sealed class SettingsProvider : ISettingsProvider, IDisposable
+    private readonly IEventListener _eventListener;
+    private readonly IQueryDispatcher _queryDispatcher;
+    private readonly ILogger _logger;
+
+    private readonly TimeSpan _delayOnRefreshError;
+
+    private readonly object _gate;
+    private readonly TaskCompletionSource _initializedTcs;
+    private readonly IDisposable _refreshSubscription;
+
+    private bool _resetting;
+    private SettingsChangedEvent? _lastEvent;
+    private volatile IReadOnlyDictionary<string, string?>? _settings;
+
+    private Exception? _previousResetException;
+
+    public SettingsProvider(IEventListener eventListener, IQueryDispatcher queryDispatcher, IOptions<SettingsProviderOptions>? options, ILogger<SettingsProvider>? logger)
     {
-        private readonly IEventListener _eventListener;
-        private readonly IQueryDispatcher _queryDispatcher;
-        private readonly ILogger _logger;
+        _eventListener = eventListener ?? throw new ArgumentNullException(nameof(eventListener));
+        _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
+        _logger = logger ?? (ILogger)NullLogger.Instance;
 
-        private readonly TimeSpan _delayOnRefreshError;
+        var optionsValue = options?.Value;
+        _delayOnRefreshError = optionsValue?.DelayOnRefreshError ?? SettingsProviderOptions.DefaultDelayOnRefreshError;
 
-        private readonly object _gate;
-        private readonly TaskCompletionSource _initializedTcs;
-        private readonly IDisposable _refreshSubscription;
+        _gate = new object();
+        _initializedTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        private bool _resetting;
-        private SettingsChangedEvent? _lastEvent;
-        private volatile IReadOnlyDictionary<string, string?>? _settings;
-
-        private Exception? _previousResetException;
-
-        public SettingsProvider(IEventListener eventListener, IQueryDispatcher queryDispatcher, IOptions<SettingsProviderOptions>? options, ILogger<SettingsProvider>? logger)
-        {
-            _eventListener = eventListener ?? throw new ArgumentNullException(nameof(eventListener));
-            _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
-            _logger = logger ?? (ILogger)NullLogger.Instance;
-
-            var optionsValue = options?.Value;
-            _delayOnRefreshError = optionsValue?.DelayOnRefreshError ?? SettingsProviderOptions.DefaultDelayOnRefreshError;
-
-            _gate = new object();
-            _initializedTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-
-            // event listener doesn't provide guaranteed delivery (currently), so we might miss some change notifications during a dropout;
-            // thus, we should also refresh the internal cache after connection has been restored
-            _refreshSubscription = _eventListener.IsActive
-                .Where(isActive => isActive)
-                .Select(_ => _eventListener.Listen<SettingsChangedEvent>()
-                    .Select(@event => (false, @event))
-                    .Merge(Observable
-                        .FromAsync(ct => _queryDispatcher.DispatchAsync(new GetLatestSettingsQuery { }, ct))
-                        .Do(OnResetSuccess, OnResetError)
-                        .Retry(wrapSubsequent: source => source.DelaySubscription(_delayOnRefreshError))
-                        .Select(@event => (true, @event))
-                        .DoOnSubscribe(ClearResetException))!
-                    .StartWith((true, null)))
-                .Switch()
-                .Subscribe(item =>
-                {
-                    var (isInitial, @event) = item;
-                    try
-                    {
-                        if (Refresh(isInitial, @event))
-                        {
-                            if (isInitial)
-                                _initializedTcs.TrySetResult();
-
-                            _logger.LogInformation("Internal cache was refreshed.");
-                        }
-                    }
-                    catch (Exception ex) when (isInitial)
-                    {
-                        _initializedTcs.TrySetException(ex);
-                    }
-                });
-        }
-
-        private void ClearResetException() => Volatile.Write(ref _previousResetException, null);
-
-        private void OnResetSuccess(SettingsChangedEvent _) => ClearResetException();
-
-        private void OnResetError(Exception ex)
-        {
-            // basic protection against littering the log with identical, recurring exceptions (e.g. connection errors, etc.)
-            var previousException = Interlocked.Exchange(ref _previousResetException, ex);
-            if (previousException?.ToString() != ex.ToString())
-                _logger.LogError(ex, "Resetting internal cache failed.");
-        }
-
-        public void Dispose()
-        {
-            _refreshSubscription.Dispose();
-        }
-
-        public Task Initialization => _initializedTcs.Task;
-
-        private bool RefreshCore(SettingsChangedEvent @event)
-        {
-            if (_lastEvent != null && _lastEvent.Version >= @event.Version)
-                return false;
-
-            _lastEvent = new SettingsChangedEvent
+        // event listener doesn't provide guaranteed delivery (currently), so we might miss some change notifications during a dropout;
+        // thus, we should also refresh the internal cache after connection has been restored
+        _refreshSubscription = _eventListener.IsActive
+            .Where(isActive => isActive)
+            .Select(_ => _eventListener.Listen<SettingsChangedEvent>()
+                .Select(@event => (false, @event))
+                .Merge(Observable
+                    .FromAsync(ct => _queryDispatcher.DispatchAsync(new GetLatestSettingsQuery { }, ct))
+                    .Do(OnResetSuccess, OnResetError)
+                    .Retry(wrapSubsequent: source => source.DelaySubscription(_delayOnRefreshError))
+                    .Select(@event => (true, @event))
+                    .DoOnSubscribe(ClearResetException))!
+                .StartWith((true, null)))
+            .Switch()
+            .Subscribe(item =>
             {
-                Version = @event.Version,
-                Data = @event.Data
-            };
+                var (isInitial, @event) = item;
+                try
+                {
+                    if (Refresh(isInitial, @event))
+                    {
+                        if (isInitial)
+                            _initializedTcs.TrySetResult();
 
-            return true;
-        }
+                        _logger.LogInformation("Internal cache was refreshed.");
+                    }
+                }
+                catch (Exception ex) when (isInitial)
+                {
+                    _initializedTcs.TrySetException(ex);
+                }
+            });
+    }
 
-        private bool Refresh(bool isInitial, SettingsChangedEvent? @event)
+    private void ClearResetException() => Volatile.Write(ref _previousResetException, null);
+
+    private void OnResetSuccess(SettingsChangedEvent _) => ClearResetException();
+
+    private void OnResetError(Exception ex)
+    {
+        // basic protection against littering the log with identical, recurring exceptions (e.g. connection errors, etc.)
+        var previousException = Interlocked.Exchange(ref _previousResetException, ex);
+        if (previousException?.ToString() != ex.ToString())
+            _logger.LogError(ex, "Resetting internal cache failed.");
+    }
+
+    public void Dispose()
+    {
+        _refreshSubscription.Dispose();
+    }
+
+    public Task Initialization => _initializedTcs.Task;
+
+    private bool RefreshCore(SettingsChangedEvent @event)
+    {
+        if (_lastEvent != null && _lastEvent.Version >= @event.Version)
+            return false;
+
+        _lastEvent = new SettingsChangedEvent
         {
-            bool hasRefreshed;
+            Version = @event.Version,
+            Data = @event.Data
+        };
 
-            lock (_gate)
+        return true;
+    }
+
+    private bool Refresh(bool isInitial, SettingsChangedEvent? @event)
+    {
+        bool hasRefreshed;
+
+        lock (_gate)
+        {
+            if (@event == null)
             {
-                if (@event == null)
-                {
-                    _resetting = true;
-                    _lastEvent = null;
-                    hasRefreshed = false;
-                }
-                else if (isInitial)
-                {
-                    RefreshCore(@event);
-                    hasRefreshed = true;
-                    _resetting = false;
-                }
-                else
-                    hasRefreshed = RefreshCore(@event) ? !_resetting : false;
-
-                if (hasRefreshed)
-                    _settings = _lastEvent!.Data ?? new Dictionary<string, string?>();
+                _resetting = true;
+                _lastEvent = null;
+                hasRefreshed = false;
             }
+            else if (isInitial)
+            {
+                RefreshCore(@event);
+                hasRefreshed = true;
+                _resetting = false;
+            }
+            else
+                hasRefreshed = RefreshCore(@event) ? !_resetting : false;
 
-            return hasRefreshed;
+            if (hasRefreshed)
+                _settings = _lastEvent!.Data ?? new Dictionary<string, string?>();
         }
 
-        public string? this[string name] => GetAllSettings().TryGetValue(name, out var value) ? value : null;
+        return hasRefreshed;
+    }
 
-        public IReadOnlyDictionary<string, string?> GetAllSettings()
-        {
-            if (!Initialization.IsCompleted)
-                throw new InvalidOperationException($"Service has not been initialized yet. Await the task returned by {nameof(Initialization)} at startup to avoid this error.");
+    public string? this[string name] => GetAllSettings().TryGetValue(name, out var value) ? value : null;
 
-            return _settings!;
-        }
+    public IReadOnlyDictionary<string, string?> GetAllSettings()
+    {
+        if (!Initialization.IsCompleted)
+            throw new InvalidOperationException($"Service has not been initialized yet. Await the task returned by {nameof(Initialization)} at startup to avoid this error.");
+
+        return _settings!;
     }
 }

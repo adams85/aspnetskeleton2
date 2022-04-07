@@ -1,11 +1,10 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebApp.Service.Settings
+namespace WebApp.Service.Settings;
+
+internal interface ISettingsSource
 {
-    internal interface ISettingsSource
-    {
-        Task<SettingsChangedEvent> GetLatestVersionAsync(CancellationToken cancellationToken);
-        void Invalidate();
-    }
+    Task<SettingsChangedEvent> GetLatestVersionAsync(CancellationToken cancellationToken);
+    void Invalidate();
 }

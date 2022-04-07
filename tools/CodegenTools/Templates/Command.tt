@@ -7,18 +7,18 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace <#= $"{Namespace}.Service.{Group}" #>
+namespace <#= $"{Namespace}.Service.{Group}" #>;
+
+[DataContract]
+public record class <#= $"{Name}Command" #> : <#= IsKeyGenerator ? "IKeyGeneratorCommand" : "ICommand" #><#= IsEventProducer ? ", IEventProducerCommand" : "" #>
 {
-    [DataContract]
-    public record class <#= $"{Name}Command" #> : <#= IsKeyGenerator ? "IKeyGeneratorCommand" : "ICommand" #><#= IsEventProducer ? ", IEventProducerCommand" : "" #>
-    {
-        [DataMember(Order = 1)] public string Property { get; init; } = null!;
+    [DataMember(Order = 1)] public string Property { get; init; } = null!;
 <#
 if (IsEventProducer)
 {
 #>
 
-        public Action<ICommand, Event>? OnEvent { get; set; }
+    public Action<ICommand, Event>? OnEvent { get; set; }
 <#
 }
 #>
@@ -27,9 +27,8 @@ if (IsKeyGenerator)
 {
 #>
 
-        public Action<ICommand, object>? OnKeyGenerated { get; set; }
+    public Action<ICommand, object>? OnKeyGenerated { get; set; }
 <#
 }
 #>
-    }
 }

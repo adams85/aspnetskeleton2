@@ -2,10 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
-namespace WebApp.UI.Infrastructure.Security
+namespace WebApp.UI.Infrastructure.Security;
+
+public interface IDynamicAuthorizationPolicyProvider
 {
-    public interface IDynamicAuthorizationPolicyProvider
-    {
-        Task<AuthorizationPolicy?> GetAuthorizationPolicyAsync(HttpContext httpContext);
-    }
+    Task<AuthorizationPolicy?> GetAuthorizationPolicyAsync(HttpContext httpContext);
 }

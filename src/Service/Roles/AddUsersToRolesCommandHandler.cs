@@ -9,58 +9,57 @@ using WebApp.Core.Helpers;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Users;
 
-namespace WebApp.Service.Roles
+namespace WebApp.Service.Roles;
+
+internal sealed class AddUsersToRolesCommandHandler : CommandHandler<AddUsersToRolesCommand>
 {
-    internal sealed class AddUsersToRolesCommandHandler : CommandHandler<AddUsersToRolesCommand>
+    public override async Task HandleAsync(AddUsersToRolesCommand command, CommandContext context, CancellationToken cancellationToken)
     {
-        public override async Task HandleAsync(AddUsersToRolesCommand command, CommandContext context, CancellationToken cancellationToken)
+        await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
         {
-            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
-            {
-                var dbProperties = dbContext.GetDbProperties();
+            var dbProperties = dbContext.GetDbProperties();
 
-                var distinctUserNames = new HashSet<string>(dbProperties.CaseInsensitiveComparer);
-                var userWhereBuilder = PredicateBuilder.New<User>(false);
-                foreach (var userName in command.UserNames)
-                    if (distinctUserNames.Add(userName))
-                        userWhereBuilder.Or(UsersHelper.GetFilterByNameWhere(userName));
+            var distinctUserNames = new HashSet<string>(dbProperties.CaseInsensitiveComparer);
+            var userWhereBuilder = PredicateBuilder.New<User>(false);
+            foreach (var userName in command.UserNames)
+                if (distinctUserNames.Add(userName))
+                    userWhereBuilder.Or(UsersHelper.GetFilterByNameWhere(userName));
 
-                var distinctRoleNames = new HashSet<string>(dbProperties.CaseInsensitiveComparer);
-                var roleWhereBuilder = PredicateBuilder.New<Role>(false);
-                foreach (var roleName in command.RoleNames)
-                    if (distinctRoleNames.Add(roleName))
-                        roleWhereBuilder.Or(RolesHelper.GetFilterByNameWhere(roleName));
+            var distinctRoleNames = new HashSet<string>(dbProperties.CaseInsensitiveComparer);
+            var roleWhereBuilder = PredicateBuilder.New<Role>(false);
+            foreach (var roleName in command.RoleNames)
+                if (distinctRoleNames.Add(roleName))
+                    roleWhereBuilder.Or(RolesHelper.GetFilterByNameWhere(roleName));
 
-                var userIds = await
-                (
-                    from u in dbContext.Users.Where(userWhereBuilder)
-                    select u.Id
-                ).ToArrayAsync(cancellationToken).ConfigureAwait(false);
+            var userIds = await
+            (
+                from u in dbContext.Users.Where(userWhereBuilder)
+                select u.Id
+            ).ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
-                RequireExisting(userIds.Length == distinctUserNames.Count, c => c.UserNames);
+            RequireExisting(userIds.Length == distinctUserNames.Count, c => c.UserNames);
 
-                var roleAndUserIdPairs = await
-                (
-                    from r in dbContext.Roles.Where(roleWhereBuilder)
-                    from ur in r.Users!.DefaultIfEmpty()
-                    select ValueTuple.Create(r.Id, (int?)ur.UserId)
-                ).ToArrayAsync<(int RoleId, int? UserId)>(cancellationToken).ConfigureAwait(false);
+            var roleAndUserIdPairs = await
+            (
+                from r in dbContext.Roles.Where(roleWhereBuilder)
+                from ur in r.Users!.DefaultIfEmpty()
+                select ValueTuple.Create(r.Id, (int?)ur.UserId)
+            ).ToArrayAsync<(int RoleId, int? UserId)>(cancellationToken).ConfigureAwait(false);
 
-                var userIdsByRoleId = roleAndUserIdPairs.ToLookup(ur => ur.RoleId, ur => ur.UserId);
+            var userIdsByRoleId = roleAndUserIdPairs.ToLookup(ur => ur.RoleId, ur => ur.UserId);
 
-                RequireExisting(userIdsByRoleId.Count == distinctRoleNames.Count, c => c.RoleNames);
+            RequireExisting(userIdsByRoleId.Count == distinctRoleNames.Count, c => c.RoleNames);
 
-                var userRolesToAdd = new List<UserRole>();
+            var userRolesToAdd = new List<UserRole>();
 
-                foreach (var userIdGroup in userIdsByRoleId)
-                    foreach (var userId in userIds)
-                        if (!userIdGroup.Any(id => id == userId))
-                            userRolesToAdd.Add(new UserRole { UserId = userId, RoleId = userIdGroup.Key });
+            foreach (var userIdGroup in userIdsByRoleId)
+                foreach (var userId in userIds)
+                    if (!userIdGroup.Any(id => id == userId))
+                        userRolesToAdd.Add(new UserRole { UserId = userId, RoleId = userIdGroup.Key });
 
-                dbContext.UserRoles.AddRange(userRolesToAdd);
+            dbContext.UserRoles.AddRange(userRolesToAdd);
 
-                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

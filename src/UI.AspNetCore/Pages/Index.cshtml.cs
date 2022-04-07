@@ -4,20 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
 using WebApp.UI.Models;
 
-namespace WebApp.UI.Pages
+namespace WebApp.UI.Pages;
+
+public class IndexModel : BasePageModel<IndexModel.PageDescriptorClass>
 {
-    public class IndexModel : BasePageModel<IndexModel.PageDescriptorClass>
+    public IActionResult OnGet()
     {
-        public IActionResult OnGet()
-        {
-            return RedirectToPage(Areas.Dashboard.Pages.IndexModel.PageDescriptor.PageName, new { area = Areas.Dashboard.Pages.IndexModel.PageDescriptor.AreaName });
-        }
+        return RedirectToPage(Areas.Dashboard.Pages.IndexModel.PageDescriptor.PageName, new { area = Areas.Dashboard.Pages.IndexModel.PageDescriptor.AreaName });
+    }
 
-        public sealed class PageDescriptorClass : PageDescriptor
-        {
-            public override string PageName => "/Index";
+    public sealed class PageDescriptorClass : PageDescriptor
+    {
+        public override string PageName => "/Index";
 
-            public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => throw new NotSupportedException();
-        }
+        public override LocalizedHtmlString GetDefaultTitle(HttpContext httpContext, IHtmlLocalizer t) => throw new NotSupportedException();
     }
 }

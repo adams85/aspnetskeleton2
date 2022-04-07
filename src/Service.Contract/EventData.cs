@@ -1,10 +1,9 @@
 ﻿using System.Runtime.Serialization;
 
-namespace WebApp.Service
+namespace WebApp.Service;
+
+[DataContract]
+public sealed record class EventData
 {
-    [DataContract]
-    public sealed record class EventData
-    {
-        [DataMember(Order = 1)] public Event Value { get; init; } = null!;
-    }
+    [DataMember(Order = 1)] public Event Value { get; init; } = null!;
 }

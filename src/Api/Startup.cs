@@ -15,118 +15,117 @@ using WebApp.Core.Infrastructure;
 using WebApp.Service.Infrastructure;
 using WebApp.Service.Settings;
 
-namespace WebApp.Api
+namespace WebApp.Api;
+
+public partial class Startup
 {
-    public partial class Startup
+    private readonly bool _provideRazorTemplating;
+
+    public Startup(IConfiguration configuration, IWebHostEnvironment environment)
+        : this(configuration, environment, provideRazorTemplating: true) { }
+
+    public Startup(IConfiguration configuration, IWebHostEnvironment environment, bool provideRazorTemplating)
     {
-        private readonly bool _provideRazorTemplating;
+        Configuration = configuration;
+        Environment = environment;
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
-            : this(configuration, environment, provideRazorTemplating: true) { }
+        _provideRazorTemplating = provideRazorTemplating;
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment environment, bool provideRazorTemplating)
+        ApiOptions = new ApiOptions();
+    }
+
+    public IConfiguration Configuration { get; }
+    public IWebHostEnvironment Environment { get; }
+
+    public bool IsRunningBehindProxy { get; private set; }
+    public ApiOptions ApiOptions { get; private set; }
+
+    partial void ConfigureBaseServicesPartial(IServiceCollection services);
+
+    public void ConfigureBaseServices(IServiceCollection services, IServiceProvider optionsProvider)
+    {
+        IsRunningBehindProxy = Configuration.GetValue("ForwardedHeaders_Enabled", false);
+        ApiOptions = optionsProvider.GetRequiredService<IOptions<ApiOptions>>().Value;
+
+        services.AddServiceLayer(optionsProvider);
+
+        services
+            .ReplaceLast(ServiceDescriptor.Singleton<IExecutionContextAccessor, HttpExecutionContextAccessor>())
+            .AddHttpContextAccessor();
+
+        ConfigureOptions(services);
+
+        services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(() =>
         {
-            Configuration = configuration;
-            Environment = environment;
+            TypeDescriptor.AddAttributes(typeof(IPAddress), new TypeConverterAttribute(typeof(IPAddressTypeConverter)));
 
-            _provideRazorTemplating = provideRazorTemplating;
+            ApiContractSerializer.TypeNameFormatterFactory = () => Core.Helpers.TypeExtensions.AssemblyQualifiedNameWithoutAssemblyDetails;
+        }));
 
-            ApiOptions = new ApiOptions();
-        }
+        if (IsRunningBehindProxy)
+            services.Insert(0, ServiceDescriptor.Transient<IStartupFilter, PathAdjustmentStartupFilter>());
 
-        public IConfiguration Configuration { get; }
-        public IWebHostEnvironment Environment { get; }
+        ConfigureBaseServicesPartial(services);
+    }
 
-        public bool IsRunningBehindProxy { get; private set; }
-        public ApiOptions ApiOptions { get; private set; }
+    partial void ConfigureAppServicesPartial(IServiceCollection services);
 
-        partial void ConfigureBaseServicesPartial(IServiceCollection services);
+    public void ConfigureAppServices(IServiceCollection services)
+    {
+        ConfigureSecurityServices(services);
 
-        public void ConfigureBaseServices(IServiceCollection services, IServiceProvider optionsProvider)
+        ConfigureSwaggerServices(services);
+
+        ConfigureAppServicesPartial(services);
+
+        var mvcBuilder = services.AddControllers();
+
+        ConfigureMvc(mvcBuilder);
+    }
+
+    // This method gets called by the runtime. Use this method to add services to the container.
+    // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+    public void ConfigureServices(IServiceCollection services)
+    {
+        using (var optionsProvider = BuildImmediateOptionsProvider())
+            ConfigureBaseServices(services, optionsProvider);
+
+        ConfigureAppServices(services);
+    }
+
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public void Configure(IApplicationBuilder app)
+    {
+        var settingsProvider = app.ApplicationServices.GetRequiredService<ISettingsProvider>();
+
+        app.UseMiddleware<ApiErrorHandlerMiddleware>();
+
+        if (!IsRunningBehindProxy && !Environment.IsDevelopment())
+            app.UseHttpsRedirection();
+
+        app.UseWhen(_ => settingsProvider.EnableSwagger(), ConfigureSwagger);
+
+        app.UseRouting();
+
+        ConfigureSecurity(app);
+
+        app.UseEndpoints(endpoints =>
         {
-            IsRunningBehindProxy = Configuration.GetValue("ForwardedHeaders_Enabled", false);
-            ApiOptions = optionsProvider.GetRequiredService<IOptions<ApiOptions>>().Value;
+            endpoints.MapControllers();
+        });
+    }
 
-            services.AddServiceLayer(optionsProvider);
-
-            services
-                .ReplaceLast(ServiceDescriptor.Singleton<IExecutionContextAccessor, HttpExecutionContextAccessor>())
-                .AddHttpContextAccessor();
-
-            ConfigureOptions(services);
-
-            services.AddScoped<IApplicationInitializer>(sp => new DelegatedApplicationInitializer(() =>
-            {
-                TypeDescriptor.AddAttributes(typeof(IPAddress), new TypeConverterAttribute(typeof(IPAddressTypeConverter)));
-
-                ApiContractSerializer.TypeNameFormatterFactory = () => Core.Helpers.TypeExtensions.AssemblyQualifiedNameWithoutAssemblyDetails;
-            }));
-
-            if (IsRunningBehindProxy)
-                services.Insert(0, ServiceDescriptor.Transient<IStartupFilter, PathAdjustmentStartupFilter>());
-
-            ConfigureBaseServicesPartial(services);
-        }
-
-        partial void ConfigureAppServicesPartial(IServiceCollection services);
-
-        public void ConfigureAppServices(IServiceCollection services)
+    // https://andrewlock.net/exploring-istartupfilter-in-asp-net-core/
+    private sealed class PathAdjustmentStartupFilter : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
         {
-            ConfigureSecurityServices(services);
+            var pathAdjusterOptions = app.ApplicationServices.GetRequiredService<IOptions<PathAdjusterOptions>>();
 
-            ConfigureSwaggerServices(services);
+            if (pathAdjusterOptions.Value.PathAdjustments.Count > 0)
+                app.UseMiddleware<PathAdjusterMiddleware>(pathAdjusterOptions);
 
-            ConfigureAppServicesPartial(services);
-
-            var mvcBuilder = services.AddControllers();
-
-            ConfigureMvc(mvcBuilder);
-        }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services)
-        {
-            using (var optionsProvider = BuildImmediateOptionsProvider())
-                ConfigureBaseServices(services, optionsProvider);
-
-            ConfigureAppServices(services);
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app)
-        {
-            var settingsProvider = app.ApplicationServices.GetRequiredService<ISettingsProvider>();
-
-            app.UseMiddleware<ApiErrorHandlerMiddleware>();
-
-            if (!IsRunningBehindProxy && !Environment.IsDevelopment())
-                app.UseHttpsRedirection();
-
-            app.UseWhen(_ => settingsProvider.EnableSwagger(), ConfigureSwagger);
-
-            app.UseRouting();
-
-            ConfigureSecurity(app);
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-        }
-
-        // https://andrewlock.net/exploring-istartupfilter-in-asp-net-core/
-        private sealed class PathAdjustmentStartupFilter : IStartupFilter
-        {
-            public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
-            {
-                var pathAdjusterOptions = app.ApplicationServices.GetRequiredService<IOptions<PathAdjusterOptions>>();
-
-                if (pathAdjusterOptions.Value.PathAdjustments.Count > 0)
-                    app.UseMiddleware<PathAdjusterMiddleware>(pathAdjusterOptions);
-
-                next(app);
-            };
-        }
+            next(app);
+        };
     }
 }

@@ -1,18 +1,17 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebApp.Service.Mailing.Users
+namespace WebApp.Service.Mailing.Users;
+
+internal sealed class PasswordResetMailTypeDefinition : MailTypeDefinition<PasswordResetMailModel, PasswordResetMailMessageProducer>
 {
-    internal sealed class PasswordResetMailTypeDefinition : MailTypeDefinition<PasswordResetMailModel, PasswordResetMailMessageProducer>
+    public override string MailType => PasswordResetMailModel.AssociatedMailType;
+
+    public override Task ValidateModelAsync(MailModelValidationContext context, CancellationToken cancellationToken)
     {
-        public override string MailType => PasswordResetMailModel.AssociatedMailType;
+        if (context.Model is not PasswordResetMailModel model)
+            context.SetError(ServiceErrorCode.ParamNotValid);
 
-        public override Task ValidateModelAsync(MailModelValidationContext context, CancellationToken cancellationToken)
-        {
-            if (context.Model is not PasswordResetMailModel model)
-                context.SetError(ServiceErrorCode.ParamNotValid);
-
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
     }
 }

@@ -2,11 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebApp.Service.Infrastructure
-{
-    internal delegate Task<object?> QueryExecutionDelegate(QueryContext context, CancellationToken cancellationToken);
+namespace WebApp.Service.Infrastructure;
 
-    internal delegate IQueryInterceptor QueryInterceptorFactory(IServiceProvider serviceProvider, QueryExecutionDelegate next);
+internal delegate Task<object?> QueryExecutionDelegate(QueryContext context, CancellationToken cancellationToken);
 
-    internal interface IQueryInterceptor { }
-}
+internal delegate IQueryInterceptor QueryInterceptorFactory(IServiceProvider serviceProvider, QueryExecutionDelegate next);
+
+internal interface IQueryInterceptor { }

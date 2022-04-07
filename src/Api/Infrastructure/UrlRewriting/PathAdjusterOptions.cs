@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace WebApp.Api.Infrastructure.UrlRewriting
-{
-    public class PathAdjusterOptions
-    {
-        public const string DefaultSectionName = "UrlRewriting";
+namespace WebApp.Api.Infrastructure.UrlRewriting;
 
-        public List<PathAdjustment> PathAdjustments { get; } = new List<PathAdjustment>();
-    }
+public class PathAdjusterOptions
+{
+    public const string DefaultSectionName = "UrlRewriting";
+
+    public List<PathAdjustment> PathAdjustments { get; } = new List<PathAdjustment>();
 }

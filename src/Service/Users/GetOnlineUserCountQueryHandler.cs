@@ -3,16 +3,15 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApp.Core.Helpers;
 
-namespace WebApp.Service.Users
+namespace WebApp.Service.Users;
+
+internal sealed class GetOnlineUserCountQueryHandler : QueryHandler<GetOnlineUserCountQuery, int>
 {
-    internal sealed class GetOnlineUserCountQueryHandler : QueryHandler<GetOnlineUserCountQuery, int>
+    public override async Task<int> HandleAsync(GetOnlineUserCountQuery query, QueryContext context, CancellationToken cancellationToken)
     {
-        public override async Task<int> HandleAsync(GetOnlineUserCountQuery query, QueryContext context, CancellationToken cancellationToken)
+        await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
         {
-            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
-            {
-                return await dbContext.Users.CountAsync(u => u.LastActivityDate > query.DateFrom, cancellationToken).ConfigureAwait(false);
-            }
+            return await dbContext.Users.CountAsync(u => u.LastActivityDate > query.DateFrom, cancellationToken).ConfigureAwait(false);
         }
     }
 }

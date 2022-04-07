@@ -34,258 +34,257 @@ using WebApp.UI.Infrastructure.Theming;
 using WebApp.UI.Infrastructure.ViewFeatures;
 using WebApp.UI.Models;
 
-namespace WebApp.UI
+namespace WebApp.UI;
+
+public partial class Startup
 {
-    public partial class Startup
+    internal const string UITenantId = "UI";
+
+    private sealed partial class UITenant : Tenant
     {
-        internal const string UITenantId = "UI";
+        private readonly Api.Startup _apiStartup;
 
-        private sealed partial class UITenant : Tenant
+        public UITenant(string id, Startup startup, Assembly? entryAssembly = null)
+            : base(id, startup.Configuration, startup.Environment, entryAssembly)
         {
-            private readonly Api.Startup _apiStartup;
+            _apiStartup = startup.ApiStartup;
 
-            public UITenant(string id, Startup startup, Assembly? entryAssembly = null)
-                : base(id, startup.Configuration, startup.Environment, entryAssembly)
+            IsRunningBehindProxy = _apiStartup.IsRunningBehindProxy;
+            UIOptions = startup.UIOptions!;
+        }
+
+        public bool IsRunningBehindProxy { get; }
+        public UIOptions UIOptions { get; }
+
+        public override Func<HttpContext, bool>? BranchPredicate => null;
+
+        protected override bool ShouldResolveFromRoot(ServiceDescriptor service) =>
+            // AddDataAnnotationsLocalization, AddViewLocalization calls AddLocalization under the hood, that is, it adds base localization services,
+            // but those are already registered in the root container and we need those shared instances
+            // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L14
+            service.ServiceType == typeof(IStringLocalizerFactory) || service.ServiceType == typeof(IStringLocalizer<>);
+
+        partial void ConfigureMvcPartial(IMvcBuilder builder);
+
+        public override void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<IAccountManager, AccountManager>();
+
+            services
+                .AddSingleton<IThemeProvider, ThemeProvider>()
+                .AddSingleton<IThemeManager, ThemeManager>();
+
+            #region Response compression
+
+            if (UIOptions.EnableResponseCompression)
             {
-                _apiStartup = startup.ApiStartup;
-
-                IsRunningBehindProxy = _apiStartup.IsRunningBehindProxy;
-                UIOptions = startup.UIOptions!;
+                services.AddResponseCompression();
+                services.Configure<ResponseCompressionOptions>(Configuration.GetSection("Response:Compression"));
             }
 
-            public bool IsRunningBehindProxy { get; }
-            public UIOptions UIOptions { get; }
+            #endregion
 
-            public override Func<HttpContext, bool>? BranchPredicate => null;
+            #region Bundling
 
-            protected override bool ShouldResolveFromRoot(ServiceDescriptor service) =>
-                // AddDataAnnotationsLocalization, AddViewLocalization calls AddLocalization under the hood, that is, it adds base localization services,
-                // but those are already registered in the root container and we need those shared instances
-                // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Localization/src/MvcLocalizationServices.cs#L14
-                service.ServiceType == typeof(IStringLocalizerFactory) || service.ServiceType == typeof(IStringLocalizer<>);
+            if (Program.UsesDesignTimeBundling)
+                services.AddBundling();
+            else
+                Bundles.ConfigureServices(services, Configuration, Environment, UIOptions.Bundles);
 
-            partial void ConfigureMvcPartial(IMvcBuilder builder);
+            #endregion
 
-            public override void ConfigureServices(IServiceCollection services)
+            #region Security
+
+            services.AddSingleton<ICachedUserInfoProvider>(sp => sp.GetRequiredService<IAccountManager>());
+
+            // https://docs.microsoft.com/en-us/aspnet/core/security/authentication/cookie
+            services.AddAuthentication(UIAuthenticationSchemes.Cookie)
+                .AddCookie(UIAuthenticationSchemes.Cookie);
+
+            services.AddSingleton<CustomCookieAuthenticationEvents>();
+            services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+                .Bind(Configuration.GetSection($"{UISecurityOptions.DefaultSectionName}:Authentication"))
+                .Configure(options =>
+                    CustomCookieAuthenticationEvents.ConfigureOptions<CustomCookieAuthenticationEvents>(options));
+
+            services.AddAuthorization(options => AnonymousOnlyAttribute.Configure(options));
+
+            services
+                .ReplaceLast(ServiceDescriptor.Singleton<IAuthorizationPolicyProvider, CustomAuthorizationPolicyProvider>())
+                .AddSingleton<IPageAuthorizationHelper, PageAuthorizationHelper>();
+
+            #endregion
+
+            #region View caching
+
+            if (UIOptions.Views.EnableResponseCaching)
             {
-                services.AddSingleton<IAccountManager, AccountManager>();
-
-                services
-                    .AddSingleton<IThemeProvider, ThemeProvider>()
-                    .AddSingleton<IThemeManager, ThemeManager>();
-
-                #region Response compression
-
-                if (UIOptions.EnableResponseCompression)
-                {
-                    services.AddResponseCompression();
-                    services.Configure<ResponseCompressionOptions>(Configuration.GetSection("Response:Compression"));
-                }
-
-                #endregion
-
-                #region Bundling
-
-                if (Program.UsesDesignTimeBundling)
-                    services.AddBundling();
-                else
-                    Bundles.ConfigureServices(services, Configuration, Environment, UIOptions.Bundles);
-
-                #endregion
-
-                #region Security
-
-                services.AddSingleton<ICachedUserInfoProvider>(sp => sp.GetRequiredService<IAccountManager>());
-
-                // https://docs.microsoft.com/en-us/aspnet/core/security/authentication/cookie
-                services.AddAuthentication(UIAuthenticationSchemes.Cookie)
-                    .AddCookie(UIAuthenticationSchemes.Cookie);
-
-                services.AddSingleton<CustomCookieAuthenticationEvents>();
-                services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .Bind(Configuration.GetSection($"{UISecurityOptions.DefaultSectionName}:Authentication"))
-                    .Configure(options =>
-                        CustomCookieAuthenticationEvents.ConfigureOptions<CustomCookieAuthenticationEvents>(options));
-
-                services.AddAuthorization(options => AnonymousOnlyAttribute.Configure(options));
-
-                services
-                    .ReplaceLast(ServiceDescriptor.Singleton<IAuthorizationPolicyProvider, CustomAuthorizationPolicyProvider>())
-                    .AddSingleton<IPageAuthorizationHelper, PageAuthorizationHelper>();
-
-                #endregion
-
-                #region View caching
-
-                if (UIOptions.Views.EnableResponseCaching)
-                {
-                    services.AddResponseCaching();
-                    services.Configure<ResponseCachingOptions>(Configuration.GetSection("Response:ViewCaching"));
-                }
-
-                #endregion
-
-                #region MVC
-
-                var mvcBuilder = services.AddRazorPages(options => options.Conventions.Add(new GlobalPageApplicationModelConvention()));
-
-                _apiStartup.ConfigureModelBinding(mvcBuilder);
-                _apiStartup.ConfigureModelValidation(mvcBuilder);
-
-                services.Configure<MvcViewOptions>(options => options.ClientModelValidatorProviders.Add(new DataAnnotationsClientLocalizationAdjuster()));
-
-                mvcBuilder
-                    .ConfigureApplicationPartManager(manager =>
-                    {
-                        // ApplicationPartManager finds the Api assembly (as it is referenced), so we have to exclude it manually
-                        // because we don't want the API controllers to be visible to the UI branch
-                        // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L91
-                        manager.ApplicationParts.RemoveAll((part, _) => part is AssemblyPart assemblyPart && assemblyPart.Assembly == typeof(Api.Startup).Assembly);
-                    });
-
-                services.ReplaceLast(ServiceDescriptor.Singleton<IHtmlGenerator, CustomHtmlGenerator>());
-
-                mvcBuilder
-                    .AddViewLocalization();
-
-                services
-                    .ReplaceLast(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>())
-                    .ReplaceLast(ServiceDescriptor.Transient<IViewLocalizer, ExtendedViewLocalizer>());
-
-                services.AddSingleton(typeof(RuntimeCompilationAwareValueCache<>));
-
-                if (UIOptions.EnableRazorRuntimeCompilation)
-                    mvcBuilder.AddRazorRuntimeCompilation(suppressExplicitNullableWarning: true);
-
-                #endregion
-
-                #region Global Razor helpers
-
-                services.AddSingleton<IGlobalRazorHelpersFactory, GlobalRazorHelpersFactory>();
-                services.AddTransient(typeof(IGlobalRazorHelpers<>), typeof(GlobalRazorHelpers<>));
-
-                #endregion
-
-                ConfigureMvcPartial(mvcBuilder);
+                services.AddResponseCaching();
+                services.Configure<ResponseCachingOptions>(Configuration.GetSection("Response:ViewCaching"));
             }
 
-            public override void Configure(IApplicationBuilder app)
+            #endregion
+
+            #region MVC
+
+            var mvcBuilder = services.AddRazorPages(options => options.Conventions.Add(new GlobalPageApplicationModelConvention()));
+
+            _apiStartup.ConfigureModelBinding(mvcBuilder);
+            _apiStartup.ConfigureModelValidation(mvcBuilder);
+
+            services.Configure<MvcViewOptions>(options => options.ClientModelValidatorProviders.Add(new DataAnnotationsClientLocalizationAdjuster()));
+
+            mvcBuilder
+                .ConfigureApplicationPartManager(manager =>
+                {
+                    // ApplicationPartManager finds the Api assembly (as it is referenced), so we have to exclude it manually
+                    // because we don't want the API controllers to be visible to the UI branch
+                    // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L91
+                    manager.ApplicationParts.RemoveAll((part, _) => part is AssemblyPart assemblyPart && assemblyPart.Assembly == typeof(Api.Startup).Assembly);
+                });
+
+            services.ReplaceLast(ServiceDescriptor.Singleton<IHtmlGenerator, CustomHtmlGenerator>());
+
+            mvcBuilder
+                .AddViewLocalization();
+
+            services
+                .ReplaceLast(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, ExtendedHtmlLocalizerFactory>())
+                .ReplaceLast(ServiceDescriptor.Transient<IViewLocalizer, ExtendedViewLocalizer>());
+
+            services.AddSingleton(typeof(RuntimeCompilationAwareValueCache<>));
+
+            if (UIOptions.EnableRazorRuntimeCompilation)
+                mvcBuilder.AddRazorRuntimeCompilation(suppressExplicitNullableWarning: true);
+
+            #endregion
+
+            #region Global Razor helpers
+
+            services.AddSingleton<IGlobalRazorHelpersFactory, GlobalRazorHelpersFactory>();
+            services.AddTransient(typeof(IGlobalRazorHelpers<>), typeof(GlobalRazorHelpers<>));
+
+            #endregion
+
+            ConfigureMvcPartial(mvcBuilder);
+        }
+
+        public override void Configure(IApplicationBuilder app)
+        {
+            var settingsProvider = app.ApplicationServices.GetRequiredService<ISettingsProvider>();
+
+            #region Exception handling
+
+            if (Environment.IsDevelopment())
             {
-                var settingsProvider = app.ApplicationServices.GetRequiredService<ISettingsProvider>();
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
 
-                #region Exception handling
+            if (UIOptions.EnableStatusCodePages)
+                app.UseStatusCodePages();
 
-                if (Environment.IsDevelopment())
+            app.UseMiddleware<ExceptionFilterMiddleware>();
+
+            #endregion
+
+            if (!IsRunningBehindProxy && !Environment.IsDevelopment())
+                app.UseHttpsRedirection();
+
+            #region Response compression
+
+            if (UIOptions.EnableResponseCompression)
+                app.UseResponseCompression();
+
+            #endregion
+
+            #region Bundling
+
+            if (Program.UsesDesignTimeBundling)
+                app.InitializeBundling();
+            else
+                app.UseBundling(new Bundles());
+
+            #endregion
+
+            #region Static files
+
+            var staticFileOptions = new StaticFileOptions();
+            if (UIOptions.StaticFiles.EnableResponseCaching)
+                staticFileOptions.OnPrepareResponse = context =>
                 {
-                    app.UseDeveloperExceptionPage();
-                }
-                else
+                    var headers = context.Context.Response.GetTypedHeaders();
+                    headers.CacheControl = new CacheControlHeaderValue { MaxAge = UIOptions.StaticFiles.CacheHeaderMaxAge ?? UIOptions.DefaultCacheHeaderMaxAge };
+                };
+
+            app.UseStaticFiles(staticFileOptions);
+
+            #endregion
+
+            #region Localization
+
+            if (settingsProvider.EnableLocalization())
+            {
+                var supportedCultures = settingsProvider.AvailableCultures(out var defaultCulture);
+
+                app.UseRequestLocalization(new RequestLocalizationOptions
                 {
-                    app.UseExceptionHandler("/Error");
-                    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                    app.UseHsts();
-                }
-
-                if (UIOptions.EnableStatusCodePages)
-                    app.UseStatusCodePages();
-
-                app.UseMiddleware<ExceptionFilterMiddleware>();
-
-                #endregion
-
-                if (!IsRunningBehindProxy && !Environment.IsDevelopment())
-                    app.UseHttpsRedirection();
-
-                #region Response compression
-
-                if (UIOptions.EnableResponseCompression)
-                    app.UseResponseCompression();
-
-                #endregion
-
-                #region Bundling
-
-                if (Program.UsesDesignTimeBundling)
-                    app.InitializeBundling();
-                else
-                    app.UseBundling(new Bundles());
-
-                #endregion
-
-                #region Static files
-
-                var staticFileOptions = new StaticFileOptions();
-                if (UIOptions.StaticFiles.EnableResponseCaching)
-                    staticFileOptions.OnPrepareResponse = context =>
-                    {
-                        var headers = context.Context.Response.GetTypedHeaders();
-                        headers.CacheControl = new CacheControlHeaderValue { MaxAge = UIOptions.StaticFiles.CacheHeaderMaxAge ?? UIOptions.DefaultCacheHeaderMaxAge };
-                    };
-
-                app.UseStaticFiles(staticFileOptions);
-
-                #endregion
-
-                #region Localization
-
-                if (settingsProvider.EnableLocalization())
-                {
-                    var supportedCultures = settingsProvider.AvailableCultures(out var defaultCulture);
-
-                    app.UseRequestLocalization(new RequestLocalizationOptions
-                    {
-                        DefaultRequestCulture = new RequestCulture(defaultCulture, defaultCulture),
-                        SupportedCultures = supportedCultures,
-                        SupportedUICultures = supportedCultures,
-                    });
-                }
-
-                #endregion
-
-                app.UseRouting();
-
-                #region Security
-
-                app.UseAuthentication();
-
-                app.UseAuthorization();
-
-                #endregion
-
-                #region View caching
-
-                if (UIOptions.Views.EnableResponseCaching)
-                    app.UseResponseCaching();
-
-                #endregion
-
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapRazorPages();
+                    DefaultRequestCulture = new RequestCulture(defaultCulture, defaultCulture),
+                    SupportedCultures = supportedCultures,
+                    SupportedUICultures = supportedCultures,
                 });
             }
 
-            /// <remarks>
-            /// We need a custom <see cref="IPageApplicationModelConvention"/> implementation because <see cref="RazorPagesOptions.Conventions"/> provides no easy way to
-            /// apply customizations (e.g. adding some filters) to all pages of all areas currently (see <seealso href="https://github.com/dotnet/aspnetcore/issues/9783">this issue</seealso>).
-            /// </remarks>
-            private sealed class GlobalPageApplicationModelConvention : IPageApplicationModelConvention
+            #endregion
+
+            app.UseRouting();
+
+            #region Security
+
+            app.UseAuthentication();
+
+            app.UseAuthorization();
+
+            #endregion
+
+            #region View caching
+
+            if (UIOptions.Views.EnableResponseCaching)
+                app.UseResponseCaching();
+
+            #endregion
+
+            app.UseEndpoints(endpoints =>
             {
-                public void Apply(PageApplicationModel model)
+                endpoints.MapRazorPages();
+            });
+        }
+
+        /// <remarks>
+        /// We need a custom <see cref="IPageApplicationModelConvention"/> implementation because <see cref="RazorPagesOptions.Conventions"/> provides no easy way to
+        /// apply customizations (e.g. adding some filters) to all pages of all areas currently (see <seealso href="https://github.com/dotnet/aspnetcore/issues/9783">this issue</seealso>).
+        /// </remarks>
+        private sealed class GlobalPageApplicationModelConvention : IPageApplicationModelConvention
+        {
+            public void Apply(PageApplicationModel model)
+            {
+                model.Filters.Add(new EnsureHandlerPageFilter());
+
+                Type pageDescriptorProviderType;
+                if ((pageDescriptorProviderType = model.HandlerType).HasInterface(typeof(IPageDescriptorProvider)) ||
+                    (pageDescriptorProviderType = model.PageType).HasInterface(typeof(IPageDescriptorProvider)))
                 {
-                    model.Filters.Add(new EnsureHandlerPageFilter());
+                    var pageDescriptor = PageDescriptor.Get(pageDescriptorProviderType);
 
-                    Type pageDescriptorProviderType;
-                    if ((pageDescriptorProviderType = model.HandlerType).HasInterface(typeof(IPageDescriptorProvider)) ||
-                        (pageDescriptorProviderType = model.PageType).HasInterface(typeof(IPageDescriptorProvider)))
+                    if (pageDescriptor is IDynamicAuthorizationPolicyProvider)
                     {
-                        var pageDescriptor = PageDescriptor.Get(pageDescriptorProviderType);
-
-                        if (pageDescriptor is IDynamicAuthorizationPolicyProvider)
-                        {
-                            var policyName = CustomAuthorizationPolicyProvider.AuthorizePagePolicyPrefix + pageDescriptorProviderType.AssemblyQualifiedNameWithoutAssemblyDetails();
-                            model.EndpointMetadata.Add(new AuthorizeAttribute(policyName));
-                        }
+                        var policyName = CustomAuthorizationPolicyProvider.AuthorizePagePolicyPrefix + pageDescriptorProviderType.AssemblyQualifiedNameWithoutAssemblyDetails();
+                        model.EndpointMetadata.Add(new AuthorizeAttribute(policyName));
                     }
                 }
             }

@@ -1,9 +1,8 @@
-﻿namespace WebApp.Service
-{
-    public class ServiceProxyApplicationOptions
-    {
-        public const string DefaultSectionName = "Application";
+﻿namespace WebApp.Service;
 
-        public string ServiceBaseUrl { get; set; } = null!;
-    }
+public class ServiceProxyApplicationOptions
+{
+    public const string DefaultSectionName = "Application";
+
+    public string ServiceBaseUrl { get; set; } = null!;
 }

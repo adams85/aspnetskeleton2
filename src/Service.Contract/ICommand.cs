@@ -1,4 +1,3 @@
-﻿namespace WebApp.Service
-{
-    public interface ICommand { }
-}
+﻿namespace WebApp.Service;
+
+public interface ICommand { }

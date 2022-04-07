@@ -1,12 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace System.CodeDom.Compiler
-{
-    public class CompilerError
-    {
-        public string? ErrorText { get; set; }
-        public bool IsWarning { get; set; }
-    }
+namespace System.CodeDom.Compiler;
 
-    public class CompilerErrorCollection : Collection<CompilerError> { }
+public class CompilerError
+{
+    public string? ErrorText { get; set; }
+    public bool IsWarning { get; set; }
 }
+
+public class CompilerErrorCollection : Collection<CompilerError> { }

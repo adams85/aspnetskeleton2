@@ -6,221 +6,220 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace POTools.Services.Extracting
+namespace POTools.Services.Extracting;
+
+public class CSharpTextExtractor : ILocalizableTextExtractor
 {
-    public class CSharpTextExtractor : ILocalizableTextExtractor
+    private readonly string _localizedAttributeName;
+    private readonly string _localizedAttributeFullName;
+    private readonly string _localizedAttributePluralIdArgName;
+    private readonly string _localizedAttributeContextIdArgName;
+
+    private readonly HashSet<string> _localizerMemberNames;
+
+    private readonly string _pluralTypeName;
+    private readonly string _pluralFactoryMemberName;
+
+    private readonly string _textContextTypeName;
+    private readonly string _textContextFactoryMemberName;
+
+    public CSharpTextExtractor() : this(null) { }
+
+    public CSharpTextExtractor(CSharpTextExtractorSettings? settings)
     {
-        private readonly string _localizedAttributeName;
-        private readonly string _localizedAttributeFullName;
-        private readonly string _localizedAttributePluralIdArgName;
-        private readonly string _localizedAttributeContextIdArgName;
+        _localizedAttributeName = settings?.LocalizedAttributeName ?? CSharpTextExtractorSettings.DefaultLocalizedAttributeName;
+        _localizedAttributeFullName = _localizedAttributeName + "Attribute";
+        _localizedAttributePluralIdArgName = settings?.LocalizedAttributePluralIdArgName ?? CSharpTextExtractorSettings.DefaultLocalizedAttributePluralIdArgName;
+        _localizedAttributeContextIdArgName = settings?.LocalizedAttributeContextIdArgName ?? CSharpTextExtractorSettings.DefaultLocalizedAttributeContextIdArgName;
 
-        private readonly HashSet<string> _localizerMemberNames;
+        _localizerMemberNames = (settings?.LocalizerMemberNames ?? CSharpTextExtractorSettings.DefaultLocalizerMemberNames).ToHashSet();
 
-        private readonly string _pluralTypeName;
-        private readonly string _pluralFactoryMemberName;
+        _pluralTypeName = settings?.PluralTypeName ?? CSharpTextExtractorSettings.DefaultPluralTypeName;
+        _pluralFactoryMemberName = settings?.PluralFactoryMemberName ?? CSharpTextExtractorSettings.DefaultPluralFactoryMemberName;
 
-        private readonly string _textContextTypeName;
-        private readonly string _textContextFactoryMemberName;
+        _textContextTypeName = settings?.TextContextTypeName ?? CSharpTextExtractorSettings.DefaultTextContextTypeName;
+        _textContextFactoryMemberName = settings?.TextContextFactoryMemberName ?? CSharpTextExtractorSettings.DefaultTextContextFactoryMemberName;
+    }
 
-        public CSharpTextExtractor() : this(null) { }
+    protected virtual string GetCode(string content, CancellationToken cancellationToken)
+    {
+        return content;
+    }
 
-        public CSharpTextExtractor(CSharpTextExtractorSettings? settings)
+    protected virtual SyntaxTree ParseText(string code, CancellationToken cancellationToken)
+    {
+        return CSharpSyntaxTree.ParseText(code, cancellationToken: cancellationToken);
+    }
+
+    protected virtual IEnumerable<MemberDeclarationSyntax> GetRelevantDeclarations(SyntaxNode root, CancellationToken cancellationToken)
+    {
+        return root.DescendantNodes()
+            .OfType<MemberDeclarationSyntax>()
+            .Where(node =>
+                node is EnumMemberDeclarationSyntax ||
+                node is BaseFieldDeclarationSyntax ||
+                node is BasePropertyDeclarationSyntax ||
+                node is BaseMethodDeclarationSyntax);
+    }
+
+    private IEnumerable<LocalizableTextInfo> AnalyzeDecoratedDeclaration(MemberDeclarationSyntax declaration, CancellationToken cancellationToken)
+    {
+        AttributeSyntax? attribute;
+        IEnumerable<string> ids;
+
+        if (declaration is FieldDeclarationSyntax fieldDeclaration &&
+            fieldDeclaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.ConstKeyword)) &&
+            (attribute = GetAttribute(declaration.AttributeLists)) != null)
         {
-            _localizedAttributeName = settings?.LocalizedAttributeName ?? CSharpTextExtractorSettings.DefaultLocalizedAttributeName;
-            _localizedAttributeFullName = _localizedAttributeName + "Attribute";
-            _localizedAttributePluralIdArgName = settings?.LocalizedAttributePluralIdArgName ?? CSharpTextExtractorSettings.DefaultLocalizedAttributePluralIdArgName;
-            _localizedAttributeContextIdArgName = settings?.LocalizedAttributeContextIdArgName ?? CSharpTextExtractorSettings.DefaultLocalizedAttributeContextIdArgName;
+            ids = fieldDeclaration.Declaration.Variables
+                .Select(declarator => declarator.Initializer?.Value.ResolveStringConstantExpression())
+                .Where(value => value != null)!;
+        }
+        else if (declaration is EnumMemberDeclarationSyntax enumMemberDeclaration &&
+            (attribute = GetAttribute(declaration.AttributeLists)) != null)
+        {
+            var enumDeclaration = declaration.Ancestors().OfType<EnumDeclarationSyntax>().First();
 
-            _localizerMemberNames = (settings?.LocalizerMemberNames ?? CSharpTextExtractorSettings.DefaultLocalizerMemberNames).ToHashSet();
+            var id = string.Join('.', enumDeclaration.GetContainerNames(includeNamespace: true).Reverse()
+                .Append(enumDeclaration.GetTypeName())
+                .Append(enumMemberDeclaration.Identifier.ValueText));
 
-            _pluralTypeName = settings?.PluralTypeName ?? CSharpTextExtractorSettings.DefaultPluralTypeName;
-            _pluralFactoryMemberName = settings?.PluralFactoryMemberName ?? CSharpTextExtractorSettings.DefaultPluralFactoryMemberName;
+            ids = new[] { id };
+        }
+        else
+            return Enumerable.Empty<LocalizableTextInfo>();
 
-            _textContextTypeName = settings?.TextContextTypeName ?? CSharpTextExtractorSettings.DefaultTextContextTypeName;
-            _textContextFactoryMemberName = settings?.TextContextFactoryMemberName ?? CSharpTextExtractorSettings.DefaultTextContextFactoryMemberName;
+        var lineNumber = declaration.GetLineNumber(cancellationToken);
+        var pluralId = GetAttributeParamValue(attribute, _localizedAttributePluralIdArgName);
+        var contextId = GetAttributeParamValue(attribute, _localizedAttributeContextIdArgName);
+
+        return ids.Select(id => new LocalizableTextInfo
+        {
+            LineNumber = lineNumber,
+            Id = id,
+            PluralId = pluralId,
+            ContextId = contextId,
+        });
+
+        AttributeSyntax? GetAttribute(SyntaxList<AttributeListSyntax> attributeLists)
+        {
+            return attributeLists
+                .SelectMany(attributeList => attributeList.Attributes)
+                .FirstOrDefault(attribute =>
+                    // only simple (unqualified) type names are supported because accepting qualified type names would be too much hassle for little gain
+                    attribute.Name is IdentifierNameSyntax attributeName &&
+                    (attributeName.Identifier.ValueText == _localizedAttributeName || attributeName.Identifier.ValueText == _localizedAttributeFullName));
         }
 
-        protected virtual string GetCode(string content, CancellationToken cancellationToken)
+        string? GetAttributeParamValue(AttributeSyntax attribute, string argName)
         {
-            return content;
+            var arg = attribute.ArgumentList?.Arguments
+                .Where(arg => arg.NameEquals?.Name.Identifier.ValueText == argName)
+                .FirstOrDefault();
+
+            return arg?.Expression.ResolveStringConstantExpression();
         }
+    }
 
-        protected virtual SyntaxTree ParseText(string code, CancellationToken cancellationToken)
+    private IEnumerable<LocalizableTextInfo> AnalyzeElementAccessExpressions(MemberDeclarationSyntax declaration, CancellationToken cancellationToken)
+    {
+        return declaration.DescendantNodes()
+            .OfType<ElementAccessExpressionSyntax>()
+            .Where(elementAccess => elementAccess.Expression is IdentifierNameSyntax identifier && _localizerMemberNames.Contains(identifier.Identifier.ValueText))
+            .Select(elementAccess => GetTextInfo(elementAccess, cancellationToken))
+            .Where(item => item != null)!;
+
+        LocalizableTextInfo? GetTextInfo(ElementAccessExpressionSyntax translateExpression, CancellationToken cancellationToken)
         {
-            return CSharpSyntaxTree.ParseText(code, cancellationToken: cancellationToken);
-        }
+            var lineNumber = translateExpression.GetLineNumber(cancellationToken);
 
-        protected virtual IEnumerable<MemberDeclarationSyntax> GetRelevantDeclarations(SyntaxNode root, CancellationToken cancellationToken)
-        {
-            return root.DescendantNodes()
-                .OfType<MemberDeclarationSyntax>()
-                .Where(node =>
-                    node is EnumMemberDeclarationSyntax ||
-                    node is BaseFieldDeclarationSyntax ||
-                    node is BasePropertyDeclarationSyntax ||
-                    node is BaseMethodDeclarationSyntax);
-        }
+            var argList = translateExpression.ArgumentList;
+            var id = GetId(argList);
+            if (id == null)
+                return null;
 
-        private IEnumerable<LocalizableTextInfo> AnalyzeDecoratedDeclaration(MemberDeclarationSyntax declaration, CancellationToken cancellationToken)
-        {
-            AttributeSyntax? attribute;
-            IEnumerable<string> ids;
-
-            if (declaration is FieldDeclarationSyntax fieldDeclaration &&
-                fieldDeclaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.ConstKeyword)) &&
-                (attribute = GetAttribute(declaration.AttributeLists)) != null)
-            {
-                ids = fieldDeclaration.Declaration.Variables
-                    .Select(declarator => declarator.Initializer?.Value.ResolveStringConstantExpression())
-                    .Where(value => value != null)!;
-            }
-            else if (declaration is EnumMemberDeclarationSyntax enumMemberDeclaration &&
-                (attribute = GetAttribute(declaration.AttributeLists)) != null)
-            {
-                var enumDeclaration = declaration.Ancestors().OfType<EnumDeclarationSyntax>().First();
-
-                var id = string.Join('.', enumDeclaration.GetContainerNames(includeNamespace: true).Reverse()
-                    .Append(enumDeclaration.GetTypeName())
-                    .Append(enumMemberDeclaration.Identifier.ValueText));
-
-                ids = new[] { id };
-            }
-            else
-                return Enumerable.Empty<LocalizableTextInfo>();
-
-            var lineNumber = declaration.GetLineNumber(cancellationToken);
-            var pluralId = GetAttributeParamValue(attribute, _localizedAttributePluralIdArgName);
-            var contextId = GetAttributeParamValue(attribute, _localizedAttributeContextIdArgName);
-
-            return ids.Select(id => new LocalizableTextInfo
+            return new LocalizableTextInfo
             {
                 LineNumber = lineNumber,
                 Id = id,
-                PluralId = pluralId,
-                ContextId = contextId,
-            });
-
-            AttributeSyntax? GetAttribute(SyntaxList<AttributeListSyntax> attributeLists)
-            {
-                return attributeLists
-                    .SelectMany(attributeList => attributeList.Attributes)
-                    .FirstOrDefault(attribute =>
-                        // only simple (unqualified) type names are supported because accepting qualified type names would be too much hassle for little gain
-                        attribute.Name is IdentifierNameSyntax attributeName &&
-                        (attributeName.Identifier.ValueText == _localizedAttributeName || attributeName.Identifier.ValueText == _localizedAttributeFullName));
-            }
-
-            string? GetAttributeParamValue(AttributeSyntax attribute, string argName)
-            {
-                var arg = attribute.ArgumentList?.Arguments
-                    .Where(arg => arg.NameEquals?.Name.Identifier.ValueText == argName)
-                    .FirstOrDefault();
-
-                return arg?.Expression.ResolveStringConstantExpression();
-            }
-        }
-
-        private IEnumerable<LocalizableTextInfo> AnalyzeElementAccessExpressions(MemberDeclarationSyntax declaration, CancellationToken cancellationToken)
-        {
-            return declaration.DescendantNodes()
-                .OfType<ElementAccessExpressionSyntax>()
-                .Where(elementAccess => elementAccess.Expression is IdentifierNameSyntax identifier && _localizerMemberNames.Contains(identifier.Identifier.ValueText))
-                .Select(elementAccess => GetTextInfo(elementAccess, cancellationToken))
-                .Where(item => item != null)!;
-
-            LocalizableTextInfo? GetTextInfo(ElementAccessExpressionSyntax translateExpression, CancellationToken cancellationToken)
-            {
-                var lineNumber = translateExpression.GetLineNumber(cancellationToken);
-
-                var argList = translateExpression.ArgumentList;
-                var id = GetId(argList);
-                if (id == null)
-                    return null;
-
-                return new LocalizableTextInfo
-                {
-                    LineNumber = lineNumber,
-                    Id = id,
-                    PluralId = GetPluralId(argList),
-                    ContextId = GetContextId(argList),
-                };
-            }
-
-            static string? GetId(BaseArgumentListSyntax node)
-            {
-                var args = node.Arguments;
-                return args.Count > 0 ? args[0].Expression.ResolveStringConstantExpression() : null;
-            }
-
-            string? GetPluralId(BaseArgumentListSyntax node)
-            {
-                var factoryInvocation = node.Arguments
-                    .Skip(1)
-                    .Select(arg =>
-                        arg.Expression is InvocationExpressionSyntax invocation &&
-                            invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-                            memberAccess.Expression is IdentifierNameSyntax typeName &&
-                            typeName.Identifier.ValueText == _pluralTypeName &&
-                            memberAccess.Name is IdentifierNameSyntax memberName &&
-                            memberName.Identifier.ValueText == _pluralFactoryMemberName ?
-                        invocation :
-                        null)
-                    .FirstOrDefault(invocation => invocation != null);
-
-                if (factoryInvocation == null)
-                    return null;
-
-                var args = factoryInvocation.ArgumentList.Arguments;
-                return args.Count == 2 ? args[0].Expression.ResolveStringConstantExpression() : null;
-            }
-
-            string? GetContextId(BaseArgumentListSyntax node)
-            {
-                var args = node.Arguments;
-                if (!(args.Count > 1 && args[^1] is ArgumentSyntax arg &&
-                    arg.Expression is InvocationExpressionSyntax factoryInvocation &&
-                        factoryInvocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-                        memberAccess.Expression is IdentifierNameSyntax typeName &&
-                        typeName.Identifier.ValueText == _textContextTypeName &&
-                        memberAccess.Name is IdentifierNameSyntax memberName &&
-                        memberName.Identifier.ValueText == _textContextFactoryMemberName))
-                    return null;
-
-                args = factoryInvocation.ArgumentList.Arguments;
-                return args.Count == 1 ? args[0].Expression.ResolveStringConstantExpression() : null;
-            }
-        }
-
-        private IEnumerable<LocalizableTextInfo> ScanDeclaration(MemberDeclarationSyntax declaration, CancellationToken cancellationToken)
-        {
-            return declaration switch
-            {
-                EnumMemberDeclarationSyntax _ => AnalyzeDecoratedDeclaration(declaration, cancellationToken),
-                BaseFieldDeclarationSyntax _ => AnalyzeDecoratedDeclaration(declaration, cancellationToken)
-                    .Concat(AnalyzeElementAccessExpressions(declaration, cancellationToken)),
-                BasePropertyDeclarationSyntax _ => AnalyzeElementAccessExpressions(declaration, cancellationToken),
-                BaseMethodDeclarationSyntax _ => AnalyzeElementAccessExpressions(declaration, cancellationToken),
-                _ => Enumerable.Empty<LocalizableTextInfo>()
+                PluralId = GetPluralId(argList),
+                ContextId = GetContextId(argList),
             };
         }
 
-        public IEnumerable<LocalizableTextInfo> Extract(string content, CancellationToken cancellationToken = default)
+        static string? GetId(BaseArgumentListSyntax node)
         {
-            if (content == null)
-                throw new ArgumentNullException(nameof(content));
-
-            var code = GetCode(content, cancellationToken);
-
-            var syntaxTree = ParseText(code, cancellationToken);
-            var errorDiagnostic = syntaxTree.GetDiagnostics(cancellationToken).FirstOrDefault(d => d.Severity >= DiagnosticSeverity.Error);
-            if (errorDiagnostic != null)
-                throw new ArgumentException($"Source code has errors: {errorDiagnostic} at {errorDiagnostic.Location}", nameof(content));
-
-            var root = syntaxTree.GetRoot(cancellationToken);
-
-            return GetRelevantDeclarations(root, cancellationToken)
-                .SelectMany(declaration => ScanDeclaration(declaration, cancellationToken));
+            var args = node.Arguments;
+            return args.Count > 0 ? args[0].Expression.ResolveStringConstantExpression() : null;
         }
+
+        string? GetPluralId(BaseArgumentListSyntax node)
+        {
+            var factoryInvocation = node.Arguments
+                .Skip(1)
+                .Select(arg =>
+                    arg.Expression is InvocationExpressionSyntax invocation &&
+                        invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+                        memberAccess.Expression is IdentifierNameSyntax typeName &&
+                        typeName.Identifier.ValueText == _pluralTypeName &&
+                        memberAccess.Name is IdentifierNameSyntax memberName &&
+                        memberName.Identifier.ValueText == _pluralFactoryMemberName ?
+                    invocation :
+                    null)
+                .FirstOrDefault(invocation => invocation != null);
+
+            if (factoryInvocation == null)
+                return null;
+
+            var args = factoryInvocation.ArgumentList.Arguments;
+            return args.Count == 2 ? args[0].Expression.ResolveStringConstantExpression() : null;
+        }
+
+        string? GetContextId(BaseArgumentListSyntax node)
+        {
+            var args = node.Arguments;
+            if (!(args.Count > 1 && args[^1] is ArgumentSyntax arg &&
+                arg.Expression is InvocationExpressionSyntax factoryInvocation &&
+                    factoryInvocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+                    memberAccess.Expression is IdentifierNameSyntax typeName &&
+                    typeName.Identifier.ValueText == _textContextTypeName &&
+                    memberAccess.Name is IdentifierNameSyntax memberName &&
+                    memberName.Identifier.ValueText == _textContextFactoryMemberName))
+                return null;
+
+            args = factoryInvocation.ArgumentList.Arguments;
+            return args.Count == 1 ? args[0].Expression.ResolveStringConstantExpression() : null;
+        }
+    }
+
+    private IEnumerable<LocalizableTextInfo> ScanDeclaration(MemberDeclarationSyntax declaration, CancellationToken cancellationToken)
+    {
+        return declaration switch
+        {
+            EnumMemberDeclarationSyntax _ => AnalyzeDecoratedDeclaration(declaration, cancellationToken),
+            BaseFieldDeclarationSyntax _ => AnalyzeDecoratedDeclaration(declaration, cancellationToken)
+                .Concat(AnalyzeElementAccessExpressions(declaration, cancellationToken)),
+            BasePropertyDeclarationSyntax _ => AnalyzeElementAccessExpressions(declaration, cancellationToken),
+            BaseMethodDeclarationSyntax _ => AnalyzeElementAccessExpressions(declaration, cancellationToken),
+            _ => Enumerable.Empty<LocalizableTextInfo>()
+        };
+    }
+
+    public IEnumerable<LocalizableTextInfo> Extract(string content, CancellationToken cancellationToken = default)
+    {
+        if (content == null)
+            throw new ArgumentNullException(nameof(content));
+
+        var code = GetCode(content, cancellationToken);
+
+        var syntaxTree = ParseText(code, cancellationToken);
+        var errorDiagnostic = syntaxTree.GetDiagnostics(cancellationToken).FirstOrDefault(d => d.Severity >= DiagnosticSeverity.Error);
+        if (errorDiagnostic != null)
+            throw new ArgumentException($"Source code has errors: {errorDiagnostic} at {errorDiagnostic.Location}", nameof(content));
+
+        var root = syntaxTree.GetRoot(cancellationToken);
+
+        return GetRelevantDeclarations(root, cancellationToken)
+            .SelectMany(declaration => ScanDeclaration(declaration, cancellationToken));
     }
 }

@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace WebApp.UI.Helpers
+namespace WebApp.UI.Helpers;
+
+public static partial class HtmlHelperExtensions
 {
-    public static partial class HtmlHelperExtensions
-    {
-        public static IHtmlContent JavaScriptString(this IHtmlHelper htmlHelper, string value, bool addQuotes = true) =>
-            htmlHelper.Raw(HttpUtility.JavaScriptStringEncode(value, addQuotes));
-    }
+    public static IHtmlContent JavaScriptString(this IHtmlHelper htmlHelper, string value, bool addQuotes = true) =>
+        htmlHelper.Raw(HttpUtility.JavaScriptStringEncode(value, addQuotes));
 }

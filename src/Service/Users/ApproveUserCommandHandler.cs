@@ -3,28 +3,27 @@ using System.Threading;
 using System.Threading.Tasks;
 using WebApp.Core.Helpers;
 
-namespace WebApp.Service.Users
+namespace WebApp.Service.Users;
+
+internal sealed class ApproveUserCommandHandler : CommandHandler<ApproveUserCommand>
 {
-    internal sealed class ApproveUserCommandHandler : CommandHandler<ApproveUserCommand>
+    public override async Task HandleAsync(ApproveUserCommand command, CommandContext context, CancellationToken cancellationToken)
     {
-        public override async Task HandleAsync(ApproveUserCommand command, CommandContext context, CancellationToken cancellationToken)
+        await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
         {
-            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
-            {
-                var user = await dbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
-                RequireExisting(user, c => c.UserName);
+            var user = await dbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
+            RequireExisting(user, c => c.UserName);
 
-                if (user.IsApproved)
-                    return;
+            if (user.IsApproved)
+                return;
 
-                if (command.Verify)
-                    RequireValid(string.Equals(user.ConfirmationToken, command.VerificationToken, StringComparison.Ordinal), m => m.VerificationToken);
+            if (command.Verify)
+                RequireValid(string.Equals(user.ConfirmationToken, command.VerificationToken, StringComparison.Ordinal), m => m.VerificationToken);
 
-                user.ConfirmationToken = null;
-                user.IsApproved = true;
+            user.ConfirmationToken = null;
+            user.IsApproved = true;
 
-                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

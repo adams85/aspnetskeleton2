@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 
-namespace WebApp.DataAccess.Infrastructure
+namespace WebApp.DataAccess.Infrastructure;
+
+internal interface IExtendedDbContextTransactionManager : IDbContextTransactionManager
 {
-    internal interface IExtendedDbContextTransactionManager : IDbContextTransactionManager
-    {
-        bool SupportsAmbientTransactions { get; }
-    }
+    bool SupportsAmbientTransactions { get; }
 }

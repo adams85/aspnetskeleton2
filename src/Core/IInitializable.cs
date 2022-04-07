@@ -1,10 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebApp.Core
+namespace WebApp.Core;
+
+public interface IInitializable
 {
-    public interface IInitializable
-    {
-        Task InitializeAsync(CancellationToken cancellationToken);
-    }
+    Task InitializeAsync(CancellationToken cancellationToken);
 }

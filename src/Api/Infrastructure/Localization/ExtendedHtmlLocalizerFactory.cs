@@ -4,27 +4,26 @@ using Microsoft.Extensions.Localization;
 using WebApp.Service.Infrastructure.Localization;
 
 #if SERVICE_HOST
-namespace WebApp.Service.Host.Infrastructure.Localization
+namespace WebApp.Service.Host.Infrastructure.Localization;
 #else
-namespace WebApp.Api.Infrastructure.Localization
+namespace WebApp.Api.Infrastructure.Localization;
 #endif
+
+public sealed class ExtendedHtmlLocalizerFactory : IHtmlLocalizerFactory
 {
-    public sealed class ExtendedHtmlLocalizerFactory : IHtmlLocalizerFactory
+    private readonly IStringLocalizerFactory _stringLocalizerFactory;
+
+    public ExtendedHtmlLocalizerFactory(IStringLocalizerFactory stringLocalizerFactory)
     {
-        private readonly IStringLocalizerFactory _stringLocalizerFactory;
-
-        public ExtendedHtmlLocalizerFactory(IStringLocalizerFactory stringLocalizerFactory)
-        {
-            _stringLocalizerFactory = stringLocalizerFactory ?? throw new ArgumentNullException(nameof(stringLocalizerFactory));
-        }
-
-        private static IHtmlLocalizer CreateHtmlLocalizer(IStringLocalizer stringLocalizer) =>
-            stringLocalizer is IExtendedStringLocalizer extendedStringLocalizer ?
-            new ExtendedHtmlLocalizer(extendedStringLocalizer) :
-            new HtmlLocalizer(stringLocalizer);
-
-        public IHtmlLocalizer Create(string baseName, string location) => CreateHtmlLocalizer(_stringLocalizerFactory.Create(baseName, location));
-
-        public IHtmlLocalizer Create(Type resourceSource) => CreateHtmlLocalizer(_stringLocalizerFactory.Create(resourceSource));
+        _stringLocalizerFactory = stringLocalizerFactory ?? throw new ArgumentNullException(nameof(stringLocalizerFactory));
     }
+
+    private static IHtmlLocalizer CreateHtmlLocalizer(IStringLocalizer stringLocalizer) =>
+        stringLocalizer is IExtendedStringLocalizer extendedStringLocalizer ?
+        new ExtendedHtmlLocalizer(extendedStringLocalizer) :
+        new HtmlLocalizer(stringLocalizer);
+
+    public IHtmlLocalizer Create(string baseName, string location) => CreateHtmlLocalizer(_stringLocalizerFactory.Create(baseName, location));
+
+    public IHtmlLocalizer Create(Type resourceSource) => CreateHtmlLocalizer(_stringLocalizerFactory.Create(resourceSource));
 }

@@ -6,58 +6,57 @@ using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 using Microsoft.Extensions.FileProviders;
 using WebApp.Service.Infrastructure.Templating;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class ServiceTemplatesServiceCollectionExtensions
 {
-    public static class ServiceTemplatesServiceCollectionExtensions
+    private static IServiceCollection AddRazorTemplating(this IServiceCollection services)
     {
-        private static IServiceCollection AddRazorTemplating(this IServiceCollection services)
+        services.PostConfigure<MvcRazorRuntimeCompilationOptions>(options =>
         {
-            services.PostConfigure<MvcRazorRuntimeCompilationOptions>(options =>
+            // the templates are copied to the output directory, so we need to make sure that the Razor engine finds them
+
+            var appBaseDirectoryNormalizedPath = Path.GetFullPath(AppBaseDirectoryFileProvider.Instance.Root);
+            var pathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+            if (!options.FileProviders.Any(fileProvider =>
+                fileProvider is PhysicalFileProvider physicalFileProvider &&
+                Path.TrimEndingDirectorySeparator(Path.GetFullPath(physicalFileProvider.Root).AsSpan())
+                    .Equals(Path.TrimEndingDirectorySeparator(appBaseDirectoryNormalizedPath.AsSpan()), pathComparer)))
             {
-                // the templates are copied to the output directory, so we need to make sure that the Razor engine finds them
+                options.FileProviders.Add(AppBaseDirectoryFileProvider.Instance);
+            }
+        });
 
-                var appBaseDirectoryNormalizedPath = Path.GetFullPath(AppBaseDirectoryFileProvider.Instance.Root);
-                var pathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        services.AddTransient<ITemplateRenderer, RazorTemplateRenderer>();
 
-                if (!options.FileProviders.Any(fileProvider =>
-                    fileProvider is PhysicalFileProvider physicalFileProvider &&
-                    Path.TrimEndingDirectorySeparator(Path.GetFullPath(physicalFileProvider.Root).AsSpan())
-                        .Equals(Path.TrimEndingDirectorySeparator(appBaseDirectoryNormalizedPath.AsSpan()), pathComparer)))
-                {
-                    options.FileProviders.Add(AppBaseDirectoryFileProvider.Instance);
-                }
-            });
+        return services;
+    }
 
-            services.AddTransient<ITemplateRenderer, RazorTemplateRenderer>();
+    public static IMvcCoreBuilder AddRazorTemplating(this IMvcCoreBuilder builder)
+    {
+        builder.AddRazorViewEngine();
 
-            return services;
-        }
+        builder.Services.AddRazorTemplating();
 
-        public static IMvcCoreBuilder AddRazorTemplating(this IMvcCoreBuilder builder)
-        {
-            builder.AddRazorViewEngine();
+        return builder;
+    }
 
-            builder.Services.AddRazorTemplating();
+    /// <remarks>
+    /// Use only when MVC services was configured to use Razor (e.g. AddControllersWithViews)
+    /// because this overload is unable to add the Razor view engine services.
+    /// </remarks>
+    public static IMvcBuilder AddRazorTemplating(this IMvcBuilder builder)
+    {
+        builder.Services.AddRazorTemplating();
 
-            return builder;
-        }
+        return builder;
+    }
 
-        /// <remarks>
-        /// Use only when MVC services was configured to use Razor (e.g. AddControllersWithViews)
-        /// because this overload is unable to add the Razor view engine services.
-        /// </remarks>
-        public static IMvcBuilder AddRazorTemplating(this IMvcBuilder builder)
-        {
-            builder.Services.AddRazorTemplating();
+    private sealed class AppBaseDirectoryFileProvider : PhysicalFileProvider
+    {
+        public static readonly AppBaseDirectoryFileProvider Instance = new AppBaseDirectoryFileProvider();
 
-            return builder;
-        }
-
-        private sealed class AppBaseDirectoryFileProvider : PhysicalFileProvider
-        {
-            public static readonly AppBaseDirectoryFileProvider Instance = new AppBaseDirectoryFileProvider();
-
-            private AppBaseDirectoryFileProvider() : base(AppContext.BaseDirectory) { }
-        }
+        private AppBaseDirectoryFileProvider() : base(AppContext.BaseDirectory) { }
     }
 }

@@ -1,7 +1,6 @@
-﻿namespace WebApp.Service.Infrastructure
+﻿namespace WebApp.Service.Infrastructure;
+
+internal interface IServiceHostGrpcServiceFactory
 {
-    internal interface IServiceHostGrpcServiceFactory
-    {
-        TService CreateGrpcService<TService>() where TService : class;
-    }
+    TService CreateGrpcService<TService>() where TService : class;
 }

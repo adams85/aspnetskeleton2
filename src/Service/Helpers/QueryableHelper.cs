@@ -3,103 +3,102 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace WebApp.Service.Helpers
+namespace WebApp.Service.Helpers;
+
+public delegate IOrderedQueryable<T> ApplyOrderByElement<T>(IQueryable<T> source, string keyPropertyPath, bool descending, bool nested);
+
+public static class QueryableHelper
 {
-    public delegate IOrderedQueryable<T> ApplyOrderByElement<T>(IQueryable<T> source, string keyPropertyPath, bool descending, bool nested);
+    private static readonly MethodInfo s_orderByMethodDefinition =
+        new Func<IQueryable<object>, Expression<Func<object, object>>, object>(Queryable.OrderBy<object, object>).Method.GetGenericMethodDefinition();
 
-    public static class QueryableHelper
+    private static readonly MethodInfo s_orderByDescendingMethodDefinition =
+        new Func<IQueryable<object>, Expression<Func<object, object>>, object>(Queryable.OrderByDescending<object, object>).Method.GetGenericMethodDefinition();
+
+    private static readonly MethodInfo s_thenByMethodDefinition =
+        new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenBy<object, object>).Method.GetGenericMethodDefinition();
+
+    private static readonly MethodInfo s_thenByDescendingMethodDefinition =
+        new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenByDescending<object, object>).Method.GetGenericMethodDefinition();
+
+    private static IOrderedQueryable<T> OrderByCore<T>(this IQueryable<T> source, string keyPropertyPath, MethodInfo orderMethodDefinition)
     {
-        private static readonly MethodInfo s_orderByMethodDefinition =
-            new Func<IQueryable<object>, Expression<Func<object, object>>, object>(Queryable.OrderBy<object, object>).Method.GetGenericMethodDefinition();
+        var type = typeof(T);
+        var @param = Expression.Parameter(type);
 
-        private static readonly MethodInfo s_orderByDescendingMethodDefinition =
-            new Func<IQueryable<object>, Expression<Func<object, object>>, object>(Queryable.OrderByDescending<object, object>).Method.GetGenericMethodDefinition();
+        Expression propertyAccess = @param;
+        var propertyNames = keyPropertyPath.Split('.');
+        for (int i = 0, n = propertyNames.Length; i < n; i++)
+            propertyAccess = Expression.Property(propertyAccess, propertyNames[i]);
 
-        private static readonly MethodInfo s_thenByMethodDefinition =
-            new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenBy<object, object>).Method.GetGenericMethodDefinition();
+        var keySelector = Expression.Lambda(propertyAccess, @param);
 
-        private static readonly MethodInfo s_thenByDescendingMethodDefinition =
-            new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenByDescending<object, object>).Method.GetGenericMethodDefinition();
+        var orderMethod = orderMethodDefinition.MakeGenericMethod(type, propertyAccess.Type);
 
-        private static IOrderedQueryable<T> OrderByCore<T>(this IQueryable<T> source, string keyPropertyPath, MethodInfo orderMethodDefinition)
+        var orderQuery = Expression.Call(orderMethod, source.Expression, Expression.Quote(keySelector));
+
+        return (IOrderedQueryable<T>)source.Provider.CreateQuery<T>(orderQuery);
+    }
+
+    public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string keyPropertyPath, bool descending = false)
+    {
+        return source.OrderByCore(keyPropertyPath, !descending ? s_orderByMethodDefinition : s_orderByDescendingMethodDefinition);
+    }
+
+    public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string keyPropertyPath, bool descending = false)
+    {
+        return source.OrderByCore(keyPropertyPath, !descending ? s_thenByMethodDefinition : s_thenByDescendingMethodDefinition);
+    }
+
+    public static (string KeyPropertyPath, bool Descending) ParseOrderByElement(string value)
+    {
+        var c = value[0];
+        switch (c)
         {
-            var type = typeof(T);
-            var @param = Expression.Parameter(type);
+            case '+':
+            case '-':
+                return (value.Substring(1), c == '-');
+            default:
+                return (value, false);
+        }
+    }
 
-            Expression propertyAccess = @param;
-            var propertyNames = keyPropertyPath.Split('.');
-            for (int i = 0, n = propertyNames.Length; i < n; i++)
-                propertyAccess = Expression.Property(propertyAccess, propertyNames[i]);
+    public static string ComposeOrderByElement(string keyPropertyPath, bool descending)
+    {
+        return descending ? "-" + keyPropertyPath : keyPropertyPath;
+    }
 
-            var keySelector = Expression.Lambda(propertyAccess, @param);
+    public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> source, ApplyOrderByElement<T> applyOrderByElement, params string[] orderByElements)
+    {
+        for (int i = 0, n = orderByElements.Length; i < n; i++)
+        {
+            var orderByElement = orderByElements[i];
 
-            var orderMethod = orderMethodDefinition.MakeGenericMethod(type, propertyAccess.Type);
+            if (string.IsNullOrEmpty(orderByElement))
+                throw new ArgumentException("Elements cannot be null or empty.", nameof(orderByElements));
 
-            var orderQuery = Expression.Call(orderMethod, source.Expression, Expression.Quote(keySelector));
-
-            return (IOrderedQueryable<T>)source.Provider.CreateQuery<T>(orderQuery);
+            var (keyPropertyPath, descending) = ParseOrderByElement(orderByElement);
+            source = applyOrderByElement(source, keyPropertyPath, descending, nested: i > 0);
         }
 
-        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string keyPropertyPath, bool descending = false)
-        {
-            return source.OrderByCore(keyPropertyPath, !descending ? s_orderByMethodDefinition : s_orderByDescendingMethodDefinition);
-        }
+        return source;
+    }
 
-        public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string keyPropertyPath, bool descending = false)
-        {
-            return source.OrderByCore(keyPropertyPath, !descending ? s_thenByMethodDefinition : s_thenByDescendingMethodDefinition);
-        }
+    public static int GetEffectivePageSize(int pageSize, int maxPageSize)
+    {
+        return maxPageSize > 0 ? Math.Min(pageSize, maxPageSize) : pageSize;
+    }
 
-        public static (string KeyPropertyPath, bool Descending) ParseOrderByElement(string value)
-        {
-            var c = value[0];
-            switch (c)
-            {
-                case '+':
-                case '-':
-                    return (value.Substring(1), c == '-');
-                default:
-                    return (value, false);
-            }
-        }
+    public static IQueryable<T> ApplyPaging<T>(this IQueryable<T> source, int pageIndex, int pageSize, int maxPageSize)
+    {
+        if (pageIndex < 0)
+            throw new ArgumentOutOfRangeException(nameof(pageIndex));
 
-        public static string ComposeOrderByElement(string keyPropertyPath, bool descending)
-        {
-            return descending ? "-" + keyPropertyPath : keyPropertyPath;
-        }
+        if (pageSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(pageSize));
 
-        public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> source, ApplyOrderByElement<T> applyOrderByElement, params string[] orderByElements)
-        {
-            for (int i = 0, n = orderByElements.Length; i < n; i++)
-            {
-                var orderByElement = orderByElements[i];
+        pageSize = GetEffectivePageSize(pageSize, maxPageSize);
 
-                if (string.IsNullOrEmpty(orderByElement))
-                    throw new ArgumentException("Elements cannot be null or empty.", nameof(orderByElements));
-
-                var (keyPropertyPath, descending) = ParseOrderByElement(orderByElement);
-                source = applyOrderByElement(source, keyPropertyPath, descending, nested: i > 0);
-            }
-
-            return source;
-        }
-
-        public static int GetEffectivePageSize(int pageSize, int maxPageSize)
-        {
-            return maxPageSize > 0 ? Math.Min(pageSize, maxPageSize) : pageSize;
-        }
-
-        public static IQueryable<T> ApplyPaging<T>(this IQueryable<T> source, int pageIndex, int pageSize, int maxPageSize)
-        {
-            if (pageIndex < 0)
-                throw new ArgumentOutOfRangeException(nameof(pageIndex));
-
-            if (pageSize <= 0)
-                throw new ArgumentOutOfRangeException(nameof(pageSize));
-
-            pageSize = GetEffectivePageSize(pageSize, maxPageSize);
-
-            return source.Skip(pageIndex * pageSize).Take(pageSize);
-        }
+        return source.Skip(pageIndex * pageSize).Take(pageSize);
     }
 }

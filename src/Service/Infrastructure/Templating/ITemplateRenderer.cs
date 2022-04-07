@@ -2,10 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebApp.Service.Infrastructure.Templating
+namespace WebApp.Service.Infrastructure.Templating;
+
+public interface ITemplateRenderer
 {
-    public interface ITemplateRenderer
-    {
-        Task<string> RenderAsync<TModel>(string templateName, TModel model, CultureInfo? culture = null, CultureInfo? uiCulture = null, CancellationToken cancellationToken = default);
-    }
+    Task<string> RenderAsync<TModel>(string templateName, TModel model, CultureInfo? culture = null, CultureInfo? uiCulture = null, CancellationToken cancellationToken = default);
 }

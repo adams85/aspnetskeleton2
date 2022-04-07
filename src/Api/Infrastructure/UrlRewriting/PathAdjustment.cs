@@ -1,8 +1,7 @@
-﻿namespace WebApp.Api.Infrastructure.UrlRewriting
+﻿namespace WebApp.Api.Infrastructure.UrlRewriting;
+
+public class PathAdjustment
 {
-    public class PathAdjustment
-    {
-        public string? OriginalPrefix { get; init; }
-        public string? NewPrefix { get; init; }
-    }
+    public string? OriginalPrefix { get; init; }
+    public string? NewPrefix { get; init; }
 }

@@ -1,11 +1,10 @@
-﻿namespace POTools.Services.Extracting
+﻿namespace POTools.Services.Extracting;
+
+public class LocalizableTextInfo
 {
-    public class LocalizableTextInfo
-    {
-        public int LineNumber { get; set; }
-        public string Id { get; set; } = null!;
-        public string? PluralId { get; set; }
-        public string? ContextId { get; set; }
-        public string? Comment { get; set; }
-    }
+    public int LineNumber { get; set; }
+    public string Id { get; set; } = null!;
+    public string? PluralId { get; set; }
+    public string? ContextId { get; set; }
+    public string? Comment { get; set; }
 }

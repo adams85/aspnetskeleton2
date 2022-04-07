@@ -1,25 +1,24 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace WebApp.UI
+namespace WebApp.UI;
+
+public partial class Startup
 {
-    public partial class Startup
+    partial void ConfigureImmediateOptionsPartial(IServiceCollection services);
+
+    private void ConfigureImmediateOptions(IServiceCollection services)
     {
-        partial void ConfigureImmediateOptionsPartial(IServiceCollection services);
+        ConfigureImmediateOptionsPartial(services);
 
-        private void ConfigureImmediateOptions(IServiceCollection services)
-        {
-            ConfigureImmediateOptionsPartial(services);
+        services.Configure<UIOptions>(Configuration.GetSection(UIOptions.DefaultSectionName));
+    }
 
-            services.Configure<UIOptions>(Configuration.GetSection(UIOptions.DefaultSectionName));
-        }
+    partial void ConfigureOptionsPartial(IServiceCollection services);
 
-        partial void ConfigureOptionsPartial(IServiceCollection services);
+    private void ConfigureOptions(IServiceCollection services)
+    {
+        ConfigureImmediateOptions(services);
 
-        private void ConfigureOptions(IServiceCollection services)
-        {
-            ConfigureImmediateOptions(services);
-
-            ConfigureOptionsPartial(services);
-        }
+        ConfigureOptionsPartial(services);
     }
 }

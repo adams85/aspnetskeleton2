@@ -1,7 +1,6 @@
-﻿namespace WebApp.Service.Infrastructure
+﻿namespace WebApp.Service.Infrastructure;
+
+internal sealed class DefaultExecutionContextAccessor : IExecutionContextAccessor
 {
-    internal sealed class DefaultExecutionContextAccessor : IExecutionContextAccessor
-    {
-        public OperationExecutionContext ExecutionContext { get; } = OperationExecutionContext.Default;
-    }
+    public OperationExecutionContext ExecutionContext { get; } = OperationExecutionContext.Default;
 }

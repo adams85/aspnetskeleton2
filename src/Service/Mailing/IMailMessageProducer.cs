@@ -2,10 +2,9 @@
 using System.Threading.Tasks;
 using MimeKit;
 
-namespace WebApp.Service.Mailing
+namespace WebApp.Service.Mailing;
+
+internal interface IMailMessageProducer
 {
-    internal interface IMailMessageProducer
-    {
-        Task<MimeMessage> ProduceAsync(MailModel model, CancellationToken cancellationToken);
-    }
+    Task<MimeMessage> ProduceAsync(MailModel model, CancellationToken cancellationToken);
 }

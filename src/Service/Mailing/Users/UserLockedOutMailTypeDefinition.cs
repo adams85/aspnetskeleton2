@@ -1,18 +1,17 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebApp.Service.Mailing.Users
+namespace WebApp.Service.Mailing.Users;
+
+internal sealed class UserLockedOutMailTypeDefinition : MailTypeDefinition<UserLockedOutMailModel, UserLockedOutMailMessageProducer>
 {
-    internal sealed class UserLockedOutMailTypeDefinition : MailTypeDefinition<UserLockedOutMailModel, UserLockedOutMailMessageProducer>
+    public override string MailType => UserLockedOutMailModel.AssociatedMailType;
+
+    public override Task ValidateModelAsync(MailModelValidationContext context, CancellationToken cancellationToken)
     {
-        public override string MailType => UserLockedOutMailModel.AssociatedMailType;
+        if (context.Model is not UserLockedOutMailModel model)
+            context.SetError(ServiceErrorCode.ParamNotValid);
 
-        public override Task ValidateModelAsync(MailModelValidationContext context, CancellationToken cancellationToken)
-        {
-            if (context.Model is not UserLockedOutMailModel model)
-                context.SetError(ServiceErrorCode.ParamNotValid);
-
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
     }
 }

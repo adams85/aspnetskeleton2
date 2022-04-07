@@ -4,20 +4,19 @@ using Microsoft.AspNetCore.Http;
 using WebApp.Service;
 
 #if SERVICE_HOST
-namespace WebApp.Service.Host.Infrastructure
+namespace WebApp.Service.Host.Infrastructure;
 #else
-namespace WebApp.Api.Infrastructure
+namespace WebApp.Api.Infrastructure;
 #endif
+
+public sealed class HttpExecutionContext : OperationExecutionContext
 {
-    public sealed class HttpExecutionContext : OperationExecutionContext
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public HttpExecutionContext(IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public HttpExecutionContext(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-        }
-
-        public override ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
+        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
     }
+
+    public override ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
 }

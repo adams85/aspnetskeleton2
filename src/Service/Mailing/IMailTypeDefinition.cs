@@ -2,17 +2,16 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebApp.Service.Mailing
+namespace WebApp.Service.Mailing;
+
+internal interface IMailTypeDefinition
 {
-    internal interface IMailTypeDefinition
-    {
-        string MailType { get; }
+    string MailType { get; }
 
-        Task ValidateModelAsync(MailModelValidationContext context, CancellationToken cancellationToken);
+    Task ValidateModelAsync(MailModelValidationContext context, CancellationToken cancellationToken);
 
-        byte[] SerializeModel(MailModel model);
-        MailModel DeserializeModel(byte[] bytes);
+    byte[] SerializeModel(MailModel model);
+    MailModel DeserializeModel(byte[] bytes);
 
-        IMailMessageProducer CreateMailMessageProducer(IServiceProvider serviceProvider);
-    }
+    IMailMessageProducer CreateMailMessageProducer(IServiceProvider serviceProvider);
 }

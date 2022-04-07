@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace WebApp.Service.Infrastructure.Caching
-{
-    internal abstract class QueryCachingOptions : CacheOptions
-    {
-        protected QueryCachingOptions() { }
+namespace WebApp.Service.Infrastructure.Caching;
 
-        public abstract bool TryHandleError(QueryContext context, Exception exception, out object? result);
-        public abstract bool IsCached(QueryContext context);
-        public abstract IEnumerable<string> GetScopes(QueryContext context);
-    }
+internal abstract class QueryCachingOptions : CacheOptions
+{
+    protected QueryCachingOptions() { }
+
+    public abstract bool TryHandleError(QueryContext context, Exception exception, out object? result);
+    public abstract bool IsCached(QueryContext context);
+    public abstract IEnumerable<string> GetScopes(QueryContext context);
 }

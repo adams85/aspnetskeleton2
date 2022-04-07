@@ -12,80 +12,79 @@ using Microsoft.EntityFrameworkCore;
 using <#= $"{Namespace}.Core.Helpers" #>;
 using <#= $"{Namespace}.DataAccess.Entities" #>;
 
-namespace <#= $"{Namespace}.Service.{Group}" #>
-{
+namespace <#= $"{Namespace}.Service.{Group}" #>;
+
 <#
 var resultType = GetResultType();
 #>
-    internal sealed class <#= $"{Name}QueryHandler" #> : <#= GetQueryHandlerBaseType(resultType) #>
+internal sealed class <#= $"{Name}QueryHandler" #> : <#= GetQueryHandlerBaseType(resultType) #>
+{
+    public override async Task<<#= resultType #>> HandleAsync(<#= $"{Name}Query" #> query, QueryContext context, CancellationToken cancellationToken)
     {
-        public override async Task<<#= resultType #>> HandleAsync(<#= $"{Name}Query" #> query, QueryContext context, CancellationToken cancellationToken)
+        await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
         {
-            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
-            {
 <#
 if (!IsList)
 {
 #>
-                Entity entity = await dbContext.Entities
-                    .FindAsync(new object[] { query.Id }, cancellationToken).ConfigureAwait(false);
+            Entity entity = await dbContext.Entities
+                .FindAsync(new object[] { query.Id }, cancellationToken).ConfigureAwait(false);
 
-                RequireExisting(entity, q => q.Id);
+            RequireExisting(entity, q => q.Id);
 
-                // ...
+            // ...
 <#
     if (IsEventProducer)
     {
 #>
 
-                query.OnEvent?.Invoke(query, new ProgressEvent
-                {
-                    Progress = 1f
-                });
+            query.OnEvent?.Invoke(query, new ProgressEvent
+            {
+                Progress = 1f
+            });
 <#
     }
 #>
 
-                return new <#= resultType #>
-                {
-                };
+            return new <#= resultType #>
+            {
+            };
 <#
 } 
 else 
 {
 #>
-                IQueryable<Entity> entityQuery = dbContext.Entities;
+            IQueryable<Entity> entityQuery = dbContext.Entities;
 
-                // ...
+            // ...
 
-                var dataQuery = entityQuery.ToData();
+            var dataQuery = entityQuery.ToData();
 <#
     if (IsEventProducer)
     {
 #>
 
-                var items = await ToArrayAsync(ApplyPagingAndOrdering(query, dataQuery), cancellationToken).ConfigureAwait(false);
+            var items = await ToArrayAsync(ApplyPagingAndOrdering(query, dataQuery), cancellationToken).ConfigureAwait(false);
 
-                var totalItemCount = await GetTotalItemCountAsync(query, dataQuery, items, cancellationToken).ConfigureAwait(false);
+            var totalItemCount = await GetTotalItemCountAsync(query, dataQuery, items, cancellationToken).ConfigureAwait(false);
 
-                query.OnEvent?.Invoke(query, new ProgressEvent
-                {
-                    Progress = 1f
-                });
+            query.OnEvent?.Invoke(query, new ProgressEvent
+            {
+                Progress = 1f
+            });
 
-                return Result(items, totalItemCount, query.PageIndex, query.PageSize, query.MaxPageSize);
+            return Result(items, totalItemCount, query.PageIndex, query.PageSize, query.MaxPageSize);
 <#
     }
     else
     {
 #>
 
-                return await ResultAsync(query, dataQuery, cancellationToken).ConfigureAwait(false);
+            return await ResultAsync(query, dataQuery, cancellationToken).ConfigureAwait(false);
 <#
     }
 }
 #>
-            }
         }
     }
 }

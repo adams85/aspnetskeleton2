@@ -4,38 +4,37 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace WebApp.Core.Helpers
+namespace WebApp.Core.Helpers;
+
+public static class DependencyInjectionHelper
 {
-    public static class DependencyInjectionHelper
+    private static readonly MethodInfo s_getRequiredServiceMethod =
+        new Func<IServiceProvider, object>(ServiceProviderServiceExtensions.GetRequiredService<object>).Method.GetGenericMethodDefinition();
+
+    public static TDelegate BuildMethodInjectionDelegate<TDelegate>(this MethodInfo method,
+        Func<ParameterExpression[], Expression?> getTargetInstance,
+        Func<ParameterExpression[], ParameterInfo, int, Expression?> getStaticArguments,
+        Func<ParameterExpression[], Expression> getServiceProvider,
+        Func<MethodCallExpression, Type, Expression>? convertReturnValue = null)
+        where TDelegate : Delegate
     {
-        private static readonly MethodInfo s_getRequiredServiceMethod =
-            new Func<IServiceProvider, object>(ServiceProviderServiceExtensions.GetRequiredService<object>).Method.GetGenericMethodDefinition();
+        return method.BuildWrapperLambda<TDelegate>(getTargetInstance, GetMethodParams, convertReturnValue).Compile();
 
-        public static TDelegate BuildMethodInjectionDelegate<TDelegate>(this MethodInfo method,
-            Func<ParameterExpression[], Expression?> getTargetInstance,
-            Func<ParameterExpression[], ParameterInfo, int, Expression?> getStaticArguments,
-            Func<ParameterExpression[], Expression> getServiceProvider,
-            Func<MethodCallExpression, Type, Expression>? convertReturnValue = null)
-            where TDelegate : Delegate
+        IEnumerable<Expression> GetMethodParams(ParameterExpression[] delegateParams, ParameterInfo[] methodParams)
         {
-            return method.BuildWrapperLambda<TDelegate>(getTargetInstance, GetMethodParams, convertReturnValue).Compile();
+            Expression? serviceProvider = null;
 
-            IEnumerable<Expression> GetMethodParams(ParameterExpression[] delegateParams, ParameterInfo[] methodParams)
+            for (int i = 0, n = methodParams.Length; i < n; i++)
             {
-                Expression? serviceProvider = null;
+                var methodParam = methodParams[i];
 
-                for (int i = 0, n = methodParams.Length; i < n; i++)
-                {
-                    var methodParam = methodParams[i];
-
-                    yield return
-                        getStaticArguments(delegateParams, methodParam, i) ??
-                        BuildServiceResolutionExpression(serviceProvider ??= getServiceProvider(delegateParams), methodParam.ParameterType);
-                }
+                yield return
+                    getStaticArguments(delegateParams, methodParam, i) ??
+                    BuildServiceResolutionExpression(serviceProvider ??= getServiceProvider(delegateParams), methodParam.ParameterType);
             }
-
-            static Expression BuildServiceResolutionExpression(Expression serviceProviderExpression, Type serviceType) =>
-                Expression.Call(s_getRequiredServiceMethod.MakeGenericMethod(serviceType), serviceProviderExpression);
         }
+
+        static Expression BuildServiceResolutionExpression(Expression serviceProviderExpression, Type serviceType) =>
+            Expression.Call(s_getRequiredServiceMethod.MakeGenericMethod(serviceType), serviceProviderExpression);
     }
 }

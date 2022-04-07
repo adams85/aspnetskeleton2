@@ -10,163 +10,162 @@ using WebApp.Service.Tests.Helpers;
 using WebApp.Service.Users;
 using Xunit;
 
-namespace WebApp.Service.Infrastructure
+namespace WebApp.Service.Infrastructure;
+
+public class DataAnnotationsValidationTests
 {
-    public class DataAnnotationsValidationTests
+    [Fact]
+    public void RespectsNullableRefTypeAnnotation()
     {
-        [Fact]
-        public void RespectsNullableRefTypeAnnotation()
+        var command = new GetUserQuery { };
+
+        var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command));
+
+        Assert.IsType<RequiredAttribute>(validationEx.ValidationAttribute);
+        Assert.Equal(new[] { nameof(command.Identifier) }, validationEx.ValidationResult.MemberNames);
+
+        var serviceErrorEx = ServiceErrorException.From(validationEx);
+
+        Assert.Equal(ServiceErrorCode.ParamNotSpecified, serviceErrorEx.ErrorCode);
+        Assert.Equal(new[] { nameof(command.Identifier) }, serviceErrorEx.Args);
+    }
+
+    [Fact]
+    public void ChecksNestedProperty()
+    {
+        var command = new GetUserQuery
         {
-            var command = new GetUserQuery { };
+            Identifier = new UserIdentifier.Name { }
+        };
 
-            var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command));
+        var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command));
 
-            Assert.IsType<RequiredAttribute>(validationEx.ValidationAttribute);
-            Assert.Equal(new[] { nameof(command.Identifier) }, validationEx.ValidationResult.MemberNames);
+        Assert.IsType<RequiredAttribute>(validationEx.ValidationAttribute);
+        Assert.Equal(new[] { nameof(UserIdentifier.Name.Value) }, validationEx.ValidationResult.MemberNames);
 
-            var serviceErrorEx = ServiceErrorException.From(validationEx);
+        var serviceErrorEx = ServiceErrorException.From(validationEx);
 
-            Assert.Equal(ServiceErrorCode.ParamNotSpecified, serviceErrorEx.ErrorCode);
-            Assert.Equal(new[] { nameof(command.Identifier) }, serviceErrorEx.Args);
-        }
+        Assert.Equal(ServiceErrorCode.ParamNotSpecified, serviceErrorEx.ErrorCode);
+        Assert.Equal(new[] { nameof(command.Identifier) + "." + nameof(UserIdentifier.Name.Value) }, serviceErrorEx.Args);
+    }
 
-        [Fact]
-        public void ChecksNestedProperty()
+    [Fact]
+    public void RespectsIValidatableObjectImplementation()
+    {
+        var command = new ApproveUserCommand
         {
-            var command = new GetUserQuery
-            {
-                Identifier = new UserIdentifier.Name { }
-            };
+            UserName = "user",
+            Verify = true,
+            VerificationToken = null
+        };
 
-            var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command));
+        var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command));
 
-            Assert.IsType<RequiredAttribute>(validationEx.ValidationAttribute);
-            Assert.Equal(new[] { nameof(UserIdentifier.Name.Value) }, validationEx.ValidationResult.MemberNames);
+        Assert.IsType<ExtendedValidationResult>(validationEx.ValidationResult);
+        Assert.IsType<RequiredAttribute>(validationEx.ValidationAttribute);
+        Assert.Equal(new[] { nameof(command.VerificationToken) }, validationEx.ValidationResult.MemberNames);
 
-            var serviceErrorEx = ServiceErrorException.From(validationEx);
+        var serviceErrorEx = ServiceErrorException.From(validationEx);
 
-            Assert.Equal(ServiceErrorCode.ParamNotSpecified, serviceErrorEx.ErrorCode);
-            Assert.Equal(new[] { nameof(command.Identifier) + "." + nameof(UserIdentifier.Name.Value) }, serviceErrorEx.Args);
-        }
+        Assert.Equal(ServiceErrorCode.ParamNotSpecified, serviceErrorEx.ErrorCode);
+        Assert.Equal(new[] { nameof(command.VerificationToken) }, serviceErrorEx.Args);
+    }
 
-        [Fact]
-        public void RespectsIValidatableObjectImplementation()
+    [Fact]
+    public void ExtendedValidationAttribute_CustomTextLocalizer()
+    {
+        var command = new ListUsersQuery
         {
-            var command = new ApproveUserCommand
-            {
-                UserName = "user",
-                Verify = true,
-                VerificationToken = null
-            };
+            OrderBy = new[] { "" }
+        };
 
-            var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command));
+        var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command));
 
-            Assert.IsType<ExtendedValidationResult>(validationEx.ValidationResult);
-            Assert.IsType<RequiredAttribute>(validationEx.ValidationAttribute);
-            Assert.Equal(new[] { nameof(command.VerificationToken) }, validationEx.ValidationResult.MemberNames);
+        Assert.IsType<ItemsRequiredAttribute>(validationEx.ValidationAttribute);
+        Assert.Equal(new[] { nameof(command.OrderBy) }, validationEx.ValidationResult.MemberNames);
 
-            var serviceErrorEx = ServiceErrorException.From(validationEx);
+        string? textToLocalize = null;
 
-            Assert.Equal(ServiceErrorCode.ParamNotSpecified, serviceErrorEx.ErrorCode);
-            Assert.Equal(new[] { nameof(command.VerificationToken) }, serviceErrorEx.Args);
-        }
-
-        [Fact]
-        public void ExtendedValidationAttribute_CustomTextLocalizer()
+        var validationAttribute = (ExtendedValidationAttribute)validationEx.ValidationAttribute!;
+        var formattedErrorMessage = validationAttribute.FormatErrorMessage(nameof(command.OrderBy), new DelegatedTextLocalizer((hint, args) =>
         {
-            var command = new ListUsersQuery
-            {
-                OrderBy = new[] { "" }
-            };
+            textToLocalize = hint;
+            return args != null ? NullTextLocalizer.Instance[hint, args] : NullTextLocalizer.Instance[hint];
+        }));
 
-            var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command));
+        Assert.Equal("The field {0} must contain non-empty strings.", textToLocalize);
+        Assert.Equal($"The field {nameof(command.OrderBy)} must contain non-empty strings.", formattedErrorMessage);
+    }
 
-            Assert.IsType<ItemsRequiredAttribute>(validationEx.ValidationAttribute);
-            Assert.Equal(new[] { nameof(command.OrderBy) }, validationEx.ValidationResult.MemberNames);
-
-            string? textToLocalize = null;
-
-            var validationAttribute = (ExtendedValidationAttribute)validationEx.ValidationAttribute!;
-            var formattedErrorMessage = validationAttribute.FormatErrorMessage(nameof(command.OrderBy), new DelegatedTextLocalizer((hint, args) =>
-            {
-                textToLocalize = hint;
-                return args != null ? NullTextLocalizer.Instance[hint, args] : NullTextLocalizer.Instance[hint];
-            }));
-
-            Assert.Equal("The field {0} must contain non-empty strings.", textToLocalize);
-            Assert.Equal($"The field {nameof(command.OrderBy)} must contain non-empty strings.", formattedErrorMessage);
-        }
-
-        [Fact]
-        public void ServiceValidationAttribute_ServiceUnavailableButValidationIgnored()
+    [Fact]
+    public void ServiceValidationAttribute_ServiceUnavailableButValidationIgnored()
+    {
+        var command = new ChangePasswordCommand
         {
-            var command = new ChangePasswordCommand
-            {
-                UserName = "user",
-                NewPassword = "12345",
-            };
+            UserName = "user",
+            NewPassword = "12345",
+        };
 
-            DataAnnotationsValidator.Validate(command);
-        }
+        DataAnnotationsValidator.Validate(command);
+    }
 
-        [Fact]
-        public async Task ServiceValidationAttribute_ServiceAvailable_ComplexityRequirementsMet()
+    [Fact]
+    public async Task ServiceValidationAttribute_ServiceAvailable_ComplexityRequirementsMet()
+    {
+        var services = new ServiceCollection();
+
+        services.Configure<PasswordOptions>(options =>
         {
-            var services = new ServiceCollection();
+            options.RequiredLength = 6;
+            options.RequireDigit = true;
+            options.RequireNonAlphanumeric = true;
+            options.RequireLowercase = true;
+            options.RequiredUniqueChars = 2;
+        });
 
-            services.Configure<PasswordOptions>(options =>
-            {
-                options.RequiredLength = 6;
-                options.RequireDigit = true;
-                options.RequireNonAlphanumeric = true;
-                options.RequireLowercase = true;
-                options.RequiredUniqueChars = 2;
-            });
+        services.AddSingleton<IValidator<PasswordAttribute>, PasswordValidator>();
 
-            services.AddSingleton<IValidator<PasswordAttribute>, PasswordValidator>();
-
-            var command = new ChangePasswordCommand
-            {
-                UserName = "user",
-                NewPassword = "12345+Z",
-            };
-
-            await using var sp = services.BuildServiceProvider();
-
-            DataAnnotationsValidator.Validate(command);
-        }
-
-        [Fact]
-        public async Task ServiceValidationAttribute_ServiceAvailable_ComplexityRequirementsNotMet()
+        var command = new ChangePasswordCommand
         {
-            var services = new ServiceCollection();
+            UserName = "user",
+            NewPassword = "12345+Z",
+        };
 
-            services.Configure<PasswordOptions>(options =>
-            {
-                options.RequiredLength = 6;
-                options.RequireDigit = true;
-                options.RequireNonAlphanumeric = true;
-                options.RequireLowercase = true;
-                options.RequiredUniqueChars = 2;
-            });
+        await using var sp = services.BuildServiceProvider();
 
-            services.AddSingleton<IStringLocalizerFactory>(NullStringLocalizerFactory.Instance);
-            services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
-            services.AddSingleton<IValidator<PasswordAttribute>, PasswordValidator>();
+        DataAnnotationsValidator.Validate(command);
+    }
 
-            var command = new ChangePasswordCommand
-            {
-                UserName = "user",
-                NewPassword = "12345",
-            };
+    [Fact]
+    public async Task ServiceValidationAttribute_ServiceAvailable_ComplexityRequirementsNotMet()
+    {
+        var services = new ServiceCollection();
 
-            await using var sp = services.BuildServiceProvider();
+        services.Configure<PasswordOptions>(options =>
+        {
+            options.RequiredLength = 6;
+            options.RequireDigit = true;
+            options.RequireNonAlphanumeric = true;
+            options.RequireLowercase = true;
+            options.RequiredUniqueChars = 2;
+        });
 
-            var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command, sp));
+        services.AddSingleton<IStringLocalizerFactory>(NullStringLocalizerFactory.Instance);
+        services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+        services.AddSingleton<IValidator<PasswordAttribute>, PasswordValidator>();
 
-            Assert.IsType<ExtendedValidationResult>(validationEx.ValidationResult);
-            Assert.IsType<PasswordAttribute>(validationEx.ValidationAttribute);
-            Assert.Equal(new[] { nameof(command.NewPassword) }, validationEx.ValidationResult.MemberNames);
-        }
+        var command = new ChangePasswordCommand
+        {
+            UserName = "user",
+            NewPassword = "12345",
+        };
+
+        await using var sp = services.BuildServiceProvider();
+
+        var validationEx = Assert.Throws<ValidationException>(() => DataAnnotationsValidator.Validate(command, sp));
+
+        Assert.IsType<ExtendedValidationResult>(validationEx.ValidationResult);
+        Assert.IsType<PasswordAttribute>(validationEx.ValidationAttribute);
+        Assert.Equal(new[] { nameof(command.NewPassword) }, validationEx.ValidationResult.MemberNames);
     }
 }

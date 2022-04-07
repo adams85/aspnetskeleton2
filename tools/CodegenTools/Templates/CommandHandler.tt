@@ -12,31 +12,31 @@ using Microsoft.EntityFrameworkCore;
 using <#= $"{Namespace}.Core.Helpers" #>;
 using <#= $"{Namespace}.DataAccess.Entities" #>;
 
-namespace <#= $"{Namespace}.Service.{Group}" #>
+namespace <#= $"{Namespace}.Service.{Group}" #>;
+
+internal sealed class <#= $"{Name}CommandHandler" #> : CommandHandler<<#= $"{Name}Command" #>>
 {
-    internal sealed class <#= $"{Name}CommandHandler" #> : CommandHandler<<#= $"{Name}Command" #>>
+    public override async Task HandleAsync(<#= $"{Name}Command" #> command, CommandContext context, CancellationToken cancellationToken)
     {
-        public override async Task HandleAsync(<#= $"{Name}Command" #> command, CommandContext context, CancellationToken cancellationToken)
+        await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
         {
-            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
-            {
-                Entity entity = await dbContext.Entities
-                    .FindAsync(new object[] { command.Id }, cancellationToken).ConfigureAwait(false);
+            Entity entity = await dbContext.Entities
+                .FindAsync(new object[] { command.Id }, cancellationToken).ConfigureAwait(false);
 
-                RequireExisting(entity, c => c.Id);
+            RequireExisting(entity, c => c.Id);
 
-                // ...
+            // ...
 
-                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 <#
 if (IsEventProducer)
 {
 #>
 
-                command.OnEvent?.Invoke(command, new ProgressEvent
-                {
-                    Progress = 1f
-                });
+            command.OnEvent?.Invoke(command, new ProgressEvent
+            {
+                Progress = 1f
+            });
 <#
 }
 
@@ -44,11 +44,10 @@ if (IsKeyGenerator)
 {
 #>
 
-                command.OnKeyGenerated?.Invoke(command, entity.Id);
+            command.OnKeyGenerated?.Invoke(command, entity.Id);
 <#
 }
 #>
-            }
         }
     }
 }

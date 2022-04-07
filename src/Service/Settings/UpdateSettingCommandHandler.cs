@@ -4,37 +4,36 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApp.Core.Helpers;
 
-namespace WebApp.Service.Settings
+namespace WebApp.Service.Settings;
+
+internal sealed class UpdateSettingCommandHandler : CommandHandler<UpdateSettingCommand>
 {
-    internal sealed class UpdateSettingCommandHandler : CommandHandler<UpdateSettingCommand>
+    private readonly ISettingsSource _settingsSource;
+
+    public UpdateSettingCommandHandler(ISettingsSource settingsSource)
     {
-        private readonly ISettingsSource _settingsSource;
+        _settingsSource = settingsSource ?? throw new ArgumentNullException(nameof(settingsSource));
+    }
 
-        public UpdateSettingCommandHandler(ISettingsSource settingsSource)
+    public override async Task HandleAsync(UpdateSettingCommand command, CommandContext context, CancellationToken cancellationToken)
+    {
+        await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
         {
-            _settingsSource = settingsSource ?? throw new ArgumentNullException(nameof(settingsSource));
-        }
+            var setting = await dbContext.Settings
+                .FirstOrDefaultAsync(setting => setting.Name == command.Name, cancellationToken).ConfigureAwait(false);
 
-        public override async Task HandleAsync(UpdateSettingCommand command, CommandContext context, CancellationToken cancellationToken)
-        {
-            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
-            {
-                var setting = await dbContext.Settings
-                    .FirstOrDefaultAsync(setting => setting.Name == command.Name, cancellationToken).ConfigureAwait(false);
+            RequireExisting(setting, c => c.Name);
 
-                RequireExisting(setting, c => c.Name);
+            var value = command.Value;
 
-                var value = command.Value;
+            RequireValid(setting.Validate(ref value), c => c.Value);
 
-                RequireValid(setting.Validate(ref value), c => c.Value);
+            setting.Value = value;
 
-                setting.Value = value;
+            var changeCount = await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                var changeCount = await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                if (changeCount > 0)
-                    _settingsSource.Invalidate();
-            }
+            if (changeCount > 0)
+                _settingsSource.Invalidate();
         }
     }
 }

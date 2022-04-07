@@ -52,7 +52,7 @@ namespace CodegenTools.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n{\r\n    internal sealed class ");
+            this.Write(";\r\n\r\ninternal sealed class ");
             
             #line 17 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\CommandHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}CommandHandler"));
@@ -66,7 +66,7 @@ namespace CodegenTools.Templates
             
             #line default
             #line hidden
-            this.Write(">\r\n    {\r\n        public override async Task HandleAsync(");
+            this.Write(">\r\n{\r\n    public override async Task HandleAsync(");
             
             #line 19 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\CommandHandler.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture($"{Name}Command"));
@@ -74,17 +74,17 @@ namespace CodegenTools.Templates
             #line default
             #line hidden
             this.Write(@" command, CommandContext context, CancellationToken cancellationToken)
+    {
+        await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
         {
-            await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
-            {
-                Entity entity = await dbContext.Entities
-                    .FindAsync(new object[] { command.Id }, cancellationToken).ConfigureAwait(false);
+            Entity entity = await dbContext.Entities
+                .FindAsync(new object[] { command.Id }, cancellationToken).ConfigureAwait(false);
 
-                RequireExisting(entity, c => c.Id);
+            RequireExisting(entity, c => c.Id);
 
-                // ...
+            // ...
 
-                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 ");
             
             #line 31 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\CommandHandler.tt"
@@ -95,8 +95,8 @@ if (IsEventProducer)
             
             #line default
             #line hidden
-            this.Write("\r\n                command.OnEvent?.Invoke(command, new ProgressEvent\r\n           " +
-                    "     {\r\n                    Progress = 1f\r\n                });\r\n");
+            this.Write("\r\n            command.OnEvent?.Invoke(command, new ProgressEvent\r\n            {\r\n" +
+                    "                Progress = 1f\r\n            });\r\n");
             
             #line 40 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\CommandHandler.tt"
 
@@ -108,7 +108,7 @@ if (IsKeyGenerator)
             
             #line default
             #line hidden
-            this.Write("\r\n                command.OnKeyGenerated?.Invoke(command, entity.Id);\r\n");
+            this.Write("\r\n            command.OnKeyGenerated?.Invoke(command, entity.Id);\r\n");
             
             #line 48 "d:\Dev\_Templates\AspNetSkeleton\tools\CodegenTools\Templates\CommandHandler.tt"
 
@@ -117,7 +117,7 @@ if (IsKeyGenerator)
             
             #line default
             #line hidden
-            this.Write("            }\r\n        }\r\n    }\r\n}\r\n");
+            this.Write("        }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
     }

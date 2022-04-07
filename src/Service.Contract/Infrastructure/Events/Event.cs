@@ -11,5 +11,5 @@ namespace WebApp.Service
     [ProtoInclude(2, typeof(ProgressEvent))]
     [ProtoInclude(3, typeof(SettingsChangedEvent))]
     [ProtoInclude(4, typeof(TranslationsChangedEvent))]
-    public abstract class Event { }
+    public abstract record class Event { }
 }

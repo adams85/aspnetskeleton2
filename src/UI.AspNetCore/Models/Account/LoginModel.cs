@@ -7,14 +7,14 @@ using WebApp.Common.Infrastructure.Localization;
 
 namespace WebApp.UI.Models.Account
 {
-    public class LoginModel
+    public record class LoginModel
     {
         [Localized] private const string UserNameDisplayName = "E-mail address";
         [DisplayName(UserNameDisplayName), Required]
         public string UserName
         {
             get => Credentials.UserName;
-            set => Credentials.UserName = value;
+            init => Credentials.UserName = value;
         }
 
         [Localized] private const string PasswordDisplayName = "Password";
@@ -22,12 +22,12 @@ namespace WebApp.UI.Models.Account
         public string Password
         {
             get => Credentials.Password;
-            set => Credentials.Password = value;
+            init => Credentials.Password = value;
         }
 
         [Localized] private const string RememberMeDisplayName = "Remember me?";
         [DisplayName(RememberMeDisplayName)]
-        public bool RememberMe { get; set; }
+        public bool RememberMe { get; init; }
 
         [BindNever, ValidateNever]
         public NetworkCredential Credentials { get; } = new NetworkCredential();

@@ -8,21 +8,21 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
         public DashboardSidebarModel Sidebar
         {
             get => _sidebar ??= new DashboardSidebarModel();
-            set => _sidebar = value;
+            init => _sidebar = value;
         }
 
         private DashboardHeaderModel? _header;
         public DashboardHeaderModel Header
         {
             get => _header ??= new DashboardHeaderModel();
-            set => _header = value;
+            init => _header = value;
         }
 
         private DashboardFooterModel? _footer;
         public DashboardFooterModel Footer
         {
             get => _footer ??= new DashboardFooterModel();
-            set => _footer = value;
+            init => _footer = value;
         }
     }
 }

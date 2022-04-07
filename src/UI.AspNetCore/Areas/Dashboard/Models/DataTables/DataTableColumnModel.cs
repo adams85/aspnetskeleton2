@@ -14,33 +14,38 @@ namespace WebApp.UI.Areas.Dashboard.Models.DataTables
 
         public DataTableModel Table { get; }
 
-        public string? Title { get; set; }
+        public string? Title { get; init; }
 
-        public bool CanSort { get; set; }
-        public string? OrderKeyPropertyPath { get; set; }
-        public string? AscendingOrderIconCssClass { get; set; }
-        public string? DescendingOrderIconCssClass { get; set; }
+        public bool CanSort { get; init; }
+        public string? OrderKeyPropertyPath { get; init; }
+        public string? AscendingOrderIconCssClass { get; init; }
+        public string? DescendingOrderIconCssClass { get; init; }
 
-        public string? HeaderCellCssClasses { get; set; }
+        public string? HeaderCellCssClasses { get; init; }
 
-        public Func<DataTableColumnModel, IHtmlContent>? HeaderCellTemplate { get; set; }
+        public Func<DataTableColumnModel, IHtmlContent>? HeaderCellTemplate { get; init; }
 
-        public bool CanFilter { get; set; }
+        public bool CanFilter { get; init; }
 
-        public DataTableColumnFilterModel? Filter { get; set; }
+        private DataTableColumnFilterModel? _filter;
+        public DataTableColumnFilterModel? Filter
+        {
+            get => _filter;
+            init => _filter = value;
+        }
 
         public Func<DataTableColumnModel, DataTableColumnFilterModel> FilterFactory
         {
-            set => Filter = value(this);
+            init => _filter = value(this);
         }
 
-        public string? FilterCellCssClasses { get; set; }
+        public string? FilterCellCssClasses { get; init; }
 
         private Func<DataTableColumnModel, IHtmlContent>? _filterCellTemplate;
         public Func<DataTableColumnModel, IHtmlContent>? FilterCellTemplate
         {
             get => _filterCellTemplate;
-            set => (_filterCellTemplate, _renderFilterCell) = (value, null);
+            init => (_filterCellTemplate, _renderFilterCell) = (value, null);
         }
 
         private Action<IDataTableHelpers>? _renderFilterCell;
@@ -52,13 +57,13 @@ namespace WebApp.UI.Areas.Dashboard.Models.DataTables
         protected virtual void RenderFilterCellDefault(IDataTableHelpers helpers) =>
             helpers.ColumnFilterCell(this, Filter != null ? Filter.RenderDefault : CachedDelegates.Noop<IDataTableHelpers>.Action);
 
-        public string? ContentCellCssClasses { get; set; }
+        public string? ContentCellCssClasses { get; init; }
 
         private Func<(object Item, DataTableColumnModel ColumnModel), IHtmlContent>? _contentCellTemplate;
         public Func<(object Item, DataTableColumnModel ColumnModel), IHtmlContent>? ContentCellTemplate
         {
             get => _contentCellTemplate;
-            set => (_contentCellTemplate, _renderContentCell) = (value, null);
+            init => (_contentCellTemplate, _renderContentCell) = (value, null);
         }
 
         private Action<IDataTableHelpers, object>? _renderContentCell;
@@ -94,8 +99,8 @@ namespace WebApp.UI.Areas.Dashboard.Models.DataTables
                 ContentCellCssClasses = "control-column";
             }
 
-            public Func<object, bool> CanEditRow { get; set; } = CachedDelegates.True<object>.Func;
-            public Func<object, bool> CanDeleteRow { get; set; } = CachedDelegates.True<object>.Func;
+            public Func<object, bool> CanEditRow { get; init; } = CachedDelegates.True<object>.Func;
+            public Func<object, bool> CanDeleteRow { get; init; } = CachedDelegates.True<object>.Func;
 
             protected override void RenderContentCellDefault(IDataTableHelpers helpers, object item) => helpers.ControlContentCell(item, this);
         }

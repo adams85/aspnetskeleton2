@@ -26,6 +26,8 @@ namespace <#= $"{Namespace}.Service.{Group}" #>
                 RequireExisting(entity, c => c.Id);
 
                 // ...
+
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 <#
 if (IsEventProducer)
 {
@@ -37,10 +39,7 @@ if (IsEventProducer)
                 });
 <#
 }
-#>
 
-                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-<#
 if (IsKeyGenerator)
 {
 #>

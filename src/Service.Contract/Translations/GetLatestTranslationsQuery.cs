@@ -3,7 +3,7 @@
 namespace WebApp.Service.Translations
 {
     [DataContract]
-    public class GetLatestTranslationsQuery : IQuery<TranslationsChangedEvent[]?>
+    public record class GetLatestTranslationsQuery : IQuery<TranslationsChangedEvent[]?>
     {
     }
 }

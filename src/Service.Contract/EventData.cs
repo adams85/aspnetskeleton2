@@ -3,8 +3,8 @@
 namespace WebApp.Service
 {
     [DataContract]
-    public sealed class EventData
+    public sealed record class EventData
     {
-        [DataMember(Order = 1)] public Event Value { get; set; } = null!;
+        [DataMember(Order = 1)] public Event Value { get; init; } = null!;
     }
 }

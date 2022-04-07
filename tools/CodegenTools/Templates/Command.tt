@@ -10,9 +10,9 @@ using System.Runtime.Serialization;
 namespace <#= $"{Namespace}.Service.{Group}" #>
 {
     [DataContract]
-    public class <#= $"{Name}Command" #> : <#= IsKeyGenerator ? "IKeyGeneratorCommand" : "ICommand" #><#= IsEventProducer ? ", IEventProducerCommand" : "" #>
+    public record class <#= $"{Name}Command" #> : <#= IsKeyGenerator ? "IKeyGeneratorCommand" : "ICommand" #><#= IsEventProducer ? ", IEventProducerCommand" : "" #>
     {
-        [DataMember(Order = 1)] public string Property { get; set; } = null!;
+        [DataMember(Order = 1)] public string Property { get; init; } = null!;
 <#
 if (IsEventProducer)
 {

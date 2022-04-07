@@ -5,14 +5,14 @@ using System.Runtime.Serialization;
 namespace WebApp.Service.Users
 {
     [DataContract]
-    public class ApproveUserCommand : ICommand, IValidatableObject
+    public record class ApproveUserCommand : ICommand, IValidatableObject
     {
         [Required]
-        [DataMember(Order = 1)] public string UserName { get; set; } = null!;
+        [DataMember(Order = 1)] public string UserName { get; init; } = null!;
 
-        [DataMember(Order = 2)] public bool Verify { get; set; }
+        [DataMember(Order = 2)] public bool Verify { get; init; }
 
-        [DataMember(Order = 3)] public string? VerificationToken { get; set; }
+        [DataMember(Order = 3)] public string? VerificationToken { get; init; }
 
         IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
         {

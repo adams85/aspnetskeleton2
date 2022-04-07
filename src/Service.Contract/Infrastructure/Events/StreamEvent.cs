@@ -11,12 +11,12 @@ namespace WebApp.Service.Infrastructure.Events
     /// </remarks>
     [DataContract]
     [ProtoInclude(1, typeof(Init))]
-    public abstract class StreamEvent : Event
+    public abstract record class StreamEvent : Event
     {
         /// <summary>
         /// Event which is sent before the actual events (to signal successful connection).
         /// </summary>
         [DataContract]
-        public sealed class Init : StreamEvent { }
+        public sealed record class Init : StreamEvent { }
     }
 }

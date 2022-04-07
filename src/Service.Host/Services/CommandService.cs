@@ -51,7 +51,7 @@ namespace WebApp.Service.Host.Services
             if (keyGeneratorCommand != null)
             {
                 handleKeyGenerated = (_, k) => key = k;
-                keyGeneratorCommand.OnKeyGenerated += handleKeyGenerated;
+                keyGeneratorCommand.OnKeyGenerated = handleKeyGenerated;
             }
             else
                 handleKeyGenerated = null;

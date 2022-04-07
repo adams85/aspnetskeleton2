@@ -6,14 +6,14 @@ using System.Runtime.Serialization;
 namespace WebApp.Service.Users
 {
     [DataContract]
-    public class VerifyJwtRefreshTokenQuery : IQuery<bool>
+    public record class VerifyJwtRefreshTokenQuery : IQuery<bool>
     {
         [Required]
-        [DataMember(Order = 1)] public string UserName { get; set; } = null!;
+        [DataMember(Order = 1)] public string UserName { get; init; } = null!;
 
-        [DataMember(Order = 2)] public TimeSpan TokenExpirationTimeSpan { get; set; }
+        [DataMember(Order = 2)] public TimeSpan TokenExpirationTimeSpan { get; init; }
 
         [Required]
-        [DataMember(Order = 3)] public string VerificationToken { get; set; } = null!;
+        [DataMember(Order = 3)] public string VerificationToken { get; init; } = null!;
     }
 }

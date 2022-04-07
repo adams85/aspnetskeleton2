@@ -3,10 +3,10 @@
 namespace WebApp.Service.Translations
 {
     [DataContract]
-    public class TranslationCatalogData
+    public record class TranslationCatalogData
     {
-        [DataMember(Order = 1)] public int PluralFormCount { get; set; }
-        [DataMember(Order = 2)] public string? PluralFormSelector { get; set; }
+        [DataMember(Order = 1)] public int PluralFormCount { get; init; }
+        [DataMember(Order = 2)] public string? PluralFormSelector { get; init; }
 
         [DataMember(Order = 3)] public TranslationEntryData[]? Entries { get; set; }
     }

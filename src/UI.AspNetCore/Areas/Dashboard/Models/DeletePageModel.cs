@@ -11,14 +11,14 @@ namespace WebApp.UI.Areas.Dashboard.Models
     {
         public virtual Func<HttpContext, IHtmlLocalizer, string> GetItemDisplayName => PageDescriptor.GetItemDisplayName;
         public virtual Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle => PageDescriptor.GetDefaultTitle;
-        public string ItemId { get; set; } = null!;
+        public string ItemId { get; protected set; } = null!;
 
         private string? _returnUrl;
         [AllowNull]
         public string ReturnUrl
         {
             get => EnsureReturnUrl(_returnUrl);
-            set => _returnUrl = value;
+            protected set => _returnUrl = value;
         }
 
         protected abstract string DefaultReturnUrl { get; }

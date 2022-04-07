@@ -3,7 +3,7 @@
 namespace WebApp.Service.Settings
 {
     [DataContract]
-    public class GetLatestSettingsQuery : IQuery<SettingsChangedEvent>
+    public record class GetLatestSettingsQuery : IQuery<SettingsChangedEvent>
     {
     }
 }

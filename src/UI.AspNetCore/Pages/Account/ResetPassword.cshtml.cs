@@ -27,7 +27,7 @@ namespace WebApp.UI.Pages.Account
             set => _model = value;
         }
 
-        public bool? Success { get; set; }
+        public bool? Success { get; private set; }
 
         public void OnGet([FromQuery] string s)
         {

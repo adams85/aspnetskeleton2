@@ -19,8 +19,8 @@ namespace WebApp.UI.Areas.Dashboard.Pages
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         }
 
-        public DateTime UtcNow { get; set; }
-        public TimeSpan TimeToMidnight { get; set; }
+        public DateTime UtcNow { get; private set; }
+        public TimeSpan TimeToMidnight { get; private set; }
 
         public void OnGet()
         {

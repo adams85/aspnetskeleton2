@@ -14,7 +14,7 @@ namespace WebApp.Service
         protected Template() { }
 
         [RazorInject]
-        public IViewLocalizer T { get; set; } = null!;
+        public IViewLocalizer T { get; init; } = null!;
 
         public string GetLanguageCode(CultureInfo culture) =>
             culture.Name.Length > 0 ? culture.TwoLetterISOLanguageName : "en";

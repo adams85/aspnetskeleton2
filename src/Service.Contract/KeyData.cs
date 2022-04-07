@@ -10,7 +10,7 @@ namespace WebApp.Service
     [ProtoInclude(2, typeof(KeyData<int>))]
     [ProtoInclude(3, typeof(KeyData<long>))]
     [ProtoInclude(4, typeof(KeyData<Guid>))]
-    public abstract class KeyData
+    public abstract record class KeyData
     {
         public static KeyData From(object value)
         {
@@ -26,20 +26,27 @@ namespace WebApp.Service
         public object Value
         {
             get => ValueInternal;
-            set => ValueInternal = value;
+            init => ValueInternal = value;
         }
     }
 
     [DataContract]
-    public sealed class KeyData<T> : KeyData
+    public sealed record class KeyData<T> : KeyData
     {
         [NotNull]
-        [DataMember(Order = 1)] public new T Value { get; set; } = default!;
+        private T _value = default!;
+
+        [DataMember(Order = 1)]
+        public new T Value
+        {
+            get => _value;
+            init => _value = value;
+        }
 
         protected override object ValueInternal
         {
-            get => Value;
-            set => Value = (T)value;
+            get => _value;
+            set => _value = (T)value;
         }
     }
 }

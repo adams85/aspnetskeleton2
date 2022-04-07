@@ -18,9 +18,9 @@ if (IsList)
 }
 #>
     [DataContract]
-    public class <#= $"{Name}Query" #> : <#= GetQueryBaseType(GetResultType()) #><#= IsEventProducer ? ", IEventProducerQuery" : "" #>
+    public record class <#= $"{Name}Query" #> : <#= GetQueryBaseType(GetResultType()) #><#= IsEventProducer ? ", IEventProducerQuery" : "" #>
     {
-        [DataMember(Order = 1)] public string Property { get; set; } = null!;
+        [DataMember(Order = 1)] public string Property { get; init; } = null!;
 <#
 if (IsEventProducer)
 {

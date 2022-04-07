@@ -3,9 +3,9 @@
 namespace WebApp.Service.Host.Models
 {
     [DataContract]
-    public class CommandRequest
+    public record class CommandRequest
     {
-        [DataMember(Order = 1)] public string CommandTypeName { get; set; } = null!;
-        [DataMember(Order = 2)] public byte[]? SerializedCommand { get; set; }
+        [DataMember(Order = 1)] public string CommandTypeName { get; init; } = null!;
+        [DataMember(Order = 2)] public byte[]? SerializedCommand { get; init; }
     }
 }

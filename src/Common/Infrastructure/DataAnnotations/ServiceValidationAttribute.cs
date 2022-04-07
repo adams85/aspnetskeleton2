@@ -20,7 +20,7 @@ namespace System.ComponentModel.DataAnnotations
             _validatorHelper = s_validatorHelperCache.GetOrAdd(GetType(), type => new ValidatorHelper(type));
         }
 
-        public bool IgnoreIfServiceUnavailable { get; set; }
+        public bool IgnoreIfServiceUnavailable { get; init; }
 
         public override bool RequiresValidationContext => true;
 

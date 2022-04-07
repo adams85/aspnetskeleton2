@@ -17,22 +17,19 @@ namespace WebApp.Service.Users
                 var result = new AuthenticateUserResult();
 
                 if (user == null)
-                {
-                    result.Status = AuthenticateUserStatus.NotExists;
-                    return result;
-                }
+                    return new AuthenticateUserResult { Status = AuthenticateUserStatus.NotExists };
 
-                result.UserId = user.Id;
+                AuthenticateUserStatus status;
                 if (!user.IsApproved)
-                    result.Status = AuthenticateUserStatus.Unapproved;
+                    status = AuthenticateUserStatus.Unapproved;
                 else if (user.IsLockedOut)
-                    result.Status = AuthenticateUserStatus.LockedOut;
+                    status = AuthenticateUserStatus.LockedOut;
                 else if (user.Password != null && SecurityHelper.VerifyHashedPassword(user.Password, query.Password) == PasswordVerificationResult.Success)
-                    result.Status = AuthenticateUserStatus.Successful;
+                    status = AuthenticateUserStatus.Successful;
                 else
-                    result.Status = AuthenticateUserStatus.Failed;
+                    status = AuthenticateUserStatus.Failed;
 
-                return result;
+                return new AuthenticateUserResult { UserId = user.Id, Status = status };
             }
         }
     }

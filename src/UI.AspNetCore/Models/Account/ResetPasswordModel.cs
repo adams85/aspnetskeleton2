@@ -6,11 +6,11 @@ using WebApp.Service.Users;
 
 namespace WebApp.UI.Models.Account
 {
-    public class ResetPasswordModel
+    public record class ResetPasswordModel
     {
         [Localized] private const string UserNameDisplayName = "E-mail address";
         [DisplayName(UserNameDisplayName), Required]
-        public string UserName { get; set; } = null!;
+        public string UserName { get; init; } = null!;
 
         public ResetPasswordCommand ToCommand(TimeSpan tokenExpirationTime) => new ResetPasswordCommand()
         {

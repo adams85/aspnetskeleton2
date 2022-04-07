@@ -4,12 +4,12 @@ using System.Runtime.Serialization;
 namespace WebApp.Service.Users
 {
     [DataContract]
-    public class AuthenticateUserQuery : IQuery<AuthenticateUserResult>
+    public record class AuthenticateUserQuery : IQuery<AuthenticateUserResult>
     {
         [Required]
-        [DataMember(Order = 1)] public string UserName { get; set; } = null!;
+        [DataMember(Order = 1)] public string UserName { get; init; } = null!;
 
         [Required]
-        [DataMember(Order = 2)] public string Password { get; set; } = null!;
+        [DataMember(Order = 2)] public string Password { get; init; } = null!;
     }
 }

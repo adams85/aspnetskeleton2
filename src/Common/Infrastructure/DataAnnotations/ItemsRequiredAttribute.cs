@@ -7,7 +7,7 @@ namespace System.ComponentModel.DataAnnotations
     {
         public ItemsRequiredAttribute() : base(ValidationErrorMessages.ItemsRequiredAttribute_DefaultErrorMessage) { }
 
-        public bool AllowEmptyStrings { get; set; }
+        public bool AllowEmptyStrings { get; init; }
 
         public override bool RequiresValidationContext => false;
 

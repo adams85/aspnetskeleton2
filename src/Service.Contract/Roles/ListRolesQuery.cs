@@ -3,8 +3,8 @@
 namespace WebApp.Service.Roles
 {
     [DataContract]
-    public class ListRolesQuery : ListQuery<ListResult<RoleData>>
+    public record class ListRolesQuery : ListQuery<ListResult<RoleData>>
     {
-        [DataMember(Order = 1)] public string? UserName { get; set; }
+        [DataMember(Order = 1)] public string? UserName { get; init; }
     }
 }

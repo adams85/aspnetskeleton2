@@ -7,24 +7,24 @@ namespace WebApp.Service.Host.Models
     [ProtoInclude(1, typeof(Success))]
     [ProtoInclude(2, typeof(Failure))]
     [ProtoInclude(3, typeof(Notification))]
-    public abstract class CommandResponse
+    public abstract record class CommandResponse
     {
         [DataContract]
-        public class Success : CommandResponse
+        public record class Success : CommandResponse
         {
-            [DataMember(Order = 1)] public KeyData? Key { get; set; }
+            [DataMember(Order = 1)] public KeyData? Key { get; init; }
         }
 
         [DataContract]
-        public class Failure : CommandResponse
+        public record class Failure : CommandResponse
         {
-            [DataMember(Order = 1)] public ServiceErrorData Error { get; set; } = null!;
+            [DataMember(Order = 1)] public ServiceErrorData Error { get; init; } = null!;
         }
 
         [DataContract]
-        public class Notification : CommandResponse
+        public record class Notification : CommandResponse
         {
-            [DataMember(Order = 1)] public EventData Event { get; set; } = null!;
+            [DataMember(Order = 1)] public EventData Event { get; init; } = null!;
         }
     }
 }

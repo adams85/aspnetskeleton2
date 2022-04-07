@@ -8,26 +8,26 @@ namespace WebApp.Service.Users
     [ProtoInclude(1, typeof(Key))]
     [ProtoInclude(2, typeof(Name))]
     [ProtoInclude(3, typeof(Email))]
-    public abstract class UserIdentifier
+    public abstract record class UserIdentifier
     {
         [DataContract]
-        public class Key : UserIdentifier
+        public record class Key : UserIdentifier
         {
-            [DataMember(Order = 1)] public int Value { get; set; }
+            [DataMember(Order = 1)] public int Value { get; init; }
         }
 
         [DataContract]
-        public class Name : UserIdentifier
+        public record class Name : UserIdentifier
         {
             [Required]
-            [DataMember(Order = 1)] public string Value { get; set; } = null!;
+            [DataMember(Order = 1)] public string Value { get; init; } = null!;
         }
 
         [DataContract]
-        public class Email : UserIdentifier
+        public record class Email : UserIdentifier
         {
             [Required]
-            [DataMember(Order = 1)] public string Value { get; set; } = null!;
+            [DataMember(Order = 1)] public string Value { get; init; } = null!;
         }
     }
 }

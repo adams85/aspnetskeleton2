@@ -36,7 +36,7 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Account
             set => _changePasswordModel = value;
         }
 
-        public bool? ChangePasswordSuccess { get; set; }
+        public bool? ChangePasswordSuccess { get; private set; }
 
         public void OnGet()
         {

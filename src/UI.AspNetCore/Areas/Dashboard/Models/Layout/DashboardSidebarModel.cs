@@ -19,26 +19,26 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
             ((state & 0x1) != 0, (state & 0x2) != 0) :
             (true, false);
 
-        public List<NavigationGroup>? Groups { get; set; }
+        public List<NavigationGroup>? Groups { get; init; }
 
         public class NavigationGroup
         {
-            public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; set; }
-            public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString>? GetTitle { get; set; }
+            public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; init; }
+            public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString>? GetTitle { get; init; }
 
             private List<NavigationItemBase>? _items;
             public List<NavigationItemBase> Items
             {
                 get => _items ??= new List<NavigationItemBase>();
-                set => _items = value;
+                init => _items = value;
             }
         }
 
         public abstract class NavigationItemBase
         {
-            public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; set; }
-            public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; set; } = null!;
-            public string? IconCssClass { get; set; }
+            public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; init; }
+            public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; init; } = null!;
+            public string? IconCssClass { get; init; }
         }
 
         public class NavigationItem : NavigationItemBase
@@ -53,8 +53,8 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
                 IsActive = (_, currentPage) => currentPage == page;
             }
 
-            public Func<IUrlHelper, string?> GetUrl { get; set; } = null!;
-            public Func<HttpContext, PageDescriptor?, bool> IsActive { get; set; } = null!;
+            public Func<IUrlHelper, string?> GetUrl { get; init; } = null!;
+            public Func<HttpContext, PageDescriptor?, bool> IsActive { get; init; } = null!;
         }
 
         public class NavigationDropDownItem : NavigationItemBase
@@ -63,7 +63,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
             public List<NavigationItemBase> Items
             {
                 get => _items ??= new List<NavigationItemBase>();
-                set => _items = value;
+                init => _items = value;
             }
 
             public bool IsShown(HttpContext context, PageDescriptor? currentPage)

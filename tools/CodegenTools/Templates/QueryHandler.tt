@@ -57,23 +57,32 @@ else
                 IQueryable<Entity> entityQuery = dbContext.Entities;
 
                 // ...
+
+                var dataQuery = entityQuery.ToData();
 <#
     if (IsEventProducer)
     {
 #>
 
+                var items = await ToArrayAsync(ApplyPagingAndOrdering(query, dataQuery), cancellationToken).ConfigureAwait(false);
+
+                var totalItemCount = await GetTotalItemCountAsync(query, dataQuery, items, cancellationToken).ConfigureAwait(false);
+
                 query.OnEvent?.Invoke(query, new ProgressEvent
                 {
                     Progress = 1f
                 });
+
+                return Result(items, totalItemCount, query.PageIndex, query.PageSize, query.MaxPageSize);
 <#
     }
+    else
+    {
 #>
 
-                var entityDataQuery = entityQuery.ToData();
-
-                return await ResultAsync(query, entityDataQuery, cancellationToken).ConfigureAwait(false);
+                return await ResultAsync(query, dataQuery, cancellationToken).ConfigureAwait(false);
 <#
+    }
 }
 #>
             }

@@ -10,7 +10,7 @@ namespace WebApp.UI.Pages
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public class ErrorModel : CardPageModel<ErrorModel.PageDescriptorClass>
     {
-        public string? RequestId { get; set; }
+        public string? RequestId { get; private set; }
 
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 

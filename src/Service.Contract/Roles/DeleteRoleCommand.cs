@@ -4,11 +4,11 @@ using System.Runtime.Serialization;
 namespace WebApp.Service.Roles
 {
     [DataContract]
-    public class DeleteRoleCommand : ICommand
+    public record class DeleteRoleCommand : ICommand
     {
         [Required]
-        [DataMember(Order = 1)] public string RoleName { get; set; } = null!;
+        [DataMember(Order = 1)] public string RoleName { get; init; } = null!;
 
-        [DataMember(Order = 2)] public bool DeletePopulatedRole { get; set; }
+        [DataMember(Order = 2)] public bool DeletePopulatedRole { get; init; }
     }
 }

@@ -3,9 +3,9 @@
 namespace WebApp.Service.Users
 {
     [DataContract]
-    public class AuthenticateUserResult
+    public record class AuthenticateUserResult
     {
-        [DataMember(Order = 1)] public int? UserId { get; set; }
-        [DataMember(Order = 2)] public AuthenticateUserStatus Status { get; set; }
+        [DataMember(Order = 1)] public int? UserId { get; init; }
+        [DataMember(Order = 2)] public AuthenticateUserStatus Status { get; init; }
     }
 }

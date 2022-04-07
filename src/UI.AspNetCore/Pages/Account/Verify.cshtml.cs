@@ -18,7 +18,7 @@ namespace WebApp.UI.Pages.Account
             _accountManager = accountManager ?? throw new ArgumentNullException(nameof(accountManager));
         }
 
-        public bool? Success { get; set; }
+        public bool? Success { get; private set; }
 
         public async Task OnGet([FromQuery] string u, [FromQuery] string v)
         {

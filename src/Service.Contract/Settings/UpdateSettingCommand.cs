@@ -4,11 +4,11 @@ using System.Runtime.Serialization;
 namespace WebApp.Service.Settings
 {
     [DataContract]
-    public class UpdateSettingCommand : ICommand
+    public record class UpdateSettingCommand : ICommand
     {
         [Required]
-        [DataMember(Order = 1)] public string Name { get; set; } = null!;
+        [DataMember(Order = 1)] public string Name { get; init; } = null!;
 
-        [DataMember(Order = 2)] public string? Value { get; set; }
+        [DataMember(Order = 2)] public string? Value { get; init; }
     }
 }

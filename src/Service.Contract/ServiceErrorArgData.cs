@@ -26,7 +26,7 @@ namespace WebApp.Service
     [ProtoInclude(17, typeof(ServiceErrorArgData<TimeSpan>))]
     [ProtoInclude(18, typeof(ServiceErrorArgData<DateTime>))]
     [ProtoInclude(101, typeof(ServiceErrorArgData<PasswordRequirementsData>))]
-    public abstract class ServiceErrorArgData
+    public abstract record class ServiceErrorArgData
     {
         public static ServiceErrorArgData From(object value)
         {
@@ -42,20 +42,27 @@ namespace WebApp.Service
         public object Value
         {
             get => ValueInternal;
-            set => ValueInternal = value;
+            init => ValueInternal = value;
         }
     }
 
     [DataContract]
-    public class ServiceErrorArgData<T> : ServiceErrorArgData
+    public record class ServiceErrorArgData<T> : ServiceErrorArgData
     {
         [NotNull]
-        [DataMember(Order = 1)] public new T Value { get; set; } = default!;
+        private T _value = default!;
+
+        [DataMember(Order = 1)]
+        public new T Value
+        {
+            get => _value;
+            init => _value = value;
+        }
 
         protected override object ValueInternal
         {
-            get => Value;
-            set => Value = (T)value;
+            get => _value;
+            set => _value = (T)value;
         }
     }
 }

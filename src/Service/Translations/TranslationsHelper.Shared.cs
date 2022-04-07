@@ -18,13 +18,21 @@ namespace WebApp.Service.Translations
                     TranslationEntryData entryData;
 
                     if (entry.Key.PluralId == null)
-                        entryData = new TranslationEntryData.Singular { Translation = entry[0] };
+                        entryData = new TranslationEntryData.Singular
+                        {
+                            Id = entry.Key.Id,
+                            PluralId = entry.Key.PluralId,
+                            ContextId = entry.Key.ContextId,
+                            Translation = entry[0]
+                        };
                     else
-                        entryData = new TranslationEntryData.Plural { Translations = entry.ToArray() };
-
-                    entryData.Id = entry.Key.Id;
-                    entryData.PluralId = entry.Key.PluralId;
-                    entryData.ContextId = entry.Key.ContextId;
+                        entryData = new TranslationEntryData.Plural
+                        {
+                            Id = entry.Key.Id,
+                            PluralId = entry.Key.PluralId,
+                            ContextId = entry.Key.ContextId,
+                            Translations = entry.ToArray()
+                        };
 
                     return entryData;
                 })

@@ -46,92 +46,92 @@ namespace WebApp.UI.Helpers
         ///<summary>
         /// CSSClasses to append to the &lt;ul&gt; element in the paging control.
         ///</summary>
-        public IEnumerable<string>? UlElementClasses { get; set; }
+        public IEnumerable<string>? UlElementClasses { get; init; }
 
         /// <summary>
         /// Attrinutes to appendto the &lt;ul&gt; element in the paging control
         /// </summary>
-        public IDictionary<string, string>? UlElementAttributes { get; set; }
+        public IDictionary<string, string>? UlElementAttributes { get; init; }
 
         ///<summary>
         /// CSS Classes to append to every &lt;li&gt; element in the paging control.
         ///</summary>
-        public IEnumerable<string>? LiElementClasses { get; set; }
+        public IEnumerable<string>? LiElementClasses { get; init; }
 
         /// <summary>
         /// CSS Classes to appent to active &lt;li&gt; element in the paging control.
         /// </summary>
-        public string ActiveLiElementClass { get; set; }
+        public string ActiveLiElementClass { get; init; }
 
         ///<summary>
         /// CSS Classes to append to every &lt;a&gt; or &lt;span&gt; element that represent each page in the paging control.
         ///</summary>
-        public IEnumerable<string>? PageClasses { get; set; }
+        public IEnumerable<string>? PageClasses { get; init; }
 
         ///<summary>
         /// CSS Classes to append to previous element in the paging control.
         ///</summary>
-        public string PreviousElementClass { get; set; }
+        public string PreviousElementClass { get; init; }
 
         ///<summary>
         /// CSS Classes to append to next element in the paging control.
         ///</summary>
-        public string NextElementClass { get; set; }
+        public string NextElementClass { get; init; }
 
         ///<summary>
         /// CSS Classes to append to every &lt;a&gt; or &lt;span&gt; Ellipses element.
         ///</summary>
-        public IEnumerable<string>? EllipsesClasses { get; set; }
+        public IEnumerable<string>? EllipsesClasses { get; init; }
 
         ///<summary>
         /// CSS Classes to append to Ellipses element in the paging control.
         ///</summary>
-        public string EllipsesElementClass { get; set; }
+        public string EllipsesElementClass { get; init; }
 
         ///<summary>
         /// Specifies a CSS class to append to the first list item in the pager. If null or whitespace is defined, no additional class is added to first list item in list.
         ///</summary>
-        public string? ClassToApplyToFirstListItemInPager { get; set; }
+        public string? ClassToApplyToFirstListItemInPager { get; init; }
 
         ///<summary>
         /// Specifies a CSS class to append to the last list item in the pager. If null or whitespace is defined, no additional class is added to last list item in list.
         ///</summary>
-        public string? ClassToApplyToLastListItemInPager { get; set; }
+        public string? ClassToApplyToLastListItemInPager { get; init; }
 
         /// <summary>
         /// If set to <see langword="true" />, always renders the paging control. If set to <see langword="null" />, render the paging control when there is more than one page.
         /// </summary>
-        public bool? Display { get; set; }
+        public bool? Display { get; init; }
 
         ///<summary>
         /// If set to <see langword="true" />, render a hyperlink to the first page in the list. If set to <see langword="null" />, render the hyperlink only when the first page isn't visible in the paging control.
         ///</summary>
-        public bool? DisplayLinkToFirstPage { get; set; }
+        public bool? DisplayLinkToFirstPage { get; init; }
 
         ///<summary>
         /// If set to <see langword="true" />, render a hyperlink to the last page in the list. If set to <see langword="null" />, render the hyperlink only when the last page isn't visible in the paging control.
         ///</summary>
-        public bool? DisplayLinkToLastPage { get; set; }
+        public bool? DisplayLinkToLastPage { get; init; }
 
         ///<summary>
         /// If set to <see langword="true" />, render a hyperlink to the previous page of the list. If set to <see langword="null" />, render the hyperlink only when there is a previous page in the list.
         ///</summary>
-        public bool? DisplayLinkToPreviousPage { get; set; }
+        public bool? DisplayLinkToPreviousPage { get; init; }
 
         ///<summary>
         /// If set to <see langword="true" />, render a hyperlink to the next page of the list. If set to <see langword="null" />, render the hyperlink only when there is a next page in the list.
         ///</summary>
-        public bool? DisplayLinkToNextPage { get; set; }
+        public bool? DisplayLinkToNextPage { get; init; }
 
         ///<summary>
         /// When true, includes hyperlinks for each page in the list.
         ///</summary>
-        public bool DisplayLinkToIndividualPages { get; set; }
+        public bool DisplayLinkToIndividualPages { get; init; }
 
         ///<summary>
         /// The maximum number of page numbers to display. Null displays all page numbers.
         ///</summary>
-        public int? MaximumPageNumbersToDisplay { get; set; }
+        public int? MaximumPageNumbersToDisplay { get; init; }
 
         ///<summary>
         /// If true, adds an ellipsis where not all page numbers are being displayed.
@@ -141,7 +141,7 @@ namespace WebApp.UI.Helpers
         /// "... 6 7 8 9 10 ...",
         /// "... 11 12 13 14 15"
         ///</example>
-        public bool DisplayEllipsesWhenNotShowingAllPageNumbers { get; set; }
+        public bool DisplayEllipsesWhenNotShowingAllPageNumbers { get; init; }
 
         ///<summary>
         /// The pre-formatted text to display when not all page numbers are displayed at once.
@@ -149,7 +149,7 @@ namespace WebApp.UI.Helpers
         ///<example>
         /// "..."
         ///</example>
-        public string EllipsesFormat { get; set; }
+        public string EllipsesFormat { get; init; }
 
         ///<summary>
         /// The pre-formatted text to display inside the hyperlink to the first page. The one-based index of the page (always 1 in this case) is passed into the formatting function - use {0} to reference it.
@@ -157,7 +157,7 @@ namespace WebApp.UI.Helpers
         ///<example>
         /// "&lt;&lt; First"
         ///</example>
-        public string LinkToFirstPageFormat { get; set; }
+        public string LinkToFirstPageFormat { get; init; }
 
         ///<summary>
         /// The pre-formatted text to display inside the hyperlink to the previous page. The one-based index of the page is passed into the formatting function - use {0} to reference it.
@@ -165,7 +165,7 @@ namespace WebApp.UI.Helpers
         ///<example>
         /// "&lt; Previous"
         ///</example>
-        public string LinkToPreviousPageFormat { get; set; }
+        public string LinkToPreviousPageFormat { get; init; }
 
         ///<summary>
         /// The pre-formatted text to display inside the hyperlink to each individual page. The one-based index of the page is passed into the formatting function - use {0} to reference it.
@@ -173,7 +173,7 @@ namespace WebApp.UI.Helpers
         ///<example>
         /// "{0}"
         ///</example>
-        public string LinkToIndividualPageFormat { get; set; }
+        public string LinkToIndividualPageFormat { get; init; }
 
         ///<summary>
         /// The pre-formatted text to display inside the hyperlink to the next page. The one-based index of the page is passed into the formatting function - use {0} to reference it.
@@ -181,7 +181,7 @@ namespace WebApp.UI.Helpers
         ///<example>
         /// "Next &gt;"
         ///</example>
-        public string LinkToNextPageFormat { get; set; }
+        public string LinkToNextPageFormat { get; init; }
 
         ///<summary>
         /// The pre-formatted text to display inside the hyperlink to the last page. The one-based index of the page is passed into the formatting function - use {0} to reference it.
@@ -189,16 +189,16 @@ namespace WebApp.UI.Helpers
         ///<example>
         /// "Last &gt;&gt;"
         ///</example>
-        public string LinkToLastPageFormat { get; set; }
+        public string LinkToLastPageFormat { get; init; }
 
         /// <summary>
         /// A function that will render each page number when specified (and DisplayLinkToIndividualPages is true). If no function is specified, the LinkToIndividualPageFormat value will be used instead.
         /// </summary>
-        public Func<int, string>? FunctionToDisplayEachPageNumber { get; set; }
+        public Func<int, string>? FunctionToDisplayEachPageNumber { get; init; }
 
         /// <summary>
         /// Text that will appear between each page number. If null or whitespace is specified, no delimiter will be shown.
         /// </summary>
-        public string? DelimiterBetweenPageNumbers { get; set; }
+        public string? DelimiterBetweenPageNumbers { get; init; }
     }
 }

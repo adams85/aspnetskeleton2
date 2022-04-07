@@ -13,18 +13,31 @@ namespace WebApp.UI.Models.Layout
     {
         private static readonly string? s_defaultAuthor = typeof(Program).Assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
         private static readonly string? s_defaultDescription = typeof(Program).Assembly.GetCustomAttribute<AssemblyDescriptionAttribute>()?.Description;
+        public string ApplicationName { get; init; } = Program.ApplicationName;
+        public string ApplicationVersion { get; init; } = Program.ApplicationVersion;
 
-        public string ApplicationName { get; set; } = Program.ApplicationName;
-        public string ApplicationVersion { get; set; } = Program.ApplicationVersion;
-
-        public string? Author { get; set; } = s_defaultAuthor;
-        public string? Descriptions { get; set; } = s_defaultDescription;
-        public string? Keywords { get; set; }
+        public string? Author { get; init; } = s_defaultAuthor;
+        public string? Descriptions { get; init; } = s_defaultDescription;
+        public string? Keywords { get; init; }
 
         public PageDescriptor? PageDescriptor { get; private set; }
-        public string? LayoutName { get; set; }
-        public LocalizedHtmlString? Title { get; set; }
-        public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString>? GetTitle { get; set; }
+
+        private string? _layoutName;
+        public string? LayoutName
+        {
+            get => _layoutName;
+            init => _layoutName = value;
+        }
+
+        private LocalizedHtmlString? _title;
+        public LocalizedHtmlString? Title
+        {
+            get => _title;
+            init => _title = value;
+        }
+
+        public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString>? GetTitle { get; init; }
+
         public object? BodyCssClasses { get; set; }
 
         protected virtual LocalizedHtmlString? GetActualTitle(HttpContext httpContext, IHtmlLocalizer htmlLocalizer) =>
@@ -36,8 +49,8 @@ namespace WebApp.UI.Models.Layout
         public virtual void Initialize(ViewContext viewContext, IHtmlLocalizer htmlLocalizer)
         {
             PageDescriptor = (viewContext.ViewData.Model as IPageDescriptorProvider)?.PageDescriptor;
-            LayoutName = GetActualLayoutName(viewContext.HttpContext);
-            Title = GetActualTitle(viewContext.HttpContext, htmlLocalizer);
+            _layoutName = GetActualLayoutName(viewContext.HttpContext);
+            _title = GetActualTitle(viewContext.HttpContext, htmlLocalizer);
         }
     }
 }

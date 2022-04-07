@@ -35,7 +35,7 @@ namespace WebApp.UI.Pages.Account
             set => _model = value;
         }
 
-        public string? ReturnUrl { get; set; }
+        public string? ReturnUrl { get; private set; }
 
         private async Task<bool> LoginAsync(CancellationToken cancellationToken)
         {

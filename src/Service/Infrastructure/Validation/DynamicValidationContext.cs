@@ -13,8 +13,8 @@ namespace WebApp.Service.Infrastructure.Validation
             _getMemberPathBase = getMemberPathBase;
         }
 
-        public ServiceErrorCode? ErrorCode { get; set; }
-        public Func<object[]>? ErrorArgsFactory { get; set; }
+        public ServiceErrorCode? ErrorCode { get; private set; }
+        public Func<object[]>? ErrorArgsFactory { get; private set; }
 
         public string GetMemberPath<TProperty>(Expression<Func<TModel, TProperty>> memberPathExpression)
         {

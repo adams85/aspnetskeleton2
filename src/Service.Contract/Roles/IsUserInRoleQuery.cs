@@ -4,12 +4,12 @@ using System.Runtime.Serialization;
 namespace WebApp.Service.Roles
 {
     [DataContract]
-    public class IsUserInRoleQuery : IQuery<bool>
+    public record class IsUserInRoleQuery : IQuery<bool>
     {
         [Required]
-        [DataMember(Order = 1)] public string UserName { get; set; } = null!;
+        [DataMember(Order = 1)] public string UserName { get; init; } = null!;
 
         [Required]
-        [DataMember(Order = 2)] public string RoleName { get; set; } = null!;
+        [DataMember(Order = 2)] public string RoleName { get; init; } = null!;
     }
 }

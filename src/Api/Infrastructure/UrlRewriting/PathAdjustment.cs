@@ -2,7 +2,7 @@
 {
     public class PathAdjustment
     {
-        public string? OriginalPrefix { get; set; }
-        public string? NewPrefix { get; set; }
+        public string? OriginalPrefix { get; init; }
+        public string? NewPrefix { get; init; }
     }
 }

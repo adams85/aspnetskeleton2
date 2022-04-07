@@ -9,7 +9,7 @@ namespace WebApp.Service.Mailing
         public MailModelValidationContext(Func<string>? getBaseMemberPath = null)
             : base(getBaseMemberPath) { }
 
-        public MailModel Model { get; set; } = null!;
-        public WritableDataContext DbContext { get; set; } = null!;
+        public MailModel Model { get; init; } = null!;
+        public WritableDataContext DbContext { get; init; } = null!;
     }
 }

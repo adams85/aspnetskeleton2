@@ -20,7 +20,7 @@ namespace WebApp.UI.Areas.Dashboard.Models
         public string ReturnUrl
         {
             get => EnsureReturnUrl(_returnUrl);
-            set => _returnUrl = value;
+            protected set => _returnUrl = value;
         }
 
         protected abstract string DefaultReturnUrl { get; }

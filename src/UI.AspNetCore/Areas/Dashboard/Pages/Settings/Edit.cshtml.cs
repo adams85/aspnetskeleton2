@@ -77,10 +77,13 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings
             if (item == null)
                 return NotFound();
 
-            Item.DefaultValue = item.DefaultValue;
-            Item.MinValue = item.MinValue;
-            Item.MaxValue = item.MaxValue;
-            Item.Description = item.Description;
+            Item = Item with
+            {
+                DefaultValue = item.DefaultValue,
+                MinValue = item.MinValue,
+                MaxValue = item.MaxValue,
+                Description = item.Description,
+            };
 
             ReturnUrl = returnUrl;
 

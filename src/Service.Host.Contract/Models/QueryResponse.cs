@@ -7,25 +7,25 @@ namespace WebApp.Service.Host.Models
     [ProtoInclude(1, typeof(Success))]
     [ProtoInclude(2, typeof(Failure))]
     [ProtoInclude(3, typeof(Notification))]
-    public abstract class QueryResponse
+    public abstract record class QueryResponse
     {
         [DataContract]
-        public class Success : QueryResponse
+        public record class Success : QueryResponse
         {
-            [DataMember(Order = 1)] public bool IsResultNull { get; set; }
-            [DataMember(Order = 2)] public byte[]? SerializedResult { get; set; }
+            [DataMember(Order = 1)] public bool IsResultNull { get; init; }
+            [DataMember(Order = 2)] public byte[]? SerializedResult { get; init; }
         }
 
         [DataContract]
-        public class Failure : QueryResponse
+        public record class Failure : QueryResponse
         {
-            [DataMember(Order = 1)] public ServiceErrorData Error { get; set; } = null!;
+            [DataMember(Order = 1)] public ServiceErrorData Error { get; init; } = null!;
         }
 
         [DataContract]
-        public class Notification : QueryResponse
+        public record class Notification : QueryResponse
         {
-            [DataMember(Order = 1)] public EventData Event { get; set; } = null!;
+            [DataMember(Order = 1)] public EventData Event { get; init; } = null!;
         }
     }
 }

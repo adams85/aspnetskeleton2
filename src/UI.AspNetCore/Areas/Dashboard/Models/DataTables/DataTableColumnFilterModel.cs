@@ -24,10 +24,10 @@ namespace WebApp.UI.Areas.Dashboard.Models.DataTables
 
             public override IEnumerable<string> FormFieldNames => new[] { FormFieldName };
 
-            public string FormFieldName { get; set; }
-            public object? FormFieldValue { get; set; }
+            public string FormFieldName { get; init; }
+            public object? FormFieldValue { get; init; }
 
-            public LocalizedHtmlString? PlaceholderText { get; set; }
+            public LocalizedHtmlString? PlaceholderText { get; init; }
 
             protected internal override void RenderDefault(IDataTableHelpers helpers) => helpers.TextColumnFilter(this);
         }

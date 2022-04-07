@@ -10,10 +10,10 @@ namespace WebApp.UI.Areas.Dashboard.Models
         where TQuery : ListQuery<TResult>
         where TResult : ListResult<TItem>
     {
-        public TQuery Query { get; set; } = null!;
+        public TQuery Query { get; protected set; } = null!;
         IListQuery IDataTableSource.Query => Query;
 
-        public TResult Result { get; set; } = null!;
+        public TResult Result { get; protected set; } = null!;
         IListResult IDataTableSource.Result => Result;
 
         Type IDataTableSource.ItemType => typeof(TItem);

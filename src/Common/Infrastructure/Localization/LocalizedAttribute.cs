@@ -8,7 +8,7 @@ namespace WebApp.Common.Infrastructure.Localization
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
     public sealed class LocalizedAttribute : Attribute
     {
-        public string? PluralId { get; set; }
-        public string? ContextId { get; set; }
+        public string? PluralId { get; init; }
+        public string? ContextId { get; init; }
     }
 }

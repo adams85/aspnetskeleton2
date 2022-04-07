@@ -10,11 +10,11 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
 {
     public class DashboardHeaderModel
     {
-        public List<DropDownMenuItemBase>? UserMenu { get; set; }
+        public List<DropDownMenuItemBase>? UserMenu { get; init; }
 
         public abstract class DropDownMenuItemBase
         {
-            public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; set; }
+            public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; init; }
         }
 
         public class DropDownMenuItem : DropDownMenuItemBase
@@ -28,14 +28,14 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout
                 GetUrl = urlHelper => urlHelper.Page(page.PageName, new { area = page.AreaName });
             }
 
-            public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; set; } = null!;
-            public Func<IUrlHelper, string?> GetUrl { get; set; } = null!;
-            public string? IconCssClass { get; set; }
+            public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; init; } = null!;
+            public Func<IUrlHelper, string?> GetUrl { get; init; } = null!;
+            public string? IconCssClass { get; init; }
         }
 
         public class DropDownMenuHeader : DropDownMenuItemBase
         {
-            public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; set; } = null!;
+            public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle { get; init; } = null!;
         }
 
         public class DropDownMenuDivider : DropDownMenuItemBase { }

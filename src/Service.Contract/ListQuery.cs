@@ -14,18 +14,40 @@ namespace WebApp.Service
     [ProtoInclude(11, typeof(ListSettingsQuery))]
     [ProtoInclude(12, typeof(ListRolesQuery))]
     [ProtoInclude(13, typeof(ListUsersQuery))]
-    public abstract class ListQuery<TResult> : IListQuery, IQuery<TResult>
+    public abstract record class ListQuery<TResult> : IListQuery, IQuery<TResult>
         where TResult : IListResult
     {
-        [DataMember(Order = 1)] public string[]? OrderBy { get; set; }
+        [DataMember(Order = 1)] public string[]? OrderBy { get; init; }
+
         public bool IsOrdered => OrderBy != null && OrderBy.Length > 0;
 
-        [DataMember(Order = 2)] public int PageIndex { get; set; }
-        [DataMember(Order = 3)] public int PageSize { get; set; }
-        [DataMember(Order = 4)] public int MaxPageSize { get; set; }
+        private int _pageIndex;
+        [DataMember(Order = 2)]
+        public int PageIndex
+        {
+            get => _pageIndex;
+            init => _pageIndex = value;
+        }
+
+        private int _pageSize;
+        [DataMember(Order = 3)]
+        public int PageSize
+        {
+            get => _pageSize;
+            init => _pageSize = value;
+        }
+
+        private int _maxPageSize;
+        [DataMember(Order = 4)]
+        public int MaxPageSize
+        {
+            get => _maxPageSize;
+            init => _maxPageSize = value;
+        }
+
         public bool IsPaged => PageSize > 0;
 
-        [DataMember(Order = 5)] public bool SkipTotalItemCount { get; set; }
+        [DataMember(Order = 5)] public bool SkipTotalItemCount { get; init; }
 
         public virtual int DefaultPageSize => 0;
 
@@ -36,11 +58,11 @@ namespace WebApp.Service
 
             if (!IsPaged)
             {
-                PageIndex = 0;
-                PageSize = DefaultPageSize > 0 ? DefaultPageSize : maxPageSize;
+                _pageIndex = 0;
+                _pageSize = DefaultPageSize > 0 ? DefaultPageSize : maxPageSize;
             }
 
-            MaxPageSize = maxPageSize;
+            _maxPageSize = maxPageSize;
         }
 
         [Localized] private const string NonNegativeIntegerValidatorErrorMessage = "The field {0} must be a non-negative integer.";

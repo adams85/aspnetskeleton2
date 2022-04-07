@@ -120,7 +120,7 @@ namespace WebApp.Api
                     case FieldInfo field:
                         // we want to avoid run-time code generation in contract assemblies but field setter delegates cannot be created without that,
                         // so we resort to reflection as public fields are uncommon in DTOs anyway
-                        return !field.IsInitOnly ? (container, value) => field.SetValueDirect(__makeref(container), value) : (Action<TContainer, TMember>?)null;
+                        return !field.IsInitOnly ? (container, value) => field.SetValueDirect(__makeref(container), value) : null;
                     default:
                         throw new ArgumentException(null, nameof(member));
                 }
@@ -176,7 +176,7 @@ namespace WebApp.Api
                     case FieldInfo field:
                         // we want to avoid run-time code generation in contract assemblies but field setter delegates cannot be created without that,
                         // so we resort to reflection as public fields are uncommon in DTOs anyway
-                        return !field.IsInitOnly ? ((ref TContainer container, TMember value) => field.SetValueDirect(__makeref(container), value))! : (Setter?)null;
+                        return !field.IsInitOnly ? ((ref TContainer container, TMember value) => field.SetValueDirect(__makeref(container), value))! : null;
                     default:
                         throw new ArgumentException(null, nameof(member));
                 }

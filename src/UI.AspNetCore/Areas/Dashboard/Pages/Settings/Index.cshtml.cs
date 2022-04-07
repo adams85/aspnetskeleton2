@@ -46,7 +46,7 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings
             return
                 HttpContext.Request.IsAjaxRequest() ?
                 PartialWithCurrentViewData(DisplayPartialName, query) :
-                (IActionResult)Page();
+                Page();
         }
 
         public static class ColumnBindings

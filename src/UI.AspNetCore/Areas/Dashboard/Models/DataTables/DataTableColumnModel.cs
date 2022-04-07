@@ -52,7 +52,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.DataTables
         public Action<IDataTableHelpers> RenderFilterCell => _renderFilterCell ??=
             FilterCellTemplate != null ?
             helpers => helpers.Write(FilterCellTemplate!(this)) :
-            new Action<IDataTableHelpers>(RenderFilterCellDefault);
+            RenderFilterCellDefault;
 
         protected virtual void RenderFilterCellDefault(IDataTableHelpers helpers) =>
             helpers.ColumnFilterCell(this, Filter != null ? Filter.RenderDefault : CachedDelegates.Noop<IDataTableHelpers>.Action);
@@ -70,7 +70,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.DataTables
         public Action<IDataTableHelpers, object> RenderContentCell => _renderContentCell ??=
             ContentCellTemplate != null ?
             (helpers, item) => helpers.Write(ContentCellTemplate!((item, this))) :
-            new Action<IDataTableHelpers, object>(RenderContentCellDefault);
+            RenderContentCellDefault;
 
         protected abstract void RenderContentCellDefault(IDataTableHelpers helpers, object item);
 

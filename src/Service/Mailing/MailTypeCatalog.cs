@@ -17,7 +17,7 @@ namespace WebApp.Service.Mailing
 
         public IMailTypeDefinition? GetDefinition(string mailType, bool throwIfNotFound = false) =>
             _definitions.TryGetValue(mailType, out var definition) ? definition :
-            !throwIfNotFound ? (IMailTypeDefinition?)null :
+            !throwIfNotFound ? null :
             throw new ArgumentException($"No {nameof(IMailTypeDefinition)} implementation was registered for mail type {mailType}.", nameof(mailType));
     }
 }

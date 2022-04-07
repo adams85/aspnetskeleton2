@@ -29,7 +29,7 @@ namespace WebApp.Core.Helpers
             var body =
                 convertReturnValue != null ? convertReturnValue(methodCall, delegateInvokeMethod.ReturnType) :
                 method.ReturnType != delegateInvokeMethod.ReturnType ? Expression.Convert(methodCall, delegateInvokeMethod.ReturnType) :
-                (Expression)methodCall;
+                methodCall;
 
             return Expression.Lambda<TDelegate>(body, delegateParams);
         }

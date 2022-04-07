@@ -40,7 +40,7 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings
             ItemId = item.Name;
             ReturnUrl = returnUrl;
 
-            return HttpContext.Request.IsAjaxRequest() ? Partial(DeletePageDescriptor.DeletePopupPartialViewName, this) : (IActionResult)Page();
+            return HttpContext.Request.IsAjaxRequest() ? Partial(DeletePageDescriptor.DeletePopupPartialViewName, this) : Page();
         }
 
         public Task<IActionResult> OnPost([FromRoute] string id, [FromQuery] string? returnUrl)

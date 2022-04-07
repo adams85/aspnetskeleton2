@@ -67,7 +67,7 @@ namespace WebApp.Service.Translations
                         .Retry(wrapSubsequent: source => source.DelaySubscription(_delayOnRefreshError))
                         .Select(@events => (@events ?? Array.Empty<TranslationsChangedEvent>(), (TranslationsChangedEvent?)null))
                         .DoOnSubscribe(ClearResetException))!
-                    .StartWith(((TranslationsChangedEvent[]?)null, (TranslationsChangedEvent?)null)))
+                    .StartWith(((TranslationsChangedEvent[]?)null, null)))
                 .Switch()
                 .Subscribe(item =>
                 {

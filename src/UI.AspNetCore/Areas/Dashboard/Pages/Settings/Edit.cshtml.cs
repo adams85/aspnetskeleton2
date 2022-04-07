@@ -46,7 +46,7 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings
             Item = item;
             ReturnUrl = returnUrl;
 
-            return HttpContext.Request.IsAjaxRequest() ? Partial(EditPageDescriptor.EditPopupPartialViewName, this) : (IActionResult)Page();
+            return HttpContext.Request.IsAjaxRequest() ? Partial(EditPageDescriptor.EditPopupPartialViewName, this) : Page();
         }
 
         public async Task<IActionResult> OnPost([FromRoute] string id, [FromQuery] string? returnUrl)
@@ -65,7 +65,7 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings
                 }
 
                 if (ModelState.IsValid)
-                    return HttpContext.Request.IsAjaxRequest() ? NoContent() : (IActionResult)Redirect(EnsureReturnUrl(returnUrl));
+                    return HttpContext.Request.IsAjaxRequest() ? NoContent() : Redirect(EnsureReturnUrl(returnUrl));
             }
 
             var item = await _queryDispatcher.DispatchAsync(new GetSettingQuery
@@ -87,7 +87,7 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings
 
             ReturnUrl = returnUrl;
 
-            return HttpContext.Request.IsAjaxRequest() ? Partial(EditPageDescriptor.EditPopupPartialViewName, this) : (IActionResult)Page();
+            return HttpContext.Request.IsAjaxRequest() ? Partial(EditPageDescriptor.EditPopupPartialViewName, this) : Page();
         }
 
         public sealed class PageDescriptorClass : EditPageDescriptor<SettingData>

@@ -172,7 +172,7 @@ namespace WebApp.Service.Mailing
 
         private async Task RegisterItemFailureAsync(MailQueueItem queueItem, bool canRetry, WritableDataContext dbContext, CancellationToken cancellationToken)
         {
-            queueItem.DueDate = canRetry ? GetRetryDueDate(queueItem.CreationDate, queueItem.DueDate!.Value) : (DateTime?)null;
+            queueItem.DueDate = canRetry ? GetRetryDueDate(queueItem.CreationDate, queueItem.DueDate!.Value) : null;
 
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }

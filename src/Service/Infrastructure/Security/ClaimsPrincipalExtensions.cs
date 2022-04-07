@@ -29,7 +29,7 @@ namespace System.Security.Claims
                 return null;
 
             string? id = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return id != null ? int.Parse(id, CultureInfo.InvariantCulture) : (int?)null;
+            return id != null ? int.Parse(id, CultureInfo.InvariantCulture) : null;
         }
 
         public static string? GetEmail(this ClaimsPrincipal principal)

@@ -62,7 +62,9 @@ internal class ScanCommand : ICommand
                 isMSBuildFile = true;
             }
             else
+            {
                 isMSBuildFile = false;
+            }
         }
         else
         {
@@ -129,8 +131,10 @@ internal class ScanCommand : ICommand
             }
         }
         else
+        {
             filePaths = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
                 .Where(p => s_extensionFilter.Contains(Path.GetExtension(p)));
+        }
 
         foreach (var filePath in filePaths)
             _context.Console.WriteLine(filePath);

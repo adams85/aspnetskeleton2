@@ -87,7 +87,9 @@ public class CSharpTextExtractor : ILocalizableTextExtractor
             ids = new[] { id };
         }
         else
+        {
             return Enumerable.Empty<LocalizableTextInfo>();
+        }
 
         var lineNumber = declaration.GetLineNumber(cancellationToken);
         var pluralId = GetAttributeParamValue(attribute, _localizedAttributePluralIdArgName);
@@ -185,7 +187,9 @@ public class CSharpTextExtractor : ILocalizableTextExtractor
                     typeName.Identifier.ValueText == _textContextTypeName &&
                     memberAccess.Name is IdentifierNameSyntax memberName &&
                     memberName.Identifier.ValueText == _textContextFactoryMemberName))
+            {
                 return null;
+            }
 
             args = factoryInvocation.ArgumentList.Arguments;
             return args.Count == 1 ? args[0].Expression.ResolveStringConstantExpression() : null;

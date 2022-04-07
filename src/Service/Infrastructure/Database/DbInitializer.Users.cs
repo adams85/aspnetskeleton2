@@ -46,6 +46,7 @@ public partial class DbInitializer
         string? firstName, string? lastName, bool isApproved, Role[] roles, DateTime utcNow)
     {
         if (!users.ContainsKey(userName))
+        {
             users.Add(userName, AsNewEntity(new User
             {
                 UserName = userName,
@@ -61,5 +62,6 @@ public partial class DbInitializer
                 },
                 Roles = roles.Select(role => new UserRole { Role = role }).ToHashSet(),
             }));
+        }
     }
 }

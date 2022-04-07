@@ -85,7 +85,9 @@ internal sealed class CreateUserCommandHandler : CommandHandler<CreateUserComman
                 }
             }
             else
+            {
                 await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
 
             command.OnKeyGenerated?.Invoke(command, user.Id);
         }

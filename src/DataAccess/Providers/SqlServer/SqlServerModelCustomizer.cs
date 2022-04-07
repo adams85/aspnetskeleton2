@@ -29,7 +29,9 @@ internal sealed class SqlServerModelCustomizer : RelationalModelCustomizer
         modelBuilder.UseCollation(_caseSensitiveCollation);
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
             foreach (var property in entityType.GetProperties())
+            {
                 if (property.PropertyInfo != null)
                 {
                     if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
@@ -43,5 +45,7 @@ internal sealed class SqlServerModelCustomizer : RelationalModelCustomizer
                     if (Type.GetTypeCode(Nullable.GetUnderlyingType(property.ClrType) ?? property.ClrType) == TypeCode.Decimal && property.GetColumnType() == null)
                         property.SetColumnType("MONEY");
                 }
+            }
+        }
     }
 }

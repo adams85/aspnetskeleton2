@@ -49,12 +49,16 @@ internal class QueryCacherInterceptor : IQueryInterceptor
     public Task<object?> InvokeAsync(QueryContext context, CancellationToken cancellationToken)
     {
         if (IsCached(context))
+        {
             return Cache.GetOrAddAsync(GetCacheKey(context), async (k, ct) =>
             {
                 try { return await _next(context, ct).ConfigureAwait(false); }
                 catch (Exception ex) when (_options.TryHandleError(context, ex, out var result)) { return result; }
             }, _options, GetScopes(context), cancellationToken);
+        }
         else
+        {
             return _next(context, cancellationToken);
+        }
     }
 }

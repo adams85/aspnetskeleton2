@@ -44,7 +44,9 @@ internal sealed class ServiceHostCommandDispatcher : ICommandDispatcher
             }
         }
         else
+        {
             response = await _commandService.Invoke(commandRequest, callContext).ConfigureAwait(false);
+        }
 
         switch (response)
         {

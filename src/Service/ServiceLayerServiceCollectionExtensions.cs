@@ -93,6 +93,7 @@ public static class ServiceLayerServiceCollectionExtensions
     private static void AddAssemblyServices(this IServiceCollection services, Assembly assembly)
     {
         foreach (var type in assembly.GetTypes())
+        {
             if (type.IsClass && !type.IsAbstract)
             {
                 services.AddValidators(type);
@@ -100,6 +101,7 @@ public static class ServiceLayerServiceCollectionExtensions
                 services.AddQueryHandlers(type);
                 services.AddMailTypeDefinition(type);
             }
+        }
     }
 
     private static void AddValidators(this IServiceCollection services, Type type)
@@ -111,15 +113,19 @@ public static class ServiceLayerServiceCollectionExtensions
     private static void AddCommandHandlers(this IServiceCollection services, Type type)
     {
         for (var baseType = type.BaseType; baseType != null; baseType = baseType.BaseType)
+        {
             if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(CommandHandler<>))
                 services.AddTransient(baseType, type);
+        }
     }
 
     private static void AddQueryHandlers(this IServiceCollection services, Type type)
     {
         for (var baseType = type.BaseType; baseType != null; baseType = baseType.BaseType)
+        {
             if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(QueryHandler<,>))
                 services.AddTransient(baseType, type);
+        }
     }
 
     private static void AddMailTypeDefinition(this IServiceCollection services, Type type)

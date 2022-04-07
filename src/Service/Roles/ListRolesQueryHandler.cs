@@ -16,12 +16,16 @@ internal sealed class ListRolesQueryHandler : ListQueryHandler<ListRolesQuery, R
         {
             IQueryable<Role> linq;
             if (query.UserName != null)
+            {
                 linq =
                     from u in dbContext.Users.FilterByName(query.UserName)
                     from ur in u.Roles!
                     select ur.Role;
+            }
             else
+            {
                 linq = dbContext.Roles;
+            }
 
             return await ResultAsync(query, linq.ToData(), cancellationToken).ConfigureAwait(false);
         }

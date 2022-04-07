@@ -20,8 +20,10 @@ public static class ProtoBufMvcBuilderExtensions
         setupAction?.Invoke(options);
 
         foreach (var extension in options.SupportedExtensions)
+        {
             foreach (var contentType in options.SupportedContentTypes)
                 builder.AddFormatterMappings(m => m.SetMediaTypeMappingForFormat(extension, new MediaTypeHeaderValue(contentType)));
+        }
 
         builder.Services.AddOptions<MvcOptions>()
             .Configure<ILoggerFactory>((mvcOptions, loggerFactory) => ConfigureMvcOptions(options, mvcOptions, loggerFactory));
@@ -35,8 +37,10 @@ public static class ProtoBufMvcBuilderExtensions
         setupAction?.Invoke(options);
 
         foreach (var extension in options.SupportedExtensions)
+        {
             foreach (var contentType in options.SupportedContentTypes)
                 builder.AddFormatterMappings(m => m.SetMediaTypeMappingForFormat(extension, new MediaTypeHeaderValue(contentType)));
+        }
 
         builder.Services.AddOptions<MvcOptions>()
             .Configure<ILoggerFactory>((mvcOptions, loggerFactory) => ConfigureMvcOptions(options, mvcOptions, loggerFactory));

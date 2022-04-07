@@ -13,8 +13,10 @@ public static class HostExtensions
     internal static async Task InitializeApplicationAsync(this IServiceProvider hostServices, CancellationToken cancellationToken)
     {
         await using (AsyncDisposableAdapter.From(hostServices.CreateScope(), out var scope).ConfigureAwait(false))
+        {
             foreach (var initializer in scope.ServiceProvider.GetRequiredService<IEnumerable<IApplicationInitializer>>())
                 await initializer.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 
     public static async Task InitializeApplicationAsync(this IHost host, CancellationToken cancellationToken = default)

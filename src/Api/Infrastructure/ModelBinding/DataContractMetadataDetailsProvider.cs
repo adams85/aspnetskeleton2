@@ -23,8 +23,10 @@ public sealed class DataContractMetadataDetailsProvider : IBindingMetadataProvid
         var property = propertyKey.PropertyInfo!;
 
         foreach (var member in ApiContractSerializer.MetadataProvider.GetMembers(propertyKey.ContainerType!, out var _))
+        {
             if (member.Member.HasSameMetadataDefinitionAs(property))
                 return true;
+        }
 
         return false;
     }

@@ -44,7 +44,9 @@ internal sealed class ServiceHostQueryDispatcher : IQueryDispatcher
             }
         }
         else
+        {
             response = await _queryService.Invoke(queryRequest, callContext).ConfigureAwait(false);
+        }
 
         switch (response)
         {

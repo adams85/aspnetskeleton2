@@ -319,10 +319,14 @@ internal sealed class MailSenderService : BackgroundService, IMailSenderService
                     await SendMailAsync(mail, dbContext, cancellationToken).ConfigureAwait(false);
                 }
                 else if (mail.Error != null)
+                {
                     await HandleMailErrorAsync(mail, dbContext, cancellationToken).ConfigureAwait(false);
+                }
                 else
+                {
                     // we should never get here
                     throw new InvalidOperationException();
+                }
             }
         }
         finally
@@ -370,6 +374,7 @@ internal sealed class MailSenderService : BackgroundService, IMailSenderService
         {
             Exception? previousException = null;
             for (; ; )
+            {
                 try
                 {
                     await ProcessAsync(stoppingToken).ConfigureAwait(false);
@@ -390,6 +395,7 @@ internal sealed class MailSenderService : BackgroundService, IMailSenderService
 
                     await Task.Delay(_delayOnUnexpectedError).ConfigureAwait(false);
                 }
+            }
         }
     }, stoppingToken);
 

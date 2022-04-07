@@ -148,7 +148,9 @@ internal sealed class FileTranslationsSource : ITranslationsSource, IDisposable
                 _logger.LogWarning("Directory of translations at \"{PATH}\" does not exist. Translations will not be available.", _translationsBasePath);
         }
         else if (_previousObtainFilesException?.ToString() != ex.ToString())
+        {
             _logger.LogError(ex, "Obtaining list of translation files failed.");
+        }
     }
 
     private async Task<TranslationCatalogData?> LoadTranslationsAsync(string filePath, CancellationToken cancellationToken)

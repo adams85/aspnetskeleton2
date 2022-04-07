@@ -129,9 +129,13 @@ public sealed class POStringLocalizer : IExtendedStringLocalizer
         do
         {
             if (catalogs.TryGetValue((_location, culture.Name), out var catalog))
+            {
                 foreach (var entry in catalog)
+                {
                     if (entry.Count > 0)
                         yield return new LocalizedString(entry.Key.Id, entry[0], resourceNotFound: false, _location);
+                }
+            }
 
             var parentCulture = culture.Parent;
             if (culture == parentCulture)

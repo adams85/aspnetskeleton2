@@ -32,7 +32,9 @@ public class ListQueryModelBinder : IModelBinder
             return Task.CompletedTask;
         }
         else
+        {
             return Await(bindModelTask, bindingContext);
+        }
 
         async Task Await(Task bindModelTask, ModelBindingContext bindingContext)
         {

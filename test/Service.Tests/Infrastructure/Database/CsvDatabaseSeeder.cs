@@ -68,6 +68,7 @@ public class CsvDatabaseSeeder : IDatabaseSeeder
         await using (var dbContext = dbContextFactory.CreateDbContext())
         {
             foreach (var file in _files)
+            {
                 using (var reader = new StreamReader(file.FilePath))
                 using (var csv = new CsvReader(reader, CreateReaderConfiguration(_configureReader, file.ConfigureReader)))
                 {
@@ -78,6 +79,7 @@ public class CsvDatabaseSeeder : IDatabaseSeeder
 
                     dbContext.AddRange(entities);
                 }
+            }
 
             await dbContext.SaveChangesAsync(cancellationToken);
         }

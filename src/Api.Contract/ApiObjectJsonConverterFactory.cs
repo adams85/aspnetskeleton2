@@ -34,6 +34,7 @@ internal sealed partial class ApiObjectJsonConverterFactory : JsonConverterFacto
             return true;
 
         if (typeToConvert.IsClass)
+        {
             return
                 typeToConvert != typeof(object) &&
                 typeToConvert != typeof(ValueType) &&
@@ -43,8 +44,10 @@ internal sealed partial class ApiObjectJsonConverterFactory : JsonConverterFacto
                 typeToConvert != typeof(Uri) &&
                 typeToConvert != typeof(Version) &&
                 typeToConvert != typeof(JsonDocument);
+        }
 
         if (typeToConvert.IsValueType)
+        {
             if (typeToConvert.IsGenericType)
             {
                 typeToConvert = typeToConvert.GetGenericTypeDefinition();
@@ -53,6 +56,7 @@ internal sealed partial class ApiObjectJsonConverterFactory : JsonConverterFacto
                     typeToConvert != typeof(KeyValuePair<,>);
             }
             else
+            {
                 return
                     !typeToConvert.IsPrimitive &&
                     !typeToConvert.IsEnum &&
@@ -62,6 +66,8 @@ internal sealed partial class ApiObjectJsonConverterFactory : JsonConverterFacto
                     typeToConvert != typeof(TimeSpan) &&
                     typeToConvert != typeof(Guid) &&
                     typeToConvert != typeof(JsonElement);
+            }
+        }
 
         return false;
     }

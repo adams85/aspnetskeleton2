@@ -30,7 +30,9 @@ internal sealed class GetSettingQueryHandler : QueryHandler<GetSettingQuery, Set
                 nameToDescriptionMapper = SettingsHelper.BuildNameToDescriptionMapper(settingEnumStringLocalizer);
             }
             else
+            {
                 nameToDescriptionMapper = null;
+            }
 
             return setting?.ToData(nameToDescriptionMapper);
         }

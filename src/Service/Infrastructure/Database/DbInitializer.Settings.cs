@@ -46,13 +46,17 @@ public partial class DbInitializer
     private static void AddOrUpdateSetting(Dictionary<string, EntityInfo<Setting>> settings, string name, string? defaultValue, string? minValue, string? maxValue)
     {
         if (!settings.TryGetValue(name, out var setting))
+        {
             settings.Add(name, setting = AsNewEntity(new Setting
             {
                 Name = name,
                 Value = defaultValue,
             }));
+        }
         else
+        {
             setting.State = EntityState.Seen;
+        }
 
         setting.Entity.DefaultValue = defaultValue;
         setting.Entity.MinValue = minValue;

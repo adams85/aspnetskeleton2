@@ -40,14 +40,18 @@ public partial class ApiContractSerializer
                 var subTypes = typeModel.Add(type, applyDefaultBehaviour: true).GetSubtypes();
 
                 for (int i = 0, n = subTypes.Length; i < n; i++)
+                {
                     if (visited.Add(type = subTypes[i].DerivedType.Type))
                     {
                         using (var enumerator = Visit(type, typeModel, visited).GetEnumerator())
+                        {
                             while (enumerator.MoveNext())
                                 yield return enumerator.Current;
+                        }
 
                         yield return type;
                     }
+                }
             }
         }
 

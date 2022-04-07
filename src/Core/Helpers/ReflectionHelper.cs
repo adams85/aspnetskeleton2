@@ -34,12 +34,18 @@ public static class ReflectionHelper
             case FieldInfo field:
                 if (field.FieldType.IsValueType ||
                     field.CustomAttributes.Any(attr => attr.AttributeType.FullName == MaybeNullAttributeFullName))
+                {
                     return false;
+                }
+
                 break;
             case PropertyInfo property:
                 if (property.PropertyType.IsValueType ||
                     property.GetMethod?.ReturnParameter?.CustomAttributes.FirstOrDefault(attr => attr.AttributeType.FullName == MaybeNullAttributeFullName) != null)
+                {
                     return false;
+                }
+
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(member));

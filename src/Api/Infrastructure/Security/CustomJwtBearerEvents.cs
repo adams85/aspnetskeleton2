@@ -31,7 +31,9 @@ public class CustomJwtBearerEvents : JwtBearerEvents
             jwtIssuerSigningKey = new RsaSecurityKey(RSAHelper.GenerateParameters());
         }
         else
+        {
             jwtIssuerSigningKey = new RsaSecurityKey(RSAHelper.DeserializeParameters(jwtIssuerSigningKeyString));
+        }
 
         var jwtAccessTokenClockSkew = securityOptionsValue?.JwtAccessTokenClockSkew ?? ApiSecurityOptions.DefaultJwtAccessTokenClockSkew;
 
@@ -73,12 +75,14 @@ public class CustomJwtBearerEvents : JwtBearerEvents
             return null;
 
         if (registerActivity)
+        {
             await CommandDispatcher.DispatchAsync(new RegisterUserActivityCommand
             {
                 UserName = result.UserName,
                 SuccessfulLogin = null,
                 UIActivity = false,
             }, CancellationToken.None);
+        }
 
         return result;
     }

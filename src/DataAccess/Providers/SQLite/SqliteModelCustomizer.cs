@@ -27,7 +27,9 @@ internal sealed class SqliteModelCustomizer : RelationalModelCustomizer
         base.Customize(modelBuilder, context);
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
             foreach (var property in entityType.GetProperties())
+            {
                 if (property.PropertyInfo != null)
                 {
                     if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
@@ -40,5 +42,7 @@ internal sealed class SqliteModelCustomizer : RelationalModelCustomizer
                     if (Type.GetTypeCode(Nullable.GetUnderlyingType(property.ClrType) ?? property.ClrType) == TypeCode.Decimal)
                         property.SetColumnType("DECIMAL(19, 4)");
                 }
+            }
+        }
     }
 }

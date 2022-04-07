@@ -62,8 +62,10 @@ internal partial class ApiObjectJsonConverterFactory
                 MethodInfo? ctorMethod;
 
                 if (!typeof(T).IsValueType)
+                {
                     try { ctorMethod = s_invokeCtorMethodDefinition.MakeGenericMethod(typeof(T)); }
                     catch { ctorMethod = null; }
+                }
                 else
                     ctorMethod = null;
 
@@ -135,7 +137,9 @@ internal partial class ApiObjectJsonConverterFactory
                 }
             }
             else if (reader.TokenType != JsonTokenType.EndObject)
+            {
                 throw new JsonException(UnexpectedTokenMessage);
+            }
 
             CheckSerializable(typeof(T));
             return ReadCore(ref reader, options);

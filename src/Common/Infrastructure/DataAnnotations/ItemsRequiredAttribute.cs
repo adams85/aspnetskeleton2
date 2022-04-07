@@ -16,25 +16,35 @@ public class ItemsRequiredAttribute : ExtendedValidationAttribute
         if (value is IList list)
         {
             for (int i = 0, n = list.Count; i < n; i++)
+            {
                 if (!IsValidItem(list[i]))
                     return false;
+            }
         }
         // TODO: IDictionary<,>/IReadOnlyDictionary<,> support?
         else if (value is IDictionary dictionary)
         {
             var enumerator = dictionary.GetEnumerator();
             using (enumerator as IDisposable)
+            {
                 while (enumerator.MoveNext())
+                {
                     if (!IsValidItem(enumerator.Value))
                         return false;
+                }
+            }
         }
         else if (value is IEnumerable enumerable)
         {
             var enumerator = enumerable.GetEnumerator();
             using (enumerator as IDisposable)
+            {
                 while (enumerator.MoveNext())
+                {
                     if (!IsValidItem(enumerator.Current))
                         return false;
+                }
+            }
         }
 
         return true;

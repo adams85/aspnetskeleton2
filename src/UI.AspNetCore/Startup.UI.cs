@@ -216,11 +216,13 @@ public partial class Startup
 
             var staticFileOptions = new StaticFileOptions();
             if (UIOptions.StaticFiles.EnableResponseCaching)
+            {
                 staticFileOptions.OnPrepareResponse = context =>
                 {
                     var headers = context.Context.Response.GetTypedHeaders();
                     headers.CacheControl = new CacheControlHeaderValue { MaxAge = UIOptions.StaticFiles.CacheHeaderMaxAge ?? UIOptions.DefaultCacheHeaderMaxAge };
                 };
+            }
 
             app.UseStaticFiles(staticFileOptions);
 

@@ -18,8 +18,10 @@ public static class ClaimsPrincipalExtensions
             identity.AddClaim(new Claim(ClaimTypes.Surname, userInfo.LastName));
 
         if (userInfo.Roles != null)
+        {
             for (int i = 0, n = userInfo.Roles.Length; i < n; i++)
                 identity.AddClaim(new Claim(ClaimTypes.Role, userInfo.Roles[i]));
+        }
     }
 
     public static int? GetUserId(this ClaimsPrincipal principal)

@@ -73,7 +73,9 @@ internal partial class ApiObjectJsonConverterFactory
                     Set(ref container, in value);
             }
             else
+            {
                 reader.Skip();
+            }
         }
 
         public sealed override void Write(ref TContainer container, string memberName, Utf8JsonWriter writer, JsonSerializerOptions options)

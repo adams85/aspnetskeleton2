@@ -70,7 +70,9 @@ public abstract class GenerateOperationCommand : ICommand
                 throw new CommandException($"The specified root directory is invalid. Project directory '{serviceContractProjectPath}' does not exist.");
         }
         else if (!TryLocateRootPath(out rootPath!))
+        {
             throw new CommandException("Root directory was not found.");
+        }
 
         return rootPath;
     }

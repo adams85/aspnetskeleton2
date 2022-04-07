@@ -71,7 +71,9 @@ public partial class Startup
         var mainBranchTenant = tenants.MainBranchTenant;
 
         foreach (var tenant in tenants)
+        {
             if (tenant != mainBranchTenant)
+            {
                 app.MapWhen(tenant.BranchPredicate!, branch =>
                 {
                     branch.ApplicationServices = tenant.TenantServices!;
@@ -80,6 +82,8 @@ public partial class Startup
 
                     tenant.Configure(branch);
                 });
+            }
+        }
 
         mainBranchTenant?.Configure(app);
     }

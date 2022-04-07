@@ -17,8 +17,10 @@ public class ServiceHostFixture : IAsyncLifetime
     private static string? LocateSolutionRootPath()
     {
         for (string? currentPath = AppContext.BaseDirectory; currentPath != null; currentPath = Path.GetDirectoryName(currentPath))
+            {
             if (File.Exists(Path.Combine(currentPath, "WebApp.Distributed.sln")))
                 return currentPath;
+            }
 
         return null;
     }

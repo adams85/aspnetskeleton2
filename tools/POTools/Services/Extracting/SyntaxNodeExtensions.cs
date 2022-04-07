@@ -22,6 +22,7 @@ public static class SyntaxNodeExtensions
         var values = new List<string>();
 
         foreach (var node in expression.DescendantNodesAndSelf())
+        {
             switch (node)
             {
                 case BinaryExpressionSyntax binaryExpression:
@@ -38,6 +39,7 @@ public static class SyntaxNodeExtensions
                 default:
                     return null;
             }
+        }
 
         return string.Concat(values);
     }
@@ -73,8 +75,10 @@ public static class SyntaxNodeExtensions
                 yield return namespaceDeclaration.Name.ToString();
 
                 while (enumerator.MoveNext())
+                {
                     if ((namespaceDeclaration = enumerator.Current as NamespaceDeclarationSyntax) != null)
                         yield return namespaceDeclaration.Name.ToString();
+                }
             }
         }
     }

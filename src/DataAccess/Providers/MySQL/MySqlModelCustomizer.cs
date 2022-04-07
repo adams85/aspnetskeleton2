@@ -32,7 +32,9 @@ internal sealed class MySqlModelCustomizer : RelationalModelCustomizer
         modelBuilder.UseCollation(_caseSensitiveCollation);
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
             foreach (var property in entityType.GetProperties())
+            {
                 if (property.PropertyInfo != null)
                 {
                     if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
@@ -43,5 +45,7 @@ internal sealed class MySqlModelCustomizer : RelationalModelCustomizer
                             property.SetCollation(_caseInsensitiveCollation);
                     }
                 }
+            }
+        }
     }
 }

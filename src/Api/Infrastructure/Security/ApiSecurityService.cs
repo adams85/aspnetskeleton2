@@ -144,25 +144,33 @@ public sealed class ApiSecurityService : CustomJwtBearerEvents, IApiSecurityServ
         if (authorization == null ||
             !(authorization.StartsWith(bearerString, StringComparison.OrdinalIgnoreCase)) ||
             (separatorIndex = authorization.LastIndexOf(';')) < 0)
+        {
             return Task.CompletedTask;
+        }
 
         int i, n;
         // skips possible whitespace between separator and refresh token
         for (i = separatorIndex + 1, n = authorization.Length; i < n; i++)
+        {
             if (!char.IsWhiteSpace(authorization[i]))
                 break;
+        }
 
         // checks for param name and equal sign
         if (string.Compare(authorization, i, JwtRefreshTokenAuthorizationHeaderParamName, 0, JwtRefreshTokenAuthorizationHeaderParamName.Length, StringComparison.OrdinalIgnoreCase) != 0 ||
             (i += JwtRefreshTokenAuthorizationHeaderParamName.Length) >= authorization.Length || authorization[i] != '=')
+        {
             return Task.CompletedTask;
+        }
 
         var refreshToken = authorization.Substring(i + 1);
 
         // skips possible whitespace between separator and access token
         for (i = separatorIndex - 1; i >= 0; i--)
+        {
             if (!char.IsWhiteSpace(authorization[i]))
                 break;
+        }
 
         // context.Properties.SetParameter(...) seems to be the proper way to pass the refresh token to TokenValidated but it won't work for some reason...
         context.HttpContext.Items[s_jwtRefreshTokenHttpContextItemKey] = refreshToken;

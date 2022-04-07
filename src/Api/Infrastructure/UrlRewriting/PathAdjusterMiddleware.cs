@@ -27,7 +27,9 @@ public sealed class PathAdjusterMiddleware
             }
         }
         else
+        {
             isMatch = true;
+        }
 
         if (isMatch && newPrefix.HasValue)
             request.PathBase = newPrefix + request.PathBase;
@@ -51,8 +53,10 @@ public sealed class PathAdjusterMiddleware
     public Task Invoke(HttpContext context)
     {
         for (int i = 0, n = _pathAdjusters.Length; i < n; i++)
+        {
             if (_pathAdjusters[i](context.Request))
                 break;
+        }
 
         return _next(context);
     }

@@ -22,14 +22,18 @@ internal sealed class AddUsersToRolesCommandHandler : CommandHandler<AddUsersToR
             var distinctUserNames = new HashSet<string>(dbProperties.CaseInsensitiveComparer);
             var userWhereBuilder = PredicateBuilder.New<User>(false);
             foreach (var userName in command.UserNames)
+            {
                 if (distinctUserNames.Add(userName))
                     userWhereBuilder.Or(UsersHelper.GetFilterByNameWhere(userName));
+            }
 
             var distinctRoleNames = new HashSet<string>(dbProperties.CaseInsensitiveComparer);
             var roleWhereBuilder = PredicateBuilder.New<Role>(false);
             foreach (var roleName in command.RoleNames)
+            {
                 if (distinctRoleNames.Add(roleName))
                     roleWhereBuilder.Or(RolesHelper.GetFilterByNameWhere(roleName));
+            }
 
             var userIds = await
             (
@@ -53,9 +57,13 @@ internal sealed class AddUsersToRolesCommandHandler : CommandHandler<AddUsersToR
             var userRolesToAdd = new List<UserRole>();
 
             foreach (var userIdGroup in userIdsByRoleId)
+            {
                 foreach (var userId in userIds)
+                {
                     if (!userIdGroup.Any(id => id == userId))
                         userRolesToAdd.Add(new UserRole { UserId = userId, RoleId = userIdGroup.Key });
+                }
+            }
 
             dbContext.UserRoles.AddRange(userRolesToAdd);
 

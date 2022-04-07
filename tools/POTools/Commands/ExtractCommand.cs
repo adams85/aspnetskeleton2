@@ -108,8 +108,10 @@ internal class ExtractCommand : ICommand
     private void FinalizeThread(ThreadData data)
     {
         lock (_results!)
+        {
             foreach (var kvp in data.Results)
                 _results.Add(kvp.Key, kvp.Value);
+        }
     }
 
     private static IEnumerable<string> GetPOEntryFlags(IPOEntry entry) => entry.Comments?
@@ -121,6 +123,7 @@ internal class ExtractCommand : ICommand
     {
         POCatalog? originalCatalog;
         if (File.Exists(filePath))
+        {
             using (var reader = new StreamReader(filePath!))
             {
                 var parseResult = new POParser().Parse(reader);
@@ -142,6 +145,7 @@ internal class ExtractCommand : ICommand
                         originalCatalog.RemoveAt(i);
                 }
             }
+        }
         else
             originalCatalog = null;
 
@@ -200,7 +204,9 @@ internal class ExtractCommand : ICommand
         }
 
         if (originalCatalog != null)
+        {
             foreach (var originalEntry in originalCatalog)
+            {
                 if (!catalog.Contains(originalEntry.Key))
                 {
                     const string entryRemovedMessage = "***THIS ENTRY WAS REMOVED. DO NOT TRANSLATE!***";
@@ -213,6 +219,8 @@ internal class ExtractCommand : ICommand
                     entry.Comments = new List<POComment> { new POFlagsComment { Flags = new HashSet<string> { "removed" } } };
                     catalog.Add(entry);
                 }
+            }
+        }
 
         return catalog;
     }
@@ -221,6 +229,7 @@ internal class ExtractCommand : ICommand
     {
         POCatalog? originalCatalog;
         if (File.Exists(filePath))
+        {
             using (var reader = new StreamReader(filePath))
             {
                 var parseResult = new POParser().Parse(reader);
@@ -234,6 +243,7 @@ internal class ExtractCommand : ICommand
 
                 originalCatalog = parseResult.Catalog;
             }
+        }
         else
             originalCatalog = null;
 
@@ -269,7 +279,9 @@ internal class ExtractCommand : ICommand
                 entry.Comments.Add(new POFlagsComment { Flags = flags });
             }
             else
+            {
                 entry.Comments = templateEntry.Comments;
+            }
 
             catalog.Add(entry);
         }
@@ -299,8 +311,10 @@ internal class ExtractCommand : ICommand
             static void EnsureTranslationCount(IPOEntry entry, int pluralFormCount)
             {
                 if (entry is POPluralEntry pluralEntry && pluralEntry.Count > pluralFormCount)
+                {
                     for (int i = pluralEntry.Count - 1; i >= pluralFormCount; i--)
                         pluralEntry.RemoveAt(i);
+                }
             }
         }
 
@@ -315,10 +329,12 @@ internal class ExtractCommand : ICommand
         };
 
         if (culture != null)
+        {
             catalog.HeaderComments = new[]
             {
                 new POFlagsComment() { Flags = new HashSet<string> { "fuzzy" } }
             };
+        }
 
         var generator = new POGenerator(s_generatorSettings);
         generator.Generate(writer, catalog);
@@ -385,7 +401,9 @@ internal class ExtractCommand : ICommand
                 }
             }
             else
+            {
                 WriteCatalog(_context.Console.Out, templateCatalog, null);
+            }
         }
 
         // displaying errors

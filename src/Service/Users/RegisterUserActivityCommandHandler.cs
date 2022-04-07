@@ -86,7 +86,9 @@ internal sealed class RegisterUserActivityCommandHandler : CommandHandler<Regist
                 }
             }
             else
+            {
                 await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }

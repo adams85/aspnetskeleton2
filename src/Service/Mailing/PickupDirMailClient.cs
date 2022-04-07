@@ -70,8 +70,10 @@ internal sealed class PickupDirMailClient : MailTransport
     private static void AddUnique(IList<MailboxAddress> recipients, HashSet<string> unique, IEnumerable<MailboxAddress> mailboxes)
     {
         foreach (var mailbox in mailboxes)
+        {
             if (unique.Add(mailbox.Address))
                 recipients.Add(mailbox);
+        }
     }
 
     private static MailboxAddress? GetMessageSender(MimeMessage message)

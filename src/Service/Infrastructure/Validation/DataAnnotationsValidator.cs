@@ -62,7 +62,9 @@ public static class DataAnnotationsValidator
         if (requiredAttribute == null &&
             (options & DataAnnotationsValidatorOptions.SuppressImplicitRequiredAttributeForNonNullableRefTypes) == 0 &&
             propertyMetadata.IsNonNullableRefType)
+        {
             requiredAttribute = s_implicitRequiredAttribute;
+        }
 
         if (requiredAttribute != null)
         {
@@ -157,12 +159,15 @@ public static class DataAnnotationsValidator
             case IEnumerable enumerable:
                 var enumerator = enumerable.GetEnumerator();
                 using (enumerator as IDisposable)
+                {
                     for (i = 0; enumerator.MoveNext(); i++)
                     {
                         instance = enumerator.Current!;
                         if (ShouldVisitObject(instance, level))
                             VisitObject(instance, serviceProvider, GetItemMemberPath(memberPathBase, i), level - 1, options);
                     }
+                }
+
                 return;
         }
 
@@ -183,11 +188,13 @@ public static class DataAnnotationsValidator
         ValidateObject(validationContext, typeMetadata, memberPathBase, options);
 
         if (propertiesToVisit != null)
+        {
             for (i = 0, n = propertiesToVisit.Count; i < n; i++)
             {
                 (propertyMetadata, instance) = propertiesToVisit[i];
                 VisitObject(instance, serviceProvider, GetPropertyMemberPath(memberPathBase, propertyMetadata.PropertyName), level - 1, options);
             }
+        }
     }
 
     public static void Validate(object instance, IServiceProvider? serviceProvider = null, int maxDepth = 32, DataAnnotationsValidatorOptions options = DataAnnotationsValidatorOptions.None)

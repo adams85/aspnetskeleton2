@@ -38,6 +38,7 @@ public static class StringHelper
         normalizeItem ??= CachedDelegates.Identity<string>.Func;
 
         using (var enumerator = SplitCommaSeparatedList(value, options).GetEnumerator())
+        {
             if (enumerator.MoveNext())
             {
                 var normalizedItem = normalizeItem(enumerator.Current);
@@ -65,7 +66,10 @@ public static class StringHelper
                 }
             }
             else
+            {
                 items = new List<string>();
+            }
+        }
 
         normalizedItems = items;
         return true;

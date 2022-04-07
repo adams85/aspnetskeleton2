@@ -43,8 +43,10 @@ internal sealed class InProcessCache : ICache
             }
 
             if (scopes != null)
+            {
                 foreach (var token in scopes.Select(GetOrCreateScopeToken))
                     ce.ExpirationTokens.Add(token);
+            }
 
             return valueFactoryAsync((string)ce.Key, cancellationToken);
         });
@@ -123,6 +125,7 @@ internal sealed class InProcessCache : ICache
         public IDisposable RegisterChangeCallback(Action<object> callback, object state)
         {
             lock (_registrations)
+            {
                 if (!_hasChanged)
                 {
                     var registration = new ScopeTokenRegistration(this, callback, state);
@@ -130,14 +133,19 @@ internal sealed class InProcessCache : ICache
                     return registration;
                 }
                 else
+                {
                     return Disposable.Empty;
+                }
+            }
         }
 
         public void UnregisterChangeCallback(ScopeTokenRegistration registration)
         {
             lock (_registrations)
+            {
                 if (_registrations.Remove(registration) && _registrations.Count == 0)
                     _owner.RemoveScopeToken(_key);
+            }
         }
 
         public bool HasChanged => _hasChanged;

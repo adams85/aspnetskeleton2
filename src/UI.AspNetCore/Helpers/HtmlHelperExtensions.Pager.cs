@@ -88,9 +88,13 @@ public static partial class HtmlHelperExtensions
 
             //append classes to all list item links
             if (options.LiElementClasses != null)
+            {
                 for (int i = 0, n = listItemLinks.Count; i < n; i++)
+                {
                     foreach (var c in options.LiElementClasses)
                         listItemLinks[i].AddCssClass(c);
+                }
+            }
         }
 
         var ul = new TagBuilder("ul");
@@ -99,12 +103,16 @@ public static partial class HtmlHelperExtensions
             ul.InnerHtml.AppendHtml(listItemLinks[i]);
 
         if (options.UlElementClasses != null)
+        {
             foreach (var c in options.UlElementClasses ?? Enumerable.Empty<string>())
                 ul.AddCssClass(c);
+        }
 
         if (options.UlElementAttributes != null)
+        {
             foreach (var c in options.UlElementAttributes)
                 ul.MergeAttribute(c.Key, c.Value);
+        }
 
         return ul;
     }
@@ -138,8 +146,10 @@ public static partial class HtmlHelperExtensions
         first.InnerHtml.AppendFormat(options.LinkToFirstPageFormat, targetPageNumber);
 
         if (options.PageClasses != null)
+        {
             foreach (var c in options.PageClasses)
                 first.AddCssClass(c);
+        }
 
         if (info.IsFirstPage)
             return WrapInListItem(first, options, "pager-skipToFirst", "disabled");
@@ -159,8 +169,10 @@ public static partial class HtmlHelperExtensions
         previous.Attributes.Add("rel", "prev");
 
         if (options.PageClasses != null)
+        {
             foreach (var c in options.PageClasses)
                 previous.AddCssClass(c);
+        }
 
         if (!info.HasPreviousPage)
             return WrapInListItem(previous, options, options.PreviousElementClass, "disabled");
@@ -180,8 +192,10 @@ public static partial class HtmlHelperExtensions
         page.InnerHtml.SetContent(format(targetPageNumber));
 
         if (options.PageClasses != null)
+        {
             foreach (var c in options.PageClasses ?? Enumerable.Empty<string>())
                 page.AddCssClass(c);
+        }
 
         if (i == info.PageNumber)
             return WrapInListItem(page, options, options.ActiveLiElementClass);
@@ -201,8 +215,10 @@ public static partial class HtmlHelperExtensions
         next.Attributes.Add("rel", "next");
 
         if (options.PageClasses != null)
+        {
             foreach (var c in options.PageClasses)
                 next.AddCssClass(c);
+        }
 
         if (!info.HasNextPage)
         {
@@ -222,8 +238,10 @@ public static partial class HtmlHelperExtensions
         last.InnerHtml.AppendFormat(options.LinkToLastPageFormat, targetPageNumber);
 
         if (options.PageClasses != null)
+        {
             foreach (var c in options.PageClasses)
                 last.AddCssClass(c);
+        }
 
         if (info.IsLastPage)
             return WrapInListItem(last, options, "pager-skipToLast", "disabled");
@@ -243,8 +261,10 @@ public static partial class HtmlHelperExtensions
         previous.AddCssClass(options.PreviousElementClass);
 
         if (options.EllipsesClasses != null)
+        {
             foreach (var c in options.EllipsesClasses)
                 previous.AddCssClass(c);
+        }
 
         if (!info.HasPreviousPage)
             return WrapInListItem(previous, options, options.EllipsesElementClass, "disabled");
@@ -266,8 +286,10 @@ public static partial class HtmlHelperExtensions
         next.AddCssClass(options.NextElementClass);
 
         if (options.EllipsesClasses != null)
+        {
             foreach (var c in options.EllipsesClasses)
                 next.AddCssClass(c);
+        }
 
         if (!info.HasNextPage)
             return WrapInListItem(next, options, options.EllipsesElementClass, "disabled");

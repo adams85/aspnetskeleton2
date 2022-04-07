@@ -25,10 +25,12 @@ public partial class DbInitializer
             var descriptionAttribute = enumMetadata.Attributes.OfType<DescriptionAttribute>().FirstOrDefault();
 
             if (descriptionAttribute != null)
+            {
                 AddOrUpdateRole(roles,
                     id: (int)enumMetadata.Value,
                     roleName,
                     description: descriptionAttribute.Description);
+            }
         }
 
         dbContext.Roles.AddRange(GetEntitesToAdd(roles.Values));
@@ -47,7 +49,9 @@ public partial class DbInitializer
             }));
         }
         else
+        {
             role.State = EntityState.Seen;
+        }
 
         role.Entity.Description = description;
     }

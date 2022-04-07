@@ -62,10 +62,12 @@ public sealed class PasswordValidator : IValidator<PasswordAttribute>
             return ValidationResult.Success;
 
         if (_passwordRequirements == null)
+        {
             return
                 validationAttribute.IgnoreIfServiceUnavailable ?
                 ValidationResult.Success :
                 throw new InvalidOperationException($"Password options {typeof(IOptions<PasswordOptions>)} has not been registered or configured.");
+        }
 
         if (IsValidPassword(stringValue))
             return ValidationResult.Success;

@@ -37,12 +37,14 @@ public sealed class AccountManager : IAccountManager
             return null;
 
         if (registerActivity)
+        {
             await _commandDispatcher.DispatchAsync(new RegisterUserActivityCommand
             {
                 UserName = result.UserName,
                 SuccessfulLogin = null,
                 UIActivity = true,
             }, CancellationToken.None);
+        }
 
         return result;
     }
@@ -60,12 +62,14 @@ public sealed class AccountManager : IAccountManager
             var authSuccess = authResult.Status == AuthenticateUserStatus.Successful;
 
             if (authSuccess || authResult.Status == AuthenticateUserStatus.Failed)
+            {
                 await _commandDispatcher.DispatchAsync(new RegisterUserActivityCommand
                 {
                     UserName = credentials.UserName,
                     SuccessfulLogin = authSuccess,
                     UIActivity = authSuccess,
                 }, CancellationToken.None);
+            }
         }
 
         return authResult.Status;

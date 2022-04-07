@@ -159,6 +159,7 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
         var nonNullableContextCache = new Dictionary<Type, bool>();
 
         foreach (var metaMember in metaMembers)
+        {
             if (metaMember.Member is PropertyInfo property)
             {
                 //if (propertyInfo.HasAttribute<JsonExtensionDataAttribute>()
@@ -205,6 +206,7 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
                         memberType: property.PropertyType,
                         memberInfo: property));
             }
+        }
 
         return dataProperties;
     }

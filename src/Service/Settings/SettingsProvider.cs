@@ -128,7 +128,9 @@ internal sealed class SettingsProvider : ISettingsProvider, IDisposable
                 _resetting = false;
             }
             else
+            {
                 hasRefreshed = RefreshCore(@event) ? !_resetting : false;
+            }
 
             if (hasRefreshed)
                 _settings = _lastEvent!.Data ?? new Dictionary<string, string?>();

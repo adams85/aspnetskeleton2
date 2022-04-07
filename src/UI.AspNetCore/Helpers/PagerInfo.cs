@@ -21,7 +21,9 @@ public readonly struct PagerInfo
                     PageCount++;
             }
             else
+            {
                 PageCount = 1;
+            }
         }
         else
         {

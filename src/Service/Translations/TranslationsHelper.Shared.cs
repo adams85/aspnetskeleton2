@@ -18,6 +18,7 @@ public static partial class TranslationsHelper
                 TranslationEntryData entryData;
 
                 if (entry.Key.PluralId == null)
+                {
                     entryData = new TranslationEntryData.Singular
                     {
                         Id = entry.Key.Id,
@@ -25,7 +26,9 @@ public static partial class TranslationsHelper
                         ContextId = entry.Key.ContextId,
                         Translation = entry[0]
                     };
+                }
                 else
+                {
                     entryData = new TranslationEntryData.Plural
                     {
                         Id = entry.Key.Id,
@@ -33,6 +36,7 @@ public static partial class TranslationsHelper
                         ContextId = entry.Key.ContextId,
                         Translations = entry.ToArray()
                     };
+                }
 
                 return entryData;
             })

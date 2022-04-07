@@ -91,15 +91,19 @@ internal abstract class EFCoreConfiguration
         public void Dispose()
         {
             foreach (var serviceProvider in _internalServiceProviders.Values)
+            {
                 if (serviceProvider is IDisposable disposable)
                     disposable.Dispose();
+            }
         }
 
         public async ValueTask DisposeAsync()
         {
             foreach (var serviceProvider in _internalServiceProviders.Values)
+            {
                 if (serviceProvider is IDisposable disposable)
                     await AsyncDisposableAdapter.From(disposable).DisposeAsync().ConfigureAwait(false);
+            }
         }
 
         public IServiceProvider GetOrCreateServiceProvider(EFCoreConfiguration configuration) =>

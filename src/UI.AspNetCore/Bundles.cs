@@ -43,7 +43,9 @@ public class Bundles : DesignTimeBundlingConfiguration
             services.Configure<FileSystemBundleCacheOptions>(configuration.GetSection("Response:BundleCaching"));
         }
         else
+        {
             bundling.UseMemoryCaching();
+        }
 
         if (options.EnableResponseMinification)
             bundling.EnableMinification();

@@ -34,7 +34,9 @@ internal sealed class NpgsqlModelCustomizer : RelationalModelCustomizer
         modelBuilder.UseDefaultColumnCollation(nameof(IDbProperties.CaseSensitiveCollation));
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
             foreach (var property in entityType.GetProperties())
+            {
                 if (property.PropertyInfo != null)
                 {
                     if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
@@ -45,5 +47,7 @@ internal sealed class NpgsqlModelCustomizer : RelationalModelCustomizer
                             property.SetCollation(_caseInsensitiveCollation);
                     }
                 }
+            }
+        }
     }
 }

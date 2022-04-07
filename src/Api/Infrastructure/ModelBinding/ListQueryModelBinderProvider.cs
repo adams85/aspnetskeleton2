@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using Karambolo.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using WebApp.Service;
 using WebApp.Service.Settings;
 

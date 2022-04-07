@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using WebApp.Core.Helpers;
 using WebApp.Core.Infrastructure;
-using WebApp.DataAccess.Entities;
 
 namespace WebApp.Service.Users;
 

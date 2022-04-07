@@ -1,7 +1,5 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using WebApp.Core;
 

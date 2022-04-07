@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading.Tasks;
 using Karambolo.Common;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +19,7 @@ public abstract class PageDescriptor
     {
         if (!providerType.HasInterface(typeof(IPageDescriptorProvider)))
             throw new ArgumentException($"Type does not implement {typeof(IPageDescriptorProvider)}.", nameof(providerType));
-        
+
         var getMethod = s_getMethodDefinition.MakeGenericMethod(providerType);
         return (Func<PageDescriptor>)Delegate.CreateDelegate(typeof(Func<PageDescriptor>), getMethod);
     })();

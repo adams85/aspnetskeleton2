@@ -6,7 +6,6 @@ using Microsoft.Extensions.Localization;
 using WebApp.Common.Settings;
 using WebApp.Core.Helpers;
 using WebApp.DataAccess.Entities;
-using WebApp.Service.Helpers;
 
 namespace WebApp.Service.Settings;
 

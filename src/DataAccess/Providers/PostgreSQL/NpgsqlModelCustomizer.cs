@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.PostgreSQL;

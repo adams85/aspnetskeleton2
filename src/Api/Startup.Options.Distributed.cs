@@ -7,6 +7,7 @@ public partial class Startup
 {
     partial void ConfigureImmediateOptionsPartial(IServiceCollection services)
     {
-        services.Configure<ServiceProxyApplicationOptions>(Configuration.GetSection(ServiceProxyApplicationOptions.DefaultSectionName));
+        services.Configure<ApplicationOptions>(Configuration.GetSection(ApplicationOptions.DefaultSectionName));
+        services.Configure<ServiceProxyApplicationOptions>(Configuration.GetSection(ApplicationOptions.DefaultSectionName));
     }
 }

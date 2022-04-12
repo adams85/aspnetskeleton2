@@ -1,23 +1,25 @@
 ﻿using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace WebApp.Service;
 
+[DataContract]
 public enum ServiceErrorCode
 {
-    Unknown = 0,
+    [EnumMember] Unknown = 0,
 
     [Description("Value for parameter {0} was not specified.")]
-    ParamNotSpecified,
+    [EnumMember] ParamNotSpecified,
 
     [Description("Value of parameter {0} is not valid.")]
-    ParamNotValid,
+    [EnumMember] ParamNotValid,
 
     [Description("Entity identified by parameter {0} was not found.")]
-    EntityNotFound,
+    [EnumMember] EntityNotFound,
 
     [Description("Entity identified by parameter {0} is not unique.")]
-    EntityNotUnique,
+    [EnumMember] EntityNotUnique,
 
     [Description("Entity identified by parameter {0} has dependencies.")]
-    EntityDependent,
+    [EnumMember] EntityDependent,
 }

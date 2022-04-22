@@ -41,7 +41,7 @@ public sealed class CompositeStringLocalizer : IExtendedStringLocalizer
             if (resourceNotFound)
             {
                 _logger.TranslationNotAvailable(name, CurrentCulture, searchedLocation);
-                NullStringLocalizer.Instance.TryLocalize(name, out var _, out value);
+                NullStringLocalizer.Instance.TryLocalize(name, out _, out value);
             }
             return new LocalizedString(name, value!, resourceNotFound, searchedLocation);
         }
@@ -57,7 +57,7 @@ public sealed class CompositeStringLocalizer : IExtendedStringLocalizer
             if (resourceNotFound)
             {
                 _logger.TranslationNotAvailable(name, CurrentCulture, searchedLocation);
-                NullStringLocalizer.Instance.TryLocalize(name, arguments, out var _, out value);
+                NullStringLocalizer.Instance.TryLocalize(name, arguments, out _, out value);
             }
             return new LocalizedString(name, value!, resourceNotFound, searchedLocation);
         }
@@ -105,7 +105,7 @@ public sealed class CompositeStringLocalizer : IExtendedStringLocalizer
         if (resourceNotFound)
         {
             _logger.TranslationNotAvailable(name, CurrentCulture, searchedLocation);
-            value = NullStringLocalizer.Instance.GetTranslation(name, plural, context, out var _, out var _);
+            value = NullStringLocalizer.Instance.GetTranslation(name, plural, context, out _, out _);
         }
 
         return value!;

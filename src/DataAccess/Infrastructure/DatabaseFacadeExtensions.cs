@@ -39,7 +39,7 @@ public static class DatabaseFacadeExtensions
         return false;
     }
 
-    public static bool HasPendingTransaction(this DatabaseFacade database) => database.HasPendingTransaction(out var _);
+    public static bool HasPendingTransaction(this DatabaseFacade database) => database.HasPendingTransaction(out _);
 
     private static IReadOnlyList<MigrationCommand> GenerateMigrationCommands(this DatabaseFacade database, IReadOnlyList<MigrationOperation> operations, IModel model)
     {

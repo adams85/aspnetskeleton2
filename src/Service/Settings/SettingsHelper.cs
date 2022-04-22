@@ -121,7 +121,7 @@ internal static class SettingsHelper
                 case SettingEnum.EnableRegistration:
                 case SettingEnum.EnableSwagger:
                 case SettingEnum.EnableTheming:
-                    return bool.TryParse(value, out var _);
+                    return bool.TryParse(value, out _);
 
                 case SettingEnum.MaxPageSize:
                     var minValue = int.TryParse(setting.MinValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue) ? intValue : MaxPageSizeMinValue;

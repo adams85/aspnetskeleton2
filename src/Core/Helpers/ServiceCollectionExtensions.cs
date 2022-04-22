@@ -3,7 +3,7 @@
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection ReplaceLast(this IServiceCollection services, ServiceDescriptor descriptor) =>
-        services.ReplaceLast(descriptor, out var _);
+        services.ReplaceLast(descriptor, out _);
 
     public static IServiceCollection ReplaceLast(this IServiceCollection services, ServiceDescriptor descriptor, out ServiceDescriptor? replacedDescriptor)
     {

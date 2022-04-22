@@ -29,7 +29,7 @@ public static class SettingsProviderExtensions
     public static string AdminMailAddress(this ISettingsProvider provider) =>
         provider.Get<string?>(SettingEnum.AdminMailAddress) ?? AdminMailAddressDefaultValue;
 
-    public static CultureInfo[] AvailableCultures(this ISettingsProvider provider) => provider.AvailableCultures(out var _);
+    public static CultureInfo[] AvailableCultures(this ISettingsProvider provider) => provider.AvailableCultures(out _);
 
     public static CultureInfo[] AvailableCultures(this ISettingsProvider provider, out CultureInfo defaultCulture)
     {
@@ -39,7 +39,7 @@ public static class SettingsProviderExtensions
         return cultures;
     }
 
-    public static string[] AvailableThemes(this ISettingsProvider provider) => provider.AvailableThemes(out var _);
+    public static string[] AvailableThemes(this ISettingsProvider provider) => provider.AvailableThemes(out _);
 
     public static string[] AvailableThemes(this ISettingsProvider provider, out string defaultTheme)
     {

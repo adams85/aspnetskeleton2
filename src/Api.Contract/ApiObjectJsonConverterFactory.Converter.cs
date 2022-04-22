@@ -41,7 +41,7 @@ internal partial class ApiObjectJsonConverterFactory
             {
                 var convertMemberName = _options.PropertyNamingPolicy != null ? _options.PropertyNamingPolicy.ConvertName : new Func<string, string>(name => name);
                 var memberNameComparer = _options.PropertyNameCaseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
-                return _factory._modelMetadataProvider.GetMembers(typeof(T), out var _)
+                return _factory._modelMetadataProvider.GetMembers(typeof(T), out _)
                     .ToDictionary(metaMember => convertMemberName(metaMember.Name), MemberHelper<T>.Create, memberNameComparer);
             })!;
 

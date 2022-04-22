@@ -21,7 +21,7 @@ public partial class ApiContractSerializer
 
         public bool CanSerialize(Type type) => _typeModel.CanSerialize(type);
 
-        public IEnumerable<Type> GetSubTypes(Type type) => GetSubTypes(type, out var _);
+        public IEnumerable<Type> GetSubTypes(Type type) => GetSubTypes(type, out _);
 
         public IEnumerable<Type> GetSubTypes(Type type, out HashSet<Type>? visited)
         {

@@ -60,7 +60,7 @@ public partial class Program
         builder
             .ClearProviders()
             .AddConsole()
-            .AddFile(options => options.RootPath = context.HostingEnvironment.ContentRootPath);
+            .AddJsonFile(options => options.RootPath = context.HostingEnvironment.ContentRootPath);
 
         if (context.HostingEnvironment.IsDevelopment())
             builder.AddDebug();

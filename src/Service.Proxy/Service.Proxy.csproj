@@ -17,7 +17,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Grpc.Net.Client" Version="2.44.0" />
-    <PackageReference Include="Karambolo.PO" Version="1.8.0" />
+    <PackageReference Include="Karambolo.PO" Version="1.9.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="$(DotNetRuntimeVersion)" />

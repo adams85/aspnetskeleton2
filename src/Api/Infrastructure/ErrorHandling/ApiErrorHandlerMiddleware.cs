@@ -27,16 +27,6 @@ public sealed class ApiErrorHandlerMiddleware
         _logger = logger ?? (ILogger)NullLogger.Instance;
     }
 
-    private async Task NextAsync(HttpContext context, Task nextTask)
-    {
-        ExceptionDispatchInfo? edi = null;
-        try { await nextTask; }
-        catch (Exception exception) { edi = ExceptionDispatchInfo.Capture(exception); }
-
-        if (edi != null)
-            await HandleExceptionAsync(context, edi);
-    }
-
     public Task Invoke(HttpContext context)
     {
         ExceptionDispatchInfo edi;
@@ -50,7 +40,17 @@ public sealed class ApiErrorHandlerMiddleware
         return HandleExceptionAsync(context, edi);
     }
 
-    public async Task HandleExceptionAsync(HttpContext context, ExceptionDispatchInfo edi)
+    private async Task NextAsync(HttpContext context, Task nextTask)
+    {
+        ExceptionDispatchInfo? edi = null;
+        try { await nextTask; }
+        catch (Exception exception) { edi = ExceptionDispatchInfo.Capture(exception); }
+
+        if (edi != null)
+            await HandleExceptionAsync(context, edi);
+    }
+
+    private async Task HandleExceptionAsync(HttpContext context, ExceptionDispatchInfo edi)
     {
         if (context.Response.HasStarted)
             edi.Throw();

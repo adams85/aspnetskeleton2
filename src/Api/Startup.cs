@@ -62,9 +62,6 @@ public partial class Startup
             ApiContractSerializer.TypeNameFormatterFactory = () => Core.Helpers.TypeExtensions.AssemblyQualifiedNameWithoutAssemblyDetails;
         }));
 
-        if (IsRunningBehindProxy)
-            services.Insert(0, ServiceDescriptor.Transient<IStartupFilter, PathAdjustmentStartupFilter>());
-
         ConfigureBaseServicesPartial(services);
     }
 
@@ -91,6 +88,9 @@ public partial class Startup
             ConfigureBaseServices(services, optionsProvider);
 
         ConfigureAppServices(services);
+
+        if (IsRunningBehindProxy)
+            services.AddTransient<IStartupFilter, PathAdjustmentStartupFilter>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -113,19 +113,5 @@ public partial class Startup
         {
             endpoints.MapControllers();
         });
-    }
-
-    // https://andrewlock.net/exploring-istartupfilter-in-asp-net-core/
-    private sealed class PathAdjustmentStartupFilter : IStartupFilter
-    {
-        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
-        {
-            var pathAdjusterOptions = app.ApplicationServices.GetRequiredService<IOptions<PathAdjusterOptions>>();
-
-            if (pathAdjusterOptions.Value.PathAdjustments.Count > 0)
-                app.UseMiddleware<PathAdjusterMiddleware>(pathAdjusterOptions);
-
-            next(app);
-        };
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using WebApp.Api.Infrastructure.UrlRewriting;
 using WebApp.UI.Infrastructure.Hosting;
 
 namespace WebApp.UI;
@@ -35,7 +36,7 @@ public partial class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         // We want to run the API and MVC UI app on a single ASP.NET Core host but we cannot get along with a single DI container currently
-        // as endpoint routing is bugged regarding pipeline branches (https://github.com/dotnet/aspnetcore/issues/19330),
+        // as endpoint routing is buggy regarding pipeline branches (https://github.com/dotnet/aspnetcore/issues/19330),
         // so we need two application branches with isolated MVC-related and shared common services (like service layer services).
         // Unfortunately, the built-in DI is insufficient for this setup, we need some more advanced solution like Autofac.
         // As a matter of fact, Autofac could handle this situation out-of-the-box (https://autofaccn.readthedocs.io/en/latest/integration/aspnetcore.html#multitenant-support)
@@ -80,12 +81,21 @@ public partial class Startup
 
                     branch.UseMiddleware<BranchRequestServicesMiddleware>(tenant);
 
+                    if (ApiStartup.IsRunningBehindProxy)
+                        PathAdjustmentStartupFilter.Configure(branch);
+
                     tenant.Configure(branch);
                 });
             }
         }
 
-        mainBranchTenant?.Configure(app);
+        if (mainBranchTenant != null)
+        {
+            if (ApiStartup.IsRunningBehindProxy)
+                PathAdjustmentStartupFilter.Configure(app);
+
+            mainBranchTenant.Configure(app);
+        }
     }
 
     private sealed class MainBranchSetupFilter : IStartupFilter

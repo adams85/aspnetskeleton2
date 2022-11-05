@@ -47,7 +47,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>

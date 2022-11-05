@@ -12,7 +12,8 @@ internal sealed class CustomNpgsqlMigrationsSqlGenerator : NpgsqlMigrationsSqlGe
 {
     private readonly string? _characterEncoding;
 
-    public CustomNpgsqlMigrationsSqlGenerator(IDbProperties dbProperties, MigrationsSqlGeneratorDependencies dependencies, INpgsqlOptions npgsqlOptions) : base(dependencies, npgsqlOptions)
+    public CustomNpgsqlMigrationsSqlGenerator(IDbProperties dbProperties, MigrationsSqlGeneratorDependencies dependencies, INpgsqlSingletonOptions npgsqlOptions)
+        : base(dependencies, npgsqlOptions)
     {
         if (dbProperties == null)
             throw new ArgumentNullException(nameof(dbProperties));

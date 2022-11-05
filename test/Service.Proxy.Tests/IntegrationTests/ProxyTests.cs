@@ -89,7 +89,7 @@ public class ProxyTests
         var result = await queryDispatcher.DispatchAsync(query, default);
 
         Assert.Equal(1, result.Items?.Length);
-        Assert.Contains(result.Items, item => ApplicationConstants.BuiltInRootUserName.Equals(item.UserName, StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Items!, item => ApplicationConstants.BuiltInRootUserName.Equals(item.UserName, StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

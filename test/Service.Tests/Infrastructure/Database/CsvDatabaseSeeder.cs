@@ -77,7 +77,7 @@ public class CsvDatabaseSeeder : IDatabaseSeeder
 
                     var entities = csv.GetRecords(file.EntityType);
 
-                    dbContext.AddRange(entities);
+                    dbContext.AddRange(entities!);
                 }
             }
 

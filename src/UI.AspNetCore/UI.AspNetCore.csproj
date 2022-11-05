@@ -55,18 +55,18 @@
   </Choose>
 
   <ItemGroup>
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
-    <PackageReference Include="Karambolo.AspNetCore.Bundling" Version="3.5.1" />
-    <PackageReference Include="Karambolo.AspNetCore.Bundling.EcmaScript" Version="3.5.1" />
-    <PackageReference Include="Karambolo.AspNetCore.Bundling.NUglify" Version="3.5.1" />
-    <PackageReference Include="Karambolo.AspNetCore.Bundling.Sass" Version="3.5.1" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Karambolo.AspNetCore.Bundling" Version="3.6.0" />
+    <PackageReference Include="Karambolo.AspNetCore.Bundling.EcmaScript" Version="3.6.0" />
+    <PackageReference Include="Karambolo.AspNetCore.Bundling.NUglify" Version="3.6.0" />
+    <PackageReference Include="Karambolo.AspNetCore.Bundling.Sass" Version="3.6.0" />
     <PackageReference Include="LibSassHost.Native.linux-x64" Version="1.3.3" />
     <PackageReference Include="LibSassHost.Native.win-x64" Version="1.3.3" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.6.4">
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.8.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.1.161" />
+    <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
     <PackageReference Include="System.Runtime.Experimental" Version="6.0.0" />
   </ItemGroup>
 

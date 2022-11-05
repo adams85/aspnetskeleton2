@@ -40,7 +40,7 @@ public class AddUsersToRolesCommandTests
                 .FirstAsync(user => user.UserName == command.UserNames[0]);
 
             Assert.Equal(1, user.Roles?.Count);
-            Assert.Contains(user.Roles, userRole => userRole.Role.RoleName == command.RoleNames[0]);
+            Assert.Contains(user.Roles!, userRole => userRole.Role.RoleName == command.RoleNames[0]);
         }
     }
 }

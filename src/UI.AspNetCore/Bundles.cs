@@ -79,10 +79,10 @@ public class Bundles : DesignTimeBundlingConfiguration
 
         #region Global
 
-        bundles.AddCss("/css/global/vendor.css")
+        bundles.AddCss("/css/global/lib.css")
             .Include("/lib/font-awesome/css/font-awesome.css");
 
-        bundles.AddJs("/js/global/vendor.js")
+        bundles.AddJs("/js/global/lib.js")
             .Include("/lib/jquery/dist/jquery.js")
             .Include("/lib/jquery-validation/dist/jquery.validate.js")
             .Include("/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js")
@@ -113,7 +113,7 @@ public class Bundles : DesignTimeBundlingConfiguration
 
         #region Dashboard
 
-        bundles.AddJs("/js/dashboard/vendor.js")
+        bundles.AddJs("/js/dashboard/lib.js")
             .Include("/js/dashboard/coreui.js");
 
         bundles.AddJs("/js/dashboard/site.js")

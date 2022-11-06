@@ -8,8 +8,8 @@ public sealed class MySqlProperties : DbProperties
 {
     public const string ProviderName = "Pomelo.EntityFrameworkCore.MySql";
 
-    public const string DefaultCaseSensitiveCollationName = "utf8mb4_0900_as_cs";
-    public const string DefaultCaseInsensitiveCollationName = "utf8mb4_0900_as_ci";
+    public const string DefaultCaseSensitiveCollationName = "utf8mb4_bin";
+    public const string DefaultCaseInsensitiveCollationName = "utf8mb4_general_ci";
 
     public MySqlProperties(DbOptions options) : base(options) { }
 

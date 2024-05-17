@@ -93,7 +93,9 @@ internal class ScanCommand : ICommand
                 IAnalyzerResult? analyzerResult;
                 if (TargetFramework != null)
                 {
-                    var buildEnvironment = project.EnvironmentFactory.GetBuildEnvironment(TargetFramework, environmentOptions);
+                    var buildEnvironment = project.EnvironmentFactory.GetBuildEnvironment(TargetFramework, environmentOptions)
+                        ?? throw new CommandException($"Unable to load MSBuild file \"{path}\" using target framework '{TargetFramework}'.");
+
                     var analyzerResults = project.Build(buildEnvironment);
                     analyzerResult = analyzerResults?.FirstOrDefault(result => result.TargetFramework == TargetFramework);
                     if (analyzerResult == null)
@@ -101,7 +103,9 @@ internal class ScanCommand : ICommand
                 }
                 else
                 {
-                    var buildEnvironment = project.EnvironmentFactory.GetBuildEnvironment(environmentOptions);
+                    var buildEnvironment = project.EnvironmentFactory.GetBuildEnvironment(environmentOptions)
+                        ?? throw new CommandException($"Unable to load MSBuild file \"{path}\" using target framework '{TargetFramework}'.");
+
                     var analyzerResults = project.Build(buildEnvironment);
                     analyzerResult = analyzerResults?.FirstOrDefault();
                     if (analyzerResult == null)

@@ -129,7 +129,7 @@ internal sealed class MailSenderService : BackgroundService, IMailSenderService
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         if (hasPendingTransaction)
-            transactionCommittedToken!.RegisterChangeCallback(state => ((MailSenderService)state).WakeProcessor(), this);
+            transactionCommittedToken!.RegisterChangeCallback(state => ((MailSenderService)state!).WakeProcessor(), this);
         else
             WakeProcessor();
     }

@@ -30,8 +30,6 @@ internal sealed class NpgsqlModelCustomizer : RelationalModelCustomizer
         modelBuilder.HasCollation(nameof(IDbProperties.CaseSensitiveCollation), locale: _caseSensitiveCollation, provider: "icu", deterministic: false);
         modelBuilder.HasCollation(nameof(IDbProperties.CaseInsensitiveCollation), locale: _caseInsensitiveCollation, provider: "icu", deterministic: false);
 
-        modelBuilder.UseDefaultColumnCollation(nameof(IDbProperties.CaseSensitiveCollation));
-
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             foreach (var property in entityType.GetProperties())
@@ -42,8 +40,8 @@ internal sealed class NpgsqlModelCustomizer : RelationalModelCustomizer
                     {
                         var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
                         var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
-                        if (caseInsensitive)
-                            property.SetCollation(_caseInsensitiveCollation);
+                        // https://www.npgsql.org/efcore/release-notes/7.0.html#obsoleted-default-column-collations
+                        property.SetCollation(caseInsensitive ? _caseInsensitiveCollation : _caseSensitiveCollation);
                     }
                 }
             }

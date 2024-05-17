@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>$(DotNetRuntimeTfm)</TargetFramework>
     <RollForward>Major</RollForward>
     <PackageId>Karambolo.AspNetSkeleton.CodegenTools</PackageId>
     <PackAsTool>true</PackAsTool>

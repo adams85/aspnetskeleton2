@@ -49,7 +49,7 @@ internal sealed class InProcessCache : ICache
             }
 
             return valueFactoryAsync((string)ce.Key, cancellationToken);
-        });
+        })!;
     }
 
     public Task RemoveAsync(string key, CancellationToken cancellationToken)
@@ -75,10 +75,10 @@ internal sealed class InProcessCache : ICache
     private sealed class ScopeTokenRegistration : IDisposable
     {
         private readonly ScopeToken _owner;
-        private readonly Action<object> _callback;
-        private readonly object _state;
+        private readonly Action<object?> _callback;
+        private readonly object? _state;
 
-        public ScopeTokenRegistration(ScopeToken owner, Action<object> callback, object state)
+        public ScopeTokenRegistration(ScopeToken owner, Action<object?> callback, object? state)
         {
             _owner = owner;
             _callback = callback;
@@ -122,7 +122,7 @@ internal sealed class InProcessCache : ICache
                 registrations[i].InvokeCallback();
         }
 
-        public IDisposable RegisterChangeCallback(Action<object> callback, object state)
+        public IDisposable RegisterChangeCallback(Action<object?> callback, object? state)
         {
             lock (_registrations)
             {

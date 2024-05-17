@@ -23,7 +23,7 @@ public sealed class ThemeProvider : IThemeProvider
     }
 
     public IReadOnlyList<string> GetThemes() => LazyInitializer.EnsureInitialized(ref _themes, () =>
-        _env.WebRootFileProvider.GetDirectoryContents(GetThemePath(ThemesBasePath).Value)
+        _env.WebRootFileProvider.GetDirectoryContents(GetThemePath(ThemesBasePath).Value ?? string.Empty)
             .Where(fileInfo => fileInfo.IsDirectory)
             .Select(fileInfo => fileInfo.Name)
             .ToArray());

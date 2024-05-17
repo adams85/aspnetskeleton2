@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>$(DotNetRuntimeTfm)</TargetFramework>
     <AssemblyName>WebApp.Service</AssemblyName>
     <RootNamespace>WebApp.Service</RootNamespace>
   </PropertyGroup>

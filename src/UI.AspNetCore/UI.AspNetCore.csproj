@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>$(DotNetRuntimeTfm)</TargetFramework>
     <AssemblyName>WebApp.UI.AspNetCore</AssemblyName>
     <RootNamespace>WebApp.UI</RootNamespace>
 
@@ -67,7 +67,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
-    <PackageReference Include="System.Runtime.Experimental" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>

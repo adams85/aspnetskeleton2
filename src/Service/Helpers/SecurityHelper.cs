@@ -9,10 +9,9 @@ public static class SecurityHelper
 {
     #region Passwords
 
-    private static readonly IPasswordHasher<object> s_passwordHasher = new PasswordHasher<object>(Options.Create(new PasswordHasherOptions
+    private static readonly PasswordHasher<object> s_passwordHasher = new PasswordHasher<object>(Options.Create(new PasswordHasherOptions
     {
-        CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV3,
-        IterationCount = 10000
+        CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV3
     }));
 
     public static string HashPassword(string password)

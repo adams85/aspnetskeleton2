@@ -29,12 +29,15 @@ public abstract class Tenant : IDisposable, IAsyncDisposable
         return true;
     };
 
-    public Tenant(string id, IConfiguration configuration, IWebHostEnvironment environment, Assembly? entryAssembly = null)
+    public Tenant(string id, IConfiguration configuration, IWebHostEnvironment environment, Assembly entryAssembly)
+        : this(id, configuration, environment, entryAssembly.GetName().Name ?? throw new ArgumentException("Assembly name is null.", nameof(entryAssembly))) { }
+
+    public Tenant(string id, IConfiguration configuration, IWebHostEnvironment environment, string applicationName)
     {
         Id = id;
         Configuration = configuration;
         Environment = environment;
-        EntryAssembly = entryAssembly;
+        ApplicationName = applicationName;
     }
 
     public void Dispose()
@@ -58,7 +61,7 @@ public abstract class Tenant : IDisposable, IAsyncDisposable
     public string Id { get; }
     public IConfiguration Configuration { get; }
     public IWebHostEnvironment Environment { get; }
-    public Assembly? EntryAssembly { get; }
+    public string ApplicationName { get; }
 
     public bool IsMainBranch => BranchPredicate == null;
     public abstract Func<HttpContext, bool>? BranchPredicate { get; }
@@ -78,7 +81,7 @@ public abstract class Tenant : IDisposable, IAsyncDisposable
             // HACK: IWebHostEnvironment is registered in the root container but we need to register a temporary instance for the time of tenant services configuration
             // because discovery of default application parts relies on IWebHostEnvironment.ApplicationName
             // https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/DependencyInjection/MvcCoreServiceCollectionExtensions.cs#L80
-            var dummyWebHostEnvironmentService = ServiceDescriptor.Singleton<IWebHostEnvironment>(new DummyWebHostEnvironment { ApplicationName = EntryAssembly?.GetName().Name });
+            var dummyWebHostEnvironmentService = ServiceDescriptor.Singleton<IWebHostEnvironment>(new DummyWebHostEnvironment { ApplicationName = ApplicationName });
 
             services.Add(dummyWebHostEnvironmentService);
 

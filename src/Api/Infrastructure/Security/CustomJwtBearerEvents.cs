@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using WebApp.Service.Infrastructure;
 using WebApp.Service.Users;
@@ -91,13 +91,10 @@ public class CustomJwtBearerEvents : JwtBearerEvents
 
     public override async Task TokenValidated(TokenValidatedContext context)
     {
-        var jwtToken = (JwtSecurityToken)context.SecurityToken;
-        var expires = (jwtToken.Payload.Exp == null) ? null : new DateTime?(jwtToken.ValidTo);
-        var notBefore = (jwtToken.Payload.Nbf == null) ? null : new DateTime?(jwtToken.ValidFrom);
-
+        var jwtToken = (JsonWebToken)context.SecurityToken;
         string? refreshToken = null;
 
-        try { Validators.ValidateLifetime(notBefore, expires, jwtToken, context.Options.TokenValidationParameters); }
+        try { Validators.ValidateLifetime(jwtToken.ValidFrom, jwtToken.ValidTo, jwtToken, context.Options.TokenValidationParameters); }
         catch (SecurityTokenValidationException ex)
         {
             if (ex is not SecurityTokenExpiredException || (refreshToken = GetRefreshToken(context)) == null)

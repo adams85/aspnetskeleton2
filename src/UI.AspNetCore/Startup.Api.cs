@@ -16,7 +16,7 @@ public partial class Startup
     {
         private readonly Api.Startup _apiStartup;
 
-        public ApiTenant(string id, Startup startup, Assembly? entryAssembly = null)
+        public ApiTenant(string id, Startup startup, Assembly entryAssembly)
             : base(id, startup.Configuration, startup.Environment, entryAssembly)
         {
             _apiStartup = startup.ApiStartup;

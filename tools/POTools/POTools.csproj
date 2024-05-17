@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>$(DotNetRuntimeTfm)</TargetFramework>
     <RollForward>Major</RollForward>
     <PackageId>Karambolo.AspNetSkeleton.POTools</PackageId>
     <PackAsTool>true</PackAsTool>
@@ -11,10 +11,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Buildalyzer" Version="6.0.4" />
+    <PackageReference Include="Buildalyzer" Version="7.0.1" />
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />
     <PackageReference Include="Karambolo.PO.Compact" Version="1.11.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="$(DotNetRuntimeVersion)" />
+    <!--
+      The Razor compiler infrastructure is being redesigned/consolidated. This package will be replaced by Microsoft.CodeAnalysis.Razor.Compiler.
+      TODO: switch to the new package when it becomes available (https://github.com/dotnet/razor/issues/8399#issue-1612247055)
+    -->
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="6.0.30" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.9.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(DotNetRuntimeVersion)" />
   </ItemGroup>

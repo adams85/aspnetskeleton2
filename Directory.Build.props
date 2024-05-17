@@ -1,10 +1,11 @@
 ﻿<Project>
   <PropertyGroup>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
-    <DotNetRuntimeVersion>6.*</DotNetRuntimeVersion>
+    <DotNetRuntimeTfm>net8.0</DotNetRuntimeTfm>
+    <DotNetRuntimeVersion>8.*</DotNetRuntimeVersion>
   </PropertyGroup>
 </Project>

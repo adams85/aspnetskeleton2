@@ -76,8 +76,8 @@ public sealed class ApiSecurityService : CustomJwtBearerEvents, IApiSecurityServ
         {
             var (userName, refreshToken, httpContext) = ((string, string, HttpContext))state;
             var accessToken = GenerateJwtAccessToken(userName);
-            httpContext.Response.Headers.Add(JwtAccessTokenHttpHeaderName, accessToken);
-            httpContext.Response.Headers.Add(JwtRefreshTokenHttpHeaderName, refreshToken);
+            httpContext.Response.Headers[JwtAccessTokenHttpHeaderName] = accessToken;
+            httpContext.Response.Headers[JwtRefreshTokenHttpHeaderName] = refreshToken;
             return Task.CompletedTask;
         }, (userName, refreshToken, httpContext));
     }
@@ -136,7 +136,7 @@ public sealed class ApiSecurityService : CustomJwtBearerEvents, IApiSecurityServ
         // we accept refresh tokens in the Authorization header as an appendix for security reasons
         // (Authorization headers are usually dropped by clients on redirection automatically as opposed to e.g. a custom header)
 
-        string authorization = context.HttpContext.Request.Headers[HeaderNames.Authorization];
+        string? authorization = context.HttpContext.Request.Headers[HeaderNames.Authorization];
 
         const string bearerString = "Bearer ";
 

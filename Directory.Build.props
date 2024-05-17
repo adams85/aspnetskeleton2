@@ -5,6 +5,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DotNetRuntimeVersion>6.0.*</DotNetRuntimeVersion>
+    <DotNetRuntimeVersion>6.*</DotNetRuntimeVersion>
   </PropertyGroup>
 </Project>

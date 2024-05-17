@@ -21,8 +21,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SQLite'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SqlServer'" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'PostgreSQL'" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.2" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'MySQL'" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'PostgreSQL'" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'MySQL'" />
   </ItemGroup>
 
   <ItemGroup>

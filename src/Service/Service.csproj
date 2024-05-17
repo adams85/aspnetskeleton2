@@ -11,14 +11,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Karambolo.PO" Version="1.9.0" />
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="6.1.2" />
-    <PackageReference Include="MailKit" Version="3.4.2" />
+    <PackageReference Include="Karambolo.PO" Version="1.11.1" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="$(DotNetRuntimeVersion)" />
+    <PackageReference Include="MailKit" Version="4.5.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="protobuf-net" Version="3.1.22" />
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
+    <PackageReference Include="protobuf-net" Version="3.2.30" />
+    <PackageReference Include="System.Reactive" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>

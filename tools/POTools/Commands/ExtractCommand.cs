@@ -198,8 +198,8 @@ internal class ExtractCommand : ICommand
                     referenceComment.References.Add(new POSourceReference(sourceFilePath, text.LineNumber));
                 }
 
-                if (!NoComments && !string.IsNullOrEmpty(text.Comment))
-                    entry.Comments.Add(new POExtractedComment { Text = text.Comment });
+                if (!NoComments && !string.IsNullOrEmpty(text.ExtractedComment))
+                    entry.Comments.Add(new POExtractedComment { Text = text.ExtractedComment });
             }
         }
 

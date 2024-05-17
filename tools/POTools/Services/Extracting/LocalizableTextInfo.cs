@@ -6,5 +6,5 @@ public class LocalizableTextInfo
     public string Id { get; set; } = null!;
     public string? PluralId { get; set; }
     public string? ContextId { get; set; }
-    public string? Comment { get; set; }
+    public string? ExtractedComment { get; set; }
 }

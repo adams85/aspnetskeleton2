@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POTools", "POTools.csproj", "{FD8E6ECD-F216-4B26-834C-8EA68AA2EA38}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FD8E6ECD-F216-4B26-834C-8EA68AA2EA38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD8E6ECD-F216-4B26-834C-8EA68AA2EA38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD8E6ECD-F216-4B26-834C-8EA68AA2EA38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD8E6ECD-F216-4B26-834C-8EA68AA2EA38}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9621BC25-7649-4348-BE1A-0BCCC693C195}
+	EndGlobalSection
+EndGlobal

@@ -9,7 +9,9 @@
     <ToolCommandName>dotnet-po</ToolCommandName>
     <PackageOutputPath>..\..\.nuget</PackageOutputPath>
   </PropertyGroup>
-
+  <ItemGroup>
+    <TrimmerRootAssembly Include="POTools" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Buildalyzer" Version="7.0.1" />
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />

@@ -44,6 +44,9 @@ internal class ExtractCommand : ICommand
     [Option("-m|--merge", Description = "Merge newly extracted entries into the previously created catalog if exists. Applies only when output file path is specified.")]
     public bool Merge { get; set; }
 
+    [Option("--use-resx-name", Description = "Use RESX name as id instead of value. Applies only when a .resx file is specified.")]
+    public bool UseResxName { get; set; }
+
     [Option("--no-backup", Description = "Don't backup existing output files.")]
     public bool NoBackup { get; set; }
 
@@ -85,6 +88,8 @@ internal class ExtractCommand : ICommand
         var extractor = data.GetExtractor(extension);
         if (extractor == null)
             return data;
+        if (extractor is ResourceTextExtractor && UseResxName)
+            extractor = new ResourceNameTextExtractor();
 
         string content;
         LocalizableTextInfo[] texts;
@@ -178,7 +183,7 @@ internal class ExtractCommand : ICommand
 
                     entry =
                         key.PluralId == null ?
-                        (IPOEntry)new POSingularEntry(key) { Translation = key.Id } :
+                        (IPOEntry)new POSingularEntry(key) { Translation = text.Translation ?? key.Id } :
                         new POPluralEntry(key) { key.Id, key.PluralId };
 
                     entry.Comments = new List<POComment>();

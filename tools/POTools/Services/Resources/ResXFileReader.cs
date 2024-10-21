@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 
 namespace POTools.Services.Resources;
 
-public class ResXFileReader : IEnumerable<(string Name, string Value, string Comment)>
+public class ResXFileReader : IEnumerable<(string Name, string Value, string? Comment)>
 {
     private readonly root _root;
 
@@ -19,7 +19,7 @@ public class ResXFileReader : IEnumerable<(string Name, string Value, string Com
             _root = (root?)xmlSerializer.Deserialize(xmlReader) ?? new root { Items = Array.Empty<object>() };
     }
 
-    public IEnumerator<(string Name, string Value, string Comment)> GetEnumerator()
+    public IEnumerator<(string Name, string Value, string? Comment)> GetEnumerator()
     {
         foreach (var dataItem in _root.Items.OfType<rootData>())
             yield return (dataItem.name, dataItem.value, dataItem.comment);

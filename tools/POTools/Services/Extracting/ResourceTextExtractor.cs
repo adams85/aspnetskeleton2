@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -18,8 +17,8 @@ public class ResourceTextExtractor : ILocalizableTextExtractor
         // Select name, value, and comment from the resource reader.
         return resourceReader.Select(item => new LocalizableTextInfo
         {
-            Id = item.Value.Replace("\n", Environment.NewLine),
-            ExtractedComment = $"{(item.Comment.Length > 0 ? item.Comment + " " : string.Empty)}[{item.Name}]",
+            Id = item.Value,
+            ExtractedComment = $"{(item.Comment is { Length: > 0 } ? item.Comment + " " : string.Empty)}[{item.Name}]",
         });
     }
 }

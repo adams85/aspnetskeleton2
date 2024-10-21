@@ -44,7 +44,7 @@ internal class ExtractCommand : ICommand
     [Option("-m|--merge", Description = "Merge newly extracted entries into the previously created catalog if exists. Applies only when output file path is specified.")]
     public bool Merge { get; set; }
 
-    [Option("--use-resx-name", Description = "Use RESX name as id instead of value. Applies only when a .resx file is specified.")]
+    [Option("--use-resx-name", Description = "Use ResX resource name as msgid instead of value. Applies only when a .resx file is specified.")]
     public bool UseResxName { get; set; }
 
     [Option("--no-backup", Description = "Don't backup existing output files.")]
@@ -79,7 +79,7 @@ internal class ExtractCommand : ICommand
 
     private ThreadData InitializeThread()
     {
-        return new ThreadData();
+        return new ThreadData(this);
     }
 
     private ThreadData Extract(string relativeFilePath, ParallelLoopState state, ThreadData data)
@@ -88,8 +88,6 @@ internal class ExtractCommand : ICommand
         var extractor = data.GetExtractor(extension);
         if (extractor == null)
             return data;
-        if (extractor is ResourceTextExtractor && UseResxName)
-            extractor = new ResourceNameTextExtractor();
 
         string content;
         LocalizableTextInfo[] texts;
@@ -437,12 +435,23 @@ internal class ExtractCommand : ICommand
 
     private class ThreadData
     {
-        private readonly Dictionary<string, Lazy<ILocalizableTextExtractor>> _extractors = new Dictionary<string, Lazy<ILocalizableTextExtractor>>(StringComparer.OrdinalIgnoreCase)
+        private readonly Dictionary<string, Lazy<ILocalizableTextExtractor>> _extractors;
+
+        public ThreadData(ExtractCommand command)
         {
-            { ".cs", new Lazy<ILocalizableTextExtractor>(() => new CSharpTextExtractor(), isThreadSafe: false) },
-            { ".cshtml", new Lazy<ILocalizableTextExtractor>(() => new CSharpRazorTextExtractor(), isThreadSafe: false) },
-            { ".resx", new Lazy<ILocalizableTextExtractor>(() => new ResourceTextExtractor(), isThreadSafe: false)  }
-        };
+            _extractors = new Dictionary<string, Lazy<ILocalizableTextExtractor>>(StringComparer.OrdinalIgnoreCase)
+            {
+                { ".cs", new Lazy<ILocalizableTextExtractor>(() => new CSharpTextExtractor(), isThreadSafe: false) },
+                { ".cshtml", new Lazy<ILocalizableTextExtractor>(() => new CSharpRazorTextExtractor(), isThreadSafe: false) },
+                {
+                    ".resx",
+                    new Lazy<ILocalizableTextExtractor>(command.UseResxName
+                        ? () => new ResourceNameTextExtractor()
+                        : () => new ResourceTextExtractor(),
+                        isThreadSafe: false)
+                }
+            };
+        }
 
         public ILocalizableTextExtractor? GetExtractor(string extension) =>
             _extractors.TryGetValue(extension, out var extractor) ? extractor.Value : null;

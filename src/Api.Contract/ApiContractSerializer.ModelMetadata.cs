@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using ProtoBuf.Meta;
 
 namespace WebApp.Api;
@@ -10,6 +9,13 @@ public partial class ApiContractSerializer
 {
     public sealed class ModelMetadataProvider
     {
+        public static bool IsCollectionType(Type type)
+        {
+            return Array.FindIndex(type.GetInterfaces(), intf =>
+                intf == typeof(IEnumerable)
+                || intf.IsGenericType && intf.FullName == "System.Collections.Generic.IAsyncEnumerable`1") >= 0;
+        }
+
         private readonly RuntimeTypeModel _typeModel;
 
         internal ModelMetadataProvider(RuntimeTypeModel typeModel)
@@ -17,36 +23,30 @@ public partial class ApiContractSerializer
             _typeModel = typeModel;
         }
 
-        public bool ShouldSerializeAsList(Type type) => typeof(IEnumerable).IsAssignableFrom(type) && !_typeModel[type].IgnoreListHandling;
+        public bool ShouldSerializeAsCollection(Type collectionType) => !_typeModel[collectionType].IgnoreListHandling;
 
         public bool CanSerialize(Type type) => _typeModel.CanSerialize(type);
 
-        public IEnumerable<Type> GetSubTypes(Type type) => GetSubTypes(type, out _);
-
-        public IEnumerable<Type> GetSubTypes(Type type, out HashSet<Type>? visited)
+        public IEnumerable<Type> GetSubTypes(Type type)
         {
             if (type.IsValueType || type.IsArray || _typeModel.CanSerializeBasicType(type))
             {
-                visited = null;
                 return Type.EmptyTypes;
             }
 
-            visited = new HashSet<Type>();
+            var visited = new HashSet<Type>() { type };
             return Visit(type, _typeModel, visited);
 
             static IEnumerable<Type> Visit(Type type, RuntimeTypeModel typeModel, HashSet<Type> visited)
             {
                 var subTypes = typeModel.Add(type, applyDefaultBehaviour: true).GetSubtypes();
 
-                for (int i = 0, n = subTypes.Length; i < n; i++)
+                for (int i = 0; i < subTypes.Length; i++)
                 {
                     if (visited.Add(type = subTypes[i].DerivedType.Type))
                     {
-                        using (var enumerator = Visit(type, typeModel, visited).GetEnumerator())
-                        {
-                            while (enumerator.MoveNext())
-                                yield return enumerator.Current;
-                        }
+                        foreach (var subType in Visit(type, typeModel, visited))
+                            yield return subType;
 
                         yield return type;
                     }
@@ -59,7 +59,7 @@ public partial class ApiContractSerializer
             if (_typeModel.CanSerializeBasicType(type))
             {
                 metaType = null;
-                return Enumerable.Empty<ValueMember>();
+                return Array.Empty<ValueMember>();
             }
 
             metaType = _typeModel.Add(type, applyDefaultBehaviour: true);
@@ -69,6 +69,7 @@ public partial class ApiContractSerializer
             {
                 do
                 {
+                    // NOTE: GetFields return fields sorted by FieldNumber.
                     var fields = metaType.GetFields();
                     for (int i = 0, n = fields.Length; i < n; i++)
                         yield return fields[i];

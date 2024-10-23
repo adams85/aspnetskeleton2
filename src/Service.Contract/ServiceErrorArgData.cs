@@ -7,6 +7,7 @@ using WebApp.Service.Infrastructure.Validation;
 namespace WebApp.Service;
 
 [DataContract]
+// ApiContractSerializer.EnsureAotGenericInstantiations should be kept in sync with the list of subtypes!
 [ProtoInclude(1, typeof(ServiceErrorArgData<string>))]
 [ProtoInclude(2, typeof(ServiceErrorArgData<char>))]
 [ProtoInclude(3, typeof(ServiceErrorArgData<bool>))]

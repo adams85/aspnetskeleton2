@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text.Json;
-using System.Threading;
+using System.Text.Json.Serialization;
+using ProtoBuf;
 using ProtoBuf.Meta;
 using WebApp.Service;
 
@@ -10,15 +12,62 @@ namespace WebApp.Api;
 
 public static partial class ApiContractSerializer
 {
-    public const string JsonTypePropertyName = "$type";
+    public const string JsonTypeDiscriminatorPropertyName = "$type";
 
-    private static Func<Type, string>? s_typeNameFormatter;
-    public static Func<Type, string> TypeNameFormatter => LazyInitializer.EnsureInitialized(ref s_typeNameFormatter, TypeNameFormatterFactory)!;
-    public static Func<Func<Type, string>> TypeNameFormatterFactory { get; set; } = () => type => type.AssemblyQualifiedName;
+    private static volatile bool s_allowDynamicCodeGeneration;
+    /// <remarks>
+    /// <para>
+    /// This does not affect Protobuf serialization as it currently requires dynamic code generation anyway.<br/>
+    /// </para>
+    /// <para>
+    /// It is also important to note that the contracts for JSON serialization are built based on protobuf-net's <see cref="RuntimeTypeModel"/>.
+    /// This does not require dynamic code generation but when using assembly trimming, the consuming application must make sure
+    /// that all contract DTO types are fully preserved.
+    /// </para>
+    /// </remarks>
+    public static bool AllowDynamicCodeGeneration { get => s_allowDynamicCodeGeneration; set => s_allowDynamicCodeGeneration = value; }
 
+    private static volatile Func<Func<Type, string>> s_typeNameFormatterFactory = () => type => type.AssemblyQualifiedName;
+    public static Func<Func<Type, string>> TypeNameFormatterFactory { get => s_typeNameFormatterFactory; set => s_typeNameFormatterFactory = value; }
+
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(DataContractAttribute))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(DataMemberAttribute))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(EnumMemberAttribute))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ProtoIncludeAttribute))]
     public static readonly ModelMetadataProvider MetadataProvider = new ModelMetadataProvider(ProtoBufSerializer.TypeModel);
 
+    /// <summary>
+    /// A serializer that can be used to serialize DTOs to Protobuf format.
+    /// (Does not work with Native AOT currently.)
+    /// </summary>
     public static readonly SerializerBase ProtoBuf = new ProtoBufSerializer();
+
+    /// <summary>
+    /// A serializer that can be used to serialize DTOs to JSON format.
+    /// (Works with Native AOT provided that <see cref="AllowDynamicCodeGeneration"/> is set to <see langword="false" />
+    /// and assembly trimming is configured in the consuming application to preserve all contract DTO types.)
+    /// </summary>
+    /// <remarks>
+    /// Uses System.Text.Json under the hood, with a custom contract resolver (<see cref="ApiContractJsonTypeInfoResolver"/>)
+    /// that makes the serializer respect the attributes used to annotate DTO types for Protobuf
+    /// (<see cref="DataContractAttribute"/>, <see cref="DataContractAttribute"/> and <see cref="ProtoIncludeAttribute"/> ).
+    /// Because of this, the following attributes are ignored:
+    /// <list type="bullet">
+    ///  <item><see cref="JsonDerivedTypeAttribute"/></item>
+    ///  <item><see cref="JsonExtensionDataAttribute"/></item>
+    ///  <item><see cref="JsonIgnoreAttribute"/></item>
+    ///  <item><see cref="JsonIncludeAttribute"/></item>
+    ///  <item><see cref="JsonPolymorphicAttribute"/></item>
+    ///  <item><see cref="JsonPropertyNameAttribute"/></item>
+    ///  <item><see cref="JsonPropertyOrderAttribute"/></item>
+    ///  <item><see cref="JsonRequiredAttribute"/> and the <see langword="required" /> keyword</item>
+    /// </list>
+    /// </remarks>
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(JsonConstructorAttribute))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(JsonConverterAttribute))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(JsonNumberHandlingAttribute))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(JsonObjectCreationHandlingAttribute))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(JsonUnmappedMemberHandlingAttribute))]
     public static readonly SerializerBase Json = new JsonSerializer();
 
     private sealed class JsonSerializer : SerializerBase.ByteArrayBased
@@ -44,5 +93,10 @@ public static partial class ApiContractSerializer
         [return: MaybeNull]
         public override T Deserialize<T>(Stream stream) => (T)TypeModel.Deserialize(stream, null, typeof(T));
     }
-}
 
+    internal static class FrozenOptions
+    {
+        public static readonly Func<Type, string> TypeNameFormatter = TypeNameFormatterFactory();
+        public static readonly bool AllowDynamicCodeGeneration = ApiContractSerializer.AllowDynamicCodeGeneration;
+    }
+}

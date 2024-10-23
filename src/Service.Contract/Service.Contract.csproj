@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="WebApp.Api.Contract"/>
+  </ItemGroup>
+
 </Project>

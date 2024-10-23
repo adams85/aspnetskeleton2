@@ -1,4 +1,6 @@
-﻿using System;
+﻿// source: https://github.com/protobuf-net/protobuf-net/blob/3.2.30/src/protobuf-net.Core/ProtoIncludeAttribute.cs
+
+using System;
 
 namespace ProtoBuf;
 

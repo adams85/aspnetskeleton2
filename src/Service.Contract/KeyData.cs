@@ -6,6 +6,7 @@ using ProtoBuf;
 namespace WebApp.Service;
 
 [DataContract]
+// ApiContractSerializer.EnsureAotGenericInstantiations should be kept in sync with the list of subtypes!
 [ProtoInclude(1, typeof(KeyData<string>))]
 [ProtoInclude(2, typeof(KeyData<int>))]
 [ProtoInclude(3, typeof(KeyData<long>))]

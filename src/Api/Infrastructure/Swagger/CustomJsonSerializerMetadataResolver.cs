@@ -15,7 +15,7 @@ using WebApp.Core.Helpers;
 namespace WebApp.Api.Infrastructure.Swagger;
 
 /// <summary>
-/// Customizes Swagger JSON schema generation to match the behavior of <see cref="ApiContractSerializer"/> (including <seealso cref="ApiObjectJsonConverterFactory"/>).
+/// Customizes Swagger JSON schema generation to match the behavior of <see cref="ApiContractSerializer.Json"/>.
 /// </summary>
 /// <remarks>
 /// Together with <see cref="DataContractMetadataDetailsProvider"/>, this class is necessary for correct Swagger JSON generation.
@@ -71,7 +71,7 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
                 jsonConverter: JsonConverterFunc);
         }
 
-        if (IsSupportedDictionary(type, out Type? keyType, out Type? valueType) && ApiContractSerializer.MetadataProvider.ShouldSerializeAsList(type))
+        if (IsSupportedDictionary(type, out Type? keyType, out Type? valueType) && ApiContractSerializer.MetadataProvider.ShouldSerializeAsCollection(type))
         {
             return DataContract.ForDictionary(
                 underlyingType: type,
@@ -80,7 +80,7 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
                 jsonConverter: JsonConverterFunc);
         }
 
-        if (IsSupportedCollection(type, out Type? itemType) && ApiContractSerializer.MetadataProvider.ShouldSerializeAsList(type))
+        if (IsSupportedCollection(type, out Type? itemType) && ApiContractSerializer.MetadataProvider.ShouldSerializeAsCollection(type))
         {
             return DataContract.ForArray(
                 underlyingType: type,
@@ -97,7 +97,9 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
 
     private string JsonConverterFunc(object? value)
     {
-        return JsonSerializer.Serialize(value, _serializerOptions);
+        return value != null
+            ? JsonSerializer.Serialize(value, value.GetType(), _serializerOptions)
+            : JsonSerializer.Serialize(value, _serializerOptions);
     }
 
     public bool IsSupportedDictionary(Type type, [MaybeNullWhen(false)] out Type keyType, [MaybeNullWhen(false)] out Type valueType)

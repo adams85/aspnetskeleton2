@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Net;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -59,6 +60,7 @@ public partial class Startup
         {
             TypeDescriptor.AddAttributes(typeof(IPAddress), new TypeConverterAttribute(typeof(IPAddressTypeConverter)));
 
+            ApiContractSerializer.AllowDynamicCodeGeneration = RuntimeFeature.IsDynamicCodeSupported;
             ApiContractSerializer.TypeNameFormatterFactory = () => Core.Helpers.TypeExtensions.AssemblyQualifiedNameWithoutAssemblyDetails;
         }));
 

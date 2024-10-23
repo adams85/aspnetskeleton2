@@ -54,10 +54,9 @@ public partial class Startup
                 [securitySchemeRef] = Array.Empty<string>()
             });
 
-            // uncomment the following lines to enable polymorphic schema generation
-            //options.UseOneOfForPolymorphism();
-            //options.SelectSubTypesUsing(ApiContractSerializer.MetadataProvider.GetSubTypes);
-            //options.SelectDiscriminatorNameUsing(_ => ApiContractSerializer.JsonTypePropertyName);
+            options.UseOneOfForPolymorphism();
+            options.SelectSubTypesUsing(ApiContractSerializer.MetadataProvider.GetSubTypes);
+            options.SelectDiscriminatorNameUsing(_ => ApiContractSerializer.JsonTypeDiscriminatorPropertyName);
         });
 
         services.ReplaceLast(ServiceDescriptor.Transient<ISerializerDataContractResolver, CustomJsonSerializerDataContractResolver>());

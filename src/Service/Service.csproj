@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="$(DotNetRuntimeVersion)" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="protobuf-net" Version="3.2.30" />
+    <PackageReference Include="protobuf-net" Version="3.2.45" />
     <PackageReference Include="System.Reactive" Version="6.0.0" />
   </ItemGroup>
 

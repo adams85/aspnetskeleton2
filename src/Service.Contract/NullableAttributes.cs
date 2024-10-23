@@ -1,60 +1,36 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-// source: https://github.com/dotnet/runtime/blob/v6.0.3/src/libraries/System.Private.CoreLib/src/System/Diagnostics/CodeAnalysis/NullableAttributes.cs
+// source: https://github.com/dotnet/runtime/blob/v8.0.10/src/libraries/System.Private.CoreLib/src/System/Diagnostics/CodeAnalysis/NullableAttributes.cs
 
 namespace System.Diagnostics.CodeAnalysis;
 
 // These attributes already shipped with .NET Core 3.1 in System.Runtime
-#if !NETCOREAPP3_0 && !NETCOREAPP3_1 && !NETSTANDARD2_1
+#if !NETCOREAPP3_0_OR_GREATER && !NETSTANDARD2_1_OR_GREATER
 /// <summary>Specifies that null is allowed as an input even if the corresponding type disallows it.</summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property, Inherited = false)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class AllowNullAttribute : Attribute
+
+internal sealed class AllowNullAttribute : Attribute
 { }
 
 /// <summary>Specifies that null is disallowed as an input even if the corresponding type allows it.</summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property, Inherited = false)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class DisallowNullAttribute : Attribute
+internal sealed class DisallowNullAttribute : Attribute
 { }
 
 /// <summary>Specifies that an output may be null even if the corresponding type disallows it.</summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, Inherited = false)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class MaybeNullAttribute : Attribute
+internal sealed class MaybeNullAttribute : Attribute
 { }
 
 /// <summary>Specifies that an output will not be null even if the corresponding type allows it. Specifies that an input argument was not null when the call returns.</summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, Inherited = false)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class NotNullAttribute : Attribute
+internal sealed class NotNullAttribute : Attribute
 { }
 
 /// <summary>Specifies that when a method returns <see cref="ReturnValue"/>, the parameter may be null even if the corresponding type disallows it.</summary>
 [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class MaybeNullWhenAttribute : Attribute
+internal sealed class MaybeNullWhenAttribute : Attribute
 {
     /// <summary>Initializes the attribute with the specified return value condition.</summary>
     /// <param name="returnValue">
@@ -68,12 +44,7 @@ internal
 
 /// <summary>Specifies that when a method returns <see cref="ReturnValue"/>, the parameter will not be null even if the corresponding type allows it.</summary>
 [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class NotNullWhenAttribute : Attribute
+internal sealed class NotNullWhenAttribute : Attribute
 {
     /// <summary>Initializes the attribute with the specified return value condition.</summary>
     /// <param name="returnValue">
@@ -87,12 +58,7 @@ internal
 
 /// <summary>Specifies that the output will be non-null if the named parameter is non-null.</summary>
 [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, AllowMultiple = true, Inherited = false)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class NotNullIfNotNullAttribute : Attribute
+internal sealed class NotNullIfNotNullAttribute : Attribute
 {
     /// <summary>Initializes the attribute with the associated parameter name.</summary>
     /// <param name="parameterName">
@@ -106,22 +72,12 @@ internal
 
 /// <summary>Applied to a method that will never return under any circumstance.</summary>
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class DoesNotReturnAttribute : Attribute
+internal sealed class DoesNotReturnAttribute : Attribute
 { }
 
 /// <summary>Specifies that the method will not return if the associated Boolean parameter is passed the specified value.</summary>
 [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class DoesNotReturnIfAttribute : Attribute
+internal sealed class DoesNotReturnIfAttribute : Attribute
 {
     /// <summary>Initializes the attribute with the specified parameter value.</summary>
     /// <param name="parameterValue">
@@ -135,14 +91,10 @@ internal
 }
 #endif
 
+#if !NET5_0_OR_GREATER
 /// <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values.</summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class MemberNotNullAttribute : Attribute
+internal sealed class MemberNotNullAttribute : Attribute
 {
     /// <summary>Initializes the attribute with a field or property member.</summary>
     /// <param name="member">
@@ -162,12 +114,7 @@ internal
 
 /// <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values when returning with the specified return value condition.</summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
-#if SYSTEM_PRIVATE_CORELIB
-public
-#else
-internal
-#endif
-    sealed class MemberNotNullWhenAttribute : Attribute
+internal sealed class MemberNotNullWhenAttribute : Attribute
 {
     /// <summary>Initializes the attribute with the specified return value condition and a field or property member.</summary>
     /// <param name="returnValue">
@@ -201,3 +148,4 @@ internal
     /// <summary>Gets field or property member names.</summary>
     public string[] Members { get; }
 }
+#endif

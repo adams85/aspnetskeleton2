@@ -6,6 +6,5 @@
 
   <PropertyGroup>
     <DotNetRuntimeTfm>net8.0</DotNetRuntimeTfm>
-    <DotNetRuntimeVersion>8.*</DotNetRuntimeVersion>
   </PropertyGroup>
 </Project>

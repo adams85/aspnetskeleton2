@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>$(DotNetRuntimeTfm)</TargetFramework>
@@ -7,18 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="5.0.0.1">
+    <PackageReference Include="ConfigureAwaitChecker.Analyzer">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Karambolo.PO" Version="1.11.1" />
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="MailKit" Version="4.5.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="protobuf-net" Version="3.2.45" />
-    <PackageReference Include="System.Reactive" Version="6.0.0" />
+    <PackageReference Include="Karambolo.PO" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="MailKit" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" />
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" />
+    <PackageReference Include="protobuf-net" />
+    <PackageReference Include="System.Reactive" />
   </ItemGroup>
 
   <ItemGroup>

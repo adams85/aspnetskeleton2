@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>$(DotNetRuntimeTfm)</TargetFramework>
@@ -9,20 +9,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="5.0.0.1">
+    <PackageReference Include="ConfigureAwaitChecker.Analyzer">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(DotNetRuntimeVersion)">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SQLite'" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SqlServer'" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'PostgreSQL'" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="$(DotNetRuntimeVersion)" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'MySQL'" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SQLite'" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SqlServer'" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'PostgreSQL'" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'MySQL'" />
   </ItemGroup>
 
   <ItemGroup>

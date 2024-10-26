@@ -12,17 +12,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="5.0.0.1">
+    <PackageReference Include="ConfigureAwaitChecker.Analyzer">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Grpc.Net.Client" Version="2.66.0" />
-    <PackageReference Include="Karambolo.PO" Version="1.11.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="$(DotNetRuntimeVersion)" />
-    <PackageReference Include="protobuf-net.Grpc" Version="1.2.2" />
-    <PackageReference Include="System.Reactive" Version="6.0.0" />
+    <PackageReference Include="Grpc.Net.Client" />
+    <PackageReference Include="Karambolo.PO" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="protobuf-net.Grpc" />
+    <PackageReference Include="System.Reactive" />
   </ItemGroup>
 
   <ItemGroup>

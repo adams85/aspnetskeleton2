@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -13,17 +13,17 @@
     <TrimmerRootAssembly Include="POTools" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Buildalyzer" Version="7.0.1" />
-    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />
-    <PackageReference Include="Karambolo.PO.Compact" Version="1.11.1" />
+    <PackageReference Include="Buildalyzer" />
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" />
+    <PackageReference Include="Karambolo.PO.Compact" />
     <!--
       The Razor compiler infrastructure is being redesigned/consolidated. This package will be replaced by Microsoft.CodeAnalysis.Razor.Compiler.
       TODO: switch to the new package when it becomes available (https://github.com/dotnet/razor/issues/8399#issue-1612247055)
     -->
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="6.0.30" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.9.2" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(DotNetRuntimeVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Language" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
   </ItemGroup>
 
 </Project>

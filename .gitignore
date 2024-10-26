@@ -303,7 +303,7 @@ __pycache__/
 
 # Other
 /.nuget/
-/src/UI.AspNetCore/wwwroot/bundles
-/src/UI.AspNetCore/wwwroot/lib
-/src/UI.AspNetCore/wwwroot/js
+/src/UI.RazorPages/wwwroot/bundles
+/src/UI.RazorPages/wwwroot/lib
+/src/UI.RazorPages/wwwroot/js
 *.Development.db*

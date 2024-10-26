@@ -1,6 +1,6 @@
 ﻿{
   "profiles": {
-    "UI.AspNetCore (Development)": {
+    "UI.RazorPages (Development)": {
       "commandName": "Project",
       "launchBrowser": false,
       "environmentVariables": {
@@ -9,7 +9,7 @@
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
-    "UI.AspNetCore (Production)": {
+    "UI.RazorPages (Production)": {
       "commandName": "Project",
       "launchBrowser": false,
       "environmentVariables": {

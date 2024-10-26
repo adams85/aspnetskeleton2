@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>$(DotNetRuntimeTfm)</TargetFramework>
-    <AssemblyName>WebApp.UI.AspNetCore</AssemblyName>
+    <AssemblyName>WebApp.UI.RazorPages</AssemblyName>
     <RootNamespace>WebApp.UI</RootNamespace>
 
     <EnablePreviewFeatures>true</EnablePreviewFeatures>

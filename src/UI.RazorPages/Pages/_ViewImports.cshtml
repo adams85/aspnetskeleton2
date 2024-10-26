@@ -1,11 +1,11 @@
-﻿@namespace WebApp.UI.Areas.Dashboard.Pages
+﻿@attribute [AssociatedAssemblyName(ApplicationConstants.AssemblyNamePrefix + ".UI.RazorPages")]
+
+@namespace WebApp.UI.Pages
 
 @using Microsoft.AspNetCore.Mvc.Localization
 @using Karambolo.AspNetCore.Bundling.ViewHelpers
 @using Karambolo.Common
 @using Karambolo.Common.Localization
-@using WebApp.Common.Roles
-@using WebApp.Common.Settings
 @using WebApp.Core
 @using WebApp.Core.Helpers
 @using WebApp.Service
@@ -17,6 +17,5 @@
 
 @addTagHelper *, Karambolo.AspNetCore.Bundling
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@addTagHelper *, WebApp.UI.AspNetCore
 
 @inject IViewLocalizer T

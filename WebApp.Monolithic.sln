@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service.Contract", "src\Ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service.Templates.Razor", "src\Service.Templates.Razor\Service.Templates.Razor.csproj", "{2F801F5E-7CDE-4853-8F6C-C5C3710B333C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UI.AspNetCore", "src\UI.AspNetCore\UI.AspNetCore.csproj", "{D43DDB88-EC01-43EC-8468-DA706A9BA120}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UI.RazorPages", "src\UI.RazorPages\UI.RazorPages.csproj", "{D43DDB88-EC01-43EC-8468-DA706A9BA120}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30850E6A-794D-4B2D-9B0C-3E88EDCBE887}"
 	ProjectSection(SolutionItems) = preProject

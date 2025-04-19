@@ -16,7 +16,14 @@ public static partial class ApiContractSerializer
 
     private static volatile bool s_allowDynamicCodeGeneration;
     /// <remarks>
-    /// Only applies to JSON serialization as Protobuf serialization currently requires dynamic code generation anyway.
+    /// <para>
+    /// This does not affect Protobuf serialization as it currently requires dynamic code generation anyway.<br/>
+    /// </para>
+    /// <para>
+    /// It is also important to note that the contracts for JSON serialization are built based on protobuf-net's <see cref="RuntimeTypeModel"/>.
+    /// This does not require dynamic code generation but when using assembly trimming, the consuming application must make sure
+    /// that all contract DTO types are fully preserved (e.g. by specifying TrimmerRootAssembly in csproj).
+    /// </para>
     /// </remarks>
     public static bool AllowDynamicCodeGeneration { get => s_allowDynamicCodeGeneration; set => s_allowDynamicCodeGeneration = value; }
 

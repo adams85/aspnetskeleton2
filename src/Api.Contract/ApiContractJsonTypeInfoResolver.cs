@@ -23,7 +23,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
     // Customizability of serialization contract creation is quite limited in System.Text.Json currently.
     // A bunch of necessary types and methods are kept internal, leaving us with two options:
     // we either copy a lot of code or use reflection to get access to those APIs.
-    // This implementation takes the former approach. (A third option would be to implement a source generator
+    // This implementation takes the former approach. (Alternatively, we could implement a source generator
     // but that would be a pretty big task.)
 
     // TODO: revise this solution when https://github.com/dotnet/runtime/issues/63791 gets resolved.

@@ -16,14 +16,7 @@ public static partial class ApiContractSerializer
 
     private static volatile bool s_allowDynamicCodeGeneration;
     /// <remarks>
-    /// <para>
-    /// This does not affect Protobuf serialization as it currently requires dynamic code generation anyway.<br/>
-    /// </para>
-    /// <para>
-    /// It is also important to note that the contracts for JSON serialization are built based on protobuf-net's <see cref="RuntimeTypeModel"/>.
-    /// This does not require dynamic code generation but when using assembly trimming, the consuming application must make sure
-    /// that all contract DTO types are fully preserved.
-    /// </para>
+    /// Only applies to JSON serialization as Protobuf serialization currently requires dynamic code generation anyway.
     /// </remarks>
     public static bool AllowDynamicCodeGeneration { get => s_allowDynamicCodeGeneration; set => s_allowDynamicCodeGeneration = value; }
 
@@ -44,8 +37,9 @@ public static partial class ApiContractSerializer
 
     /// <summary>
     /// A serializer that can be used to serialize DTOs to JSON format.
-    /// (Works with Native AOT provided that <see cref="AllowDynamicCodeGeneration"/> is set to <see langword="false" />
-    /// and assembly trimming is configured in the consuming application to preserve all contract DTO types.)
+    /// (Can be made to work with Native AOT, provided that <see cref="AllowDynamicCodeGeneration"/> is set to <see langword="false" />
+    /// and assembly trimming is configured to preserve all DTO types, including generic instantiations, plus the necessary
+    /// JSON serializer infrastructure types for DTO types and property types. See also <see cref="Helpers.AotHelper"/>.)
     /// </summary>
     /// <remarks>
     /// Uses System.Text.Json under the hood, with a custom contract resolver (<see cref="ApiContractJsonTypeInfoResolver"/>)
@@ -75,9 +69,11 @@ public static partial class ApiContractSerializer
         private static readonly JsonSerializerOptions s_options = new JsonSerializerOptions().ConfigureApiDefaults();
 
         public override byte[] Serialize(object? obj, Type type) => System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(obj, type, s_options);
+
         public override byte[] Serialize<T>(T obj) => System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(obj, s_options);
 
         public override object? Deserialize(ArraySegment<byte> bytes, Type type) => System.Text.Json.JsonSerializer.Deserialize(bytes, type, s_options);
+
         [return: MaybeNull]
         public override T Deserialize<T>(ArraySegment<byte> bytes) => System.Text.Json.JsonSerializer.Deserialize<T>(bytes, s_options);
     }
@@ -87,9 +83,11 @@ public static partial class ApiContractSerializer
         internal static readonly RuntimeTypeModel TypeModel = RuntimeTypeModel.Create().ConfigureApiDefaults();
 
         public override void Serialize(Stream stream, object? obj, Type type) => TypeModel.Serialize(stream, obj);
+
         public override void Serialize<T>(Stream stream, T obj) => TypeModel.Serialize(stream, obj);
 
         public override object? Deserialize(Stream stream, Type type) => TypeModel.Deserialize(stream, null, type);
+
         [return: MaybeNull]
         public override T Deserialize<T>(Stream stream) => (T)TypeModel.Deserialize(stream, null, typeof(T));
     }

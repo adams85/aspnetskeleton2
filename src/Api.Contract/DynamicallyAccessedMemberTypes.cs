@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-// source: https://github.com/dotnet/runtime/blob/v8.0.10/src/libraries/System.Private.CoreLib/src/System/Diagnostics/CodeAnalysis/DynamicallyAccessedMemberTypes.cs
+// Source: https://github.com/dotnet/runtime/blob/v8.0.15/src/libraries/System.Private.CoreLib/src/System/Diagnostics/CodeAnalysis/DynamicallyAccessedMemberTypes.cs
 
 namespace System.Diagnostics.CodeAnalysis;
 

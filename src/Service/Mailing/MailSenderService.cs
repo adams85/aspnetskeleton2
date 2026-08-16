@@ -302,7 +302,7 @@ internal sealed class MailSenderService : BackgroundService, IMailSenderService
                     {
                         try
                         {
-                            await _smtpClient.ConnectAsync(_smtpHost, _smtpPort, _smtpSecurity, cancellationToken).ConfigureAwait(false);
+                            await _smtpClient.ConnectAsync(_smtpHost!, _smtpPort, _smtpSecurity, cancellationToken).ConfigureAwait(false);
                         }
                         catch (Exception ex) when (ex is not OperationCanceledException)
                         {

@@ -33,7 +33,7 @@ internal sealed class PickupDirMailClient : MailTransport
 
     protected override string Protocol => "smtp";
 
-    public override HashSet<string>? AuthenticationMechanisms => default;
+    public override HashSet<string> AuthenticationMechanisms => default!;
 
     public override int Timeout
     {

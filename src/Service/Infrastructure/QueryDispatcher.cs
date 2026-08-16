@@ -39,8 +39,11 @@ internal sealed class QueryDispatcher : IQueryDispatcher
         }
     }
 
-    public async Task<TResult> DispatchAsync<TResult>(IQuery<TResult> query, CancellationToken cancellationToken) =>
-        (TResult)(await DispatchAsync((IQuery)query, cancellationToken).ConfigureAwait(false))!;
+    public Task<TResult> DispatchAsync<TResult>(IQuery<TResult> query, CancellationToken cancellationToken)
+    {
+        return DispatchAsync((IQuery)query, cancellationToken)
+            .ContinueWith(task => (TResult)task.GetAwaiter().GetResult()!, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+    }
 
     private sealed class InterceptorChain
     {

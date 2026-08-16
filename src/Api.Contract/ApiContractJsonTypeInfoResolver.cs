@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
@@ -477,13 +478,14 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         typeInfo.PolymorphismOptions = null;
 
         var subTypes = _modelMetadataProvider.GetSubTypes(typeInfo.Type);
-        if (subTypes is IReadOnlyCollection<Type> { Count: 0 })
+        if (subTypes is IReadOnlyCollection<KeyValuePair<int, Type>> { Count: 0 })
             return;
 
         JsonPolymorphismOptions? polymorphismOptions = null;
 
-        foreach (var subType in subTypes)
+        foreach (var kvp in subTypes)
         {
+            var subType = kvp.Value;
             if (subType.IsAbstract)
                 continue;
 
@@ -492,7 +494,10 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
                 TypeDiscriminatorPropertyName = ApiContractSerializer.JsonTypeDiscriminatorPropertyName
             };
 
-            polymorphismOptions.DerivedTypes.Add(new JsonDerivedType(subType, ApiContractSerializer.FrozenOptions.TypeNameFormatter(subType)));
+            var discriminatorValue = kvp.Key;
+            // NOTE: Per the OpenAPI specification, discriminator values must be of type string.
+            // See: https://redocly.com/learn/openapi/openapi-visual-reference/discriminator.md
+            polymorphismOptions.DerivedTypes.Add(new JsonDerivedType(subType, discriminatorValue.ToString(CultureInfo.InvariantCulture)));
         }
 
         typeInfo.PolymorphismOptions = polymorphismOptions;

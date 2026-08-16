@@ -27,28 +27,30 @@ public partial class ApiContractSerializer
 
         public bool CanSerialize(Type type) => _typeModel.CanSerialize(type);
 
-        public IEnumerable<Type> GetSubTypes(Type type)
+        public IEnumerable<KeyValuePair<int, Type>> GetSubTypes(Type type)
         {
             if (type.IsValueType || type.IsArray || _typeModel.CanSerializeBasicType(type))
             {
-                return Type.EmptyTypes;
+                return Array.Empty<KeyValuePair<int, Type>>();
             }
 
             var visited = new HashSet<Type>() { type };
             return Visit(type, _typeModel, visited);
 
-            static IEnumerable<Type> Visit(Type type, RuntimeTypeModel typeModel, HashSet<Type> visited)
+            static IEnumerable<KeyValuePair<int, Type>> Visit(Type type, RuntimeTypeModel typeModel, HashSet<Type> visited)
             {
                 var subTypes = typeModel.Add(type, applyDefaultBehaviour: true).GetSubtypes();
 
                 for (int i = 0; i < subTypes.Length; i++)
-                {
-                    if (visited.Add(type = subTypes[i].DerivedType.Type))
-                    {
-                        foreach (var subType in Visit(type, typeModel, visited))
-                            yield return subType;
+                { 
+                    var subType = subTypes[i];
 
-                        yield return type;
+                    if (visited.Add(type = subType.DerivedType.Type))
+                    {
+                        foreach (var kvp in Visit(type, typeModel, visited))
+                            yield return kvp;
+
+                        yield return new KeyValuePair<int, Type>(subType.FieldNumber, type);
                     }
                 }
             }

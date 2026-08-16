@@ -27,9 +27,6 @@ public static partial class ApiContractSerializer
     /// </remarks>
     public static bool AllowDynamicCodeGeneration { get => s_allowDynamicCodeGeneration; set => s_allowDynamicCodeGeneration = value; }
 
-    private static volatile Func<Func<Type, string>> s_typeNameFormatterFactory = () => type => type.AssemblyQualifiedName;
-    public static Func<Func<Type, string>> TypeNameFormatterFactory { get => s_typeNameFormatterFactory; set => s_typeNameFormatterFactory = value; }
-
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(DataContractAttribute))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(DataMemberAttribute))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(EnumMemberAttribute))]
@@ -101,7 +98,6 @@ public static partial class ApiContractSerializer
 
     internal static class FrozenOptions
     {
-        public static readonly Func<Type, string> TypeNameFormatter = TypeNameFormatterFactory();
         public static readonly bool AllowDynamicCodeGeneration = ApiContractSerializer.AllowDynamicCodeGeneration;
     }
 }

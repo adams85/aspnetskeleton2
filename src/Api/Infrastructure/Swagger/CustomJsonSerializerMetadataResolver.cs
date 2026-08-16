@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
@@ -34,6 +35,12 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
 
     public DataContract GetDataContractForType(Type type)
     {
+        var subType = type as SubType;
+        if (subType is not null)
+        {
+            type = subType.DelegatingType;
+        }
+
         if (type.IsOneOf(typeof(object), typeof(JsonDocument), typeof(JsonElement)))
         {
             return DataContract.ForDynamic(
@@ -92,7 +99,8 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
             underlyingType: type,
             properties: GetDataPropertiesFor(type, out Type? extensionDataType),
             extensionDataType: extensionDataType,
-            jsonConverter: JsonConverterFunc);
+            jsonConverter: JsonConverterFunc,
+            typeNameValue: subType?.DiscriminatorValue.ToString(CultureInfo.InvariantCulture));
     }
 
     private string JsonConverterFunc(object? value)
@@ -236,4 +244,16 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
         [typeof(Guid)] = (DataType.String, "uuid"),
         [typeof(Uri)] = (DataType.String, "uri"),
     };
+
+    public sealed class SubType : TypeDelegator
+    {
+        public SubType(int discriminatorValue, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type delegatingType)
+            : base(delegatingType)
+        {
+            DiscriminatorValue = discriminatorValue;
+        }
+
+        public int DiscriminatorValue { get; }
+        public Type DelegatingType => typeImpl;
+    }
 }

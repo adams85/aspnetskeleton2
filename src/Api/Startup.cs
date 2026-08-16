@@ -61,7 +61,6 @@ public partial class Startup
             TypeDescriptor.AddAttributes(typeof(IPAddress), new TypeConverterAttribute(typeof(IPAddressTypeConverter)));
 
             ApiContractSerializer.AllowDynamicCodeGeneration = RuntimeFeature.IsDynamicCodeSupported;
-            ApiContractSerializer.TypeNameFormatterFactory = () => Core.Helpers.TypeExtensions.AssemblyQualifiedNameWithoutAssemblyDetails;
         }));
 
         ConfigureBaseServicesPartial(services);

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using TUnit.Core;
 using WebApp.Common.Infrastructure.Localization;
 using WebApp.Common.Infrastructure.Validation;
 using WebApp.Service.Infrastructure.Validation;
@@ -14,7 +15,7 @@ namespace WebApp.Service.Infrastructure;
 
 public class DataAnnotationsValidationTests
 {
-    [Fact]
+    [Test]
     public void RespectsNullableRefTypeAnnotation()
     {
         var command = new GetUserQuery { };
@@ -30,7 +31,7 @@ public class DataAnnotationsValidationTests
         Assert.Equal(new[] { nameof(command.Identifier) }, serviceErrorEx.Args);
     }
 
-    [Fact]
+    [Test]
     public void ChecksNestedProperty()
     {
         var command = new GetUserQuery
@@ -49,7 +50,7 @@ public class DataAnnotationsValidationTests
         Assert.Equal(new[] { nameof(command.Identifier) + "." + nameof(UserIdentifier.Name.Value) }, serviceErrorEx.Args);
     }
 
-    [Fact]
+    [Test]
     public void RespectsIValidatableObjectImplementation()
     {
         var command = new ApproveUserCommand
@@ -71,7 +72,7 @@ public class DataAnnotationsValidationTests
         Assert.Equal(new[] { nameof(command.VerificationToken) }, serviceErrorEx.Args);
     }
 
-    [Fact]
+    [Test]
     public void ExtendedValidationAttribute_CustomTextLocalizer()
     {
         var command = new ListUsersQuery
@@ -97,7 +98,7 @@ public class DataAnnotationsValidationTests
         Assert.Equal($"The field {nameof(command.OrderBy)} must contain non-empty strings.", formattedErrorMessage);
     }
 
-    [Fact]
+    [Test]
     public void ServiceValidationAttribute_ServiceUnavailableButValidationIgnored()
     {
         var command = new ChangePasswordCommand
@@ -109,7 +110,7 @@ public class DataAnnotationsValidationTests
         DataAnnotationsValidator.Validate(command);
     }
 
-    [Fact]
+    [Test]
     public async Task ServiceValidationAttribute_ServiceAvailable_ComplexityRequirementsMet()
     {
         var services = new ServiceCollection();
@@ -136,7 +137,7 @@ public class DataAnnotationsValidationTests
         DataAnnotationsValidator.Validate(command);
     }
 
-    [Fact]
+    [Test]
     public async Task ServiceValidationAttribute_ServiceAvailable_ComplexityRequirementsNotMet()
     {
         var services = new ServiceCollection();

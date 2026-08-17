@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TUnit.Core;
 using WebApp.Core;
 using WebApp.Core.Helpers;
 using WebApp.Service.Infrastructure;
@@ -14,7 +16,6 @@ using Xunit;
 namespace WebApp.Service;
 
 // TODO: add tests for progress reporting
-[Collection(nameof(ServiceHostCollection))]
 public class ProxyTests
 {
     private static IServiceProvider BuildProxyServices(string serviceBaseUrl)
@@ -33,7 +34,7 @@ public class ProxyTests
 
     private static readonly IServiceProvider s_proxyServices = BuildProxyServices(ServiceHostFixture.ServiceBaseUrl);
 
-    [Fact]
+    [Test]
     public async Task DispatchCommandExpectingSuccess()
     {
         await using var scope = AsyncDisposableAdapter.From(s_proxyServices.CreateScope());
@@ -52,7 +53,7 @@ public class ProxyTests
         await commandDispatcher.DispatchAsync(command, default);
     }
 
-    [Fact]
+    [Test]
     public async Task DispatchCommandExpectingFailure()
     {
         await using var scope = AsyncDisposableAdapter.From(s_proxyServices.CreateScope());
@@ -74,7 +75,7 @@ public class ProxyTests
         Assert.Equal(new[] { nameof(command.UserName) }, ex.Args);
     }
 
-    [Fact]
+    [Test]
     public async Task DispatchQueryExpectingSuccess()
     {
         await using var scope = AsyncDisposableAdapter.From(s_proxyServices.CreateScope());
@@ -92,7 +93,7 @@ public class ProxyTests
         Assert.Contains(result.Items!, item => ApplicationConstants.BuiltInRootUserName.Equals(item.UserName, StringComparison.OrdinalIgnoreCase));
     }
 
-    [Fact]
+    [Test]
     public async Task DispatchQueryExpectingFailure()
     {
         await using var scope = AsyncDisposableAdapter.From(s_proxyServices.CreateScope());

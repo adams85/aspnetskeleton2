@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using TUnit.Core;
 using WebApp.Common.Roles;
 using WebApp.Service.Roles;
 using WebApp.Service.Tests.Infrastructure;
@@ -11,7 +12,7 @@ namespace WebApp.Service.Tests.UnitTests.Users;
 
 public class AddUsersToRolesCommandTests
 {
-    [Fact]
+    [Test]
     public async Task AddSingleUserToSingleRole()
     {
         var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder

@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TUnit.Core;
 using WebApp.Service.Roles;
 using WebApp.Service.Tests.Helpers;
 using WebApp.Service.Tests.Infrastructure;
@@ -12,7 +13,7 @@ namespace WebApp.Service.Infrastructure;
 
 public class InterceptorChainTests
 {
-    [Fact]
+    [Test]
     public async Task CommandDataAnnotationsValidatorInterceptorTest()
     {
         var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
@@ -36,7 +37,7 @@ public class InterceptorChainTests
         Assert.Equal(new[] { nameof(command.UserNames) }, ex.Args);
     }
 
-    [Fact]
+    [Test]
     public async Task QueryDataAnnotationsValidatorInterceptorTest()
     {
         var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder

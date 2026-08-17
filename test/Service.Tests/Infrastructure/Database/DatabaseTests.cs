@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TUnit.Core;
 using WebApp.Core;
 using WebApp.DataAccess.Entities;
 using WebApp.Service.Tests.TestData;
@@ -9,7 +10,7 @@ namespace WebApp.Service.Tests.Infrastructure.Database;
 
 public class DatabaseTests
 {
-    [Fact]
+    [Test]
     public async Task TestCaseGotDedicatedDbInstance1()
     {
         var testContextBuilder = new TestContextBuilder();
@@ -31,7 +32,7 @@ public class DatabaseTests
         }
     }
 
-    [Fact]
+    [Test]
     public async Task TestCaseGotDedicatedDbInstance2()
     {
         var testContextBuilder = new TestContextBuilder();
@@ -53,7 +54,7 @@ public class DatabaseTests
         }
     }
 
-    [Fact]
+    [Test]
     public async Task SeedDefaults()
     {
         var testContextBuilder = new TestContextBuilder();
@@ -76,7 +77,7 @@ public class DatabaseTests
         }
     }
 
-    [Fact]
+    [Test]
     public async Task SeedDefaultsAndCsvData()
     {
         var testContextBuilder = new TestContextBuilder();

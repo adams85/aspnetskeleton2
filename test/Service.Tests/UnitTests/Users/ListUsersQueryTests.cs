@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using TUnit.Core;
 using WebApp.Core;
 using WebApp.Service.Tests.Infrastructure;
 using WebApp.Service.Tests.TestData;
@@ -9,7 +10,7 @@ namespace WebApp.Service.Users;
 
 public class ListUsersQueryTests
 {
-    [Fact]
+    [Test]
     public async Task NoParams()
     {
         var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder
@@ -34,7 +35,7 @@ public class ListUsersQueryTests
         Assert.Contains(result.Items!, item => item.UserId == 12 && item.UserName == "JaneDoe");
     }
 
-    [Fact]
+    [Test]
     public async Task FilterByNamePagedAndSorted()
     {
         var testContextBuilder = TestContextBuilder.CreateDefault(builder => builder

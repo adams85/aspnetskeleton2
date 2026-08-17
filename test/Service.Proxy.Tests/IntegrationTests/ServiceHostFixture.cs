@@ -3,16 +3,30 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Karambolo.Common;
-using Xunit;
+using TUnit.Core;
 
 namespace WebApp.Service.Proxy.Tests.IntegrationTests;
 
-public class ServiceHostFixture : IAsyncLifetime
+public class ServiceHostFixture
 {
     internal const string ServiceBaseUrl = "http://localhost:4999";
 
     private const string ServiceHostCommandEnvironmentVariableName = "WEBAPP_SERVICEHOST_CMD";
     private const string ServiceHostPath = @"src\Service.Host";
+
+    private static readonly ServiceHostFixture s_instance = new();
+
+    [Before(HookType.TestSession)]
+    public static async Task BeforeSession()
+    {
+        await s_instance.InitializeAsync();
+    }
+
+    [After(HookType.TestSession)]
+    public static async Task AfterSession()
+    {
+        await s_instance!.DisposeAsync();
+    }
 
     private static string? LocateSolutionRootPath()
     {

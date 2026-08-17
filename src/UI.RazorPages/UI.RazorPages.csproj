@@ -5,7 +5,6 @@
     <AssemblyName>WebApp.UI.RazorPages</AssemblyName>
     <RootNamespace>WebApp.UI</RootNamespace>
 
-    <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <UseDesignTimeBundling>false</UseDesignTimeBundling>
   </PropertyGroup>
 
@@ -33,11 +32,6 @@
     <When Condition="'$(ApplicationArchitecture)' == 'Distributed'">
       <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
-        <!--
-          This explicit reference is necessary for the Razor runtime compilation to work.
-          See also: https://github.com/dotnet/aspnetcore/issues/45725#issuecomment-1378580453
-         -->
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
       </ItemGroup>
 
       <ItemGroup>

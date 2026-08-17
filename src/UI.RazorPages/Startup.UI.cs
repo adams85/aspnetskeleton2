@@ -155,7 +155,7 @@ public partial class Startup
             services.AddSingleton(typeof(RuntimeCompilationAwareValueCache<>));
 
             if (UIOptions.EnableRazorRuntimeCompilation)
-                mvcBuilder.AddRazorRuntimeCompilation(suppressExplicitNullableWarning: true);
+                mvcBuilder.AddRazorRuntimeCompilation();
 
             #endregion
 

@@ -13,10 +13,6 @@
     // * wwwroot/lib/bootstrap/scss/_tables.scss
     // * wwwroot/scss/dashboard/_data-table.scss
 
-    // template delegates, tag helpers need the following pragmas to compile (https://github.com/dotnet/aspnetcore/issues/20055)
-    //#pragma warning disable MVC1006
-    //#pragma warning disable 1998
-
     public void Table(DataTableModel tableModel)
     {
         if (tableModel.TableTemplate != null)

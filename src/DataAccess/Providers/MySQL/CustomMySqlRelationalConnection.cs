@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
 using Microsoft.EntityFrameworkCore.Storage;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
-using Pomelo.EntityFrameworkCore.MySql.Storage.Internal;
+using Microting.EntityFrameworkCore.MySql.Infrastructure.Internal;
+using Microting.EntityFrameworkCore.MySql.Storage.Internal;
 using WebApp.DataAccess.Infrastructure;
 
 namespace WebApp.DataAccess.Providers.MySQL;

@@ -21,8 +21,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SQLite'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'SqlServer'" />
+    <PackageReference Include="Microting.EntityFrameworkCore.MySql" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'MySQL'" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'PostgreSQL'" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Condition="'$(DbProvider)' == '' OR '$(DbProvider)' == 'MySQL'" />
   </ItemGroup>
 
   <ItemGroup>

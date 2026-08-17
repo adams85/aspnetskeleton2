@@ -21,7 +21,6 @@
       TODO: switch to the new package when it becomes available (https://github.com/dotnet/razor/issues/8399#issue-1612247055)
     -->
     <PackageReference Include="Microsoft.AspNetCore.Razor.Language" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
   </ItemGroup>
 
 </Project>

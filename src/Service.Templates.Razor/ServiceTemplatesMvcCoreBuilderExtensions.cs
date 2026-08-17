@@ -8,6 +8,8 @@ using WebApp.Service.Infrastructure.Templating;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
+#pragma warning disable ASPDEPR003 // Type or member is obsolete
+
 public static class ServiceTemplatesServiceCollectionExtensions
 {
     private static IServiceCollection AddRazorTemplating(this IServiceCollection services)

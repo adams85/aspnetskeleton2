@@ -14,6 +14,9 @@ using MailKit.Security;
 using MimeKit;
 using WebApp.Core.Infrastructure;
 
+#pragma warning disable CS0672 // Member overrides obsolete member
+#pragma warning disable SYSLIB0058 // Type or member is obsolete
+
 namespace WebApp.Service.Mailing;
 
 internal sealed class PickupDirMailClient : MailTransport

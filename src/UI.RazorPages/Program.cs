@@ -95,7 +95,7 @@ public partial class Program
             // Change notification
             services.AddSingleton<IOptionsChangeTokenSource<HostFilteringOptions>>(new ConfigurationChangeTokenSource<HostFilteringOptions>(hostingContext.Configuration));
 
-            var webHostAssembly = typeof(WebHost).Assembly;
+            var webHostAssembly = typeof(WebApplicationBuilder).Assembly;
             var hostFilteringStartupFilterType = Type.GetType("Microsoft.AspNetCore.HostFilteringStartupFilter, " + webHostAssembly.FullName, throwOnError: true)!;
             services.AddTransient(typeof(IStartupFilter), hostFilteringStartupFilterType);
 
@@ -114,7 +114,7 @@ public partial class Program
                     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
                     // Only loopback proxies are allowed by default. Clear that restriction because forwarders are
                     // being enabled by explicit configuration.
-                    options.KnownNetworks.Clear();
+                    options.KnownIPNetworks.Clear();
                     options.KnownProxies.Clear();
                 });
         })

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Buildalyzer;
 using Buildalyzer.Environment;
+using Buildalyzer.IO;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 
@@ -81,7 +82,7 @@ internal class ScanCommand : ICommand
             {
                 // https://daveaglick.com/posts/running-a-design-time-build-with-msbuild-apis
                 var analyzerManager = new AnalyzerManager();
-                var project = analyzerManager.GetProject(path);
+                var project = analyzerManager.GetProject(IOPath.Parse(path));
 
                 var environmentOptions = new EnvironmentOptions();
 
@@ -93,7 +94,7 @@ internal class ScanCommand : ICommand
                 IAnalyzerResult? analyzerResult;
                 if (TargetFramework != null)
                 {
-                    var buildEnvironment = project.EnvironmentFactory.GetBuildEnvironment(TargetFramework, environmentOptions)
+                    var buildEnvironment = project?.EnvironmentFactory.GetBuildEnvironment(TargetFramework, environmentOptions)
                         ?? throw new CommandException($"Unable to load MSBuild file \"{path}\" using target framework '{TargetFramework}'.");
 
                     var analyzerResults = project.Build(buildEnvironment);
@@ -103,7 +104,7 @@ internal class ScanCommand : ICommand
                 }
                 else
                 {
-                    var buildEnvironment = project.EnvironmentFactory.GetBuildEnvironment(environmentOptions)
+                    var buildEnvironment = project?.EnvironmentFactory.GetBuildEnvironment(environmentOptions)
                         ?? throw new CommandException($"Unable to load MSBuild file \"{path}\" using target framework '{TargetFramework}'.");
 
                     var analyzerResults = project.Build(buildEnvironment);

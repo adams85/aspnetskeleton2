@@ -281,7 +281,7 @@
     public void TextColumnFilter(DataTableColumnFilterModel.TextFilter filterModel)
     {
         <div>
-            <input class="form-control form-control-sm" type="text" form="@filterModel.Column.Table.FilterFormHtmlId" name="@filterModel.FormFieldName" value="@filterModel.FormFieldValue" placeholder="@(filterModel.PlaceholderText ?? T["Filter text"])" />
+            <input class="form-control form-control-sm" type="text" form="@filterModel.Column.Table.FilterFormHtmlId" name="@filterModel.FormFieldName" value="@filterModel.FormFieldValue" placeholder="@(filterModel.PlaceholderText ?? T["Filter text"])" autocomplete="off" />
         </div>
     }
 

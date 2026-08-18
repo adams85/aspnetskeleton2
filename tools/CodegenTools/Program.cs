@@ -28,7 +28,7 @@ public class Program
             console.WriteLine("Command was canceled.");
             return 0;
         }
-        catch (Exception ex) when (ex is CommandException || ex is CommandParsingException)
+        catch (Exception ex) when (ex is CommandException or CommandParsingException)
         {
             console.Error.WriteLine(ex.Message);
             return 1;
@@ -42,6 +42,7 @@ public class Program
         _console = console;
     }
 
+#pragma warning disable IDE0051
     private Task<int> OnExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken)
     {
         _console.Error.WriteLine("A command must be specified.");
@@ -50,12 +51,13 @@ public class Program
         app.ShowHelp();
         return Task.FromResult(1);
     }
+#pragma warning restore IDE0051
 
     private static string GetVersion()
     {
         var assembly = typeof(Program).Assembly;
         return
-            assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ??
-            assembly.GetName().Version!.ToString();
+            assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? assembly.GetName().Version!.ToString();
     }
 }

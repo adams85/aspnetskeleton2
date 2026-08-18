@@ -18,7 +18,7 @@ public class ExceptionFilterMiddleware
     private static readonly Action<ILogger, Exception> s_logUnhandledException =
         LoggerMessage.Define(LogLevel.Error, new EventId(1, "UnhandledException"), "An unhandled exception has occurred while executing the request.");
 
-    private static readonly ActionDescriptor s_emptyActionDescriptor = new ActionDescriptor();
+    private static readonly ActionDescriptor s_emptyActionDescriptor = new();
 
     private static Task ClearCacheHeaders(object state)
     {

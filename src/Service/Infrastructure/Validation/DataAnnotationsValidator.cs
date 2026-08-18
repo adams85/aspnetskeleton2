@@ -24,10 +24,10 @@ public static class DataAnnotationsValidator
 {
     private const string MemberPathBaseExceptionDataKey = "MemberPathBase";
 
-    private static readonly RequiredAttribute s_implicitRequiredAttribute = new RequiredAttribute() { AllowEmptyStrings = true };
+    private static readonly RequiredAttribute s_implicitRequiredAttribute = new() { AllowEmptyStrings = true };
 
     private static ValidationException CreateValidationException(ValidationResult validationResult, ValidationAttribute? validationAttribute, object? value, string memberPathBase) =>
-        new ValidationException(validationResult, validationAttribute, value)
+        new(validationResult, validationAttribute, value)
         {
             Data = { [MemberPathBaseExceptionDataKey] = memberPathBase }
         };
@@ -57,16 +57,16 @@ public static class DataAnnotationsValidator
         var value = propertyMetadata.ValueAccessor(validationContext.ObjectInstance);
         ValidationResult? validationResult;
 
-        RequiredAttribute? requiredAttribute = propertyMetadata.ValidationAttributes.OfType<RequiredAttribute>().FirstOrDefault();
+        var requiredAttribute = propertyMetadata.ValidationAttributes.OfType<RequiredAttribute>().FirstOrDefault();
 
-        if (requiredAttribute == null &&
-            (options & DataAnnotationsValidatorOptions.SuppressImplicitRequiredAttributeForNonNullableRefTypes) == 0 &&
-            propertyMetadata.IsNonNullableRefType)
+        if (requiredAttribute is null
+            && (options & DataAnnotationsValidatorOptions.SuppressImplicitRequiredAttributeForNonNullableRefTypes) == 0
+            && propertyMetadata.IsNonNullableRefType)
         {
             requiredAttribute = s_implicitRequiredAttribute;
         }
 
-        if (requiredAttribute != null)
+        if (requiredAttribute is not null)
         {
             validationResult = requiredAttribute.GetValidationResult(value, validationContext);
             if (validationResult != ValidationResult.Success)
@@ -107,38 +107,36 @@ public static class DataAnnotationsValidator
         if (validationContext.ObjectInstance is IValidatableObject validatableObject)
         {
             var validationResult = validatableObject.Validate(validationContext)?
-                .FirstOrDefault(validationResult => validationResult != null && validationResult != ValidationResult.Success);
+                .FirstOrDefault(validationResult => validationResult is not null && validationResult != ValidationResult.Success);
 
-            if (validationResult != null)
+            if (validationResult is not null)
                 throw CreateValidationException(validationResult, (validationResult as ExtendedValidationResult)?.ValidationAttribute, validationContext.ObjectInstance, memberPathBase);
         }
     }
 
     private static bool ShouldVisitObject(object? instance, int level)
     {
-        if (instance == null || level <= 0)
+        if (instance is null || level <= 0)
             return false;
 
         var type = instance.GetType();
         if (type.IsValueType)
         {
-            return
-                !type.IsPrimitive &&
-                !type.IsEnum &&
-                type != typeof(decimal) &&
-                type != typeof(DateTime) &&
-                type != typeof(DateTimeOffset) &&
-                type != typeof(TimeSpan) &&
-                type != typeof(Guid);
+            return !type.IsPrimitive
+                && !type.IsEnum
+                && type != typeof(decimal)
+                && type != typeof(DateTime)
+                && type != typeof(DateTimeOffset)
+                && type != typeof(TimeSpan)
+                && type != typeof(Guid);
         }
         else
         {
-            return
-                type != typeof(object) &&
-                type != typeof(string) &&
-                type != typeof(Uri) &&
-                instance is not Delegate &&
-                instance is not MemberInfo;
+            return type != typeof(object)
+                && type != typeof(string)
+                && type != typeof(Uri)
+                && instance is not Delegate
+                && instance is not MemberInfo;
         }
     }
 
@@ -187,7 +185,7 @@ public static class DataAnnotationsValidator
 
         ValidateObject(validationContext, typeMetadata, memberPathBase, options);
 
-        if (propertiesToVisit != null)
+        if (propertiesToVisit is not null)
         {
             for (i = 0, n = propertiesToVisit.Count; i < n; i++)
             {
@@ -205,7 +203,7 @@ public static class DataAnnotationsValidator
 
     private sealed class PropertyMetadata
     {
-        private static readonly ConcurrentDictionary<(Type, string), PropertyMetadata> s_cache = new ConcurrentDictionary<(Type, string), PropertyMetadata>();
+        private static readonly ConcurrentDictionary<(Type, string), PropertyMetadata> s_cache = new();
 
         public static PropertyMetadata For(PropertyInfo property, Dictionary<Type, bool> nonNullableContextCache) =>
             s_cache.GetOrAdd((property.DeclaringType!, property.Name), _ => new PropertyMetadata(property, nonNullableContextCache));
@@ -214,11 +212,10 @@ public static class DataAnnotationsValidator
         {
             PropertyName = property.Name;
 
-            IsNonNullableRefType =
-                property.IsNonNullableRefType() ??
+            IsNonNullableRefType = property.IsNonNullableRefType()
                 // for properties declared on generic types determining reference type nullability is pretty hard (for root objects is impossible AFAIK),
                 // so we skip the check and treat these properties nullable (just as ASP.NET Core's DataAnnotationsMetadataProvider does)
-                !property.DeclaringType!.IsGenericType && property.DeclaringType.IsNonNullableContext(nonNullableContextCache);
+                ?? !property.DeclaringType!.IsGenericType && property.DeclaringType.IsNonNullableContext(nonNullableContextCache);
 
             ValidationAttributes = (ValidationAttribute[])Attribute.GetCustomAttributes(property, typeof(ValidationAttribute));
 
@@ -236,7 +233,7 @@ public static class DataAnnotationsValidator
 
     private sealed class TypeMetadata
     {
-        private static readonly ConcurrentDictionary<Type, TypeMetadata> s_cache = new ConcurrentDictionary<Type, TypeMetadata>();
+        private static readonly ConcurrentDictionary<Type, TypeMetadata> s_cache = new();
 
         public static TypeMetadata For(Type type) =>
             s_cache.GetOrAdd(type, type => new TypeMetadata(type));
@@ -248,7 +245,7 @@ public static class DataAnnotationsValidator
             var nonNullableContextCache = new Dictionary<Type, bool>();
 
             Properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(property => property.DeclaringType != null && property.GetMethod != null && property.GetIndexParameters().Length == 0)
+                .Where(property => property.DeclaringType is not null && property.GetMethod is not null && property.GetIndexParameters().Length == 0)
                 .Select(property => PropertyMetadata.For(property, nonNullableContextCache))
                 .ToArray();
         }

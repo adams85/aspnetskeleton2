@@ -34,7 +34,7 @@ public static class SyntaxNodeExtensions
                         return null;
                     values.Add(literalExpression.Token.ValueText);
                     break;
-                case ParenthesizedExpressionSyntax _:
+                case ParenthesizedExpressionSyntax:
                     break;
                 default:
                     return null;
@@ -66,7 +66,7 @@ public static class SyntaxNodeExtensions
 
                 if (enumerator.Current is TypeDeclarationSyntax typeDeclaration)
                     yield return GetTypeName(typeDeclaration);
-                else if ((namespaceDeclaration = enumerator.Current as NamespaceDeclarationSyntax) != null)
+                else if ((namespaceDeclaration = enumerator.Current as NamespaceDeclarationSyntax) is not null)
                     break;
             }
 
@@ -76,7 +76,7 @@ public static class SyntaxNodeExtensions
 
                 while (enumerator.MoveNext())
                 {
-                    if ((namespaceDeclaration = enumerator.Current as NamespaceDeclarationSyntax) != null)
+                    if ((namespaceDeclaration = enumerator.Current as NamespaceDeclarationSyntax) is not null)
                         yield return namespaceDeclaration.Name.ToString();
                 }
             }

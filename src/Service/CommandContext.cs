@@ -45,10 +45,10 @@ internal class CommandContext : IDisposable, IAsyncDisposable
 
     private IExecutionContextAccessor? _executionContextAccessor;
     public virtual OperationExecutionContext ExecutionContext =>
-        LazyInitializer.EnsureInitialized(ref _executionContextAccessor, () => ScopedServices.GetRequiredService<IExecutionContextAccessor>())!.ExecutionContext;
+        LazyInitializer.EnsureInitialized(ref _executionContextAccessor, ScopedServices.GetRequiredService<IExecutionContextAccessor>).ExecutionContext;
 
     private IDictionary<object, object>? _properties;
-    public virtual IDictionary<object, object> Properties => LazyInitializer.EnsureInitialized(ref _properties, () => new Dictionary<object, object>())!;
+    public virtual IDictionary<object, object> Properties => LazyInitializer.EnsureInitialized(ref _properties, () => new Dictionary<object, object>());
 
     public virtual WritableDataContext CreateDbContext() => ScopedServices.GetRequiredService<IDbContextFactory<WritableDataContext>>().CreateDbContext();
 }

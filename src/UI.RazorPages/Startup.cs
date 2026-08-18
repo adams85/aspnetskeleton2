@@ -89,7 +89,7 @@ public partial class Startup
             }
         }
 
-        if (mainBranchTenant != null)
+        if (mainBranchTenant is not null)
         {
             if (ApiStartup.IsRunningBehindProxy)
                 PathAdjustmentStartupFilter.Configure(app);
@@ -111,7 +111,7 @@ public partial class Startup
         {
             var mainBranchTenant = _tenants.MainBranchTenant;
 
-            if (mainBranchTenant != null)
+            if (mainBranchTenant is not null)
             {
                 app.ApplicationServices = mainBranchTenant.TenantServices!;
 
@@ -137,7 +137,7 @@ public partial class Startup
 
         public async Task Invoke(HttpContext context)
         {
-            if (_httpContextAccessor != null && _httpContextAccessor.HttpContext == null)
+            if (_httpContextAccessor is not null && _httpContextAccessor.HttpContext is null)
                 _httpContextAccessor.HttpContext = context;
 
             IServiceProvidersFeature? originalServiceProvidersFeature = null;

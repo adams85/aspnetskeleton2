@@ -17,7 +17,7 @@ public static class ClaimsPrincipalExtensions
         if (!string.IsNullOrEmpty(userInfo.LastName))
             identity.AddClaim(new Claim(ClaimTypes.Surname, userInfo.LastName));
 
-        if (userInfo.Roles != null)
+        if (userInfo.Roles is not null)
         {
             for (int i = 0, n = userInfo.Roles.Length; i < n; i++)
                 identity.AddClaim(new Claim(ClaimTypes.Role, userInfo.Roles[i]));
@@ -27,28 +27,28 @@ public static class ClaimsPrincipalExtensions
     public static int? GetUserId(this ClaimsPrincipal principal)
     {
         var claimsIdentity = (ClaimsIdentity?)principal.Identity;
-        if (!(claimsIdentity != null && claimsIdentity.IsAuthenticated))
+        if (!(claimsIdentity is not null && claimsIdentity.IsAuthenticated))
             return null;
 
-        string? id = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return id != null ? int.Parse(id, CultureInfo.InvariantCulture) : null;
+        var id = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return id is not null ? int.Parse(id, CultureInfo.InvariantCulture) : null;
     }
 
     public static string? GetEmail(this ClaimsPrincipal principal)
     {
         var claimsIdentity = (ClaimsIdentity?)principal.Identity;
-        return claimsIdentity != null && claimsIdentity.IsAuthenticated ? claimsIdentity.FindFirst(ClaimTypes.Email)?.Value : null;
+        return claimsIdentity is not null && claimsIdentity.IsAuthenticated ? claimsIdentity.FindFirst(ClaimTypes.Email)?.Value : null;
     }
 
     public static string? GetFirstName(this ClaimsPrincipal principal)
     {
         var claimsIdentity = (ClaimsIdentity?)principal.Identity;
-        return claimsIdentity != null && claimsIdentity.IsAuthenticated ? claimsIdentity.FindFirst(ClaimTypes.GivenName)?.Value : null;
+        return claimsIdentity is not null && claimsIdentity.IsAuthenticated ? claimsIdentity.FindFirst(ClaimTypes.GivenName)?.Value : null;
     }
 
     public static string? GetLastName(this ClaimsPrincipal principal)
     {
         var claimsIdentity = (ClaimsIdentity?)principal.Identity;
-        return claimsIdentity != null && claimsIdentity.IsAuthenticated ? claimsIdentity.FindFirst(ClaimTypes.Surname)?.Value : null;
+        return claimsIdentity is not null && claimsIdentity.IsAuthenticated ? claimsIdentity.FindFirst(ClaimTypes.Surname)?.Value : null;
     }
 }

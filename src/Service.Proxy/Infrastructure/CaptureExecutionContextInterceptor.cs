@@ -22,7 +22,7 @@ internal sealed class CaptureExecutionContextInterceptor : Interceptor
     {
         var headers = context.Options.Headers;
 
-        if (headers == null)
+        if (headers is null)
         {
             headers = new Metadata();
             var options = context.Options.WithHeaders(headers);
@@ -37,7 +37,7 @@ internal sealed class CaptureExecutionContextInterceptor : Interceptor
         var executionContext = _executionContextAccessor.ExecutionContext;
 
         var identity = executionContext.User?.Identity;
-        if (identity != null && identity.IsAuthenticated)
+        if (identity is not null && identity.IsAuthenticated)
         {
             headers.Add(IdentityAuthenticationTypeHeaderName, identity.AuthenticationType!);
             headers.Add(IdentityNameHeaderName, Encoding.UTF8.GetBytes(identity.Name!));

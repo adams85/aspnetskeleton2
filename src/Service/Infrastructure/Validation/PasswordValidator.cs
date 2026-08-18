@@ -10,9 +10,9 @@ namespace WebApp.Service.Infrastructure.Validation;
 
 public sealed class PasswordValidator : IValidator<PasswordAttribute>
 {
-    public static readonly object PasswordRequirementsPropertyKey = new object();
+    public static readonly object PasswordRequirementsPropertyKey = new();
 
-    private static PasswordRequirementsData? GetPasswordRequirements(PasswordOptions passwordOptions) => new PasswordRequirementsData()
+    private static PasswordRequirementsData? GetPasswordRequirements(PasswordOptions passwordOptions) => new()
     {
         RequiredLength = passwordOptions.RequiredLength,
         RequiredUniqueChars = passwordOptions.RequiredUniqueChars,
@@ -27,7 +27,7 @@ public sealed class PasswordValidator : IValidator<PasswordAttribute>
     public PasswordValidator(IOptions<PasswordOptions>? passwordOptions)
     {
         var passwordOptionsValue = passwordOptions?.Value;
-        _passwordRequirements = passwordOptionsValue != null ? GetPasswordRequirements(passwordOptionsValue) : null;
+        _passwordRequirements = passwordOptionsValue is not null ? GetPasswordRequirements(passwordOptionsValue) : null;
     }
 
     private bool IsValidPassword(string? value)
@@ -61,12 +61,11 @@ public sealed class PasswordValidator : IValidator<PasswordAttribute>
         if (value is not string stringValue)
             return ValidationResult.Success;
 
-        if (_passwordRequirements == null)
+        if (_passwordRequirements is null)
         {
-            return
-                validationAttribute.IgnoreIfServiceUnavailable ?
-                ValidationResult.Success :
-                throw new InvalidOperationException($"Password options {typeof(IOptions<PasswordOptions>)} has not been registered or configured.");
+            return validationAttribute.IgnoreIfServiceUnavailable
+                ? ValidationResult.Success
+                : throw new InvalidOperationException($"Password options {typeof(IOptions<PasswordOptions>)} has not been registered or configured.");
         }
 
         if (IsValidPassword(stringValue))
@@ -74,7 +73,7 @@ public sealed class PasswordValidator : IValidator<PasswordAttribute>
 
         var result = new ExtendedValidationResult(validationAttribute, validationContext, new[] { validationContext.MemberName! });
 
-        if (_passwordRequirements != null)
+        if (_passwordRequirements is not null)
             result.Properties[PasswordRequirementsPropertyKey] = _passwordRequirements;
 
         return result;

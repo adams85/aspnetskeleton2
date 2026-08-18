@@ -16,10 +16,10 @@ namespace POTools.Commands;
     UnrecognizedArgumentHandling = UnrecognizedArgumentHandling.StopParsingAndCollect, AllowArgumentSeparator = true)]
 internal class ScanCommand : ICommand
 {
-    private static readonly HashSet<string> s_projectExtensionFilter = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".csproj" };
+    private static readonly HashSet<string> s_projectExtensionFilter = new(StringComparer.OrdinalIgnoreCase) { ".csproj" };
 
-    private static readonly HashSet<string> s_compileExtensionFilter = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".cs" };
-    private static readonly HashSet<string> s_contentExtensionFilter = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".cshtml" };
+    private static readonly HashSet<string> s_compileExtensionFilter = new(StringComparer.OrdinalIgnoreCase) { ".cs" };
+    private static readonly HashSet<string> s_contentExtensionFilter = new(StringComparer.OrdinalIgnoreCase) { ".cshtml" };
     private static readonly HashSet<string> s_extensionFilter = s_compileExtensionFilter.Concat(s_contentExtensionFilter).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     private readonly CommandLineContext _context;
@@ -48,7 +48,7 @@ internal class ScanCommand : ICommand
         bool isMSBuildFile;
 
         var path = ProjectPath;
-        if (path == null)
+        if (path is null)
         {
             path = Directory.GetCurrentDirectory();
 
@@ -86,21 +86,20 @@ internal class ScanCommand : ICommand
 
                 var environmentOptions = new EnvironmentOptions();
 
-                if (Configuration != null)
+                if (Configuration is not null)
                     environmentOptions.GlobalProperties["Configuration"] = Configuration;
 
-                Array.ForEach(RemainingArguments, arg => environmentOptions.Arguments.Add(arg));
+                Array.ForEach(RemainingArguments, environmentOptions.Arguments.Add);
 
                 IAnalyzerResult? analyzerResult;
-                if (TargetFramework != null)
+                if (TargetFramework is not null)
                 {
                     var buildEnvironment = project?.EnvironmentFactory.GetBuildEnvironment(TargetFramework, environmentOptions)
                         ?? throw new CommandException($"Unable to load MSBuild file \"{path}\" using target framework '{TargetFramework}'.");
 
                     var analyzerResults = project.Build(buildEnvironment);
-                    analyzerResult = analyzerResults?.FirstOrDefault(result => result.TargetFramework == TargetFramework);
-                    if (analyzerResult == null)
-                        throw new CommandException($"Unable to load MSBuild file \"{path}\" using target framework '{TargetFramework}'.");
+                    analyzerResult = (analyzerResults?.FirstOrDefault(result => result.TargetFramework == TargetFramework))
+                        ?? throw new CommandException($"Unable to load MSBuild file \"{path}\" using target framework '{TargetFramework}'.");
                 }
                 else
                 {
@@ -108,9 +107,8 @@ internal class ScanCommand : ICommand
                         ?? throw new CommandException($"Unable to load MSBuild file \"{path}\" using target framework '{TargetFramework}'.");
 
                     var analyzerResults = project.Build(buildEnvironment);
-                    analyzerResult = analyzerResults?.FirstOrDefault();
-                    if (analyzerResult == null)
-                        throw new CommandException($"Unable to load MSBuild file \"{path}\".");
+                    analyzerResult = (analyzerResults?.FirstOrDefault())
+                        ?? throw new CommandException($"Unable to load MSBuild file \"{path}\".");
                 }
 
                 var basePath = Path.GetDirectoryName(path)!;

@@ -92,11 +92,11 @@ public sealed class POStringLocalizer : IExtendedStringLocalizer
     public bool TryGetTranslation(string name, Plural plural, TextContext context, out string? searchedLocation, [MaybeNullWhen(false)] out string value)
     {
         var catalog = GetCatalog();
-        if (catalog != null)
+        if (catalog is not null)
         {
             var key = new POKey(name, plural.Id, context.Id);
-            value = plural.Id == null ? catalog.GetTranslation(key) : catalog.GetTranslation(key, plural.Count);
-            if (value != null)
+            value = plural.Id is null ? catalog.GetTranslation(key) : catalog.GetTranslation(key, plural.Count);
+            if (value is not null)
             {
                 searchedLocation = _location;
                 return true;

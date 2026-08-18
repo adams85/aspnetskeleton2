@@ -6,7 +6,7 @@ namespace WebApp.Service;
 
 internal partial class QueryContext
 {
-    private static readonly ConcurrentDictionary<Type, Type> s_resultTypes = new ConcurrentDictionary<Type, Type>();
+    private static readonly ConcurrentDictionary<Type, Type> s_resultTypes = new();
 
     public static Type GetResultType(Type queryType)
     {
@@ -16,7 +16,7 @@ internal partial class QueryContext
             try { interfaceType = type.GetInterface(typeof(IQuery<>).FullName!); }
             catch (AmbiguousMatchException) { interfaceType = null; }
 
-            if (interfaceType == null)
+            if (interfaceType is null)
                 throw new ArgumentException($"Query type {type} implements no or multiple {typeof(IQuery<>)} interfaces.", nameof(type));
 
             return interfaceType.GetGenericArguments()[0];

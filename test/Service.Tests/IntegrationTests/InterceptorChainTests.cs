@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TUnit.Core;
@@ -26,7 +27,7 @@ public class InterceptorChainTests
 
         await using var testContext = await testContextBuilder.BuildAsync();
 
-        var command = new AddUsersToRolesCommand { UserNames = new string[] { }, RoleNames = new string[] { "x" } };
+        var command = new AddUsersToRolesCommand { UserNames = Array.Empty<string>(), RoleNames = new string[] { "x" } };
 
         var commandDispatcher = testContext.Services.GetRequiredService<ICommandDispatcher>();
 

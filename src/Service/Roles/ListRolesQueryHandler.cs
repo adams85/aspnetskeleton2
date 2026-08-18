@@ -15,7 +15,7 @@ internal sealed class ListRolesQueryHandler : ListQueryHandler<ListRolesQuery, R
         await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
         {
             IQueryable<Role> linq;
-            if (query.UserName != null)
+            if (query.UserName is not null)
             {
                 linq =
                     from u in dbContext.Users.FilterByName(query.UserName)

@@ -16,7 +16,7 @@ internal sealed class AuthenticateUserQueryHandler : QueryHandler<AuthenticateUs
 
             var result = new AuthenticateUserResult();
 
-            if (user == null)
+            if (user is null)
                 return new AuthenticateUserResult { Status = AuthenticateUserStatus.NotExists };
 
             AuthenticateUserStatus status;
@@ -24,7 +24,7 @@ internal sealed class AuthenticateUserQueryHandler : QueryHandler<AuthenticateUs
                 status = AuthenticateUserStatus.Unapproved;
             else if (user.IsLockedOut)
                 status = AuthenticateUserStatus.LockedOut;
-            else if (user.Password != null && SecurityHelper.VerifyHashedPassword(user.Password, query.Password) == PasswordVerificationResult.Success)
+            else if (user.Password is not null && SecurityHelper.VerifyHashedPassword(user.Password, query.Password) == PasswordVerificationResult.Success)
                 status = AuthenticateUserStatus.Successful;
             else
                 status = AuthenticateUserStatus.Failed;

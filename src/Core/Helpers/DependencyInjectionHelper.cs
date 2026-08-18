@@ -28,9 +28,8 @@ public static class DependencyInjectionHelper
             {
                 var methodParam = methodParams[i];
 
-                yield return
-                    getStaticArguments(delegateParams, methodParam, i) ??
-                    BuildServiceResolutionExpression(serviceProvider ??= getServiceProvider(delegateParams), methodParam.ParameterType);
+                yield return getStaticArguments(delegateParams, methodParam, i)
+                    ?? BuildServiceResolutionExpression(serviceProvider ??= getServiceProvider(delegateParams), methodParam.ParameterType);
             }
         }
 

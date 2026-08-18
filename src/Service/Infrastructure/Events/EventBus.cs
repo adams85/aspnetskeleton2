@@ -36,17 +36,17 @@ internal sealed class EventBus : IEventPublisher, IEventListener, IDisposable
                     value =>
                     {
                         try { observer.OnNext(value); }
-                        catch (Exception ex) { _logger.LogError(ex, string.Format(subscriberErrorFormat, nameof(IObserver<object>.OnNext))); }
+                        catch (Exception ex) { _logger.LogError(ex, string.Format(subscriberErrorFormat, nameof(IObserver<>.OnNext))); }
                     },
                     exception =>
                     {
                         try { observer.OnError(exception); }
-                        catch (Exception ex) { _logger.LogError(ex, string.Format(subscriberErrorFormat, nameof(IObserver<object>.OnError))); }
+                        catch (Exception ex) { _logger.LogError(ex, string.Format(subscriberErrorFormat, nameof(IObserver<>.OnError))); }
                     },
                     () =>
                     {
                         try { observer.OnCompleted(); }
-                        catch (Exception ex) { _logger.LogError(ex, string.Format(subscriberErrorFormat, nameof(IObserver<object>.OnCompleted))); }
+                        catch (Exception ex) { _logger.LogError(ex, string.Format(subscriberErrorFormat, nameof(IObserver<>.OnCompleted))); }
                     });
 
                 return _subject.SubscribeSafe(safeObserver);

@@ -13,7 +13,7 @@ namespace WebApp.UI.Models;
 public abstract class PageDescriptor
 {
     private static readonly MethodInfo s_getMethodDefinition = new Func<PageDescriptor>(Get<Pages.IndexModel>).Method.GetGenericMethodDefinition();
-    private static readonly ConcurrentDictionary<Type, Func<PageDescriptor>> s_pageDescriptorAccessorCache = new ConcurrentDictionary<Type, Func<PageDescriptor>>();
+    private static readonly ConcurrentDictionary<Type, Func<PageDescriptor>> s_pageDescriptorAccessorCache = new();
 
     public static PageDescriptor Get(Type providerType) => s_pageDescriptorAccessorCache.GetOrAdd(providerType, providerType =>
     {

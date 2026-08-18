@@ -5,7 +5,7 @@ namespace WebApp.Service.Infrastructure;
 
 internal sealed class QueryExecutionBuilder
 {
-    private readonly List<(Predicate<Type>, QueryInterceptorFactory)> _interceptorFactories = new List<(Predicate<Type>, QueryInterceptorFactory)>();
+    private readonly List<(Predicate<Type>, QueryInterceptorFactory)> _interceptorFactories = new();
 
     public QueryExecutionBuilder AddInterceptor(Predicate<Type> queryTypeFilter, QueryInterceptorFactory interceptorFactory)
     {

@@ -12,9 +12,9 @@ public record class ResetPasswordModel
     [DisplayName(UserNameDisplayName), Required]
     public string UserName { get; init; } = null!;
 
-    public ResetPasswordCommand ToCommand(TimeSpan tokenExpirationTime) => new ResetPasswordCommand()
+    public ResetPasswordCommand ToCommand(TimeSpan tokenExpirationTime) => new()
     {
-        UserName = this.UserName,
+        UserName = UserName,
         TokenExpirationTimeSpan = tokenExpirationTime
     };
 }

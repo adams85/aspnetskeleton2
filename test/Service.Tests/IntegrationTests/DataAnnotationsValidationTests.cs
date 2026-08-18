@@ -87,11 +87,11 @@ public class DataAnnotationsValidationTests
 
         string? textToLocalize = null;
 
-        var validationAttribute = (ExtendedValidationAttribute)validationEx.ValidationAttribute!;
+        var validationAttribute = (ExtendedValidationAttribute)validationEx.ValidationAttribute;
         var formattedErrorMessage = validationAttribute.FormatErrorMessage(nameof(command.OrderBy), new DelegatedTextLocalizer((hint, args) =>
         {
             textToLocalize = hint;
-            return args != null ? NullTextLocalizer.Instance[hint, args] : NullTextLocalizer.Instance[hint];
+            return args is not null ? NullTextLocalizer.Instance[hint, args] : NullTextLocalizer.Instance[hint];
         }));
 
         Assert.Equal("The field {0} must contain non-empty strings.", textToLocalize);

@@ -26,14 +26,13 @@ internal sealed class NpgsqlConfiguration : EFCoreConfiguration
 
     protected override void ConfigureOptionsCore(DbContextOptionsBuilder optionsBuilder, IServiceProvider internalServiceProvider, IServiceProvider applicationServiceProvider)
     {
-        var serverVersion =
-            Options.Database.ServerVersion != null ?
-            Version.Parse(Options.Database.ServerVersion) :
-            null;
+        var serverVersion = Options.Database.ServerVersion is not null
+            ? Version.Parse(Options.Database.ServerVersion)
+            : null;
 
         optionsBuilder.UseNpgsql(Options.Database.ConnectionString, options =>
         {
-            if (serverVersion != null)
+            if (serverVersion is not null)
                 options.SetPostgresVersion(serverVersion);
         });
     }

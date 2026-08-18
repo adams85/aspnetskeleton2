@@ -33,7 +33,7 @@ internal sealed class RegisterUserActivityCommandHandler : CommandHandler<Regist
             var user = await dbContext.Users.GetByNameAsync(command.UserName, cancellationToken).ConfigureAwait(false);
             RequireExisting(user, c => c.UserName);
 
-            bool lockedOut = false;
+            var lockedOut = false;
 
             var now = _clock.UtcNow;
             if (command.SuccessfulLogin == true)
@@ -44,7 +44,7 @@ internal sealed class RegisterUserActivityCommandHandler : CommandHandler<Regist
             else if (command.SuccessfulLogin == false)
             {
                 var failures = user.PasswordFailuresSinceLastSuccess;
-                if (_lockoutOptions == null || failures < _lockoutOptions.MaxFailedAccessAttempts)
+                if (_lockoutOptions is null || failures < _lockoutOptions.MaxFailedAccessAttempts)
                 {
                     user.PasswordFailuresSinceLastSuccess += 1;
                     user.LastPasswordFailureDate = now;

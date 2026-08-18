@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -16,13 +15,13 @@ internal sealed class QueryDispatcher : IQueryDispatcher
 {
     private readonly IServiceProvider _serviceProvider;
 
-    private readonly IReadOnlyList<(Predicate<Type> QueryTypeFilter, QueryInterceptorFactory InterceptorFactory)> _interceptorFactories;
+    private readonly (Predicate<Type> QueryTypeFilter, QueryInterceptorFactory InterceptorFactory)[] _interceptorFactories;
     private readonly ConcurrentDictionary<Type, InterceptorChain> _interceptorChains;
     private readonly Func<Type, InterceptorChain> _cachedInterceptorChainFactory;
 
     public QueryDispatcher(IServiceProvider serviceProvider, IOptions<QueryDispatcherOptions>? options)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(_serviceProvider));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
         _interceptorFactories = (options?.Value.InterceptorFactories ?? Enumerable.Empty<(Predicate<Type>, QueryInterceptorFactory)>()).ToArray();
         _interceptorChains = new ConcurrentDictionary<Type, InterceptorChain>();
@@ -58,7 +57,7 @@ internal sealed class QueryDispatcher : IQueryDispatcher
             try { method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public); }
             catch (AmbiguousMatchException) { method = null; }
 
-            if (method == null)
+            if (method is null)
                 throw new InvalidOperationException($"Type {type} declares no or multiple {methodName} methods.");
 
             var methodReturnType = typeof(Task<object?>);
@@ -88,7 +87,7 @@ internal sealed class QueryDispatcher : IQueryDispatcher
             var interceptor = (IQueryInterceptor)Activator.CreateInstance(handlerInvokerInterceptorType)!;
             var executionDelegate = BuildExecutionDelegate(interceptor);
 
-            for (var i = dispatcher._interceptorFactories.Count - 1; i >= 0; i--)
+            for (var i = dispatcher._interceptorFactories.Length - 1; i >= 0; i--)
             {
                 var (queryTypeFilter, interceptorFactory) = dispatcher._interceptorFactories[i];
                 if (queryTypeFilter(queryType))
@@ -107,7 +106,9 @@ internal sealed class QueryDispatcher : IQueryDispatcher
     private sealed class HandlerInvokerInterceptor<TQuery, TResult> : IQueryInterceptor
         where TQuery : IQuery<TResult>
     {
+#pragma warning disable CA1822
         public async Task<object?> InvokeAsync(QueryHandler<TQuery, TResult> handler, QueryContext context, CancellationToken cancellationToken) =>
             await handler.HandleAsync((TQuery)context.Query, context, cancellationToken).ConfigureAwait(false);
+#pragma warning restore CA1822
     }
 }

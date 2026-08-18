@@ -16,7 +16,7 @@ public sealed class ThemeManager : IThemeManager
 
     public ThemeManager(IThemeProvider themeProvider, ISettingsProvider settingsProvider, ILogger<ThemeManager>? logger)
     {
-        if (settingsProvider == null)
+        if (settingsProvider is null)
             throw new ArgumentNullException(nameof(settingsProvider));
 
         _themeProvider = themeProvider ?? throw new ArgumentNullException(nameof(themeProvider));

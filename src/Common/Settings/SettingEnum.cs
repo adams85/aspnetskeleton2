@@ -45,18 +45,18 @@ public static class SettingEnumConstants
     public const string AdminMailAddressDefaultValue = "admin@example.com";
 
     [Localized]
-    internal const string AvailableCulturesDescription = "A comma-separated list of cultures which are available for users to choose from. " +
-        "The first item in the list used as the default culture. For changes to take effect, the application needs to be restarted.";
+    internal const string AvailableCulturesDescription = "A comma-separated list of cultures which are available for users to choose from. "
+        + "The first item in the list used as the default culture. For changes to take effect, the application needs to be restarted.";
     public const string AvailableCulturesDefaultValue = "en-US";
 
     [Localized]
-    internal const string AvailableThemesDescription = "A comma-separated list of themes which are available for users to choose from. " +
-        "The first item in the list used as the default theme. For changes to take effect, the application needs to be restarted.";
+    internal const string AvailableThemesDescription = "A comma-separated list of themes which are available for users to choose from. "
+        + "The first item in the list used as the default theme. For changes to take effect, the application needs to be restarted.";
     public const string AvailableThemesDefaultValue = "Default";
 
     [Localized]
-    internal const string EnableLocalizationDescription = "Specifies whether translation of the application's resources is enabled. " +
-        "For changes to take effect, the application needs to be restarted.";
+    internal const string EnableLocalizationDescription = "Specifies whether translation of the application's resources is enabled. "
+        + "For changes to take effect, the application needs to be restarted.";
     public const bool EnableLocalizationDefaultValue = true;
 
     [Localized]
@@ -68,14 +68,14 @@ public static class SettingEnumConstants
     public const bool EnableSwaggerDefaultValue = true;
 
     [Localized]
-    internal const string EnableThemingDescription = "Specifies whether changing the appearance of the user interface is enabled. " +
-        "For changes to take effect, the application needs to be restarted.";
+    internal const string EnableThemingDescription = "Specifies whether changing the appearance of the user interface is enabled. "
+        + "For changes to take effect, the application needs to be restarted.";
     public const bool EnableThemingDefaultValue = true;
 
     [Localized]
-    internal const string MaxPageSizeDescription = "Global limit on list page size. " +
-        "To guard the server against overloading, no query may return more items than the specified value in a single HTTP request. " +
-        "The value must be between {1} and {2}.";
+    internal const string MaxPageSizeDescription = "Global limit on list page size. "
+        + "To guard the server against overloading, no query may return more items than the specified value in a single HTTP request. "
+        + "The value must be between {1} and {2}.";
     public const int MaxPageSizeDefaultValue = 500;
     public const int MaxPageSizeMinValue = 10;
     public const int MaxPageSizeMaxValue = 5000;

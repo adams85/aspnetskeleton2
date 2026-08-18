@@ -26,7 +26,7 @@ public sealed partial class DbInitializer : IApplicationInitializer
 
     public DbInitializer(IDbContextFactory<WritableDataContext> dbContextFactory, IOptions<DbInitializerOptions> options, IClock clock, ILogger<DbInitializer>? logger)
     {
-        if (options?.Value == null)
+        if (options?.Value is null)
             throw new ArgumentNullException(nameof(options));
 
         _dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
@@ -81,7 +81,7 @@ public sealed partial class DbInitializer : IApplicationInitializer
     /// <summary>
     /// Creates/updates DB objects which are not supported by EF Core migrations out-of-the-box (triggers, SPs, etc.)
     /// </summary>
-    private async Task SeedDbObjectsAsync(WritableDataContext dbContext, CancellationToken cancellationToken)
+    private static async Task SeedDbObjectsAsync(WritableDataContext dbContext, CancellationToken cancellationToken)
     {
         var operations = new CustomDbObjects(dbContext.Model, dbContext.Database.ProviderName!).GetAllDbObjectsOperations(dropIfExists: true, create: true);
 
@@ -107,7 +107,7 @@ public sealed partial class DbInitializer : IApplicationInitializer
 
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            transaction.Commit();
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
 
         return true;
@@ -133,9 +133,9 @@ public sealed partial class DbInitializer : IApplicationInitializer
         public EntityState State { get; set; }
     }
 
-    private static EntityInfo<TEntity> AsExistingEntity<TEntity>(TEntity entity) => new EntityInfo<TEntity>(entity) { State = EntityState.Unseen };
+    private static EntityInfo<TEntity> AsExistingEntity<TEntity>(TEntity entity) => new(entity) { State = EntityState.Unseen };
 
-    private static EntityInfo<TEntity> AsNewEntity<TEntity>(TEntity entity) => new EntityInfo<TEntity>(entity) { State = EntityState.New };
+    private static EntityInfo<TEntity> AsNewEntity<TEntity>(TEntity entity) => new(entity) { State = EntityState.New };
 
     private static IEnumerable<TEntity> GetEntitesToAdd<TEntity>(IEnumerable<EntityInfo<TEntity>> entityInfos) =>
         entityInfos.Where(info => info.State == EntityState.New).Select(info => info.Entity);
@@ -143,8 +143,10 @@ public sealed partial class DbInitializer : IApplicationInitializer
     private static IEnumerable<TEntity> GetEntitesToRemove<TEntity>(IEnumerable<EntityInfo<TEntity>> entityInfos) =>
         entityInfos.Where(info => info.State == EntityState.Unseen).Select(info => info.Entity);
 
+#pragma warning disable IDE0051
     private static IEnumerable<TEntity> GetExistingEntities<TEntity>(IEnumerable<EntityInfo<TEntity>> entityInfos) =>
         entityInfos.Where(info => info.State != EntityState.New).Select(info => info.Entity);
+#pragma warning restore IDE0051
 
     #endregion
 }

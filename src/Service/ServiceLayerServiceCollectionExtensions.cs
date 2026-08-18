@@ -47,10 +47,9 @@ public static class ServiceLayerServiceCollectionExtensions
             .AddSingleton<ITranslationsProvider, TranslationsProvider>();
 
         services
-            .AddSingleton(sp =>
-                sp.GetRequiredService<ISettingsProvider>().EnableLocalization() ?
-                ActivatorUtilities.CreateInstance<POStringLocalizerFactory>(sp) :
-                (IStringLocalizerFactory)NullStringLocalizerFactory.Instance)
+            .AddSingleton(sp => sp.GetRequiredService<ISettingsProvider>().EnableLocalization()
+                ? ActivatorUtilities.CreateInstance<POStringLocalizerFactory>(sp)
+                : (IStringLocalizerFactory)NullStringLocalizerFactory.Instance)
             .AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
 
         services.AddApplicationInitializers();
@@ -112,7 +111,7 @@ public static class ServiceLayerServiceCollectionExtensions
 
     private static void AddCommandHandlers(this IServiceCollection services, Type type)
     {
-        for (var baseType = type.BaseType; baseType != null; baseType = baseType.BaseType)
+        for (var baseType = type.BaseType; baseType is not null; baseType = baseType.BaseType)
         {
             if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(CommandHandler<>))
                 services.AddTransient(baseType, type);
@@ -121,7 +120,7 @@ public static class ServiceLayerServiceCollectionExtensions
 
     private static void AddQueryHandlers(this IServiceCollection services, Type type)
     {
-        for (var baseType = type.BaseType; baseType != null; baseType = baseType.BaseType)
+        for (var baseType = type.BaseType; baseType is not null; baseType = baseType.BaseType)
         {
             if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(QueryHandler<,>))
                 services.AddTransient(baseType, type);

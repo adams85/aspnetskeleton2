@@ -50,7 +50,7 @@ internal abstract class ListQueryHandler<TQuery, TResult, T> : QueryHandler<TQue
 
     protected async Task<TResult> ResultAsync(TQuery query, IQueryable<T> queryable, CancellationToken cancellationToken)
     {
-        T[] items = await ToArrayAsync(ApplyPagingAndOrdering(query, queryable), cancellationToken).ConfigureAwait(false);
+        var items = await ToArrayAsync(ApplyPagingAndOrdering(query, queryable), cancellationToken).ConfigureAwait(false);
 
         var totalItemCount = await GetTotalItemCountAsync(query, queryable, items, cancellationToken).ConfigureAwait(false);
 

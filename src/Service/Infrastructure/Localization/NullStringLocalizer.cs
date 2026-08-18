@@ -9,7 +9,7 @@ namespace WebApp.Service.Infrastructure.Localization;
 
 public sealed class NullStringLocalizer : IExtendedStringLocalizer
 {
-    public static readonly NullStringLocalizer Instance = new NullStringLocalizer();
+    public static readonly NullStringLocalizer Instance = new();
 
     private NullStringLocalizer() { }
 
@@ -39,19 +39,19 @@ public sealed class NullStringLocalizer : IExtendedStringLocalizer
     {
         TryGetTranslation(name, plural, context, out searchedLocation, out var value);
         resourceNotFound = false;
-        return value!;
+        return value;
     }
 
     public bool TryGetTranslation(string name, Plural plural, TextContext context, out string? searchedLocation, out string value)
     {
         searchedLocation = null;
-        value = plural.Id != null && plural.Count != 1 ? plural.Id : name;
+        value = plural.Id is not null && plural.Count != 1 ? plural.Id : name;
         return true;
     }
 
     public bool TryLocalize(string name, out string? searchedLocation, out string value)
     {
-        TryGetTranslation(name, default, default, out searchedLocation, out value!);
+        TryGetTranslation(name, default, default, out searchedLocation, out value);
         return true;
     }
 

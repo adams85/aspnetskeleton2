@@ -16,7 +16,9 @@ namespace WebApp.UI.Areas.Dashboard.Pages.Settings;
 public class DeleteModel : DeletePageModel<DeleteModel.PageDescriptorClass, SettingData>
 {
     private readonly IQueryDispatcher _queryDispatcher;
+#pragma warning disable IDE0052
     private readonly ICommandDispatcher _commandDispatcher;
+#pragma warning restore IDE0052
 
     public DeleteModel(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher)
     {
@@ -34,7 +36,7 @@ public class DeleteModel : DeletePageModel<DeleteModel.PageDescriptorClass, Sett
             IncludeDescription = true
         }, HttpContext.RequestAborted);
 
-        if (item == null)
+        if (item is null)
             return NotFound();
 
         ItemId = item.Name;

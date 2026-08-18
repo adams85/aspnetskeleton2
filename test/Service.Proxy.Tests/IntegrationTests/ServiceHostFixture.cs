@@ -25,16 +25,16 @@ public class ServiceHostFixture
     [After(HookType.TestSession)]
     public static async Task AfterSession()
     {
-        await s_instance!.DisposeAsync();
+        await s_instance.DisposeAsync();
     }
 
     private static string? LocateSolutionRootPath()
     {
-        for (string? currentPath = AppContext.BaseDirectory; currentPath != null; currentPath = Path.GetDirectoryName(currentPath))
-            {
+        for (var currentPath = AppContext.BaseDirectory; currentPath is not null; currentPath = Path.GetDirectoryName(currentPath))
+        {
             if (File.Exists(Path.Combine(currentPath, "WebApp.Distributed.sln")))
                 return currentPath;
-            }
+        }
 
         return null;
     }
@@ -68,11 +68,10 @@ public class ServiceHostFixture
     {
         var command = Environment.GetEnvironmentVariable(ServiceHostCommandEnvironmentVariableName);
         string? args, workingDir;
-        if (command == null)
+        if (command is null)
         {
-            var solutionRootPath = LocateSolutionRootPath();
-            if (solutionRootPath == null)
-                throw new InvalidOperationException($"Solution root path could not be located. Specify a command which can start the Service.Host application using the environment variable {ServiceHostCommandEnvironmentVariableName}.");
+            var solutionRootPath = LocateSolutionRootPath()
+                ?? throw new InvalidOperationException($"Solution root path could not be located. Specify a command which can start the Service.Host application using the environment variable {ServiceHostCommandEnvironmentVariableName}.");
 
             command = "dotnet";
             args = "build";
@@ -119,7 +118,7 @@ public class ServiceHostFixture
 
     public async Task DisposeAsync()
     {
-        if (_serviceHostProcess == null)
+        if (_serviceHostProcess is null)
             return;
 
         // it'd be nicer to send CTRL+C/SIGTERM but there's no easy way to do that currently

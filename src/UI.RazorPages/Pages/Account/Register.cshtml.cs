@@ -29,12 +29,11 @@ public class RegisterModel : CardPageModel<RegisterModel.PageDescriptorClass>
         _t = stringLocalizer ?? (IStringLocalizer)NullStringLocalizer.Instance;
     }
 
-    private Models.Account.RegisterModel? _model;
     [BindProperty]
     public Models.Account.RegisterModel Model
     {
-        get => _model ??= new Models.Account.RegisterModel();
-        set => _model = value;
+        get => field ??= new Models.Account.RegisterModel();
+        set;
     }
 
     private Task<(CreateUserStatus, PasswordRequirementsData?)> RegisterAsync(CancellationToken cancellationToken)

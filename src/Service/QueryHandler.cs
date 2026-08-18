@@ -32,13 +32,13 @@ internal abstract class QueryHandler<TQuery, TResult>
     protected static void RequireSpecified<T>([NotNull] T @param, Expression<Func<TQuery, T>> memberPathExpression, bool emptyAllowed = false)
     {
         Require(
-            @param != null &&
-            (emptyAllowed ||
-                (@param is not string paramString || paramString.Length > 0) &&
-                (@param is not ICollection paramCollection || paramCollection.Count > 0)),
+            @param is not null
+            && (emptyAllowed
+                || (@param is not string paramString || paramString.Length > 0)
+                    && (@param is not ICollection paramCollection || paramCollection.Count > 0)),
             ServiceErrorCode.ParamNotSpecified, memberPathExpression);
 
-        Debug.Assert(@param != null);
+        Debug.Assert(@param is not null);
     }
 
     protected static void RequireValid<T>([DoesNotReturnIf(false)] bool condition, Expression<Func<TQuery, T>> memberPathExpression)
@@ -48,9 +48,9 @@ internal abstract class QueryHandler<TQuery, TResult>
 
     protected static void RequireExisting<T>([NotNull] object? entity, Expression<Func<TQuery, T>> memberPathExpression)
     {
-        RequireExisting(entity != null, memberPathExpression);
+        RequireExisting(entity is not null, memberPathExpression);
 
-        Debug.Assert(entity != null);
+        Debug.Assert(entity is not null);
     }
 
     protected static void RequireExisting<T>([DoesNotReturnIf(false)] bool entityExists, Expression<Func<TQuery, T>> memberPathExpression)

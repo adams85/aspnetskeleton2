@@ -6,7 +6,7 @@ namespace WebApp.Service;
 
 public class OperationExecutionContext
 {
-    public static readonly OperationExecutionContext Default = new OperationExecutionContext();
+    public static readonly OperationExecutionContext Default = new();
 
     public CultureInfo Culture => CultureInfo.CurrentCulture;
     public CultureInfo UICulture => CultureInfo.CurrentUICulture;

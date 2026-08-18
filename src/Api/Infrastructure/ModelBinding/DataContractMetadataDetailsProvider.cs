@@ -33,8 +33,8 @@ public sealed class DataContractMetadataDetailsProvider : IBindingMetadataProvid
 
     public void CreateBindingMetadata(BindingMetadataProviderContext context)
     {
-        if (context.Key.MetadataKind == ModelMetadataKind.Property && context.BindingMetadata.IsBindingAllowed &&
-            ApiContractSerializer.MetadataProvider.CanSerialize(context.Key.ContainerType!) && !IsSerializedProperty(context.Key))
+        if (context.Key.MetadataKind == ModelMetadataKind.Property && context.BindingMetadata.IsBindingAllowed
+            && ApiContractSerializer.MetadataProvider.CanSerialize(context.Key.ContainerType!) && !IsSerializedProperty(context.Key))
         {
             context.BindingMetadata.IsBindingAllowed = false;
         }
@@ -42,8 +42,8 @@ public sealed class DataContractMetadataDetailsProvider : IBindingMetadataProvid
 
     public void CreateValidationMetadata(ValidationMetadataProviderContext context)
     {
-        if (context.Key.MetadataKind == ModelMetadataKind.Property &&
-            ApiContractSerializer.MetadataProvider.CanSerialize(context.Key.ContainerType!) && !IsSerializedProperty(context.Key))
+        if (context.Key.MetadataKind == ModelMetadataKind.Property
+            && ApiContractSerializer.MetadataProvider.CanSerialize(context.Key.ContainerType!) && !IsSerializedProperty(context.Key))
         {
             context.ValidationMetadata.PropertyValidationFilter = s_validateNeverFilter;
         }

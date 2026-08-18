@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -16,13 +15,13 @@ internal sealed class CommandDispatcher : ICommandDispatcher
 {
     private readonly IServiceProvider _serviceProvider;
 
-    private readonly IReadOnlyList<(Predicate<Type> CommandTypeFilter, CommandInterceptorFactory InterceptorFactory)> _interceptorFactories;
+    private readonly (Predicate<Type> CommandTypeFilter, CommandInterceptorFactory InterceptorFactory)[] _interceptorFactories;
     private readonly ConcurrentDictionary<Type, InterceptorChain> _interceptorChains;
     private readonly Func<Type, InterceptorChain> _cachedInterceptorChainFactory;
 
     public CommandDispatcher(IServiceProvider serviceProvider, IOptions<CommandDispatcherOptions>? options)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(_serviceProvider));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
         _interceptorFactories = (options?.Value.InterceptorFactories ?? Enumerable.Empty<(Predicate<Type>, CommandInterceptorFactory)>()).ToArray();
         _interceptorChains = new ConcurrentDictionary<Type, InterceptorChain>();
@@ -52,7 +51,7 @@ internal sealed class CommandDispatcher : ICommandDispatcher
             try { method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public); }
             catch (AmbiguousMatchException) { method = null; }
 
-            if (method == null)
+            if (method is null)
                 throw new InvalidOperationException($"Type {type} declares no or multiple {methodName} methods.");
 
             var methodReturnType = typeof(Task);
@@ -80,7 +79,7 @@ internal sealed class CommandDispatcher : ICommandDispatcher
             var interceptor = (ICommandInterceptor)Activator.CreateInstance(handlerInvokerInterceptorType)!;
             var executionDelegate = BuildExecutionDelegate(interceptor);
 
-            for (var i = dispatcher._interceptorFactories.Count - 1; i >= 0; i--)
+            for (var i = dispatcher._interceptorFactories.Length - 1; i >= 0; i--)
             {
                 var (commandTypeFilter, interceptorFactory) = dispatcher._interceptorFactories[i];
                 if (commandTypeFilter(commandType))
@@ -99,7 +98,9 @@ internal sealed class CommandDispatcher : ICommandDispatcher
     private sealed class HandlerInvokerInterceptor<TCommand> : ICommandInterceptor
         where TCommand : ICommand
     {
+#pragma warning disable CA1822
         public Task InvokeAsync(CommandHandler<TCommand> handler, CommandContext context, CancellationToken cancellationToken) =>
             handler.HandleAsync((TCommand)context.Command, context, cancellationToken);
+#pragma warning restore CA1822
     }
 }

@@ -14,7 +14,7 @@ public sealed class EnsureHandlerPageFilter : IPageFilter, IOrderedFilter
 
     public void OnPageHandlerExecuting(PageHandlerExecutingContext context)
     {
-        if (context.HandlerMethod == null && context.Result == null)
+        if (context.HandlerMethod is null && context.Result is null)
             context.Result = new StatusCodeResult(StatusCodes.Status405MethodNotAllowed);
     }
 

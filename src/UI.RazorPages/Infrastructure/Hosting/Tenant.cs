@@ -42,7 +42,7 @@ public abstract class Tenant : IDisposable, IAsyncDisposable
 
     public void Dispose()
     {
-        if (TenantServices != null)
+        if (TenantServices is not null)
         {
             TenantServices.Dispose();
             TenantServices = null;
@@ -51,7 +51,7 @@ public abstract class Tenant : IDisposable, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (TenantServices != null)
+        if (TenantServices is not null)
         {
             await TenantServices.DisposeAsync();
             TenantServices = null;
@@ -63,7 +63,7 @@ public abstract class Tenant : IDisposable, IAsyncDisposable
     public IWebHostEnvironment Environment { get; }
     public string ApplicationName { get; }
 
-    public bool IsMainBranch => BranchPredicate == null;
+    public bool IsMainBranch => BranchPredicate is null;
     public abstract Func<HttpContext, bool>? BranchPredicate { get; }
 
     public AutofacServiceProvider? TenantServices { get; private set; }

@@ -13,12 +13,11 @@ public abstract class DeletePageModel<TPageDescriptor> : CardPageModel<TPageDesc
     public virtual Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString> GetTitle => PageDescriptor.GetDefaultTitle;
     public string ItemId { get; protected set; } = null!;
 
-    private string? _returnUrl;
     [AllowNull]
     public string ReturnUrl
     {
-        get => EnsureReturnUrl(_returnUrl);
-        protected set => _returnUrl = value;
+        get => EnsureReturnUrl(field);
+        protected set;
     }
 
     protected abstract string DefaultReturnUrl { get; }

@@ -10,16 +10,16 @@ public delegate IOrderedQueryable<T> ApplyOrderByElement<T>(IQueryable<T> source
 public static class QueryableHelper
 {
     private static readonly MethodInfo s_orderByMethodDefinition =
-        new Func<IQueryable<object>, Expression<Func<object, object>>, object>(Queryable.OrderBy<object, object>).Method.GetGenericMethodDefinition();
+        new Func<IQueryable<object>, Expression<Func<object, object>>, object>(Queryable.OrderBy).Method.GetGenericMethodDefinition();
 
     private static readonly MethodInfo s_orderByDescendingMethodDefinition =
-        new Func<IQueryable<object>, Expression<Func<object, object>>, object>(Queryable.OrderByDescending<object, object>).Method.GetGenericMethodDefinition();
+        new Func<IQueryable<object>, Expression<Func<object, object>>, object>(Queryable.OrderByDescending).Method.GetGenericMethodDefinition();
 
     private static readonly MethodInfo s_thenByMethodDefinition =
-        new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenBy<object, object>).Method.GetGenericMethodDefinition();
+        new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenBy).Method.GetGenericMethodDefinition();
 
     private static readonly MethodInfo s_thenByDescendingMethodDefinition =
-        new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenByDescending<object, object>).Method.GetGenericMethodDefinition();
+        new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, object>(Queryable.ThenByDescending).Method.GetGenericMethodDefinition();
 
     private static IOrderedQueryable<T> OrderByCore<T>(this IQueryable<T> source, string keyPropertyPath, MethodInfo orderMethodDefinition)
     {
@@ -53,14 +53,11 @@ public static class QueryableHelper
     public static (string KeyPropertyPath, bool Descending) ParseOrderByElement(string value)
     {
         var c = value[0];
-        switch (c)
+        return c switch
         {
-            case '+':
-            case '-':
-                return (value.Substring(1), c == '-');
-            default:
-                return (value, false);
-        }
+            '+' or '-' => (value.Substring(1), c == '-'),
+            _ => (value, false),
+        };
     }
 
     public static string ComposeOrderByElement(string keyPropertyPath, bool descending)

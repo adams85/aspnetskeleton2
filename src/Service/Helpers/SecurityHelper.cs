@@ -9,7 +9,7 @@ public static class SecurityHelper
 {
     #region Passwords
 
-    private static readonly PasswordHasher<object> s_passwordHasher = new PasswordHasher<object>(Options.Create(new PasswordHasherOptions
+    private static readonly PasswordHasher<object> s_passwordHasher = new(Options.Create(new PasswordHasherOptions
     {
         CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV3
     }));
@@ -38,7 +38,7 @@ public static class SecurityHelper
 
     public static string GenerateToken(IRandom random, int tokenSizeInBytes)
     {
-        if (tokenSizeInBytes <= 0 || 1024 < tokenSizeInBytes)
+        if (tokenSizeInBytes is <= 0 or > 1024)
             throw new ArgumentOutOfRangeException(nameof(tokenSizeInBytes));
 
         Span<byte> tokenBytes = stackalloc byte[tokenSizeInBytes];

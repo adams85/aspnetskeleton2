@@ -20,7 +20,7 @@ public sealed class ProtoBufOutputFormatter : OutputFormatter
             SupportedMediaTypes.Add(new MediaTypeHeaderValue(contentType));
     }
 
-    protected override bool CanWriteType(Type? type) => type != null ? ApiContractSerializer.MetadataProvider.CanSerialize(type) : false;
+    protected override bool CanWriteType(Type? type) => type is not null && ApiContractSerializer.MetadataProvider.CanSerialize(type);
 
     public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
     {
@@ -36,7 +36,7 @@ public sealed class ProtoBufOutputFormatter : OutputFormatter
         {
             ApiContractSerializer.ProtoBuf.Serialize(writeStream, context.Object, context.ObjectType!);
 
-            if (fileBufferingWriteStream != null)
+            if (fileBufferingWriteStream is not null)
             {
                 response.ContentLength = fileBufferingWriteStream.Length;
                 await fileBufferingWriteStream.DrainBufferAsync(response.Body);

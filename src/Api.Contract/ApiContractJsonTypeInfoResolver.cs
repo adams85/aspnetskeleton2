@@ -32,6 +32,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
     private static readonly Action<JsonPropertyInfo, Delegate>? s_setPropertyGetter;
     private static readonly Action<JsonPropertyInfo, Delegate>? s_setPropertySetter;
 
+#pragma warning disable CA1810
     [DynamicDependency("SetGetter", typeof(JsonPropertyInfo))]
     [DynamicDependency("SetSetter", typeof(JsonPropertyInfo))]
     static ApiContractJsonTypeInfoResolver()
@@ -42,15 +43,16 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
             var setGetterMethod = typeof(JsonPropertyInfo).GetMethod("SetGetter", BindingFlags.Instance | BindingFlags.NonPublic, null, paramTypes, null);
             var setSetterMethod = typeof(JsonPropertyInfo).GetMethod("SetSetter", BindingFlags.Instance | BindingFlags.NonPublic, null, paramTypes, null);
 
-            Debug.Assert(setGetterMethod != null && setSetterMethod != null, "System.Text.Json internals have apparently changed.");
+            Debug.Assert(setGetterMethod is not null && setSetterMethod is not null, "System.Text.Json internals have apparently changed.");
 
-            if (setGetterMethod != null && setSetterMethod != null)
+            if (setGetterMethod is not null && setSetterMethod is not null)
             {
                 s_setPropertyGetter = (Action<JsonPropertyInfo, Delegate>)Delegate.CreateDelegate(typeof(Action<JsonPropertyInfo, Delegate>), setGetterMethod);
                 s_setPropertySetter = (Action<JsonPropertyInfo, Delegate>)Delegate.CreateDelegate(typeof(Action<JsonPropertyInfo, Delegate>), setSetterMethod);
             }
         }
     }
+#pragma warning restore CA1810
 
     private readonly ApiContractSerializer.ModelMetadataProvider _modelMetadataProvider;
 
@@ -132,7 +134,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
             ? _modelMetadataProvider.CanSerialize(actualType)
             // protobuf-net's TypeModel.CanSerialize doesn't work with trimming,
             // so we use this approximation of ModelMetadataProvider.CanSerialize as a workaround.
-            : actualType.GetCustomAttribute<DataContractAttribute>() != null || ApiContractSerializer.AdditionalDataContracts.ContainsKey(actualType);
+            : actualType.GetCustomAttribute<DataContractAttribute>() is not null || ApiContractSerializer.AdditionalDataContracts.ContainsKey(actualType);
 
         if (!canSerialize)
             throw new InvalidOperationException($"{actualType} must be declared as serializable. Apply {nameof(DataContractAttribute)} to the type.");
@@ -147,7 +149,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         var typeHelper = TypeHelper.For(type);
 
         var converter = GetConverterForType(type, options);
-        if (converter != null)
+        if (converter is not null)
             return typeHelper.CreateValueInfo(options, converter);
 
         var numberHandling = type.GetUniqueCustomAttribute<JsonNumberHandlingAttribute>(inherit: false)?.Handling;
@@ -175,16 +177,16 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         var converter = GetConverterFromList(typeToConvert, options);
 
         // Priority 2: Attempt to get converter from [JsonConverter] on the type being converted.
-        if (converter == null)
+        if (converter is null)
         {
             JsonConverterAttribute? converterAttribute = typeToConvert.GetUniqueCustomAttribute<JsonConverterAttribute>(inherit: false);
-            if (converterAttribute != null)
+            if (converterAttribute is not null)
             {
                 converter = GetConverterFromAttribute(converterAttribute, typeToConvert: typeToConvert, memberInfo: null, options);
             }
         }
 
-        if (converter != null)
+        if (converter is not null)
         {
             // Expand if factory converter & validate.
             converter = ExpandConverterFactory(converter, typeToConvert, options);
@@ -204,7 +206,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         // Based on: https://github.com/dotnet/runtime/blob/v8.0.15/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/Metadata/DefaultJsonTypeInfoResolver.Converters.cs#L132
 
         Debug.Assert(memberInfo is FieldInfo or PropertyInfo);
-        Debug.Assert(typeToConvert != null);
+        Debug.Assert(typeToConvert is not null);
 
         JsonConverterAttribute? converterAttribute = memberInfo.GetUniqueCustomAttribute<JsonConverterAttribute>(inherit: false);
         return converterAttribute is null ? null : GetConverterFromAttribute(converterAttribute, typeToConvert!, memberInfo, options);
@@ -217,7 +219,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         for (int i = 0, n = options.Converters.Count; i < n; i++)
         {
             var converter = options.Converters[i];
-            if (converter != null && converter.CanConvert(typeToConvert))
+            if (converter is not null && converter.CanConvert(typeToConvert))
             {
                 return converter;
             }
@@ -233,11 +235,11 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
 
         Type declaringType = memberInfo?.DeclaringType ?? typeToConvert;
         Type? converterType = converterAttribute.ConverterType;
-        if (converterType == null)
+        if (converterType is null)
         {
             // Allow the attribute to create the converter.
             converter = converterAttribute.CreateConverter(typeToConvert);
-            if (converter == null)
+            if (converter is null)
             {
                 throw SerializationConverterOnAttributeNotCompatible(declaringType, memberInfo, typeToConvert);
             }
@@ -245,7 +247,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         else
         {
             ConstructorInfo? ctor = converterType.GetConstructor(Type.EmptyTypes);
-            if (!typeof(JsonConverter).IsAssignableFrom(converterType) || ctor == null || !ctor.IsPublic)
+            if (!typeof(JsonConverter).IsAssignableFrom(converterType) || ctor is null || !ctor.IsPublic)
             {
                 throw SerializationConverterOnAttributeInvalid(declaringType, memberInfo);
             }
@@ -253,11 +255,11 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
             converter = (JsonConverter)Activator.CreateInstance(converterType)!;
         }
 
-        Debug.Assert(converter != null);
+        Debug.Assert(converter is not null);
         if (!converter!.CanConvert(typeToConvert))
         {
             Type? underlyingType = Nullable.GetUnderlyingType(typeToConvert);
-            if (underlyingType != null && converter.CanConvert(underlyingType))
+            if (underlyingType is not null && converter.CanConvert(underlyingType))
             {
                 if (converter is JsonConverterFactory converterFactory)
                 {
@@ -277,7 +279,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         static InvalidOperationException SerializationConverterOnAttributeNotCompatible(Type declaringType, MemberInfo? memberInfo, Type typeToConvert)
         {
             string location = declaringType.ToString();
-            if (memberInfo != null)
+            if (memberInfo is not null)
                 location = location + "." + memberInfo.Name;
             throw new InvalidOperationException($"The converter specified on '{location}' is not compatible with the type '{typeToConvert}'.");
         }
@@ -285,7 +287,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         static InvalidOperationException SerializationConverterOnAttributeInvalid(Type declaringType, MemberInfo? memberInfo)
         {
             string location = declaringType.ToString();
-            if (memberInfo != null)
+            if (memberInfo is not null)
                 location = location + "." + memberInfo.Name;
             throw new InvalidOperationException($"The converter specified on '{location}' does not derive from {nameof(JsonConverter)} or have a public parameterless constructor.");
         }
@@ -296,7 +298,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         if (converter is JsonConverterFactory factory)
         {
             converter = factory.CreateConverter(typeToConvert, options)!;
-            if (converter == null || converter is JsonConverterFactory)
+            if (converter is null or JsonConverterFactory)
             {
                 throw new InvalidOperationException($"The converter '{factory.GetType()}' cannot return null or a {nameof(JsonConverterFactory)} instance.");
             }
@@ -314,7 +316,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
             throw new InvalidOperationException($"The type '{typeToConvert}' cannot have more than one member that has the attribute '{typeof(JsonConstructorAttribute)}'.");
         }
 
-        if (constructor == null || typeToConvert.IsAbstract || (parameters = constructor.GetParameters()).Length == 0)
+        if (constructor is null || typeToConvert.IsAbstract || (parameters = constructor.GetParameters()).Length == 0)
         {
             parameters = null;
             return null;
@@ -344,9 +346,9 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
 
         foreach (ConstructorInfo constructor in constructors)
         {
-            if (constructor.GetCustomAttribute<JsonConstructorAttribute>() != null)
+            if (constructor.GetCustomAttribute<JsonConstructorAttribute>() is not null)
             {
-                if (ctorWithAttribute != null)
+                if (ctorWithAttribute is not null)
                 {
                     deserializationCtor = null;
                     return false;
@@ -363,9 +365,9 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         // Search for non-public ctors with [JsonConstructor].
         foreach (ConstructorInfo constructor in type.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance))
         {
-            if (constructor.GetCustomAttribute<JsonConstructorAttribute>() != null)
+            if (constructor.GetCustomAttribute<JsonConstructorAttribute>() is not null)
             {
-                if (ctorWithAttribute != null)
+                if (ctorWithAttribute is not null)
                 {
                     deserializationCtor = null;
                     return false;
@@ -376,7 +378,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         }
 
         // Structs will use default constructor if attribute isn't used.
-        if (useDefaultCtorInAnnotatedStructs && type.IsValueType && ctorWithAttribute == null)
+        if (useDefaultCtorInAnnotatedStructs && type.IsValueType && ctorWithAttribute is null)
         {
             deserializationCtor = null;
             return true;
@@ -400,7 +402,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
             // Trimmed parameter names are reported as null in CoreCLR or "" in Mono.
             if (string.IsNullOrEmpty(reflectionInfo.Name))
             {
-                Debug.Assert(constructor.DeclaringType != null);
+                Debug.Assert(constructor.DeclaringType is not null);
                 throw new NotSupportedException($"The deserialization constructor for type '{constructor.DeclaringType}' contains parameters with null names. This might happen because the parameter names have been trimmed by ILLink. Consider using the source generated serializer instead.");
             }
 
@@ -421,22 +423,22 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
 
     private static Func<T> CreateFactoryFromParameterlessCtorCodegen<T>(ConstructorInfo? constructor)
     {
-        var createInstance = constructor != null ? Expression.New(constructor) : Expression.New(typeof(T));
+        var createInstance = constructor is not null ? Expression.New(constructor) : Expression.New(typeof(T));
         var lambda = Expression.Lambda<Func<T>>(createInstance);
         return lambda.Compile();
     }
 
     private static Func<T> CreateFactoryFromParameterlessCtorReflection<T>(ConstructorInfo? constructor)
     {
-        return constructor != null
-            ? () =>
+        return constructor is not null
+            ? (() =>
             {
                 object? instance = null;
                 try { instance = (T)constructor.Invoke(null); }
                 catch (TargetInvocationException ex) { ExceptionDispatchInfo.Capture(ex.InnerException).Throw(); }
                 return (T)instance!;
-            }
-        : Activator.CreateInstance<T>;
+            })
+            : Activator.CreateInstance<T>;
     }
 
     private static Func<object[], T> CreateFactoryFromParameterizedCtorCodegen<T>(ConstructorInfo constructor, ParameterInfo[] parameters)
@@ -508,7 +510,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         typeInfo.Properties.Clear();
 
         var members = _modelMetadataProvider.GetMembers(typeInfo.Type, out var metaType);
-        if (metaType == null)
+        if (metaType is null)
             return;
 
         var properties = typeInfo.Properties;
@@ -538,7 +540,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         DeterminePropertyName(jsonPropertyInfo, member);
         DeterminePropertyIsRequired(jsonPropertyInfo, member);
 
-        if (ApiContractSerializer.FrozenOptions.AllowDynamicCodeGeneration && s_setPropertyGetter != null && s_setPropertySetter != null)
+        if (ApiContractSerializer.FrozenOptions.AllowDynamicCodeGeneration && s_setPropertyGetter is not null && s_setPropertySetter is not null)
             DeterminePropertyAccessorsCodeGen(jsonPropertyInfo, member);
         else
             DeterminePropertyAccessorsReflection(jsonPropertyInfo, member);
@@ -559,12 +561,14 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
     {
         // Based on: https://github.com/dotnet/runtime/blob/v8.0.15/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/Metadata/DefaultJsonTypeInfoResolver.Helpers.cs#L350
 
-        var name = propertyInfo.Options.PropertyNamingPolicy != null
+        var name = propertyInfo.Options.PropertyNamingPolicy is not null
             ? propertyInfo.Options.PropertyNamingPolicy.ConvertName(member.Member.Name)
             : member.Member.Name;
 
-        if (name == null)
+        if (name is null)
+        {
             throw new InvalidOperationException($"The JSON property name for '{member.ParentType}.{member.Member.Name}' cannot be null.");
+        }
 
         propertyInfo.Name = name;
     }
@@ -579,15 +583,15 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         PropertyInfo? property;
         FieldInfo? field = null;
 
-        if ((property = member.Member as PropertyInfo) != null
-            || (field = member.Member as FieldInfo) != null)
+        if ((property = member.Member as PropertyInfo) is not null
+            || (field = member.Member as FieldInfo) is not null)
         {
             var objParam = Expression.Parameter(typeof(object));
             var obj = member.Member.DeclaringType.IsValueType
                 ? Expression.Unbox(objParam, member.Member.DeclaringType)
                 : Expression.Convert(objParam, member.Member.DeclaringType);
 
-            if (property == null || property.GetGetMethod() != null)
+            if (property is null || property.GetGetMethod() is not null)
             {
                 var body = Expression.MakeMemberAccess(obj, member.Member);
                 var lambda = Expression.Lambda(typeof(Func<,>).MakeGenericType(typeof(object), member.MemberType), body, objParam);
@@ -595,7 +599,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
                 s_setPropertyGetter!(jsonPropertyInfo, getter);
             }
 
-            if (property == null ? !field!.IsInitOnly : property.GetSetMethod() != null)
+            if (property is null ? !field!.IsInitOnly : property.GetSetMethod() is not null)
             {
                 var valueParam = Expression.Parameter(member.MemberType);
                 var body = Expression.Assign(Expression.MakeMemberAccess(obj, member.Member), valueParam);
@@ -618,7 +622,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
                 jsonPropertyInfo.Get = obj => getMethod.Invoke(obj, null);
 
             if (property.GetSetMethod() is { } setMethod)
-                jsonPropertyInfo.Set = (obj, value) => setMethod.Invoke(obj, new object?[] { value });
+                jsonPropertyInfo.Set = (obj, value) => setMethod.Invoke(obj, new[] { value });
         }
         else if (member.Member is FieldInfo field)
         {
@@ -638,7 +642,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         // Based on: https://github.com/dotnet/runtime/blob/v8.0.15/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/JsonSerializerOptions.Converters.cs#L97
 
         if (propertyType.IsValueType && (converter.Type?.IsValueType ?? false)
-            && (propertyType.IsNullableOfT() ^ converter.Type!.IsNullableOfT()))
+            && (propertyType.IsNullableOfT() ^ converter.Type.IsNullableOfT()))
         {
             throw new InvalidOperationException($"The converter '{converter.GetType()}' handles type '{converter.Type}' but is being asked to convert type '{propertyType}'. Either create a separate converter for type '{propertyType}' or change the converter's 'CanConvert' method to only return 'true' for a single type.");
         }
@@ -666,7 +670,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
 
             Func<T>? objectCreator;
             Func<object[], T>? objectWithParameterizedConstructorCreator = null;
-            if (parameters == null)
+            if (parameters is null)
             {
                 objectCreator =
                     typeof(T).IsAbstract ? null
@@ -691,7 +695,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
                 ConstructorParameterMetadataInitializer = constructorParameterMetadataInitializer
             };
 
-            return JsonMetadataServices.CreateObjectInfo<T>(options, objectInfoValues);
+            return JsonMetadataServices.CreateObjectInfo(options, objectInfoValues);
         }
 
         public override JsonTypeInfo CreateValueInfo(JsonSerializerOptions options, JsonConverter converter)
@@ -717,7 +721,7 @@ internal sealed class ApiContractJsonTypeInfoResolver : DefaultJsonTypeInfoResol
         public override JsonConverter GetNullableConverter(JsonConverter converter, JsonSerializerOptions options)
         {
             var typeInfo = JsonMetadataServices.CreateValueInfo<T>(options, converter);
-            return JsonMetadataServices.GetNullableConverter<T>(typeInfo);
+            return JsonMetadataServices.GetNullableConverter(typeInfo);
         }
     }
 }

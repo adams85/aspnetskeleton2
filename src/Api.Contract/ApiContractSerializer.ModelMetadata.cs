@@ -42,7 +42,7 @@ public partial class ApiContractSerializer
                 var subTypes = typeModel.Add(type, applyDefaultBehaviour: true).GetSubtypes();
 
                 for (int i = 0; i < subTypes.Length; i++)
-                { 
+                {
                     var subType = subTypes[i];
 
                     if (visited.Add(type = subType.DerivedType.Type))
@@ -76,7 +76,7 @@ public partial class ApiContractSerializer
                     for (int i = 0, n = fields.Length; i < n; i++)
                         yield return fields[i];
                 }
-                while ((metaType = metaType.BaseType) != null);
+                while ((metaType = metaType!.BaseType) is not null);
             }
         }
     }

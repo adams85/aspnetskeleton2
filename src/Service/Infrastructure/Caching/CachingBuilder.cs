@@ -6,7 +6,7 @@ namespace WebApp.Service.Infrastructure.Caching;
 
 internal sealed class CachingBuilder
 {
-    private readonly Dictionary<Type, QueryCachingBuilder> _builders = new Dictionary<Type, QueryCachingBuilder>();
+    private readonly Dictionary<Type, QueryCachingBuilder> _builders = new();
 
     public QueryCachingBuilder<TQuery> Cache<TQuery>()
         where TQuery : IQuery

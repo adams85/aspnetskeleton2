@@ -5,7 +5,7 @@ namespace WebApp.UI.Infrastructure.Theming;
 
 public static class ThemingHelper
 {
-    private static readonly ConcurrentDictionary<string, object?> s_unavailableThemes = new ConcurrentDictionary<string, object?>();
+    private static readonly ConcurrentDictionary<string, object?> s_unavailableThemes = new();
 
     internal static void ThemeNotAvailable(this ILogger logger, string name, string path)
     {

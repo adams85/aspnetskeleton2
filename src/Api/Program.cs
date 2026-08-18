@@ -10,15 +10,15 @@ using WebApp.Core.Helpers;
 
 namespace WebApp.Api;
 
-public partial class Program
+public static partial class Program
 {
     public static readonly string ApplicationName =
-        typeof(Program).Assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product ??
-        typeof(Program).Assembly.GetName().Name!;
+        typeof(Program).Assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product
+        ?? typeof(Program).Assembly.GetName().Name!;
 
     public static readonly string ApplicationVersion =
-        typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ??
-        typeof(Program).Assembly.GetName().Version!.ToString();
+        typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+        ?? typeof(Program).Assembly.GetName().Version!.ToString();
 
     public static async Task Main(string[] args)
     {
@@ -44,7 +44,7 @@ public partial class Program
     {
         var env = context.HostingEnvironment;
 
-        int index = builder.Sources.Count;
+        var index = builder.Sources.Count;
         builder.Sources.RemoveAll((source, i) => source is JsonConfigurationSource ? (index = Math.Min(index, i), @true: true).@true : false);
 
         ConfigureAppConfigurationPartial(context, builder, ref index);

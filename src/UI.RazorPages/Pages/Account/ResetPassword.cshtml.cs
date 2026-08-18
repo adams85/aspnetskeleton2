@@ -19,19 +19,18 @@ public class ResetPasswordModel : CardPageModel<ResetPasswordModel.PageDescripto
         _accountManager = accountManager ?? throw new ArgumentNullException(nameof(accountManager));
     }
 
-    private Models.Account.ResetPasswordModel? _model;
     [BindProperty]
     public Models.Account.ResetPasswordModel Model
     {
-        get => _model ??= new Models.Account.ResetPasswordModel();
-        set => _model = value;
+        get => field ??= new Models.Account.ResetPasswordModel();
+        set;
     }
 
     public bool? Success { get; private set; }
 
     public void OnGet([FromQuery] string s)
     {
-        if (s != null)
+        if (s is not null)
             Success = Convert.ToBoolean(int.Parse(s, CultureInfo.InvariantCulture));
     }
 

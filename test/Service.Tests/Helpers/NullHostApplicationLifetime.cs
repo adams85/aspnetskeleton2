@@ -5,11 +5,11 @@ namespace WebApp.Service.Tests.Helpers;
 
 public class NullHostApplicationLifetime : IHostApplicationLifetime
 {
-    public static readonly NullHostApplicationLifetime Instance = new NullHostApplicationLifetime();
+    public static readonly NullHostApplicationLifetime Instance = new();
 
     private NullHostApplicationLifetime() { }
 
-    public CancellationToken ApplicationStarted => new CancellationToken(true);
+    public CancellationToken ApplicationStarted => new(true);
 
     public CancellationToken ApplicationStopping => default;
 

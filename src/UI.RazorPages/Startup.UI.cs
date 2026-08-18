@@ -50,7 +50,7 @@ public partial class Startup
             _apiStartup = startup.ApiStartup;
 
             IsRunningBehindProxy = _apiStartup.IsRunningBehindProxy;
-            UIOptions = startup.UIOptions!;
+            UIOptions = startup.UIOptions;
         }
 
         public bool IsRunningBehindProxy { get; }
@@ -104,10 +104,9 @@ public partial class Startup
             services.AddSingleton<CustomCookieAuthenticationEvents>();
             services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                 .Bind(Configuration.GetSection($"{UISecurityOptions.DefaultSectionName}:Authentication"))
-                .Configure(options =>
-                    CustomCookieAuthenticationEvents.ConfigureOptions<CustomCookieAuthenticationEvents>(options));
+                .Configure(CustomCookieAuthenticationEvents.ConfigureOptions<CustomCookieAuthenticationEvents>);
 
-            services.AddAuthorization(options => AnonymousOnlyAttribute.Configure(options));
+            services.AddAuthorization(AnonymousOnlyAttribute.Configure);
 
             services
                 .ReplaceLast(ServiceDescriptor.Singleton<IAuthorizationPolicyProvider, CustomAuthorizationPolicyProvider>())
@@ -278,8 +277,8 @@ public partial class Startup
                 model.Filters.Add(new EnsureHandlerPageFilter());
 
                 Type pageDescriptorProviderType;
-                if ((pageDescriptorProviderType = model.HandlerType).HasInterface(typeof(IPageDescriptorProvider)) ||
-                    (pageDescriptorProviderType = model.PageType).HasInterface(typeof(IPageDescriptorProvider)))
+                if ((pageDescriptorProviderType = model.HandlerType).HasInterface(typeof(IPageDescriptorProvider))
+                    || (pageDescriptorProviderType = model.PageType).HasInterface(typeof(IPageDescriptorProvider)))
                 {
                     var pageDescriptor = PageDescriptor.Get(pageDescriptorProviderType);
 

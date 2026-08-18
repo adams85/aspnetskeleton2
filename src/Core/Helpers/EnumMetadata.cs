@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -16,10 +17,10 @@ public static class EnumMetadata
 
 public sealed class EnumMetadata<TEnum> where TEnum : struct, Enum
 {
-    public static readonly IReadOnlyDictionary<string, EnumMetadata<TEnum>> Members = Enum.GetNames(typeof(TEnum))
+    public static readonly FrozenDictionary<string, EnumMetadata<TEnum>> Members = Enum.GetNames<TEnum>()
         .Select(name => (name, field: typeof(TEnum).GetField(name)))
-        .Where(item => item.field != null)
-        .ToDictionary(item => item.name, item => new EnumMetadata<TEnum>(item.name, item.field!));
+        .Where(item => item.field is not null)
+        .ToFrozenDictionary(item => item.name, item => new EnumMetadata<TEnum>(item.name, item.field!));
 
     private EnumMetadata(string name, FieldInfo field)
     {

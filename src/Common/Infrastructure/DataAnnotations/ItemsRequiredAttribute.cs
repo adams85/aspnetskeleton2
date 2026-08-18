@@ -3,7 +3,7 @@
 namespace System.ComponentModel.DataAnnotations;
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
-public class ItemsRequiredAttribute : ExtendedValidationAttribute
+public sealed class ItemsRequiredAttribute : ExtendedValidationAttribute
 {
     public ItemsRequiredAttribute() : base(ValidationErrorMessages.ItemsRequiredAttribute_DefaultErrorMessage) { }
 
@@ -51,7 +51,7 @@ public class ItemsRequiredAttribute : ExtendedValidationAttribute
 
         bool IsValidItem(object item)
         {
-            if (item == null)
+            if (item is null)
                 return false;
 
             if (!AllowEmptyStrings && item is string text && text.Trim().Length == 0)
@@ -66,7 +66,7 @@ public class ItemsRequiredAttribute : ExtendedValidationAttribute
         if (IsValid(value))
             return ValidationResult.Success;
 
-        var memberNames = validationContext.MemberName != null ? new string[] { validationContext.MemberName } : null;
+        var memberNames = validationContext.MemberName is not null ? new string[] { validationContext.MemberName } : null;
         return new ExtendedValidationResult(this, validationContext, memberNames);
     }
 }

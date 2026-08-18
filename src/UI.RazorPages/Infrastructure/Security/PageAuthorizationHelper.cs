@@ -66,9 +66,9 @@ public sealed class PageAuthorizationHelper : IPageAuthorizationHelper, IDisposa
             var endpoint = endpoints[i];
 
             var actionDescriptor = endpoint.Metadata.GetMetadata<PageActionDescriptor>();
-            if (actionDescriptor != null &&
-                !endpoint.Metadata.OfType<IDynamicEndpointMetadata>().Any() &&
-                IsMatchingActionDescriptor(actionDescriptor, pageName, areaName))
+            if (actionDescriptor is not null
+                && !endpoint.Metadata.OfType<IDynamicEndpointMetadata>().Any()
+                && IsMatchingActionDescriptor(actionDescriptor, pageName, areaName))
             {
                 return endpoint;
             }
@@ -90,21 +90,20 @@ public sealed class PageAuthorizationHelper : IPageAuthorizationHelper, IDisposa
         var endpointMetadata = compiledActionDescriptor.Endpoint?.Metadata ?? endpoint.Metadata;
 
         // Allow Anonymous skips all authorization
-        if (endpointMetadata.GetMetadata<IAllowAnonymous>() != null)
+        if (endpointMetadata.GetMetadata<IAllowAnonymous>() is not null)
             return true;
 
         var authorizeData = endpointMetadata.GetOrderedMetadata<IAuthorizeData>() ?? Array.Empty<IAuthorizeData>();
         var policy = await AuthorizationPolicy.CombineAsync(_policyProvider, authorizeData);
-        if (policy == null)
+        if (policy is null)
             return true;
 
         // Policy evaluator has transient lifetime so it fetched from request services instead of injecting in constructor
         var policyEvaluator = httpContext.RequestServices.GetRequiredService<IPolicyEvaluator>();
 
-        var authenticateResult =
-            (httpContext.User?.Identity?.IsAuthenticated ?? false) ?
-            AuthenticateResult.Success(new AuthenticationTicket(httpContext.User, "context.User")) :
-            AuthenticateResult.NoResult();
+        var authenticateResult = (httpContext.User?.Identity?.IsAuthenticated ?? false)
+            ? AuthenticateResult.Success(new AuthenticationTicket(httpContext.User, "context.User"))
+            : AuthenticateResult.NoResult();
 
         var authorizeResult = await policyEvaluator.AuthorizeAsync(policy, authenticateResult, httpContext, resource: endpoint);
 

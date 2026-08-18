@@ -9,16 +9,16 @@ public static class ValidatableObjectExtensions
     public static ValidationResult ValidateMember(this IValidatableObject obj, object? memberValue, string memberName,
         ValidationContext validationContext, ValidationAttribute validationAttribute)
     {
-        if (obj == null)
+        if (obj is null)
             throw new ArgumentNullException(nameof(obj));
 
-        if (memberName == null)
+        if (memberName is null)
             throw new ArgumentNullException(nameof(memberName));
 
-        if (validationContext == null)
+        if (validationContext is null)
             throw new ArgumentNullException(nameof(validationContext));
 
-        if (validationAttribute == null)
+        if (validationAttribute is null)
             throw new ArgumentNullException(nameof(validationAttribute));
 
         validationContext = new ValidationContext(obj, validationContext, validationContext.Items) { MemberName = memberName };

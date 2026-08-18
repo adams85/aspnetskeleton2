@@ -36,21 +36,21 @@ public abstract class GenerateOperationCommand : ICommand
     [Option("--namespace <NAMESPACE>", Description = "The base namespace for generated classes. Default: 'WebApp'.")]
     public string? Namespace { get; set; }
 
-    protected string GetProjectPath(string rootPath, string projectName) => Path.Combine(rootPath, "src", projectName);
+    protected static string GetProjectPath(string rootPath, string projectName) => Path.Combine(rootPath, "src", projectName);
 
-    private bool TryLocateRootPath(out string? value)
+    private static bool TryLocateRootPath(out string? value)
     {
-        string? currentPath = Environment.CurrentDirectory;
+        var currentPath = Environment.CurrentDirectory;
         do
         {
-            if (Directory.EnumerateFiles(currentPath, "*.sln", SearchOption.TopDirectoryOnly).Any() &&
-                Directory.Exists(GetProjectPath(currentPath, ServiceContractProjectName)))
+            if (Directory.EnumerateFiles(currentPath, "*.sln", SearchOption.TopDirectoryOnly).Any()
+                && Directory.Exists(GetProjectPath(currentPath, ServiceContractProjectName)))
             {
                 value = currentPath;
                 return true;
             }
         }
-        while ((currentPath = Path.GetDirectoryName(currentPath)) != null);
+        while ((currentPath = Path.GetDirectoryName(currentPath)) is not null);
 
         value = default;
         return false;
@@ -59,7 +59,7 @@ public abstract class GenerateOperationCommand : ICommand
     protected string GetRootPath()
     {
         var rootPath = RootPath;
-        if (rootPath != null)
+        if (rootPath is not null)
         {
             var serviceContractProjectPath = GetProjectPath(rootPath, ServiceContractProjectName);
 

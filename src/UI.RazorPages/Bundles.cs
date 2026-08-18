@@ -15,12 +15,12 @@ namespace WebApp.UI;
 
 public class Bundles : DesignTimeBundlingConfiguration
 {
-    private static CssSettings CreateNUglifyCssSettings() => new CssSettings
+    private static CssSettings CreateNUglifyCssSettings() => new()
     {
         CommentMode = CssComment.None
     };
 
-    private static CodeSettings CreateNUglifyJsSettings() => new CodeSettings
+    private static CodeSettings CreateNUglifyJsSettings() => new()
     {
         PreserveImportantComments = false
     };
@@ -73,9 +73,8 @@ public class Bundles : DesignTimeBundlingConfiguration
 
     public override void Configure(BundleCollectionConfigurer bundles)
     {
-        var themeProvider =
-            bundles.AppServices.GetService<IThemeProvider>() ??
-            new ThemeProvider(bundles.AppServices.GetRequiredService<IWebHostEnvironment>());
+        var themeProvider = bundles.AppServices.GetService<IThemeProvider>()
+            ?? new ThemeProvider(bundles.AppServices.GetRequiredService<IWebHostEnvironment>());
 
         #region Global
 

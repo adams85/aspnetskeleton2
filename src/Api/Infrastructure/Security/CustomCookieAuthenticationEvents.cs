@@ -27,7 +27,7 @@ public class CustomCookieAuthenticationEvents : CookieAuthenticationEvents
 
         var userInfo = await _cachedUserInfoProvider.GetCachedUserInfoAsync(userName, registerActivity: true, context.HttpContext.RequestAborted);
 
-        if (userInfo != null && userInfo.LoginAllowed)
+        if (userInfo is not null && userInfo.LoginAllowed)
         {
             identity.AddClaimsFrom(userInfo);
         }

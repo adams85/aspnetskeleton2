@@ -8,7 +8,7 @@ namespace WebApp.Service.Infrastructure.Localization;
 
 public static class LocalizationHelper
 {
-    private static readonly ConcurrentDictionary<(string, string?), object?> s_unavailableTranslations = new ConcurrentDictionary<(string, string?), object?>();
+    private static readonly ConcurrentDictionary<(string, string?), object?> s_unavailableTranslations = new();
 
     internal static void TranslationNotAvailable(this ILogger logger, string name, CultureInfo culture, string? searchedLocation)
     {

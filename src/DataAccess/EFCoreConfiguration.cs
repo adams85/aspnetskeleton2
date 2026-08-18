@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Collections.Frozen;
 using System.Linq;
 using System.Threading.Tasks;
 using Karambolo.Common;
@@ -16,12 +16,12 @@ namespace WebApp.DataAccess;
 
 internal abstract class EFCoreConfiguration
 {
-    private static readonly IReadOnlyDictionary<string, IConfigurationFactory> s_configurationFactories = typeof(EFCoreConfiguration).Assembly.GetTypes()
+    private static readonly FrozenDictionary<string, IConfigurationFactory> s_configurationFactories = typeof(EFCoreConfiguration).Assembly.GetTypes()
         .Where(type => !type.IsAbstract && type.HasInterface(typeof(IConfigurationFactory)))
         .Select(type => type.GetConstructor(Type.EmptyTypes))
-        .Where(ctor => ctor != null)
+        .Where(ctor => ctor is not null)
         .Select(ctor => (IConfigurationFactory)ctor!.Invoke(null))
-        .ToDictionary(factory => factory.ProviderName, CachedDelegates.Identity<IConfigurationFactory>.Func);
+        .ToFrozenDictionary(factory => factory.ProviderName, CachedDelegates.Identity<IConfigurationFactory>.Func);
 
     public static EFCoreConfiguration From(DataAccessOptions options)
     {

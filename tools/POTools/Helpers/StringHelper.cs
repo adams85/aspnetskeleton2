@@ -4,15 +4,16 @@ using System.Text.RegularExpressions;
 
 namespace POTools.Helpers;
 
-public static class StringHelper
+public static partial class StringHelper
 {
-    private static readonly Regex s_matchNewLinesRegex = new Regex(@"\r?\n|\r", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    [GeneratedRegex(@"\r?\n|\r", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex MatchNewLinesRegex { get; }
 
     [return: NotNullIfNotNull(nameof(s))]
     public static string? NormalizeNewLines(this string? s)
     {
         return !string.IsNullOrEmpty(s)
-            ? s_matchNewLinesRegex.Replace(s, Environment.NewLine)
+            ? MatchNewLinesRegex.Replace(s, Environment.NewLine)
             : s;
     }
 }

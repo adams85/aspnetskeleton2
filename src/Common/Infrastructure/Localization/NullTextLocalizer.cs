@@ -4,7 +4,7 @@ namespace WebApp.Common.Infrastructure.Localization;
 
 public sealed class NullTextLocalizer : ITextLocalizer
 {
-    public static readonly NullTextLocalizer Instance = new NullTextLocalizer();
+    public static readonly NullTextLocalizer Instance = new();
 
     private NullTextLocalizer() { }
 

@@ -23,7 +23,7 @@ internal sealed class VerifyJwtRefreshTokenQueryHandler : QueryHandler<VerifyJwt
             RequireExisting(user, c => c.UserName);
 
             var now = _clock.UtcNow;
-            return user.ValidateJwtRefreshToken(query.VerificationToken!, now);
+            return user.ValidateJwtRefreshToken(query.VerificationToken, now);
         }
     }
 }

@@ -7,13 +7,13 @@ namespace WebApp.Service.Tests.Helpers;
 
 public class NullStringLocalizer : IStringLocalizer
 {
-    public static readonly NullStringLocalizer Instance = new NullStringLocalizer();
+    public static readonly NullStringLocalizer Instance = new();
 
     private NullStringLocalizer() { }
 
-    public LocalizedString this[string name] => new LocalizedString(name, name);
+    public LocalizedString this[string name] => new(name, name);
 
-    public LocalizedString this[string name, params object[] arguments] => new LocalizedString(name, string.Format(CultureInfo.CurrentCulture, name, arguments));
+    public LocalizedString this[string name, params object[] arguments] => new(name, string.Format(CultureInfo.CurrentCulture, name, arguments));
 
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) => throw new NotSupportedException();
 

@@ -33,7 +33,7 @@ internal sealed class ServiceHostCommandDispatcher : ICommandDispatcher
 
         CommandResponse? response = null;
 
-        if (command is IEventProducerCommand eventProducerCommand && eventProducerCommand.OnEvent != null)
+        if (command is IEventProducerCommand eventProducerCommand && eventProducerCommand.OnEvent is not null)
         {
             await foreach (var currentResponse in _commandService.InvokeWithEventNotification(commandRequest, callContext).ConfigureAwait(false))
             {
@@ -51,7 +51,7 @@ internal sealed class ServiceHostCommandDispatcher : ICommandDispatcher
         switch (response)
         {
             case CommandResponse.Success successResponse:
-                if (command is IKeyGeneratorCommand keyGeneratorCommand && successResponse.Key?.Value != null)
+                if (command is IKeyGeneratorCommand keyGeneratorCommand && successResponse.Key?.Value is not null)
                     keyGeneratorCommand.OnKeyGenerated?.Invoke(command, successResponse.Key.Value);
 
                 return;

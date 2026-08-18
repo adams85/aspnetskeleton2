@@ -24,10 +24,10 @@ internal sealed class ListSettingsQueryHandler : ListQueryHandler<ListSettingsQu
         {
             IQueryable<Setting> linq = dbContext.Settings;
 
-            if (query.NamePattern != null)
+            if (query.NamePattern is not null)
                 linq = linq.Where(setting => setting.Name!.ToLower().Contains(query.NamePattern.ToLower()));
 
-            if (query.ValuePattern != null)
+            if (query.ValuePattern is not null)
                 linq = linq.Where(setting => setting.Value!.ToLower().Contains(query.ValuePattern.ToLower()));
 
             var settingEnumStringLocalizer = _stringLocalizerFactory.Create(typeof(SettingEnumConstants));
@@ -37,7 +37,7 @@ internal sealed class ListSettingsQueryHandler : ListQueryHandler<ListSettingsQu
 
             var resultLinq = linq.ToData(nameToDescriptionMapper);
 
-            if (query.DescriptionPattern != null)
+            if (query.DescriptionPattern is not null)
                 resultLinq = resultLinq.Where(setting => setting.Description!.ToLower().Contains(query.DescriptionPattern.ToLower()));
 
             return await ResultAsync(query, resultLinq, cancellationToken).ConfigureAwait(false);

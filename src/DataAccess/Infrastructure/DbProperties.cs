@@ -7,7 +7,7 @@ public abstract class DbProperties : IDbProperties
 {
     protected DbProperties(DbOptions options)
     {
-        if (options == null)
+        if (options is null)
             throw new ArgumentNullException(nameof(options));
 
         CharacterEncoding = options.CharacterEncoding ?? DefaultCharacterEncoding;
@@ -36,7 +36,7 @@ public abstract class DbProperties : IDbProperties
 
     protected Exception CreateUndefinedCollationError(string provider, string? collation, bool caseSensitive)
     {
-        string methodName = this.GetType() + "." + (caseSensitive ? nameof(CreateCaseSensitiveComparer) : nameof(CreateCaseInsensitiveComparer));
+        var methodName = GetType() + "." + (caseSensitive ? nameof(CreateCaseSensitiveComparer) : nameof(CreateCaseInsensitiveComparer));
         return new InvalidOperationException($"No comparer is defined for the combination of provider {provider} and collation {collation ?? "(default)"}. Modify {methodName} to provide a comparer for the required combination.");
     }
 

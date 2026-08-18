@@ -5,7 +5,7 @@ namespace WebApp.Service.Infrastructure;
 
 internal sealed class CommandExecutionBuilder
 {
-    private readonly List<(Predicate<Type>, CommandInterceptorFactory)> _interceptorFactories = new List<(Predicate<Type>, CommandInterceptorFactory)>();
+    private readonly List<(Predicate<Type>, CommandInterceptorFactory)> _interceptorFactories = new();
 
     public CommandExecutionBuilder AddInterceptor(Predicate<Type> commandTypeFilter, CommandInterceptorFactory interceptorFactory)
     {

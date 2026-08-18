@@ -30,7 +30,7 @@ public sealed class DataAnnotationsLocalizationAdjuster : IMetadataBasedModelVal
     public DataAnnotationsLocalizationAdjuster(IValidationAttributeAdapterProvider validationAttributeAdapterProvider, IOptions<MvcDataAnnotationsLocalizationOptions> options,
         IStringLocalizerFactory? stringLocalizerFactory)
     {
-        if (options?.Value == null)
+        if (options?.Value is null)
             throw new ArgumentNullException(nameof(options));
 
         _validationAttributeAdapterProvider = validationAttributeAdapterProvider ?? throw new ArgumentNullException(nameof(validationAttributeAdapterProvider));
@@ -41,9 +41,9 @@ public sealed class DataAnnotationsLocalizationAdjuster : IMetadataBasedModelVal
     public void CreateValidators(ModelValidatorProviderContext context)
     {
         var stringLocalizer =
-            _stringLocalizerFactory != null && _dataAnnotationLocalizerProvider != null && context.ModelMetadata.ModelType.HasInterface(typeof(IValidatableObject)) ?
-            EnsureTextLocalizerInterface(_dataAnnotationLocalizerProvider(context.ModelMetadata.ContainerType ?? context.ModelMetadata.ModelType, _stringLocalizerFactory)) :
-            null;
+            _stringLocalizerFactory is not null && _dataAnnotationLocalizerProvider is not null && context.ModelMetadata.ModelType.HasInterface(typeof(IValidatableObject))
+            ? EnsureTextLocalizerInterface(_dataAnnotationLocalizerProvider(context.ModelMetadata.ContainerType ?? context.ModelMetadata.ModelType, _stringLocalizerFactory))
+            : null;
 
         var validatableObjectAdapterFound = false;
 
@@ -60,10 +60,10 @@ public sealed class DataAnnotationsLocalizationAdjuster : IMetadataBasedModelVal
 
             // 2. support for ExtendedValidationResult localization in the case of IValidatableObject
 
-            if (stringLocalizer != null)
+            if (stringLocalizer is not null)
             {
                 // we need to check type by name because unfortunately ValidatableObjectAdapter is internal
-                if (result.Validator != null && result.Validator.GetType().FullName == "Microsoft.AspNetCore.Mvc.DataAnnotations.ValidatableObjectAdapter")
+                if (result.Validator is not null && result.Validator.GetType().FullName == "Microsoft.AspNetCore.Mvc.DataAnnotations.ValidatableObjectAdapter")
                 {
                     results[i] = new ValidatorItem(result.ValidatorMetadata)
                     {
@@ -76,7 +76,7 @@ public sealed class DataAnnotationsLocalizationAdjuster : IMetadataBasedModelVal
             }
         }
 
-        if (stringLocalizer != null)
+        if (stringLocalizer is not null)
             Debug.Assert(validatableObjectAdapterFound, "Microsoft.AspNetCore.Mvc.DataAnnotations internals have apparently changed.");
 
         static IStringLocalizer EnsureTextLocalizerInterface(IStringLocalizer stringLocalizer) =>

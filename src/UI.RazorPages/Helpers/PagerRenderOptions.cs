@@ -6,7 +6,7 @@ namespace WebApp.UI.Helpers;
 // https://github.com/dncuug/X.PagedList/blob/68345177ef1de43b2538134378d9abe6292ff83d/src/X.PagedList.Web.Common/PagedListRenderOptions.cs
 public sealed class PagerRenderOptions
 {
-    public static readonly PagerRenderOptions Default = new PagerRenderOptions
+    public static readonly PagerRenderOptions Default = new()
     {
         Display = true,
         MaximumPageNumbersToDisplay = 5

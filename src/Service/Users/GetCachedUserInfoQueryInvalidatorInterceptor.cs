@@ -16,7 +16,7 @@ internal sealed class GetCachedUserInfoQueryInvalidatorInterceptor : CachedQuery
         ILogger<CachedQueryInvalidatorInterceptor>? logger)
         : base(next, applicationLifetime, cache, queryTypes, logger) { }
 
-    private string[]? GetAffectedUserNames(CommandContext context) => context.Command switch
+    private static string[]? GetAffectedUserNames(CommandContext context) => context.Command switch
     {
         CreateUserCommand createUserCommand => new[] { createUserCommand.UserName },
         ApproveUserCommand approveUserCommand => new[] { approveUserCommand.UserName },

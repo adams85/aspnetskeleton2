@@ -40,7 +40,7 @@ public class EditModel : EditPageModel<EditModel.PageDescriptorClass, SettingDat
             IncludeDescription = true
         }, HttpContext.RequestAborted);
 
-        if (item == null)
+        if (item is null)
             return NotFound();
 
         Item = item;
@@ -74,7 +74,7 @@ public class EditModel : EditPageModel<EditModel.PageDescriptorClass, SettingDat
             IncludeDescription = true
         }, HttpContext.RequestAborted);
 
-        if (item == null)
+        if (item is null)
             return NotFound();
 
         Item = Item with

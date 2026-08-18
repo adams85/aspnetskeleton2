@@ -9,8 +9,8 @@ public static class TypeExtensions
 {
     private static readonly Assembly s_coreLibAssembly = typeof(object).Assembly;
 
-    private static readonly ConcurrentDictionary<Type, string> s_fullNameCache = new ConcurrentDictionary<Type, string>();
-    private static readonly ConcurrentDictionary<Type, string?> s_associatedAssemblyNameCache = new ConcurrentDictionary<Type, string?>();
+    private static readonly ConcurrentDictionary<Type, string> s_fullNameCache = new();
+    private static readonly ConcurrentDictionary<Type, string?> s_associatedAssemblyNameCache = new();
 
     private static string? GetSimpleAssemblyName(Assembly assembly) =>
         assembly != s_coreLibAssembly ? assembly.GetName().Name : null;
@@ -23,7 +23,7 @@ public static class TypeExtensions
         var fullName = type.FullNameWithoutAssemblyDetails();
 
         var simpleAssemblyName = GetSimpleAssemblyName(type.Assembly);
-        if (simpleAssemblyName != null)
+        if (simpleAssemblyName is not null)
             fullName += ", " + simpleAssemblyName;
 
         return fullName;

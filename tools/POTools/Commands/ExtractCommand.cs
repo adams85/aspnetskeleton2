@@ -17,7 +17,7 @@ namespace POTools.Commands;
 [Command("extract", Description = "Extracts localizable text from source files in PO format.")]
 internal class ExtractCommand : ICommand
 {
-    private static readonly POGeneratorSettings s_generatorSettings = new POGeneratorSettings { IgnoreEncoding = true };
+    private static readonly POGeneratorSettings s_generatorSettings = new() { IgnoreEncoding = true };
 
     private readonly CommandLineContext _context;
 
@@ -60,7 +60,7 @@ internal class ExtractCommand : ICommand
 
     private IList<string> GetSourceFilePaths()
     {
-        if (SourceFilePaths != null && SourceFilePaths.Length > 0)
+        if (SourceFilePaths is not null && SourceFilePaths.Length > 0)
             return SourceFilePaths;
 
         var inputFilePaths = new List<string>();
@@ -73,9 +73,9 @@ internal class ExtractCommand : ICommand
     }
 
     private string? GetTemplateFilePath() =>
-        TemplateFilePath != null && Path.GetExtension(TemplateFilePath).Length == 0 ?
-        Path.ChangeExtension(TemplateFilePath, ".pot") :
-        TemplateFilePath;
+        TemplateFilePath is not null && Path.GetExtension(TemplateFilePath).Length == 0
+        ? Path.ChangeExtension(TemplateFilePath, ".pot")
+        : TemplateFilePath;
 
     private ThreadData InitializeThread()
     {
@@ -86,7 +86,7 @@ internal class ExtractCommand : ICommand
     {
         var extension = Path.GetExtension(relativeFilePath);
         var extractor = data.GetExtractor(extension);
-        if (extractor == null)
+        if (extractor is null)
             return data;
 
         string content;
@@ -119,7 +119,7 @@ internal class ExtractCommand : ICommand
 
     private static IEnumerable<string> GetPOEntryFlags(IPOEntry entry) => entry.Comments?
         .OfType<POFlagsComment>()
-        .Where(flagsComment => flagsComment.Flags != null && flagsComment.Flags.Count > 0)
+        .Where(flagsComment => flagsComment.Flags is not null && flagsComment.Flags.Count > 0)
         .SelectMany(flagsComment => flagsComment.Flags) ?? Enumerable.Empty<string>();
 
     private POCatalog BuildTemplateCatalog(string? filePath, KeyValuePair<string, ExtractResult>[] fileTexts)
@@ -150,10 +150,12 @@ internal class ExtractCommand : ICommand
             }
         }
         else
+        {
             originalCatalog = null;
+        }
 
         var groupsById = fileTexts
-            .Where(fileText => fileText.Value.Texts != null)
+            .Where(fileText => fileText.Value.Texts is not null)
             .SelectMany(fileText => fileText.Value.Texts!.Select(text => (text, fileText.Key)))
             .GroupBy(item => new POKey(item.text.Id, item.text.PluralId, item.text.ContextId))
             .OrderBy(item => item.Key, POKeyComparer.Instance);
@@ -170,23 +172,22 @@ internal class ExtractCommand : ICommand
                 {
                     var state = "new";
 
-                    if (originalCatalog != null && originalCatalog.TryGetValue(key, out var originalEntry))
+                    if (originalCatalog is not null && originalCatalog.TryGetValue(key, out var originalEntry))
                     {
                         var hasChanged =
-                            key.Id != originalEntry[0] ||
-                            key.PluralId != null && (originalEntry.Count != 2 || key.PluralId != originalEntry[1]);
+                            key.Id != originalEntry[0]
+                            || key.PluralId is not null && (originalEntry.Count != 2 || key.PluralId != originalEntry[1]);
 
                         state = hasChanged ? "changed" : null;
                     }
 
-                    entry =
-                        key.PluralId == null ?
-                        (IPOEntry)new POSingularEntry(key) { Translation = text.Translation ?? key.Id } :
-                        new POPluralEntry(key) { key.Id, key.PluralId };
+                    entry = key.PluralId is null
+                        ? new POSingularEntry(key) { Translation = text.Translation ?? key.Id }
+                        : new POPluralEntry(key) { key.Id, key.PluralId };
 
                     entry.Comments = new List<POComment>();
 
-                    if (state != null)
+                    if (state is not null)
                         entry.Comments.Add(new POFlagsComment { Flags = new HashSet<string> { state } });
 
                     if (!NoReferences)
@@ -206,7 +207,7 @@ internal class ExtractCommand : ICommand
             }
         }
 
-        if (originalCatalog != null)
+        if (originalCatalog is not null)
         {
             foreach (var originalEntry in originalCatalog)
             {
@@ -214,10 +215,9 @@ internal class ExtractCommand : ICommand
                 {
                     const string entryRemovedMessage = "***THIS ENTRY WAS REMOVED. DO NOT TRANSLATE!***";
 
-                    var entry =
-                        originalEntry.Key.PluralId == null ?
-                        (IPOEntry)new POSingularEntry(originalEntry.Key) { Translation = entryRemovedMessage } :
-                        new POPluralEntry(originalEntry.Key) { entryRemovedMessage };
+                    var entry = originalEntry.Key.PluralId is null
+                        ? (IPOEntry)new POSingularEntry(originalEntry.Key) { Translation = entryRemovedMessage }
+                        : new POPluralEntry(originalEntry.Key) { entryRemovedMessage };
 
                     entry.Comments = new List<POComment> { new POFlagsComment { Flags = new HashSet<string> { "removed" } } };
                     catalog.Add(entry);
@@ -248,7 +248,9 @@ internal class ExtractCommand : ICommand
             }
         }
         else
+        {
             originalCatalog = null;
+        }
 
         var catalog = new POCatalog();
 
@@ -259,7 +261,7 @@ internal class ExtractCommand : ICommand
                 continue;
 
             IEnumerable<string> originalFlags;
-            if (originalCatalog != null && originalCatalog.TryGetValue(templateEntry.Key, out var originalEntry))
+            if (originalCatalog is not null && originalCatalog.TryGetValue(templateEntry.Key, out var originalEntry))
                 originalFlags = GetPOEntryFlags(originalEntry);
             else
                 (originalFlags, originalEntry) = (Enumerable.Empty<string>(), null);
@@ -278,7 +280,7 @@ internal class ExtractCommand : ICommand
             if (isNew || hasChanged || isOriginalFuzzy)
             {
                 flags.Add("fuzzy");
-                entry.Comments = templateEntry.Comments?.Where(comment => !(comment is POFlagsComment)).ToList() ?? new List<POComment>();
+                entry.Comments = templateEntry.Comments?.Where(comment => comment is not POFlagsComment).ToList() ?? new List<POComment>();
                 entry.Comments.Add(new POFlagsComment { Flags = flags });
             }
             else
@@ -292,14 +294,14 @@ internal class ExtractCommand : ICommand
         return catalog;
     }
 
-    private void WriteCatalog(TextWriter writer, POCatalog catalog, CultureInfo? culture)
+    private static void WriteCatalog(TextWriter writer, POCatalog catalog, CultureInfo? culture)
     {
         var now = DateTimeOffset.Now;
 
         try { catalog.Encoding = Encoding.GetEncoding(writer.Encoding.CodePage).BodyName; }
         catch (NotSupportedException) { catalog.Encoding = "(n/a)"; }
 
-        if (culture != null)
+        if (culture is not null)
         {
             catalog.Language = culture.Name.Replace('-', '_');
 
@@ -315,7 +317,7 @@ internal class ExtractCommand : ICommand
             {
                 if (entry is POPluralEntry pluralEntry && pluralEntry.Count > pluralFormCount)
                 {
-                    for (int i = pluralEntry.Count - 1; i >= pluralFormCount; i--)
+                    for (var i = pluralEntry.Count - 1; i >= pluralFormCount; i--)
                         pluralEntry.RemoveAt(i);
                 }
             }
@@ -331,7 +333,7 @@ internal class ExtractCommand : ICommand
             [POCatalog.LanguageTeamHeaderName] = string.Empty,
         };
 
-        if (culture != null)
+        if (culture is not null)
         {
             catalog.HeaderComments = new[]
             {
@@ -356,12 +358,12 @@ internal class ExtractCommand : ICommand
 
     public Task<int> OnExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken)
     {
-        _basePath = BasePath != null ? Path.GetFullPath(BasePath) : Directory.GetCurrentDirectory();
+        _basePath = BasePath is not null ? Path.GetFullPath(BasePath) : Directory.GetCurrentDirectory();
 
         var relativeSourceFilePaths = GetSourceFilePaths().Select(filePath => Path.GetRelativePath(_basePath, filePath));
         var templateFilePath = GetTemplateFilePath();
 
-        var cultures = Languages?.Select(language => CultureInfo.GetCultureInfo(language)).ToArray() ?? Array.Empty<CultureInfo>();
+        var cultures = Languages?.Select(CultureInfo.GetCultureInfo).ToArray() ?? Array.Empty<CultureInfo>();
 
         // extracting texts
         _results = new Dictionary<string, ExtractResult>();
@@ -378,7 +380,7 @@ internal class ExtractCommand : ICommand
 
             var templateCatalog = BuildTemplateCatalog(Merge ? templateFilePath : null, fileTexts);
 
-            if (templateFilePath != null)
+            if (templateFilePath is not null)
             {
                 SaveCatalog(templateFilePath, templateCatalog, null);
 
@@ -430,7 +432,7 @@ internal class ExtractCommand : ICommand
     {
         public LocalizableTextInfo[]? Texts { get; set; }
         public string? Error { get; set; }
-        public bool Success => Error == null;
+        public bool Success => Error is null;
     }
 
     private class ThreadData
@@ -445,7 +447,8 @@ internal class ExtractCommand : ICommand
                 { ".cshtml", new Lazy<ILocalizableTextExtractor>(() => new CSharpRazorTextExtractor(), isThreadSafe: false) },
                 {
                     ".resx",
-                    new Lazy<ILocalizableTextExtractor>(command.UseResxName
+                    new Lazy<ILocalizableTextExtractor>(
+                        command.UseResxName
                         ? () => new ResourceNameTextExtractor()
                         : () => new ResourceTextExtractor(),
                         isThreadSafe: false)
@@ -456,12 +459,12 @@ internal class ExtractCommand : ICommand
         public ILocalizableTextExtractor? GetExtractor(string extension) =>
             _extractors.TryGetValue(extension, out var extractor) ? extractor.Value : null;
 
-        public Dictionary<string, ExtractResult> Results = new Dictionary<string, ExtractResult>();
+        public Dictionary<string, ExtractResult> Results = new();
     }
 
     private class POKeyComparer : IComparer<POKey>
     {
-        public static readonly POKeyComparer Instance = new POKeyComparer();
+        public static readonly POKeyComparer Instance = new();
 
         private POKeyComparer() { }
 

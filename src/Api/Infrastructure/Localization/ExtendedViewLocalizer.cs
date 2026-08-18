@@ -32,14 +32,14 @@ public sealed class ExtendedViewLocalizer : IViewLocalizer, IViewContextAware
 
     public LocalizedString GetString(string name) => _localizer!.GetString(name);
 
-    public LocalizedString GetString(string name, params object[] values) => _localizer!.GetString(name, values);
+    public LocalizedString GetString(string name, params object[] arguments) => _localizer!.GetString(name, arguments);
 
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) =>
         _localizer!.GetAllStrings(includeParentCultures);
 
     public void Contextualize(ViewContext viewContext)
     {
-        if (viewContext == null)
+        if (viewContext is null)
             throw new ArgumentNullException(nameof(viewContext));
 
         // Given a view path "/Views/Home/Index.cshtml" we want a baseName like "MyApplication.Views.Home.Index"
@@ -53,8 +53,8 @@ public sealed class ExtendedViewLocalizer : IViewLocalizer, IViewContextAware
         Debug.Assert(!string.IsNullOrEmpty(path), "Couldn't determine a path for the view");
 
         var location =
-            (viewContext.View as RazorView)?.RazorPage.GetType().GetAssociatedAssemblyName() ??
-            _applicationName;
+            (viewContext.View as RazorView)?.RazorPage.GetType().GetAssociatedAssemblyName()
+            ?? _applicationName;
 
         _localizer = _localizerFactory.Create(BuildBaseName(path, location), location);
     }
@@ -62,7 +62,7 @@ public sealed class ExtendedViewLocalizer : IViewLocalizer, IViewContextAware
     private static string BuildBaseName(string path, string location)
     {
         var extension = Path.GetExtension(path);
-        var startIndex = path[0] == '/' || path[0] == '\\' ? 1 : 0;
+        var startIndex = path[0] is '/' or '\\' ? 1 : 0;
         var length = path.Length - startIndex - extension.Length;
         var capacity = length + location.Length + 1;
         var builder = new StringBuilder(path, startIndex, length, capacity);

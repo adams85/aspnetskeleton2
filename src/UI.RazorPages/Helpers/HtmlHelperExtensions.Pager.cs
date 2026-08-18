@@ -11,7 +11,7 @@ public static partial class HtmlHelperExtensions
     // based on: https://github.com/dncuug/X.PagedList/blob/68345177ef1de43b2538134378d9abe6292ff83d/src/X.PagedList.Web.Common/HtmlHelper.cs
     public static IHtmlContent Pager(this IHtmlHelper htmlHelper, in PagerInfo info, Func<int, string?> generatePageUrl, PagerRenderOptions options)
     {
-        if (options.Display == false || options.Display == null && info.PageCount <= 1)
+        if (options.Display == false || options.Display is null && info.PageCount <= 1)
             return HtmlString.Empty;
 
         var listItemLinks = new List<TagBuilder>();
@@ -39,11 +39,11 @@ public static partial class HtmlHelperExtensions
         }
 
         //first
-        if (options.DisplayLinkToFirstPage == true || options.DisplayLinkToFirstPage == null && firstPageToDisplay > 1)
+        if (options.DisplayLinkToFirstPage == true || options.DisplayLinkToFirstPage is null && firstPageToDisplay > 1)
             listItemLinks.Add(First(info, generatePageUrl, options));
 
         //previous
-        if (options.DisplayLinkToPreviousPage == true || options.DisplayLinkToPreviousPage == null && !info.IsFirstPage)
+        if (options.DisplayLinkToPreviousPage == true || options.DisplayLinkToPreviousPage is null && !info.IsFirstPage)
             listItemLinks.Add(Previous(info, generatePageUrl, options));
 
         //page
@@ -69,11 +69,11 @@ public static partial class HtmlHelperExtensions
         }
 
         //next
-        if (options.DisplayLinkToNextPage == true || options.DisplayLinkToNextPage == null && !info.IsLastPage)
+        if (options.DisplayLinkToNextPage == true || options.DisplayLinkToNextPage is null && !info.IsLastPage)
             listItemLinks.Add(Next(info, generatePageUrl, options));
 
         //last
-        if (options.DisplayLinkToLastPage == true || options.DisplayLinkToLastPage == null && lastPageToDisplay < info.PageCount)
+        if (options.DisplayLinkToLastPage == true || options.DisplayLinkToLastPage is null && lastPageToDisplay < info.PageCount)
             listItemLinks.Add(Last(info, generatePageUrl, options));
 
         if (listItemLinks.Count > 0)
@@ -87,7 +87,7 @@ public static partial class HtmlHelperExtensions
                 listItemLinks[^1].AddCssClass(options.ClassToApplyToLastListItemInPager);
 
             //append classes to all list item links
-            if (options.LiElementClasses != null)
+            if (options.LiElementClasses is not null)
             {
                 for (int i = 0, n = listItemLinks.Count; i < n; i++)
                 {
@@ -102,13 +102,13 @@ public static partial class HtmlHelperExtensions
         for (int i = 0, n = listItemLinks.Count; i < n; i++)
             ul.InnerHtml.AppendHtml(listItemLinks[i]);
 
-        if (options.UlElementClasses != null)
+        if (options.UlElementClasses is not null)
         {
             foreach (var c in options.UlElementClasses ?? Enumerable.Empty<string>())
                 ul.AddCssClass(c);
         }
 
-        if (options.UlElementAttributes != null)
+        if (options.UlElementAttributes is not null)
         {
             foreach (var c in options.UlElementAttributes)
                 ul.MergeAttribute(c.Key, c.Value);
@@ -145,7 +145,7 @@ public static partial class HtmlHelperExtensions
 
         first.InnerHtml.AppendFormat(options.LinkToFirstPageFormat, targetPageNumber);
 
-        if (options.PageClasses != null)
+        if (options.PageClasses is not null)
         {
             foreach (var c in options.PageClasses)
                 first.AddCssClass(c);
@@ -168,7 +168,7 @@ public static partial class HtmlHelperExtensions
 
         previous.Attributes.Add("rel", "prev");
 
-        if (options.PageClasses != null)
+        if (options.PageClasses is not null)
         {
             foreach (var c in options.PageClasses)
                 previous.AddCssClass(c);
@@ -191,7 +191,7 @@ public static partial class HtmlHelperExtensions
 
         page.InnerHtml.SetContent(format(targetPageNumber));
 
-        if (options.PageClasses != null)
+        if (options.PageClasses is not null)
         {
             foreach (var c in options.PageClasses ?? Enumerable.Empty<string>())
                 page.AddCssClass(c);
@@ -214,7 +214,7 @@ public static partial class HtmlHelperExtensions
 
         next.Attributes.Add("rel", "next");
 
-        if (options.PageClasses != null)
+        if (options.PageClasses is not null)
         {
             foreach (var c in options.PageClasses)
                 next.AddCssClass(c);
@@ -237,7 +237,7 @@ public static partial class HtmlHelperExtensions
 
         last.InnerHtml.AppendFormat(options.LinkToLastPageFormat, targetPageNumber);
 
-        if (options.PageClasses != null)
+        if (options.PageClasses is not null)
         {
             foreach (var c in options.PageClasses)
                 last.AddCssClass(c);
@@ -260,7 +260,7 @@ public static partial class HtmlHelperExtensions
         previous.Attributes.Add("rel", "prev");
         previous.AddCssClass(options.PreviousElementClass);
 
-        if (options.EllipsesClasses != null)
+        if (options.EllipsesClasses is not null)
         {
             foreach (var c in options.EllipsesClasses)
                 previous.AddCssClass(c);
@@ -285,7 +285,7 @@ public static partial class HtmlHelperExtensions
         next.Attributes.Add("rel", "next");
         next.AddCssClass(options.NextElementClass);
 
-        if (options.EllipsesClasses != null)
+        if (options.EllipsesClasses is not null)
         {
             foreach (var c in options.EllipsesClasses)
                 next.AddCssClass(c);

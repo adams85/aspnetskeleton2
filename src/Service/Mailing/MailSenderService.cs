@@ -51,7 +51,7 @@ internal sealed class MailSenderService : BackgroundService, IMailSenderService
     public MailSenderService(IServiceScopeFactory serviceScopeFactory, IMailTypeCatalog mailTypeCatalog, IGuidProvider guidProvider, IClock clock,
         IOptions<SmtpOptions>? smtpOptions, IOptions<MailSenderServiceOptions>? options, ILogger<MailSenderService>? logger)
     {
-        if (guidProvider == null)
+        if (guidProvider is null)
             throw new ArgumentNullException(nameof(guidProvider));
 
         _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
@@ -70,16 +70,15 @@ internal sealed class MailSenderService : BackgroundService, IMailSenderService
         }
         else
         {
-            _smtpHost =
-                smtpOptionsValue!.Host ??
-                throw new ArgumentException($"{nameof(SmtpOptions.Host)} must be specified.", nameof(smtpOptions));
+            _smtpHost = smtpOptionsValue!.Host
+                ?? throw new ArgumentException($"{nameof(SmtpOptions.Host)} must be specified.", nameof(smtpOptions));
 
             _smtpPort = smtpOptionsValue.Port ?? SmtpOptions.DefaultPort;
             _smtpSecurity = smtpOptionsValue.Security ?? SmtpOptions.DefaultSecurity;
 
             var smtpUserName = smtpOptionsValue.UserName;
             var smtpPassword = smtpOptionsValue.Password;
-            _smtpCredentials = smtpUserName != null || smtpPassword != null ? new NetworkCredential(smtpUserName, smtpPassword) : null;
+            _smtpCredentials = smtpUserName is not null || smtpPassword is not null ? new NetworkCredential(smtpUserName, smtpPassword) : null;
 
             var smtpTimeout = smtpOptionsValue.Timeout ?? SmtpOptions.DefaultTimeout;
             _smtpClientFactory = () => new SmtpClient { Timeout = checked((int)smtpTimeout.TotalMilliseconds) };
@@ -110,7 +109,7 @@ internal sealed class MailSenderService : BackgroundService, IMailSenderService
     public async Task EnqueueItemAsync(MailModel model, WritableDataContext dbContext, IChangeToken? transactionCommittedToken, CancellationToken cancellationToken)
     {
         var hasPendingTransaction = dbContext.Database.HasPendingTransaction();
-        if (hasPendingTransaction && transactionCommittedToken == null)
+        if (hasPendingTransaction && transactionCommittedToken is null)
             throw new ArgumentNullException(nameof(transactionCommittedToken), "A change token signalling on successful commit must be supplied when a transaction is present.");
 
         var mailTypeDefinition = _mailTypeCatalog.GetDefinition(model.MailType, throwIfNotFound: true)!;
@@ -296,7 +295,7 @@ internal sealed class MailSenderService : BackgroundService, IMailSenderService
             {
                 var mail = await produceMailTasks[i].ConfigureAwait(false);
 
-                if (mail.Message != null)
+                if (mail.Message is not null)
                 {
                     if (!_smtpClient!.IsConnected)
                     {
@@ -312,13 +311,13 @@ internal sealed class MailSenderService : BackgroundService, IMailSenderService
                             throw;
                         }
 
-                        if (_smtpCredentials != null)
+                        if (_smtpCredentials is not null)
                             await _smtpClient.AuthenticateAsync(_smtpCredentials, cancellationToken).ConfigureAwait(false);
                     }
 
                     await SendMailAsync(mail, dbContext, cancellationToken).ConfigureAwait(false);
                 }
-                else if (mail.Error != null)
+                else if (mail.Error is not null)
                 {
                     await HandleMailErrorAsync(mail, dbContext, cancellationToken).ConfigureAwait(false);
                 }

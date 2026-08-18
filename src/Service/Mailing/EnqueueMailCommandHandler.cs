@@ -20,7 +20,7 @@ internal sealed class EnqueueMailCommandHandler : CommandHandler<EnqueueMailComm
     public override async Task HandleAsync(EnqueueMailCommand command, CommandContext context, CancellationToken cancellationToken)
     {
         var mailTypeDefinition = _mailTypeCatalog.GetDefinition(command.Model.MailType);
-        RequireValid(mailTypeDefinition != null, c => c.Model.MailType);
+        RequireValid(mailTypeDefinition is not null, c => c.Model.MailType);
 
         await using (context.CreateDbContext().AsAsyncDisposable(out var dbContext).ConfigureAwait(false))
         {
@@ -30,9 +30,9 @@ internal sealed class EnqueueMailCommandHandler : CommandHandler<EnqueueMailComm
                 DbContext = dbContext,
             };
 
-            await mailTypeDefinition!.ValidateModelAsync(validationContext, cancellationToken).ConfigureAwait(false);
+            await mailTypeDefinition.ValidateModelAsync(validationContext, cancellationToken).ConfigureAwait(false);
 
-            if (validationContext.ErrorCode != null)
+            if (validationContext.ErrorCode is not null)
                 throw new ServiceErrorException(validationContext.ErrorCode.Value, validationContext.ErrorArgsFactory?.Invoke());
 
             await _mailSenderService.EnqueueItemAsync(command.Model, dbContext, null, cancellationToken).ConfigureAwait(false);

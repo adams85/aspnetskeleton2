@@ -46,24 +46,23 @@ public static class ValidationErrorMessages
 
     public static string GetDefaultErrorMessage(this ValidationAttribute attribute) => attribute switch
     {
-        CompareAttribute _ => CompareAttribute_DefaultErrorMessage,
-        CreditCardAttribute _ => CreditCardAttribute_DefaultErrorMessage,
-        EmailAddressAttribute _ => EmailAddressAttribute_DefaultErrorMessage,
-        FileExtensionsAttribute _ => FileExtensionsAttribute_DefaultErrorMessage,
-        MaxLengthAttribute _ => MaxLengthAttribute_DefaultErrorMessage,
-        MinLengthAttribute _ => MinLengthAttribute_DefaultErrorMessage,
-        PhoneAttribute _ => PhoneAttribute_DefaultErrorMessage,
-        RangeAttribute _ => RangeAttribute_DefaultErrorMessage,
-        RegularExpressionAttribute _ => RegularExpressionAttribute_DefaultErrorMessage,
-        RequiredAttribute _ => RequiredAttribute_DefaultErrorMessage,
-        StringLengthAttribute stringLengthAttribute =>
-            stringLengthAttribute.MinimumLength != 0 ?
-            StringLengthAttribute_IncludingMinimumErrorMessage :
-            StringLengthAttribute_DefaultErrorMessage,
-        UrlAttribute _ => UrlAttribute_IncludingMinimumErrorMessage,
+        CompareAttribute => CompareAttribute_DefaultErrorMessage,
+        CreditCardAttribute => CreditCardAttribute_DefaultErrorMessage,
+        EmailAddressAttribute => EmailAddressAttribute_DefaultErrorMessage,
+        FileExtensionsAttribute => FileExtensionsAttribute_DefaultErrorMessage,
+        MaxLengthAttribute => MaxLengthAttribute_DefaultErrorMessage,
+        MinLengthAttribute => MinLengthAttribute_DefaultErrorMessage,
+        PhoneAttribute => PhoneAttribute_DefaultErrorMessage,
+        RangeAttribute => RangeAttribute_DefaultErrorMessage,
+        RegularExpressionAttribute => RegularExpressionAttribute_DefaultErrorMessage,
+        RequiredAttribute => RequiredAttribute_DefaultErrorMessage,
+        StringLengthAttribute stringLengthAttribute => stringLengthAttribute.MinimumLength != 0
+            ? StringLengthAttribute_IncludingMinimumErrorMessage
+            : StringLengthAttribute_DefaultErrorMessage,
+        UrlAttribute => UrlAttribute_IncludingMinimumErrorMessage,
 
-        ItemsRequiredAttribute _ => ItemsRequiredAttribute_DefaultErrorMessage,
-        PasswordAttribute _ => PasswordAttribute_DefaultErrorMessage,
+        ItemsRequiredAttribute => ItemsRequiredAttribute_DefaultErrorMessage,
+        PasswordAttribute => PasswordAttribute_DefaultErrorMessage,
 
         _ => ValidationAttribute_DefaultErrorMessage,
     };

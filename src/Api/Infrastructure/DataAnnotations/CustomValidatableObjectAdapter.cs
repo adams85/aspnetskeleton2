@@ -24,14 +24,14 @@ public sealed class CustomValidatableObjectAdapter : IModelValidator
     public IEnumerable<ModelValidationResult> Validate(ModelValidationContext context)
     {
         var model = context.Model;
-        if (model == null)
+        if (model is null)
         {
             return Enumerable.Empty<ModelValidationResult>();
         }
 
         if (model is not IValidatableObject validatable)
         {
-            throw new InvalidOperationException($"The model object inside the metadata claimed to be compatible with '{typeof(IValidatableObject).Name}', but was actually '{model.GetType()}'.");
+            throw new InvalidOperationException($"The model object inside the metadata claimed to be compatible with '{typeof(IValidatableObject)}', but was actually '{model.GetType()}'.");
         }
 
         // The constructed ValidationContext is intentionally slightly different from what
@@ -58,7 +58,7 @@ public sealed class CustomValidatableObjectAdapter : IModelValidator
         {
             if (result != ValidationResult.Success)
             {
-                if (result.MemberNames == null || !result.MemberNames.Any())
+                if (result.MemberNames is null || !result.MemberNames.Any())
                 {
                     yield return new ModelValidationResult(memberName: null, message: GetErrorMessage(validationContext, context, result));
                 }
@@ -78,10 +78,10 @@ public sealed class CustomValidatableObjectAdapter : IModelValidator
         if (result is ExtendedValidationResult extendedValidationResult)
         {
             var adapter = _validationAttributeAdapterProvider.GetAttributeAdapter(extendedValidationResult.ValidationAttribute, _stringLocalizer);
-            if (adapter != null)
+            if (adapter is not null)
             {
                 ModelMetadata? memberModelMetadata;
-                if (memberName != null && (memberModelMetadata = validationContext.ModelMetadata.Properties[memberName]) != null && memberModelMetadata.PropertyGetter != null)
+                if (memberName is not null && (memberModelMetadata = validationContext.ModelMetadata.Properties[memberName]) is not null && memberModelMetadata.PropertyGetter is not null)
                 {
                     var memberValue = memberModelMetadata.PropertyGetter(validationContext.Model!);
                     validationContext = new ModelValidationContext(validationContext.ActionContext, memberModelMetadata, validationContext.MetadataProvider, validationContext.Model, memberValue);

@@ -26,8 +26,7 @@ public partial class Startup
 
         services.AddSingleton<CustomCookieAuthenticationEvents>();
         services.AddOptions<CookieAuthenticationOptions>(ApiAuthenticationSchemes.Cookie)
-            .Configure(options =>
-                CustomCookieAuthenticationEvents.ConfigureOptions<CustomCookieAuthenticationEvents>(options));
+            .Configure(CustomCookieAuthenticationEvents.ConfigureOptions<CustomCookieAuthenticationEvents>);
     }
 
     private void ConfigureSecurity(IApplicationBuilder app)

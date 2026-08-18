@@ -5,7 +5,7 @@ namespace WebApp.Service.Tests.Helpers;
 
 public class NullStringLocalizerFactory : IStringLocalizerFactory
 {
-    public static readonly NullStringLocalizerFactory Instance = new NullStringLocalizerFactory();
+    public static readonly NullStringLocalizerFactory Instance = new();
 
     private NullStringLocalizerFactory() { }
 

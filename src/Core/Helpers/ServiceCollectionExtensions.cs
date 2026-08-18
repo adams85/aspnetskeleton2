@@ -7,7 +7,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection ReplaceLast(this IServiceCollection services, ServiceDescriptor descriptor, out ServiceDescriptor? replacedDescriptor)
     {
-        for (int i = services.Count - 1; i >= 0; i--)
+        for (var i = services.Count - 1; i >= 0; i--)
         {
             var currentDescriptor = services[i];
 

@@ -52,12 +52,11 @@ public sealed class DataTableModel
 
     public Func<object, object?> GetRowId { get; init; } = item => null;
 
-    private Func<IUrlHelper, object?, string?> _generateDisplayUrl = (url, values) => url.Page("./Index", values);
     public Func<IUrlHelper, object?, string?> GenerateDisplayUrl
     {
-        get => _generateDisplayUrl;
-        init => (_generateDisplayUrl, _returnUrlRouteValues) = (value, null);
-    }
+        get;
+        init => (field, _returnUrlRouteValues) = (value, null);
+    } = (url, values) => url.Page("./Index", values);
 
     public Func<IUrlHelper, object?, string?> GenerateCreateUrl { get; init; } = (url, values) => url.Page("./Create", values);
     public Func<IUrlHelper, object?, string?> GenerateEditUrl { get; init; } = (url, values) => url.Page("./Edit", values);
@@ -68,7 +67,7 @@ public sealed class DataTableModel
 
     private object GetReturnUrlRouteValuesDefault(IUrlHelper url)
     {
-        if (_returnUrlRouteValues == null)
+        if (_returnUrlRouteValues is null)
         {
             var routeValues = new RouteValueDictionary();
             routeValues.Merge(url.ActionContext.HttpContext.Request.Query);

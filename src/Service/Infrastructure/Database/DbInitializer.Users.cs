@@ -18,7 +18,7 @@ public partial class DbInitializer
     {
         var dbProperties = dbContext.GetDbProperties();
 
-        string[] usersToLoad = { ApplicationConstants.BuiltInRootUserName };
+        var usersToLoad = new[] { ApplicationConstants.BuiltInRootUserName };
 
         var users = await dbContext.Users
             .Where(entity => usersToLoad.Contains(entity.UserName))

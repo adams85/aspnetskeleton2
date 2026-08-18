@@ -19,7 +19,7 @@ public abstract record class ListQuery<TResult> : IListQuery, IQuery<TResult>
 {
     [DataMember(Order = 1)] public string[]? OrderBy { get; init; }
 
-    public bool IsOrdered => OrderBy != null && OrderBy.Length > 0;
+    public bool IsOrdered => OrderBy is not null && OrderBy.Length > 0;
 
     private int _pageIndex;
     [DataMember(Order = 2)]

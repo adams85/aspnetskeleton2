@@ -19,7 +19,7 @@ public class OptionsProvider : IServiceProvider
     }
 
     public object GetService(Type serviceType) =>
-        _options.TryGetValue(serviceType, out var option) ?
-        option :
-        throw new ArgumentOutOfRangeException(nameof(serviceType));
+        _options.TryGetValue(serviceType, out var option)
+        ? option
+        : throw new ArgumentOutOfRangeException(nameof(serviceType));
 }

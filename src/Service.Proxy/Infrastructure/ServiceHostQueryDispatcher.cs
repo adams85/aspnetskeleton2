@@ -33,7 +33,7 @@ internal sealed class ServiceHostQueryDispatcher : IQueryDispatcher
 
         QueryResponse? response = null;
 
-        if (query is IEventProducerQuery eventProducerQuery && eventProducerQuery.OnEvent != null)
+        if (query is IEventProducerQuery eventProducerQuery && eventProducerQuery.OnEvent is not null)
         {
             await foreach (var currentResponse in _queryService.InvokeWithEventNotification(queryRequest, callContext).ConfigureAwait(false))
             {

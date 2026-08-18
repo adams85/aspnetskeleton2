@@ -15,9 +15,9 @@ public class DashboardSidebarModel
     public const string SidebarStateCookieName = "App.Dashboard.SidebarState";
 
     public static (bool IsVisible, bool IsMinimized) GetSidebarState(HttpContext httpContext) =>
-        int.TryParse(httpContext.Request.Cookies[SidebarStateCookieName], NumberStyles.Integer, CultureInfo.InvariantCulture, out var state) ?
-        ((state & 0x1) != 0, (state & 0x2) != 0) :
-        (true, false);
+        int.TryParse(httpContext.Request.Cookies[SidebarStateCookieName], NumberStyles.Integer, CultureInfo.InvariantCulture, out var state)
+        ? ((state & 0x1) != 0, (state & 0x2) != 0)
+        : (true, false);
 
     public List<NavigationGroup>? Groups { get; init; }
 
@@ -26,11 +26,10 @@ public class DashboardSidebarModel
         public Func<HttpContext, Task<bool>>? IsVisibleAsync { get; init; }
         public Func<HttpContext, IHtmlLocalizer, LocalizedHtmlString>? GetTitle { get; init; }
 
-        private List<NavigationItemBase>? _items;
         public List<NavigationItemBase> Items
         {
-            get => _items ??= new List<NavigationItemBase>();
-            init => _items = value;
+            get => field ??= new List<NavigationItemBase>();
+            init;
         }
     }
 
@@ -59,18 +58,17 @@ public class DashboardSidebarModel
 
     public class NavigationDropDownItem : NavigationItemBase
     {
-        private List<NavigationItemBase>? _items;
         public List<NavigationItemBase> Items
         {
-            get => _items ??= new List<NavigationItemBase>();
-            init => _items = value;
+            get => field ??= new List<NavigationItemBase>();
+            init;
         }
 
         public bool IsShown(HttpContext context, PageDescriptor? currentPage)
         {
             return Items.Any(itemBase =>
-                itemBase is NavigationItem item && item.IsActive(context, currentPage) ||
-                itemBase is NavigationDropDownItem dropDownItem && dropDownItem.IsShown(context, currentPage));
+                itemBase is NavigationItem item && item.IsActive(context, currentPage)
+                || itemBase is NavigationDropDownItem dropDownItem && dropDownItem.IsShown(context, currentPage));
         }
     }
 }

@@ -31,7 +31,7 @@ public static partial class ApiContractSerializer
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(DataMemberAttribute))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(EnumMemberAttribute))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ProtoIncludeAttribute))]
-    public static readonly ModelMetadataProvider MetadataProvider = new ModelMetadataProvider(ProtoBufSerializer.TypeModel);
+    public static readonly ModelMetadataProvider MetadataProvider = new(ProtoBufSerializer.TypeModel);
 
     /// <summary>
     /// A serializer that can be used to serialize DTOs to Protobuf format.

@@ -30,7 +30,7 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
     public CustomJsonSerializerDataContractResolver(IOptions<JsonOptions>? jsonOptions)
     {
         _serializerOptions = jsonOptions?.Value?.JsonSerializerOptions ?? new JsonSerializerOptions().ConfigureApiDefaults();
-        _convertMemberName = _serializerOptions.PropertyNamingPolicy != null ? _serializerOptions.PropertyNamingPolicy.ConvertName : CachedDelegates.Identity<string>.Func;
+        _convertMemberName = _serializerOptions.PropertyNamingPolicy is not null ? _serializerOptions.PropertyNamingPolicy.ConvertName : CachedDelegates.Identity<string>.Func;
     }
 
     public DataContract GetDataContractForType(Type type)
@@ -48,10 +48,8 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
                 jsonConverter: JsonConverterFunc);
         }
 
-        if (s_primitiveTypesAndFormats.ContainsKey(type))
+        if (s_primitiveTypesAndFormats.TryGetValue(type, out var primitiveTypeAndFormat))
         {
-            var primitiveTypeAndFormat = s_primitiveTypesAndFormats[type];
-
             return DataContract.ForPrimitive(
                 underlyingType: type,
                 dataType: primitiveTypeAndFormat.Item1,
@@ -65,9 +63,9 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
 
             //Test to determine if the serializer will treat as string
             var serializeAsString = (enumValues.Length > 0)
-                && JsonConverterFunc(enumValues.GetValue(0)).StartsWith("\"", StringComparison.Ordinal);
+                && JsonConverterFunc(enumValues.GetValue(0)).StartsWith('"');
 
-            var primitiveTypeAndFormat = serializeAsString
+            primitiveTypeAndFormat = serializeAsString
                 ? s_primitiveTypesAndFormats[typeof(string)]
                 : s_primitiveTypesAndFormats[type.GetEnumUnderlyingType()];
 
@@ -105,7 +103,7 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
 
     private string JsonConverterFunc(object? value)
     {
-        return value != null
+        return value is not null
             ? JsonSerializer.Serialize(value, value.GetType(), _serializerOptions)
             : JsonSerializer.Serialize(value, _serializerOptions);
     }
@@ -162,7 +160,7 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
             return Enumerable.Empty<DataProperty>();
 
         var metaMembers = ApiContractSerializer.MetadataProvider.GetMembers(objectType, out var metaType);
-        if (metaType == null)
+        if (metaType is null)
             return Enumerable.Empty<DataProperty>();
 
         var dataProperties = new List<DataProperty>();
@@ -183,7 +181,7 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
 
                 bool isNullable;
                 if (property.PropertyType.IsValueType)
-                    isNullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
+                    isNullable = Nullable.GetUnderlyingType(property.PropertyType) is not null;
                 else if (property.IsNonNullableRefType() is bool isNonNullableRefType)
                     isNullable = !isNonNullableRefType;
                 else if (!property.DeclaringType!.IsGenericType)
@@ -196,14 +194,14 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
                 var isReadable = property.IsPubliclyReadable();
                 var isWritable = property.IsPubliclyWritable();
 
-                //var isSetViaConstructor = property.DeclaringType != null && property.DeclaringType.GetConstructors()
+                //var isSetViaConstructor = property.DeclaringType is not null && property.DeclaringType.GetConstructors()
                 //    .SelectMany(c => c.GetParameters())
                 //    .Any(p =>
                 //    {
                 //        // STJ supports setting via constructor if either underlying OR JSON names match
                 //        return
-                //            string.Equals(p.Name, property.Name, StringComparison.OrdinalIgnoreCase) ||
-                //            string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase);
+                //            string.Equals(p.Name, property.Name, StringComparison.OrdinalIgnoreCase)
+                //            || string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase);
                 //    });
 
                 dataProperties.Add(
@@ -221,7 +219,7 @@ public sealed class CustomJsonSerializerDataContractResolver : ISerializerDataCo
         return dataProperties;
     }
 
-    private static readonly Dictionary<Type, (DataType, string?)> s_primitiveTypesAndFormats = new Dictionary<Type, (DataType, string?)>
+    private static readonly Dictionary<Type, (DataType, string?)> s_primitiveTypesAndFormats = new()
     {
         [typeof(bool)] = (DataType.Boolean, null),
         [typeof(byte)] = (DataType.Integer, "int32"),

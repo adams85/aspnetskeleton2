@@ -17,10 +17,9 @@ public abstract class QueryTemplateBase : TemplateBase
         if (!string.IsNullOrEmpty(ResultType))
             return ResultType;
 
-        return
-            !IsList || !UseGenericListResult ?
-            $"{Name}Result" :
-            $"ListResult<{ListItemType}>";
+        return !IsList || !UseGenericListResult
+            ? $"{Name}Result"
+            : $"ListResult<{ListItemType}>";
     }
 
     public string GetQueryBaseType(string resultType)

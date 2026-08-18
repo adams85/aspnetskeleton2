@@ -23,8 +23,8 @@ public partial class ServiceErrorException : ApplicationException
 
         var (errorCode, args) = exception.ValidationAttribute switch
         {
-            RequiredAttribute _ => (ServiceErrorCode.ParamNotSpecified, new[] { memberPath }),
-            PasswordAttribute _ when TryGetValidationResultProperty(exception.ValidationResult, PasswordValidator.PasswordRequirementsPropertyKey, out var passwordRequirements) =>
+            RequiredAttribute => (ServiceErrorCode.ParamNotSpecified, new[] { memberPath }),
+            PasswordAttribute when TryGetValidationResultProperty(exception.ValidationResult, PasswordValidator.PasswordRequirementsPropertyKey, out var passwordRequirements) =>
                 (ServiceErrorCode.ParamNotValid, new object[] { memberPath, passwordRequirements }),
             _ => (ServiceErrorCode.ParamNotValid, new[] { memberPath })
         };

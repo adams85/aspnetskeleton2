@@ -12,7 +12,7 @@ internal sealed class SqlServerStringComparer : StringComparer
     }
 
     // SQL Server ignores trailing whitespace
-    private string? Normalize(string? value) => value?.TrimEnd(' ');
+    private static string? Normalize(string? value) => value?.TrimEnd(' ');
 
     public override int Compare(string? x, string? y) => _stringComparer.Compare(Normalize(x), Normalize(y));
 

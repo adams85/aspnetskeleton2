@@ -25,10 +25,10 @@ internal sealed class RazorTemplateRenderer : ITemplateRenderer
 {
     private const string TemplatesBasePath = "/Templates";
 
-    private static readonly RouteData s_routeData = new RouteData();
-    private static readonly ActionDescriptor s_actionDescriptor = new ActionDescriptor();
-    private static readonly EmptyModelMetadataProvider s_modelMetadataProvider = new EmptyModelMetadataProvider();
-    private static readonly HtmlHelperOptions s_htmlHelperOptions = new HtmlHelperOptions();
+    private static readonly RouteData s_routeData = new();
+    private static readonly ActionDescriptor s_actionDescriptor = new();
+    private static readonly EmptyModelMetadataProvider s_modelMetadataProvider = new();
+    private static readonly HtmlHelperOptions s_htmlHelperOptions = new();
 
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IRazorViewEngine _viewEngine;

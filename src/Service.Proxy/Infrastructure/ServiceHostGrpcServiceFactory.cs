@@ -18,15 +18,14 @@ internal sealed class ServiceHostGrpcServiceFactory : IServiceHostGrpcServiceFac
 
     public ServiceHostGrpcServiceFactory(IExecutionContextAccessor executionContextAccessor, IOptions<ServiceProxyApplicationOptions> options, ILoggerFactory? loggerFactory)
     {
-        if (executionContextAccessor == null)
+        if (executionContextAccessor is null)
             throw new ArgumentNullException(nameof(executionContextAccessor));
 
-        if (options?.Value == null)
+        if (options?.Value is null)
             throw new ArgumentNullException(nameof(options));
 
-        var baseUrl =
-            options.Value.ServiceBaseUrl ??
-            throw new ArgumentException($"{nameof(ServiceProxyApplicationOptions.ServiceBaseUrl)} must be specified.", nameof(options));
+        var baseUrl = options.Value.ServiceBaseUrl
+            ?? throw new ArgumentException($"{nameof(ServiceProxyApplicationOptions.ServiceBaseUrl)} must be specified.", nameof(options));
 
         var channelOptions = new GrpcChannelOptions
         {

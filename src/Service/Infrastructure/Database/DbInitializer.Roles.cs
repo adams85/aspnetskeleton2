@@ -24,7 +24,7 @@ public partial class DbInitializer
         {
             var descriptionAttribute = enumMetadata.Attributes.OfType<DescriptionAttribute>().FirstOrDefault();
 
-            if (descriptionAttribute != null)
+            if (descriptionAttribute is not null)
             {
                 AddOrUpdateRole(roles,
                     id: (int)enumMetadata.Value,

@@ -6,7 +6,7 @@ namespace WebApp.Service.Translations;
 
 public static partial class TranslationsHelper
 {
-    public static TranslationCatalogData ToData(this POCatalog catalog) => new TranslationCatalogData
+    public static TranslationCatalogData ToData(this POCatalog catalog) => new()
     {
         PluralFormCount = catalog.PluralFormCount,
         PluralFormSelector = catalog.PluralFormSelector,
@@ -17,7 +17,7 @@ public static partial class TranslationsHelper
             {
                 TranslationEntryData entryData;
 
-                if (entry.Key.PluralId == null)
+                if (entry.Key.PluralId is null)
                 {
                     entryData = new TranslationEntryData.Singular
                     {
@@ -40,10 +40,10 @@ public static partial class TranslationsHelper
 
                 return entryData;
             })
-            .ToArray()!
+            .ToArray()
     };
 
-    public static POCatalog ToCatalog(this TranslationCatalogData catalogData) => new POCatalog((catalogData.Entries ?? Enumerable.Empty<TranslationEntryData>())
+    public static POCatalog ToCatalog(this TranslationCatalogData catalogData) => new((catalogData.Entries ?? Enumerable.Empty<TranslationEntryData>())
         .Select(entryData =>
         {
             IPOEntry entry;

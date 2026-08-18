@@ -10,7 +10,7 @@ namespace WebApp.UI.Areas.Dashboard.Models.DataTables;
 
 public sealed class DataTableColumnBinding
 {
-    public static DataTableColumnBinding For<TItem>() => new DataTableColumnBinding(typeof(TItem), Array.Empty<PropertyInfo>(), CachedDelegates.Identity<object>.Func);
+    public static DataTableColumnBinding For<TItem>() => new(typeof(TItem), Array.Empty<PropertyInfo>(), CachedDelegates.Identity<object>.Func);
 
     public static DataTableColumnBinding For<TItem>(Expression<Func<TItem, object?>> pathExpression)
     {
@@ -37,10 +37,9 @@ public sealed class DataTableColumnBinding
 
     public string? GetDisplayName(IModelMetadataProvider modelMetadataProvider)
     {
-        var modelMetadata =
-            PropertyPath.Count > 0 ?
-            modelMetadataProvider.GetMetadataForProperty(PropertyPath.Count > 1 ? PropertyPath[^2].PropertyType : ItemType, PropertyPath[^1].Name) :
-            modelMetadataProvider.GetMetadataForType(ItemType);
+        var modelMetadata = PropertyPath.Count > 0
+            ? modelMetadataProvider.GetMetadataForProperty(PropertyPath.Count > 1 ? PropertyPath[^2].PropertyType : ItemType, PropertyPath[^1].Name)
+            : modelMetadataProvider.GetMetadataForType(ItemType);
 
         return modelMetadata.DisplayName;
     }

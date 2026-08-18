@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,11 +11,11 @@ namespace WebApp.UI.Infrastructure.Hosting;
 
 public sealed class Tenants : IReadOnlyCollection<Tenant>, IDisposable, IAsyncDisposable
 {
-    private readonly IReadOnlyDictionary<string, Tenant> _tenants;
+    private readonly FrozenDictionary<string, Tenant> _tenants;
 
     public Tenants(IEnumerable<Tenant> tenants)
     {
-        _tenants = tenants.ToDictionary(tenant => tenant.Id, CachedDelegates.Identity<Tenant>.Func);
+        _tenants = tenants.ToFrozenDictionary(tenant => tenant.Id, CachedDelegates.Identity<Tenant>.Func);
         MainBranchTenant = tenants.FirstOrDefault(tenant => tenant.IsMainBranch);
     }
 
@@ -38,7 +39,7 @@ public sealed class Tenants : IReadOnlyCollection<Tenant>, IDisposable, IAsyncDi
 
     public int Count => _tenants.Count;
 
-    public IEnumerator<Tenant> GetEnumerator() => _tenants.Values.GetEnumerator();
+    public IEnumerator<Tenant> GetEnumerator() => _tenants.Values.AsEnumerable().GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

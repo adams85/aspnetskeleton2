@@ -14,13 +14,13 @@ public static class UIStringLocalizerExtensions
 
         var errorMessage = t["The password does not meet the complexity requirements."];
 
-        if (passwordRequirements == null)
+        if (passwordRequirements is null)
             return errorMessage;
 
         var sb = new StringBuilder(errorMessage);
 
         sb.Append(' ');
-        sb.Append(t["Passwords must be at least {0} character long.", Plural.From("Passwords must be at least {0} characters long.", Math.Max(1, passwordRequirements!.RequiredLength))]);
+        sb.Append(t["Passwords must be at least {0} character long.", Plural.From("Passwords must be at least {0} characters long.", Math.Max(1, passwordRequirements.RequiredLength))]);
 
         if (passwordRequirements.RequireNonAlphanumeric || passwordRequirements.RequireDigit || passwordRequirements.RequireLowercase || passwordRequirements.RequireUppercase)
         {

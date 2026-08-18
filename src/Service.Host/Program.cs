@@ -11,7 +11,7 @@ using WebApp.Core.Helpers;
 
 namespace WebApp.Service.Host;
 
-public class Program
+public static class Program
 {
     public static async Task Main(string[] args)
     {
@@ -43,7 +43,7 @@ public class Program
         if (!fileProvider.GetFileInfo($"appsettings.{serviceSettingsTag}.json").Exists)
             fileProvider = new PhysicalFileProvider(AppContext.BaseDirectory);
 
-        int index = builder.Sources.Count;
+        var index = builder.Sources.Count;
         builder.Sources.RemoveAll((source, i) => source is JsonConfigurationSource ? (index = Math.Min(index, i), @true: true).@true : false);
 
         builder.Sources.Insert(index++, new JsonConfigurationSource { FileProvider = fileProvider, Path = $"appsettings.{serviceSettingsTag}.json", Optional = true, ReloadOnChange = true });

@@ -27,12 +27,11 @@ public class IndexModel : DashboardPageModel<IndexModel.PageDescriptorClass>
         _t = stringLocalizer ?? (IStringLocalizer)NullStringLocalizer.Instance;
     }
 
-    private ChangePasswordModel? _changePasswordModel;
     [BindProperty]
     public ChangePasswordModel ChangePasswordModel
     {
-        get => _changePasswordModel ??= new ChangePasswordModel();
-        set => _changePasswordModel = value;
+        get => field ??= new ChangePasswordModel();
+        set;
     }
 
     public bool? ChangePasswordSuccess { get; private set; }

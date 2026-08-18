@@ -15,12 +15,12 @@ public abstract record class KeyData
 {
     public static KeyData From(object value)
     {
-        var key = (KeyData)Activator.CreateInstance(typeof(KeyData<>).MakeGenericType(value.GetType()))!;
+        var key = (KeyData)Activator.CreateInstance(typeof(KeyData<>).MakeGenericType(value.GetType()));
         key.ValueInternal = value;
         return key;
     }
 
-    public static KeyData<T> From<T>([DisallowNull] T value) => new KeyData<T> { Value = value };
+    public static KeyData<T> From<T>([DisallowNull] T value) => new() { Value = value };
 
     protected abstract object ValueInternal { get; set; }
 

@@ -29,9 +29,9 @@ namespace System.Diagnostics.CodeAnalysis;
 /// will use it there).
 /// </remarks>
 [AttributeUsage(
-    AttributeTargets.Field | AttributeTargets.ReturnValue | AttributeTargets.GenericParameter |
-    AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Method |
-    AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct,
+    AttributeTargets.Field | AttributeTargets.ReturnValue | AttributeTargets.GenericParameter
+    | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Method
+    | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct,
     Inherited = false)]
 internal sealed class DynamicallyAccessedMembersAttribute : Attribute
 {

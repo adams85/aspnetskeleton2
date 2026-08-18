@@ -4,24 +4,21 @@ namespace WebApp.UI.Areas.Dashboard.Models.Layout;
 
 public class DashboardPageLayoutModel : LayoutModel
 {
-    private DashboardSidebarModel? _sidebar;
     public DashboardSidebarModel Sidebar
     {
-        get => _sidebar ??= new DashboardSidebarModel();
-        init => _sidebar = value;
+        get => field ??= new DashboardSidebarModel();
+        init;
     }
 
-    private DashboardHeaderModel? _header;
     public DashboardHeaderModel Header
     {
-        get => _header ??= new DashboardHeaderModel();
-        init => _header = value;
+        get => field ??= new DashboardHeaderModel();
+        init;
     }
 
-    private DashboardFooterModel? _footer;
     public DashboardFooterModel Footer
     {
-        get => _footer ??= new DashboardFooterModel();
-        init => _footer = value;
+        get => field ??= new DashboardFooterModel();
+        init;
     }
 }

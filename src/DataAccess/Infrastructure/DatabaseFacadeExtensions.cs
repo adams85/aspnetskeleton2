@@ -20,9 +20,9 @@ public static class DatabaseFacadeExtensions
     {
         IDatabaseFacadeDependenciesAccessor dependenciesAccessor = database;
         var transactionManager = dependenciesAccessor.Dependencies.TransactionManager as IExtendedDbContextTransactionManager;
-        Debug.Assert(transactionManager != null, $"{nameof(IDbContextTransactionManager)} of provider {database.ProviderName} does not implement {typeof(IExtendedDbContextTransactionManager)}.");
+        Debug.Assert(transactionManager is not null, $"{nameof(IDbContextTransactionManager)} of provider {database.ProviderName} does not implement {typeof(IExtendedDbContextTransactionManager)}.");
 
-        if (database.CurrentTransaction != null)
+        if (database.CurrentTransaction is not null)
         {
             activeTransaction = null;
             return true;
@@ -31,7 +31,7 @@ public static class DatabaseFacadeExtensions
         if (transactionManager.SupportsAmbientTransactions)
         {
             activeTransaction = (transactionManager is ITransactionEnlistmentManager ? database.GetEnlistedTransaction() : null) ?? Transaction.Current;
-            if (activeTransaction != null && activeTransaction.TransactionInformation.Status == TransactionStatus.Active)
+            if (activeTransaction is not null && activeTransaction.TransactionInformation.Status == TransactionStatus.Active)
                 return true;
         }
 

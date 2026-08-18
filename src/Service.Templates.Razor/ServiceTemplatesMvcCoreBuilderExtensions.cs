@@ -8,7 +8,7 @@ using WebApp.Service.Infrastructure.Templating;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-#pragma warning disable ASPDEPR003 // Type or member is obsolete
+#pragma warning disable ASPDEPR003
 
 public static class ServiceTemplatesServiceCollectionExtensions
 {
@@ -22,8 +22,8 @@ public static class ServiceTemplatesServiceCollectionExtensions
             var pathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
             if (!options.FileProviders.Any(fileProvider =>
-                fileProvider is PhysicalFileProvider physicalFileProvider &&
-                Path.TrimEndingDirectorySeparator(Path.GetFullPath(physicalFileProvider.Root).AsSpan())
+                fileProvider is PhysicalFileProvider physicalFileProvider
+                && Path.TrimEndingDirectorySeparator(Path.GetFullPath(physicalFileProvider.Root).AsSpan())
                     .Equals(Path.TrimEndingDirectorySeparator(appBaseDirectoryNormalizedPath.AsSpan()), pathComparer)))
             {
                 options.FileProviders.Add(AppBaseDirectoryFileProvider.Instance);
@@ -57,7 +57,7 @@ public static class ServiceTemplatesServiceCollectionExtensions
 
     private sealed class AppBaseDirectoryFileProvider : PhysicalFileProvider
     {
-        public static readonly AppBaseDirectoryFileProvider Instance = new AppBaseDirectoryFileProvider();
+        public static readonly AppBaseDirectoryFileProvider Instance = new();
 
         private AppBaseDirectoryFileProvider() : base(AppContext.BaseDirectory) { }
     }

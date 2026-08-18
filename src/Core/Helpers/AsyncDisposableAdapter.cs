@@ -8,10 +8,10 @@ namespace WebApp.Core.Helpers;
 public static class AsyncDisposableAdapter
 {
     public static AsyncDisposableAdapter<T> From<T>([AllowNull] T value) where T : notnull, IDisposable =>
-        new AsyncDisposableAdapter<T>(value);
+        new(value);
 
-    public static AsyncDisposableAdapter<T> From<T>([AllowNull] T value, [MaybeNull, NotNullIfNotNull("value")] out T valueOut) where T : notnull, IDisposable =>
-        new AsyncDisposableAdapter<T>(valueOut = value);
+    public static AsyncDisposableAdapter<T> From<T>([AllowNull] T value, [MaybeNull, NotNullIfNotNull(nameof(value))] out T valueOut) where T : notnull, IDisposable =>
+        new(valueOut = value);
 
     // https://github.com/dotnet/csharplang/discussions/2661
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

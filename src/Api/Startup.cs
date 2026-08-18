@@ -20,7 +20,9 @@ namespace WebApp.Api;
 
 public partial class Startup
 {
+#pragma warning disable IDE0052
     private readonly bool _provideRazorTemplating;
+#pragma warning restore IDE0052
 
     public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         : this(configuration, environment, provideRazorTemplating: true) { }

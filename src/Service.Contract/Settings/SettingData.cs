@@ -28,9 +28,9 @@ public record class SettingData
     [Display(Name = DescriptionDisplayName)]
     [DataMember(Order = 6)] public string? Description { get; init; }
 
-    public UpdateSettingCommand ToUpdateCommand() => new UpdateSettingCommand
+    public UpdateSettingCommand ToUpdateCommand() => new()
     {
-        Name = this.Name,
-        Value = this.Value
+        Name = Name,
+        Value = Value
     };
 }

@@ -5,5 +5,5 @@ namespace WebApp.UI.Infrastructure.ViewFeatures;
 
 public class GlobalRazorHelpersOptions
 {
-    public Dictionary<Type, string> HelpersTypeViewPathMappings { get; } = new Dictionary<Type, string>();
+    public Dictionary<Type, string> HelpersTypeViewPathMappings { get; } = new();
 }

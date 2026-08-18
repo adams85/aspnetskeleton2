@@ -27,7 +27,7 @@ public static class ExpressionHelper
         var methodCall = Expression.Call(targetInstance, method, methodCallArguments);
 
         var body =
-            convertReturnValue != null ? convertReturnValue(methodCall, delegateInvokeMethod.ReturnType) :
+            convertReturnValue is not null ? convertReturnValue(methodCall, delegateInvokeMethod.ReturnType) :
             method.ReturnType != delegateInvokeMethod.ReturnType ? Expression.Convert(methodCall, delegateInvokeMethod.ReturnType) :
             methodCall;
 

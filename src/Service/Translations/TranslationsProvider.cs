@@ -76,13 +76,13 @@ internal sealed class TranslationsProvider : ITranslationsProvider, IDisposable
                 {
                     if (Refresh(initialEvents, @event))
                     {
-                        if (initialEvents != null)
+                        if (initialEvents is not null)
                             _initializedTcs.TrySetResult();
 
                         _logger.LogInformation("Internal cache was refreshed.");
                     }
                 }
-                catch (Exception ex) when (initialEvents != null)
+                catch (Exception ex) when (initialEvents is not null)
                 {
                     _initializedTcs.TrySetException(ex);
                 }
@@ -139,15 +139,15 @@ internal sealed class TranslationsProvider : ITranslationsProvider, IDisposable
 
         lock (_lastEvents)
         {
-            if (initialEvents != null)
+            if (initialEvents is not null)
             {
-                for (int i = 0; i < initialEvents.Length; i++)
+                for (var i = 0; i < initialEvents.Length; i++)
                     RefreshCore(initialEvents[i]);
 
                 hasRefreshed = true;
                 _resetting = false;
             }
-            else if (@event != null)
+            else if (@event is not null)
             {
                 hasRefreshed = RefreshCore(@event) ? !_resetting : false;
             }
@@ -161,7 +161,7 @@ internal sealed class TranslationsProvider : ITranslationsProvider, IDisposable
             if (hasRefreshed)
             {
                 _catalogs = _lastEvents
-                    .Where(item => item.Value.Catalog != null)
+                    .Where(item => item.Value.Catalog is not null)
                     .ToDictionary(item => item.Key, item => item.Value.Catalog!, s_translationsKeyComparer);
             }
         }

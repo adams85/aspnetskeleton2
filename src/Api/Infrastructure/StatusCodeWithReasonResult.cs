@@ -18,7 +18,7 @@ public class StatusCodeWithReasonResult : StatusCodeResult
         base.ExecuteResult(context);
 
         var httpResponseFeature = context.HttpContext.Features.Get<IHttpResponseFeature>();
-        if (httpResponseFeature != null)
+        if (httpResponseFeature is not null)
             httpResponseFeature.ReasonPhrase = Reason;
     }
 }

@@ -11,7 +11,7 @@ public class SingleValueCache<T> : IDisposable where T : class
 
     public SingleValueCache(Func<IChangeToken>? invalidationTokenProducer = null)
     {
-        if (invalidationTokenProducer != null)
+        if (invalidationTokenProducer is not null)
             _invalidationTokenDisposable = ChangeToken.OnChange(invalidationTokenProducer, () => Volatile.Write(ref _value, null));
     }
 

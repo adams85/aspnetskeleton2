@@ -39,7 +39,7 @@ public class SettingsController : Controller
     [HttpGet]
     public async Task<ActionResult<ListResult<SettingData>>> List([FromQuery] ListSettingsQuery model)
     {
-        if (model == null)
+        if (model is null)
             return BadRequest();
 
         var result = await _queryDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
@@ -61,7 +61,7 @@ public class SettingsController : Controller
     [HttpPost]
     public async Task<IActionResult> Update([FromBody] UpdateSettingCommand model)
     {
-        if (model == null)
+        if (model is null)
             return BadRequest();
 
         await _commandDispatcher.DispatchAsync(model, HttpContext.RequestAborted);

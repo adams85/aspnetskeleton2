@@ -22,22 +22,24 @@ using WebApp.UI.Infrastructure.Hosting;
 
 namespace WebApp.UI;
 
-public partial class Program
+public static partial class Program
 {
     public static readonly string ApplicationName =
-        typeof(Program).Assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product ??
-        typeof(Program).Assembly.GetName().Name!;
+        typeof(Program).Assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product
+        ?? typeof(Program).Assembly.GetName().Name!;
 
     public static readonly string ApplicationVersion =
-        typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ??
-        typeof(Program).Assembly.GetName().Version!.ToString();
+        typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+        ?? typeof(Program).Assembly.GetName().Version!.ToString();
 
+#pragma warning disable CA1805
     public static readonly bool UsesDesignTimeBundling =
 #if USES_DESIGNTIME_BUNDLING
         true;
 #else
         false;
 #endif
+#pragma warning restore CA1805
 
     public static async Task Main(string[] args)
     {
@@ -84,7 +86,7 @@ public partial class Program
             // Fallback
             services.PostConfigure<HostFilteringOptions>(options =>
             {
-                if (options.AllowedHosts == null || options.AllowedHosts.Count == 0)
+                if (options.AllowedHosts is null || options.AllowedHosts.Count == 0)
                 {
                     // "AllowedHosts": "localhost;127.0.0.1;[::1]"
                     var hosts = hostingContext.Configuration["AllowedHosts"]?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -133,7 +135,7 @@ public partial class Program
         var hostingStartupAssemblies = SplitAssemblyList(builder.GetSetting(WebHostDefaults.HostingStartupAssembliesKey)!)
             .ToLookup(value => new AssemblyName(value).Name, CachedDelegates.Identity<string>.Func, StringComparer.OrdinalIgnoreCase);
 
-        IEnumerable<string> assembliesToExclude = Enumerable.Empty<string>();
+        var assembliesToExclude = Enumerable.Empty<string>();
 
         var assemblies = hostingStartupAssemblies["Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation"];
         if (assemblies.Any())
@@ -174,7 +176,7 @@ public partial class Program
         if (!fileProvider.GetFileInfo("appsettings.json").Exists)
             fileProvider = new PhysicalFileProvider(AppContext.BaseDirectory);
 
-        int index = builder.Sources.Count;
+        var index = builder.Sources.Count;
         builder.Sources.RemoveAll((source, i) => source is JsonConfigurationSource ? (index = Math.Min(index, i), @true: true).@true : false);
 
         ConfigureAppConfigurationPartial(context, builder, fileProvider, ref index);

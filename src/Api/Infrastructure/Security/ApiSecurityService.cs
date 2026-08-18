@@ -22,7 +22,7 @@ public sealed class ApiSecurityService : CustomJwtBearerEvents, IApiSecurityServ
     internal const string JwtRefreshTokenHttpHeaderName = "X-Refresh-Token";
     internal const string JwtRefreshTokenAuthorizationHeaderParamName = "Refresh";
 
-    private static readonly object s_jwtRefreshTokenHttpContextItemKey = new object();
+    private static readonly object s_jwtRefreshTokenHttpContextItemKey = new();
 
     private readonly IGuidProvider _guidProvider;
     private readonly IClock _clock;
@@ -52,12 +52,12 @@ public sealed class ApiSecurityService : CustomJwtBearerEvents, IApiSecurityServ
 
     private string GenerateJwtAccessToken(string userName)
     {
-        Claim[] claims = new[]
+        var claims = new Claim[]
         {
-            new Claim(JwtRegisteredClaimNames.Jti, _guidProvider.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Jti, _guidProvider.NewGuid().ToString()),
             // by default JwtRegisteredClaimNames.UniqueName is translated to ClaimTypes.Name on decoding the JWT token
             // see https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/5.5.0/src/System.IdentityModel.Tokens.Jwt/ClaimTypeMapping.cs
-            new Claim(JwtRegisteredClaimNames.UniqueName, userName),
+            new(JwtRegisteredClaimNames.UniqueName, userName),
         };
 
         var token = new JwtSecurityToken(
@@ -141,9 +141,9 @@ public sealed class ApiSecurityService : CustomJwtBearerEvents, IApiSecurityServ
         const string bearerString = "Bearer ";
 
         int separatorIndex;
-        if (authorization == null ||
-            !(authorization.StartsWith(bearerString, StringComparison.OrdinalIgnoreCase)) ||
-            (separatorIndex = authorization.LastIndexOf(';')) < 0)
+        if (authorization is null
+            || !authorization.StartsWith(bearerString, StringComparison.OrdinalIgnoreCase)
+            || (separatorIndex = authorization.LastIndexOf(';')) < 0)
         {
             return Task.CompletedTask;
         }
@@ -157,8 +157,9 @@ public sealed class ApiSecurityService : CustomJwtBearerEvents, IApiSecurityServ
         }
 
         // checks for param name and equal sign
-        if (string.Compare(authorization, i, JwtRefreshTokenAuthorizationHeaderParamName, 0, JwtRefreshTokenAuthorizationHeaderParamName.Length, StringComparison.OrdinalIgnoreCase) != 0 ||
-            (i += JwtRefreshTokenAuthorizationHeaderParamName.Length) >= authorization.Length || authorization[i] != '=')
+        if (string.Compare(authorization, i, JwtRefreshTokenAuthorizationHeaderParamName, 0, JwtRefreshTokenAuthorizationHeaderParamName.Length, StringComparison.OrdinalIgnoreCase) != 0
+            || (i += JwtRefreshTokenAuthorizationHeaderParamName.Length) >= authorization.Length
+            || authorization[i] != '=')
         {
             return Task.CompletedTask;
         }
@@ -200,8 +201,8 @@ public sealed class ApiSecurityService : CustomJwtBearerEvents, IApiSecurityServ
             }, httpContext.RequestAborted);
         }
         catch (ServiceErrorException ex) when (
-            ex.ErrorCode == ServiceErrorCode.ParamNotValid &&
-            (string)ex.Args[0] == nameof(UpdateJwtRefreshTokenCommand.VerificationToken))
+            ex.ErrorCode == ServiceErrorCode.ParamNotValid
+            && (string)ex.Args[0] == nameof(UpdateJwtRefreshTokenCommand.VerificationToken))
         {
             return false;
         }

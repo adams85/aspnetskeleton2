@@ -59,7 +59,7 @@ public sealed class ProtoBufInputFormatter : InputFormatter
 
         await using (fileBufferingReadStream)
         {
-            if (fileBufferingReadStream != null)
+            if (fileBufferingReadStream is not null)
             {
                 await readStream.DrainAsync(CancellationToken.None);
                 readStream.Seek(0, SeekOrigin.Begin);
@@ -69,7 +69,7 @@ public sealed class ProtoBufInputFormatter : InputFormatter
             catch (ProtoException ex) { exception = ex; }
         }
 
-        if (exception != null)
+        if (exception is not null)
         {
             _logger.LogDebug(exception, "ProtoBuf input formatter threw an exception.");
             return InputFormatterResult.Failure();

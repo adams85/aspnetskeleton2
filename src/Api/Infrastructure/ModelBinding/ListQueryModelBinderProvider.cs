@@ -28,7 +28,7 @@ public class ListQueryModelBinderProvider : IModelBinderProvider
 
     public IModelBinder? GetBinder(ModelBinderProviderContext context)
     {
-        if (context == null)
+        if (context is null)
             throw new ArgumentNullException(nameof(context));
 
         if (context.Metadata.IsComplexType && !context.Metadata.IsCollectionType && context.Metadata.ModelType.HasInterface(typeof(IListQuery)))

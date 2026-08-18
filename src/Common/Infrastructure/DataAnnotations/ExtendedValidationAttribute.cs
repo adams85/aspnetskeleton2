@@ -24,7 +24,7 @@ public abstract class ExtendedValidationAttribute : ValidationAttribute
 
         // when ErrorMessageResourceType and ErrorMessageResourceName is set, we assume that the error message is already localized
         // (we only need to check either of these properties because of the preliminary check which ErrorMessageString does under the hood)
-        if (ErrorMessageResourceType != null)
+        if (ErrorMessageResourceType is not null)
             return NullTextLocalizer.Instance[errorMessageFormat, errorMessageArgs];
 
         return textLocalizer[errorMessageFormat, errorMessageArgs];

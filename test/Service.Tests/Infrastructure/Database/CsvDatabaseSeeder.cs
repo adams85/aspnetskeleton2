@@ -58,7 +58,7 @@ public class CsvDatabaseSeeder : IDatabaseSeeder
             options.CultureInfo = context.Configuration.CultureInfo;
 
             // consider "NULL" string as NULL value
-            if (!type.IsValueType || Nullable.GetUnderlyingType(type) != null)
+            if (!type.IsValueType || Nullable.GetUnderlyingType(type) is not null)
                 options.NullValues.Add("NULL");
         }
     }
@@ -77,7 +77,7 @@ public class CsvDatabaseSeeder : IDatabaseSeeder
 
                     var entities = csv.GetRecords(file.EntityType);
 
-                    dbContext.AddRange(entities!);
+                    dbContext.AddRange(entities);
                 }
             }
 

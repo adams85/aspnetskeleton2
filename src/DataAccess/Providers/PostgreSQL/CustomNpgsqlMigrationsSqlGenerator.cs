@@ -15,7 +15,7 @@ internal sealed class CustomNpgsqlMigrationsSqlGenerator : NpgsqlMigrationsSqlGe
     public CustomNpgsqlMigrationsSqlGenerator(IDbProperties dbProperties, MigrationsSqlGeneratorDependencies dependencies, INpgsqlSingletonOptions npgsqlOptions)
         : base(dependencies, npgsqlOptions)
     {
-        if (dbProperties == null)
+        if (dbProperties is null)
             throw new ArgumentNullException(nameof(dbProperties));
 
         _characterEncoding = dbProperties.CharacterEncoding;
@@ -27,10 +27,10 @@ internal sealed class CustomNpgsqlMigrationsSqlGenerator : NpgsqlMigrationsSqlGe
         IModel? model,
         MigrationCommandListBuilder builder)
     {
-        if (operation == null)
+        if (operation is null)
             throw new ArgumentNullException(nameof(operation));
 
-        if (builder == null)
+        if (builder is null)
             throw new ArgumentNullException(nameof(builder));
 
         builder

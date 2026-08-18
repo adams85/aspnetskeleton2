@@ -14,7 +14,7 @@ internal abstract class QueryCachingBuilder
     }
 
     public Type QueryInterceptorType { get; }
-    public Dictionary<Type, Type> Invalidators { get; } = new Dictionary<Type, Type>();
+    public Dictionary<Type, Type> Invalidators { get; } = new();
 
     public abstract QueryCachingOptions BuildOptions();
 }
@@ -27,7 +27,7 @@ internal sealed class QueryCachingBuilder<TQuery> : QueryCachingBuilder
     private CacheItemPriority? _priority;
 
     private Func<TQuery, bool>? _filter;
-    private readonly List<Func<TQuery, string>> _scopeSelectors = new List<Func<TQuery, string>>();
+    private readonly List<Func<TQuery, string>> _scopeSelectors = new();
     private QueryErrorHandler? _errorHandler;
 
     public QueryCachingBuilder(Type interceptorType) : base(interceptorType) { }
@@ -117,7 +117,7 @@ internal sealed class QueryCachingBuilder<TQuery> : QueryCachingBuilder
 
         public override bool TryHandleError(QueryContext context, Exception exception, out object? result)
         {
-            if (ErrorHandler == null)
+            if (ErrorHandler is null)
             {
                 result = default;
                 return false;

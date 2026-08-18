@@ -50,7 +50,7 @@ internal sealed class QueryPerformanceLoggerInterceptor : IQueryInterceptor
         static string GetOperationStatus(Exception? ex) => ex switch
         {
             null => "success",
-            OperationCanceledException _ => "cancellation",
+            OperationCanceledException => "cancellation",
             ServiceErrorException serviceErrorEx => $"failure ({serviceErrorEx.ErrorCode})",
             _ => "unexpected error"
         };

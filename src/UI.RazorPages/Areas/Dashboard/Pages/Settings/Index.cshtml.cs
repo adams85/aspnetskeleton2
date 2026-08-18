@@ -43,10 +43,9 @@ public class IndexModel : ListPageModel<IndexModel.PageDescriptorClass, ListSett
 
         ViewData[nameof(IndexModel)] = this;
 
-        return
-            HttpContext.Request.IsAjaxRequest() ?
-            PartialWithCurrentViewData(DisplayPartialName, query) :
-            Page();
+        return HttpContext.Request.IsAjaxRequest()
+            ? PartialWithCurrentViewData(DisplayPartialName, query)
+            : Page();
     }
 
     public static class ColumnBindings

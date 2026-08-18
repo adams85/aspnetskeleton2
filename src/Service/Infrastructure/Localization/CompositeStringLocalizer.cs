@@ -13,7 +13,7 @@ namespace WebApp.Service.Infrastructure.Localization;
 
 public sealed class CompositeStringLocalizer : IExtendedStringLocalizer
 {
-    private readonly IReadOnlyList<IStringLocalizer> _stringLocalizers;
+    private readonly IStringLocalizer[] _stringLocalizers;
     private readonly CultureInfo? _culture;
     private readonly ILogger _logger;
 
@@ -29,7 +29,7 @@ public sealed class CompositeStringLocalizer : IExtendedStringLocalizer
         : this(baseNameLocationPairs.Select(pair => stringLocalizerFactory.Create(pair.BaseName, pair.Location)), null, logger) { }
 
     public CompositeStringLocalizer(IStringLocalizerFactory stringLocalizerFactory, IEnumerable<Type> types, ILogger<CompositeStringLocalizer>? logger = null)
-        : this(types.Select(type => stringLocalizerFactory.Create(type)), null, logger) { }
+        : this(types.Select(stringLocalizerFactory.Create), null, logger) { }
 
     private CultureInfo CurrentCulture => _culture ?? CultureInfo.CurrentUICulture;
 
@@ -72,15 +72,14 @@ public sealed class CompositeStringLocalizer : IExtendedStringLocalizer
     {
         var searchedLocations = new List<string>();
 
-        for (int i = 0, n = _stringLocalizers.Count; i < n; i++)
+        for (var i = 0; i < _stringLocalizers.Length; i++)
         {
             var stringLocalizer = _stringLocalizers[i];
-            var (searchedLocationLocal, valueLocal, translationFound) =
-                stringLocalizer is IExtendedStringLocalizer extendedStringLocalizer ?
-                getValueExtended(extendedStringLocalizer, state) :
-                getValue(stringLocalizer, state);
+            var (searchedLocationLocal, valueLocal, translationFound) = stringLocalizer is IExtendedStringLocalizer extendedStringLocalizer
+                ? getValueExtended(extendedStringLocalizer, state)
+                : getValue(stringLocalizer, state);
 
-            if (searchedLocationLocal != null)
+            if (searchedLocationLocal is not null)
                 searchedLocations.Add(searchedLocationLocal);
 
             if (translationFound)

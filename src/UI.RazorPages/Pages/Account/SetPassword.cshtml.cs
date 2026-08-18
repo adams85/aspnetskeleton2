@@ -25,19 +25,18 @@ public class SetPasswordModel : CardPageModel<SetPasswordModel.PageDescriptorCla
         _t = stringLocalizer ?? (IStringLocalizer)NullStringLocalizer.Instance;
     }
 
-    private Models.Account.SetPasswordModel? _model;
     [BindProperty]
     public Models.Account.SetPasswordModel Model
     {
-        get => _model ??= new Models.Account.SetPasswordModel();
-        set => _model = value;
+        get => field ??= new Models.Account.SetPasswordModel();
+        set;
     }
 
     public bool? Success { get; private set; }
 
     public void OnGet(string s)
     {
-        if (s != null)
+        if (s is not null)
             Success = Convert.ToBoolean(int.Parse(s, CultureInfo.InvariantCulture));
     }
 

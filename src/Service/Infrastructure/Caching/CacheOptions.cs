@@ -7,7 +7,7 @@ public class CacheOptions
 {
     public static readonly CacheItemPriority DefaultPriority = CacheItemPriority.Normal;
 
-    public static readonly CacheOptions Default = new CacheOptions();
+    public static readonly CacheOptions Default = new();
 
     public TimeSpan? AbsoluteExpiration { get; set; }
     public TimeSpan? SlidingExpiration { get; set; }

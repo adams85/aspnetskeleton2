@@ -31,12 +31,12 @@ public abstract record class ServiceErrorArgData
 {
     public static ServiceErrorArgData From(object value)
     {
-        var key = (ServiceErrorArgData)Activator.CreateInstance(typeof(ServiceErrorArgData<>).MakeGenericType(value.GetType()))!;
+        var key = (ServiceErrorArgData)Activator.CreateInstance(typeof(ServiceErrorArgData<>).MakeGenericType(value.GetType()));
         key.ValueInternal = value;
         return key;
     }
 
-    public static ServiceErrorArgData<T> From<T>([DisallowNull] T value) => new ServiceErrorArgData<T> { Value = value };
+    public static ServiceErrorArgData<T> From<T>([DisallowNull] T value) => new() { Value = value };
 
     protected abstract object ValueInternal { get; set; }
 

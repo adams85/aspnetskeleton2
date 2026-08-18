@@ -37,7 +37,7 @@ public class TestContextBuilder
     private Action<IConfiguration, ServiceCollection>? _onConfigured;
     private Action<ILoggingBuilder>? _configureLogging;
 
-    public ServiceCollection Services { get; } = new ServiceCollection();
+    public ServiceCollection Services { get; } = new();
 
     public TestContextBuilder AddServices(Action<ServiceCollection> configure)
     {
@@ -113,13 +113,13 @@ public class TestContextBuilder
     /// </summary>
     public async Task<TestContext> BuildAsync(CancellationToken cancellationToken = default)
     {
-        if (_onConfiguring != null || _configurationValues != null)
+        if (_onConfiguring is not null || _configurationValues is not null)
         {
             var configurationBuilder = new ConfigurationBuilder();
 
             _onConfiguring?.Invoke(configurationBuilder);
 
-            if (_configurationValues != null)
+            if (_configurationValues is not null)
                 configurationBuilder.AddInMemoryCollection(_configurationValues);
 
             var configuration = configurationBuilder.Build();
@@ -130,7 +130,7 @@ public class TestContextBuilder
             _onConfigured?.Invoke(configuration, Services);
         }
 
-        if (_configureLogging != null)
+        if (_configureLogging is not null)
             Services.AddLogging(_configureLogging);
 
         var services = Services.BuildServiceProvider();

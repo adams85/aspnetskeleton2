@@ -16,17 +16,16 @@ public class ExtendedValidationAttributeAdapter<TAttribute> : AttributeAdapterBa
     public ExtendedValidationAttributeAdapter(TAttribute attribute, IStringLocalizer? stringLocalizer)
         : base(attribute, stringLocalizer)
     {
-        _textLocalizer =
-            stringLocalizer != null ?
-            stringLocalizer as ITextLocalizer ?? new TextLocalizerAdapter(stringLocalizer) :
-            NullTextLocalizer.Instance;
+        _textLocalizer = stringLocalizer is not null
+            ? stringLocalizer as ITextLocalizer ?? new TextLocalizerAdapter(stringLocalizer)
+            : NullTextLocalizer.Instance;
     }
 
     public override void AddValidation(ClientModelValidationContext context) { }
 
     public sealed override string GetErrorMessage(ModelValidationContextBase validationContext)
     {
-        if (validationContext == null)
+        if (validationContext is null)
             throw new ArgumentNullException(nameof(validationContext));
 
         return Attribute.FormatErrorMessage(

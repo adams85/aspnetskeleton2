@@ -11,7 +11,7 @@ public sealed class NullThemeManager : IThemeManager
 {
     public NullThemeManager(ISettingsProvider settingsProvider)
     {
-        if (settingsProvider == null)
+        if (settingsProvider is null)
             throw new ArgumentNullException(nameof(settingsProvider));
 
         AvailableThemes = settingsProvider.AvailableThemes(out var defaultTheme);

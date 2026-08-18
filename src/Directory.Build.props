@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019#use-case-multi-level-merging -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
@@ -8,8 +8,6 @@
     <Copyright>© 2026 Adam Simon</Copyright>
     <Description>A foundation for building robust ASP.NET Core applications.</Description>
     <InformationalVersion>2.0</InformationalVersion>
-
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <!-- Architecture -->

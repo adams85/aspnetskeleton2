@@ -86,7 +86,7 @@ internal sealed class DbSettingsSource : ISettingsSource, IDisposable
     {
         lock (_gate)
         {
-            if (_lastEvent != null && _lastEvent.Version >= @event.Version)
+            if (_lastEvent is not null && _lastEvent.Version >= @event.Version)
                 return false;
 
             _lastEvent = @event;

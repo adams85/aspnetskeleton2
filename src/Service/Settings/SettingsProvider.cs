@@ -97,7 +97,7 @@ internal sealed class SettingsProvider : ISettingsProvider, IDisposable
 
     private bool RefreshCore(SettingsChangedEvent @event)
     {
-        if (_lastEvent != null && _lastEvent.Version >= @event.Version)
+        if (_lastEvent is not null && _lastEvent.Version >= @event.Version)
             return false;
 
         _lastEvent = new SettingsChangedEvent
@@ -115,7 +115,7 @@ internal sealed class SettingsProvider : ISettingsProvider, IDisposable
 
         lock (_gate)
         {
-            if (@event == null)
+            if (@event is null)
             {
                 _resetting = true;
                 _lastEvent = null;

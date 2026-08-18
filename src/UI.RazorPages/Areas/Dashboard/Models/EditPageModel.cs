@@ -15,12 +15,11 @@ public abstract class EditPageModel<TPageDescriptor> : CardPageModel<TPageDescri
     public abstract string? EditorTemplateName { get; }
     public bool IsNewItem => PageDescriptor.CreatesItem;
 
-    private string? _returnUrl;
     [AllowNull]
     public string ReturnUrl
     {
-        get => EnsureReturnUrl(_returnUrl);
-        protected set => _returnUrl = value;
+        get => EnsureReturnUrl(field);
+        protected set;
     }
 
     protected abstract string DefaultReturnUrl { get; }

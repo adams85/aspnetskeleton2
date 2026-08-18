@@ -41,36 +41,32 @@ public abstract class DataTableColumnModel
 
     public string? FilterCellCssClasses { get; init; }
 
-    private Func<DataTableColumnModel, IHtmlContent>? _filterCellTemplate;
     public Func<DataTableColumnModel, IHtmlContent>? FilterCellTemplate
     {
-        get => _filterCellTemplate;
-        init => (_filterCellTemplate, _renderFilterCell) = (value, null);
+        get;
+        init => (field, _renderFilterCell) = (value, null);
     }
 
     private Action<IDataTableHelpers>? _renderFilterCell;
-    public Action<IDataTableHelpers> RenderFilterCell => _renderFilterCell ??=
-        FilterCellTemplate != null ?
-        helpers => helpers.Write(FilterCellTemplate!(this)) :
-        RenderFilterCellDefault;
+    public Action<IDataTableHelpers> RenderFilterCell => _renderFilterCell ??= FilterCellTemplate is not null
+        ? helpers => helpers.Write(FilterCellTemplate(this))
+        : RenderFilterCellDefault;
 
     protected virtual void RenderFilterCellDefault(IDataTableHelpers helpers) =>
-        helpers.ColumnFilterCell(this, Filter != null ? Filter.RenderDefault : CachedDelegates.Noop<IDataTableHelpers>.Action);
+        helpers.ColumnFilterCell(this, Filter is not null ? Filter.RenderDefault : CachedDelegates.Noop<IDataTableHelpers>.Action);
 
     public string? ContentCellCssClasses { get; init; }
 
-    private Func<(object Item, DataTableColumnModel ColumnModel), IHtmlContent>? _contentCellTemplate;
     public Func<(object Item, DataTableColumnModel ColumnModel), IHtmlContent>? ContentCellTemplate
     {
-        get => _contentCellTemplate;
-        init => (_contentCellTemplate, _renderContentCell) = (value, null);
+        get;
+        init => (field, _renderContentCell) = (value, null);
     }
 
     private Action<IDataTableHelpers, object>? _renderContentCell;
-    public Action<IDataTableHelpers, object> RenderContentCell => _renderContentCell ??=
-        ContentCellTemplate != null ?
-        (helpers, item) => helpers.Write(ContentCellTemplate!((item, this))) :
-        RenderContentCellDefault;
+    public Action<IDataTableHelpers, object> RenderContentCell => _renderContentCell ??= ContentCellTemplate is not null
+        ? (helpers, item) => helpers.Write(ContentCellTemplate((item, this)))
+        : RenderContentCellDefault;
 
     protected abstract void RenderContentCellDefault(IDataTableHelpers helpers, object item);
 

@@ -29,5 +29,5 @@ public sealed class ThemeProvider : IThemeProvider
             .ToArray());
 
     public PathString GetThemePath(PathString basePath, string? name = null) =>
-        basePath + new PathString(name != null ? ThemesDirPath + "/" + name : ThemesDirPath);
+        basePath + new PathString(name is not null ? ThemesDirPath + "/" + name : ThemesDirPath);
 }

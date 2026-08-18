@@ -14,8 +14,8 @@ using MailKit.Security;
 using MimeKit;
 using WebApp.Core.Infrastructure;
 
-#pragma warning disable CS0672 // Member overrides obsolete member
-#pragma warning disable SYSLIB0058 // Type or member is obsolete
+#pragma warning disable CS0672
+#pragma warning disable SYSLIB0058
 
 namespace WebApp.Service.Mailing;
 
@@ -70,7 +70,7 @@ internal sealed class PickupDirMailClient : MailTransport
 
     public override int? SslKeyExchangeStrength => null;
 
-    private static void AddUnique(IList<MailboxAddress> recipients, HashSet<string> unique, IEnumerable<MailboxAddress> mailboxes)
+    private static void AddUnique(List<MailboxAddress> recipients, HashSet<string> unique, IEnumerable<MailboxAddress> mailboxes)
     {
         foreach (var mailbox in mailboxes)
         {
@@ -81,24 +81,24 @@ internal sealed class PickupDirMailClient : MailTransport
 
     private static MailboxAddress? GetMessageSender(MimeMessage message)
     {
-        if (message.ResentSender != null)
+        if (message.ResentSender is not null)
             return message.ResentSender;
 
         if (message.ResentFrom.Count > 0)
             return message.ResentFrom.Mailboxes.FirstOrDefault();
 
-        if (message.Sender != null)
+        if (message.Sender is not null)
             return message.Sender;
 
         return message.From.Mailboxes.FirstOrDefault();
     }
 
-    private static IList<MailboxAddress> GetMessageRecipients(MimeMessage message)
+    private static List<MailboxAddress> GetMessageRecipients(MimeMessage message)
     {
         var unique = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var recipients = new List<MailboxAddress>();
 
-        if (message.ResentSender != null || message.ResentFrom.Count > 0)
+        if (message.ResentSender is not null || message.ResentFrom.Count > 0)
         {
             AddUnique(recipients, unique, message.ResentTo.Mailboxes);
             AddUnique(recipients, unique, message.ResentCc.Mailboxes);
@@ -114,7 +114,7 @@ internal sealed class PickupDirMailClient : MailTransport
         return recipients;
     }
 
-    private async Task<string> WriteAsync(FormatOptions options, MimeMessage message, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
+    private async Task<string> WriteAsync(FormatOptions options, MimeMessage message, ITransferProgress? progress = null, CancellationToken cancellationToken = default)
     {
         var format = options.Clone();
         format.HiddenHeaders.Add(HeaderId.ContentLength);
@@ -137,7 +137,7 @@ internal sealed class PickupDirMailClient : MailTransport
             {
                 await message.WriteToAsync(format, fs, cancellationToken).ConfigureAwait(false);
 
-                if (progress != null)
+                if (progress is not null)
                 {
                     var numWritten = fs.Length;
                     progress.Report(numWritten, numWritten);
@@ -158,13 +158,13 @@ internal sealed class PickupDirMailClient : MailTransport
         var recipients = GetMessageRecipients(message);
         var sender = GetMessageSender(message);
 
-        if (sender == null)
+        if (sender is null)
             throw new InvalidOperationException("No sender has been specified.");
 
         if (recipients.Count == 0)
             throw new InvalidOperationException("No recipients have been specified.");
 
-        return WriteAsync(options, message, cancellationToken, progress);
+        return WriteAsync(options, message, progress, cancellationToken);
     }
 
     public override string Send(FormatOptions options, MimeMessage message, MailboxAddress sender, IEnumerable<MailboxAddress> recipients, CancellationToken cancellationToken = default, ITransferProgress? progress = null)
@@ -206,7 +206,7 @@ internal sealed class PickupDirMailClient : MailTransport
 
         message.To.AddRange(rcpts);
 
-        return WriteAsync(options, message, cancellationToken, progress);
+        return WriteAsync(options, message, progress, cancellationToken);
     }
 
     public override void Connect(string host, int port = 0, SecureSocketOptions options = SecureSocketOptions.Auto, CancellationToken cancellationToken = default) { }

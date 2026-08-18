@@ -21,7 +21,7 @@ public abstract class TemplateBase
     {
         get
         {
-            if ((this.generationEnvironmentField == null))
+            if ((this.generationEnvironmentField is null))
             {
                 this.generationEnvironmentField = new global::System.Text.StringBuilder();
             }
@@ -39,7 +39,7 @@ public abstract class TemplateBase
     {
         get
         {
-            if ((this.errorsField == null))
+            if ((this.errorsField is null))
             {
                 this.errorsField = new global::System.CodeDom.Compiler.CompilerErrorCollection();
             }
@@ -53,7 +53,7 @@ public abstract class TemplateBase
     {
         get
         {
-            if ((this.indentLengthsField == null))
+            if ((this.indentLengthsField is null))
             {
                 this.indentLengthsField = new global::System.Collections.Generic.List<int>();
             }
@@ -175,7 +175,7 @@ public abstract class TemplateBase
     /// </summary>
     public void PushIndent(string indent)
     {
-        if ((indent == null))
+        if ((indent is null))
         {
             throw new global::System.ArgumentNullException("indent");
         }
@@ -227,7 +227,7 @@ public abstract class TemplateBase
             }
             set
             {
-                if ((value != null))
+                if ((value is not null))
                 {
                     this.formatProviderField = value;
                 }
@@ -238,14 +238,14 @@ public abstract class TemplateBase
         /// </summary>
         public string ToStringWithCulture(object objectToConvert)
         {
-            if ((objectToConvert == null))
+            if ((objectToConvert is null))
             {
                 throw new global::System.ArgumentNullException("objectToConvert");
             }
             System.Type t = objectToConvert.GetType();
             System.Reflection.MethodInfo method = t.GetMethod("ToString", new System.Type[] {
                         typeof(System.IFormatProvider)});
-            if ((method == null))
+            if ((method is null))
             {
                 return objectToConvert.ToString();
             }

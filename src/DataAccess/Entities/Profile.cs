@@ -28,7 +28,7 @@ public class Profile
 
             builder
                 .HasOne(e => e.User)
-                .WithOne(e => e.Profile!)
+                .WithOne(e => e.Profile)
                 .HasForeignKey<Profile>(e => e.UserId);
         }
     }

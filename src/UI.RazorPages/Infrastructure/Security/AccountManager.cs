@@ -33,7 +33,7 @@ public sealed class AccountManager : IAccountManager
     {
         var result = await _queryDispatcher.DispatchAsync(new GetCachedUserInfoQuery { UserName = userName }, cancellationToken);
 
-        if (result == null)
+        if (result is null)
             return null;
 
         if (registerActivity)
@@ -57,7 +57,7 @@ public sealed class AccountManager : IAccountManager
             Password = credentials.Password,
         }, cancellationToken);
 
-        if (authResult.UserId != null)
+        if (authResult.UserId is not null)
         {
             var authSuccess = authResult.Status == AuthenticateUserStatus.Successful;
 

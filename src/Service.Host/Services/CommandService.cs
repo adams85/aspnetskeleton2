@@ -15,7 +15,7 @@ public sealed class CommandService : ICommandService
 {
     private static readonly string s_serviceContractAssemblyName = typeof(ICommand).Assembly.GetName().Name!;
 
-    private static readonly UnboundedChannelOptions s_eventChannelOptions = new UnboundedChannelOptions
+    private static readonly UnboundedChannelOptions s_eventChannelOptions = new()
     {
         SingleReader = true,
         SingleWriter = false,
@@ -30,7 +30,7 @@ public sealed class CommandService : ICommandService
 
     private async IAsyncEnumerable<CommandResponse> InvokeCore(CommandRequest request, bool relayEvents, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        if (request.CommandTypeName == null)
+        if (request.CommandTypeName is null)
             throw new ArgumentException("Command type is not specified.", nameof(request));
 
         var commandType = Type.GetType(request.CommandTypeName + "," + s_serviceContractAssemblyName, throwOnError: true)!;
@@ -38,9 +38,8 @@ public sealed class CommandService : ICommandService
         if (!commandType.HasInterface(typeof(ICommand)))
             throw new ArgumentException("Command type is invalid.", nameof(request));
 
-        var command = (ICommand?)ServiceHostContractSerializer.Default.Deserialize(request.SerializedCommand ?? Array.Empty<byte>(), commandType);
-        if (command == null)
-            throw new ArgumentException("Command is not specified.", nameof(request));
+        var command = (ICommand?)ServiceHostContractSerializer.Default.Deserialize(request.SerializedCommand ?? Array.Empty<byte>(), commandType)
+            ?? throw new ArgumentException("Command is not specified.", nameof(request));
 
         ServiceErrorException? errorException = null;
 
@@ -48,13 +47,15 @@ public sealed class CommandService : ICommandService
         Action<ICommand, object>? handleKeyGenerated;
 
         var keyGeneratorCommand = command as IKeyGeneratorCommand;
-        if (keyGeneratorCommand != null)
+        if (keyGeneratorCommand is not null)
         {
             handleKeyGenerated = (_, k) => key = k;
             keyGeneratorCommand.OnKeyGenerated = handleKeyGenerated;
         }
         else
+        {
             handleKeyGenerated = null;
+        }
 
         try
         {
@@ -73,28 +74,34 @@ public sealed class CommandService : ICommandService
                 });
 
                 while (await eventChannel.Reader.WaitToReadAsync(cancellationToken))
+                {
                     while (eventChannel.Reader.TryRead(out var @event))
+                    {
                         yield return new CommandResponse.Notification
                         {
                             Event = new EventData { Value = @event }
                         };
+                    }
+                }
             }
             else
+            {
                 dispatchTask = _commandDispatcher.DispatchAsync(command, cancellationToken);
+            }
 
             try { await dispatchTask; }
             catch (ServiceErrorException ex) { errorException = ex; }
         }
         finally
         {
-            if (keyGeneratorCommand != null)
+            if (keyGeneratorCommand is not null)
                 keyGeneratorCommand.OnKeyGenerated -= handleKeyGenerated;
         }
 
-        if (errorException != null)
+        if (errorException is not null)
             yield return new CommandResponse.Failure { Error = errorException.ToData() };
         else
-            yield return new CommandResponse.Success { Key = key != null ? KeyData.From(key) : null };
+            yield return new CommandResponse.Success { Key = key is not null ? KeyData.From(key) : null };
     }
 
     public async ValueTask<CommandResponse> Invoke(CommandRequest request, CallContext context = default)

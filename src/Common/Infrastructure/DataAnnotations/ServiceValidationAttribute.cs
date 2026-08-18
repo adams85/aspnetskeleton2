@@ -11,7 +11,7 @@ namespace System.ComponentModel.DataAnnotations;
 /// </summary>
 public abstract class ServiceValidationAttribute : ExtendedValidationAttribute
 {
-    private static readonly ConcurrentDictionary<Type, ValidatorHelper> s_validatorHelperCache = new ConcurrentDictionary<Type, ValidatorHelper>();
+    private static readonly ConcurrentDictionary<Type, ValidatorHelper> s_validatorHelperCache = new();
 
     private readonly ValidatorHelper _validatorHelper;
 
@@ -28,7 +28,7 @@ public abstract class ServiceValidationAttribute : ExtendedValidationAttribute
     {
         var validator = serviceProvider.GetService(_validatorHelper.ServiceType);
 
-        if (validator == null && !IgnoreIfServiceUnavailable)
+        if (validator is null && !IgnoreIfServiceUnavailable)
             throw new InvalidOperationException($"Validator service {_validatorHelper.ServiceType} has not been registered.");
 
         return validator;
@@ -36,9 +36,9 @@ public abstract class ServiceValidationAttribute : ExtendedValidationAttribute
 
     public override string FormatErrorMessage(string localizedName, ITextLocalizer textLocalizer, IServiceProvider? serviceProvider = null)
     {
-        var validator = serviceProvider != null ? GetValidator(serviceProvider) : null;
+        var validator = serviceProvider is not null ? GetValidator(serviceProvider) : null;
 
-        if (validator == null)
+        if (validator is null)
             return FormatErrorMessageFallback(localizedName, textLocalizer, serviceProvider);
 
         return _validatorHelper.FormatErrorMessage(validator, localizedName, textLocalizer, this);
@@ -51,7 +51,7 @@ public abstract class ServiceValidationAttribute : ExtendedValidationAttribute
     {
         var validator = GetValidator(validationContext);
 
-        if (validator == null)
+        if (validator is null)
             return IsValidFallback(value, validationContext);
 
         return _validatorHelper.IsValid(validator, value, validationContext, this);

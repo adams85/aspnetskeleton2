@@ -27,12 +27,11 @@ public class LoginModel : CardPageModel<LoginModel.PageDescriptorClass>
         _t = stringLocalizer ?? (IStringLocalizer)NullStringLocalizer.Instance;
     }
 
-    private Models.Account.LoginModel? _model;
     [BindProperty]
     public Models.Account.LoginModel Model
     {
-        get => _model ??= new Models.Account.LoginModel();
-        set => _model = value;
+        get => field ??= new Models.Account.LoginModel();
+        set;
     }
 
     public string? ReturnUrl { get; private set; }
@@ -46,7 +45,7 @@ public class LoginModel : CardPageModel<LoginModel.PageDescriptorClass>
 
         var claims = new Claim[]
         {
-            new Claim(ClaimTypes.Name, Model.UserName)
+            new(ClaimTypes.Name, Model.UserName)
         };
 
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

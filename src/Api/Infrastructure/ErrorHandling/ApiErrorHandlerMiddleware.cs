@@ -16,7 +16,7 @@ public sealed class ApiErrorHandlerMiddleware
     private static readonly Action<ILogger, Exception> s_logUnhandledException =
         LoggerMessage.Define(LogLevel.Error, new EventId(1, "UnhandledException"), "An unhandled exception has occurred while executing the request.");
 
-    private static readonly ActionDescriptor s_emptyActionDescriptor = new ActionDescriptor();
+    private static readonly ActionDescriptor s_emptyActionDescriptor = new();
 
     private readonly RequestDelegate _next;
     private readonly ILogger _logger;
@@ -46,7 +46,7 @@ public sealed class ApiErrorHandlerMiddleware
         try { await nextTask; }
         catch (Exception exception) { edi = ExceptionDispatchInfo.Capture(exception); }
 
-        if (edi != null)
+        if (edi is not null)
             await HandleExceptionAsync(context, edi);
     }
 

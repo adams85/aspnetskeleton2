@@ -38,7 +38,7 @@ public class TokenController : Controller
     [AllowAnonymous]
     public new async Task<IActionResult> Request([FromBody] NetworkCredential model)
     {
-        if (model == null)
+        if (model is null)
             return BadRequest();
 
         var success = await _securityService.TryIssueJwtTokenAsync(model, HttpContext);

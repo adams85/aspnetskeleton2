@@ -22,7 +22,7 @@ public class VerifyModel : CardPageModel<VerifyModel.PageDescriptorClass>
 
     public async Task OnGet([FromQuery] string u, [FromQuery] string v)
     {
-        if (u != null && v != null)
+        if (u is not null && v is not null)
             Success = await _accountManager.VerifyUserAsync(u, v, HttpContext.RequestAborted);
         else
             Success = null;

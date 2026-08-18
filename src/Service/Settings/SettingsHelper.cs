@@ -49,7 +49,7 @@ internal static class SettingsHelper
     private static LocalizedString? GetDescriptionTranslation(EnumMetadata<SettingEnum> metadata, IStringLocalizer settingEnumStringLocalizer)
     {
         var description = metadata.Attributes.OfType<DescriptionAttribute>().FirstOrDefault()?.Description;
-        return description != null ? settingEnumStringLocalizer[description] : null;
+        return description is not null ? settingEnumStringLocalizer[description] : null;
     }
 
     public static Func<string, string?> BuildNameToDescriptionMapper(IStringLocalizer settingEnumStringLocalizer)
@@ -57,7 +57,7 @@ internal static class SettingsHelper
         return name =>
         {
             var metadata = EnumMetadata.For<SettingEnum>(name);
-            return metadata != null ? GetDescriptionTranslation(metadata, settingEnumStringLocalizer)?.Value : null;
+            return metadata is not null ? GetDescriptionTranslation(metadata, settingEnumStringLocalizer)?.Value : null;
         };
     }
 
@@ -68,7 +68,7 @@ internal static class SettingsHelper
 
         var mapping = EnumMetadata<SettingEnum>.Members.Values
             .Select(metadata => (metadata.Name, Translation: GetDescriptionTranslation(metadata, settingEnumStringLocalizer)))
-            .Where(item => item.Translation != null)
+            .Where(item => item.Translation is not null)
             .Aggregate(noTranslationValue, (expression, item) =>
             {
                 // we need to box the translation string to force it to be included as an SQL parameter
@@ -91,7 +91,7 @@ internal static class SettingsHelper
 
     private static readonly Func<string, string?> s_normalizeTheme = CachedDelegates.Identity<string>.Func;
 
-    private static readonly EmailAddressAttribute s_emailAddressValidator = new EmailAddressAttribute();
+    private static readonly EmailAddressAttribute s_emailAddressValidator = new();
 
     public static bool Validate(this Setting setting, ref string? value)
     {
@@ -101,7 +101,7 @@ internal static class SettingsHelper
             {
                 case SettingEnum.AdminMailAddress:
                 case SettingEnum.NoReplyMailAddress:
-                    return value != null && s_emailAddressValidator.IsValid(value);
+                    return value is not null && s_emailAddressValidator.IsValid(value);
 
                 case SettingEnum.AvailableCultures:
                     if (!StringHelper.TryNormalizeCommaSeparatedList(value, out var items, s_normalizeCulture, StringSplitOptions.RemoveEmptyEntries) || items.Count == 0)
@@ -127,8 +127,8 @@ internal static class SettingsHelper
                     var minValue = int.TryParse(setting.MinValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue) ? intValue : MaxPageSizeMinValue;
                     var maxValue = int.TryParse(setting.MaxValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out intValue) ? intValue : MaxPageSizeMaxValue;
 
-                    return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out intValue) &&
-                        minValue <= intValue && intValue <= maxValue;
+                    return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out intValue)
+                        && minValue <= intValue && intValue <= maxValue;
             }
         }
 

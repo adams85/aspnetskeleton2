@@ -29,7 +29,7 @@ public class UsersController : Controller
     [HttpGet]
     public async Task<ActionResult<ListResult<UserData>>> List([FromQuery] ListUsersQuery model)
     {
-        if (model == null)
+        if (model is null)
             return BadRequest();
 
         var result = await _queryDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
@@ -54,7 +54,7 @@ public class UsersController : Controller
     [HttpPost]
     public async Task<IActionResult> Approve([FromBody] ApproveUserCommand model)
     {
-        if (model == null)
+        if (model is null)
             return BadRequest();
 
         await _commandDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
@@ -65,7 +65,7 @@ public class UsersController : Controller
     [HttpPost]
     public async Task<IActionResult> AddUsersToRoles([FromBody] AddUsersToRolesCommand model)
     {
-        if (model == null)
+        if (model is null)
             return BadRequest();
 
         await _commandDispatcher.DispatchAsync(model, HttpContext.RequestAborted);
@@ -76,7 +76,7 @@ public class UsersController : Controller
     [HttpPost]
     public async Task<IActionResult> RemoveUsersFromRolesCommand([FromBody] RemoveUsersFromRolesCommand model)
     {
-        if (model == null)
+        if (model is null)
             return BadRequest();
 
         await _commandDispatcher.DispatchAsync(model, HttpContext.RequestAborted);

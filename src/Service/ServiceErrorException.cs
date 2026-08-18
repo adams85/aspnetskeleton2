@@ -7,7 +7,7 @@ namespace WebApp.Service;
 public partial class ServiceErrorException : ApplicationException
 {
     internal static ServiceErrorException From(ServiceErrorData data) =>
-        new ServiceErrorException(data.ErrorCode, data.Args != null ? Array.ConvertAll(data.Args, arg => arg.Value) : null);
+        new(data.ErrorCode, data.Args is not null ? Array.ConvertAll(data.Args, arg => arg.Value) : null);
 
     internal ServiceErrorException(ServiceErrorCode errorCode)
         : this(errorCode, null) { }
@@ -25,19 +25,19 @@ public partial class ServiceErrorException : ApplicationException
 
     public string GetErrorDescription()
     {
-        var name = Enum.GetName(typeof(ServiceErrorCode), ErrorCode);
-        if (name == null)
+        var name = Enum.GetName(ErrorCode);
+        if (name is null)
             return GetDefaultErrorDescription();
 
         var field = typeof(ServiceErrorCode).GetField(name);
 
         var description = field!.GetCustomAttribute<DescriptionAttribute>()?.Description;
-        return description != null ? string.Format(description, Args) : GetDefaultErrorDescription();
+        return description is not null ? string.Format(description, Args) : GetDefaultErrorDescription();
     }
 
     public sealed override string Message => GetErrorDescription();
 
-    public ServiceErrorData ToData() => new ServiceErrorData
+    public ServiceErrorData ToData() => new()
     {
         ErrorCode = ErrorCode,
         Args = Array.ConvertAll(Args, ServiceErrorArgData.From)

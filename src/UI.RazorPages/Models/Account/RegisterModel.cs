@@ -29,13 +29,13 @@ public record class RegisterModel
     [DisplayName(LastNameDisplayName), Required, MaxLength(ModelConstants.UserLastNameMaxLength)]
     public string LastName { get; init; } = null!;
 
-    public CreateUserCommand ToCommand() => new CreateUserCommand()
+    public CreateUserCommand ToCommand() => new()
     {
-        UserName = this.UserName,
-        Email = this.UserName,
-        Password = this.Password,
-        FirstName = this.FirstName.Trim(),
-        LastName = this.LastName.Trim(),
+        UserName = UserName,
+        Email = UserName,
+        Password = Password,
+        FirstName = FirstName.Trim(),
+        LastName = LastName.Trim(),
         IsApproved = false,
         CreateProfile = true,
     };

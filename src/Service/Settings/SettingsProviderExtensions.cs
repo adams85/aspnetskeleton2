@@ -13,17 +13,16 @@ public static class SettingsProviderExtensions
     [return: MaybeNull]
     public static T Get<T>(this ISettingsProvider provider, SettingEnum setting)
     {
-        Type? type = typeof(T);
+        var type = typeof(T);
 
         if (type.IsValueType)
         {
-            type = Nullable.GetUnderlyingType(typeof(T));
-            if (type == null)
-                throw new ArgumentException("Type parameter must be a type accepting null values.", nameof(T));
+            type = Nullable.GetUnderlyingType(typeof(T))
+                ?? throw new ArgumentException("Type parameter must be a type accepting null values.", nameof(T));
         }
 
         var value = provider[setting.ToString()];
-        return value != null ? (T)Convert.ChangeType(value, type, CultureInfo.InvariantCulture) : default;
+        return value is not null ? (T)Convert.ChangeType(value, type, CultureInfo.InvariantCulture) : default;
     }
 
     public static string AdminMailAddress(this ISettingsProvider provider) =>

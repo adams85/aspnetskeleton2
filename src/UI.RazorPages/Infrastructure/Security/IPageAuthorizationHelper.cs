@@ -5,5 +5,5 @@ namespace WebApp.UI.Infrastructure.Security;
 
 public interface IPageAuthorizationHelper
 {
-    Task<bool> CheckAccessAllowedAsync(HttpContext httpContext, string pageRoute, string areaName);
+    Task<bool> CheckAccessAllowedAsync(HttpContext httpContext, string pageName, string areaName);
 }

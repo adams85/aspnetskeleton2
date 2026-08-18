@@ -15,7 +15,7 @@ public sealed class QueryService : IQueryService
 {
     private static readonly string s_serviceContractAssemblyName = typeof(IQuery).Assembly.GetName().Name!;
 
-    private static readonly UnboundedChannelOptions s_eventChannelOptions = new UnboundedChannelOptions
+    private static readonly UnboundedChannelOptions s_eventChannelOptions = new()
     {
         SingleReader = true,
         SingleWriter = false,
@@ -30,7 +30,7 @@ public sealed class QueryService : IQueryService
 
     private async IAsyncEnumerable<QueryResponse> InvokeCore(QueryRequest request, bool relayEvents, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        if (request.QueryTypeName == null)
+        if (request.QueryTypeName is null)
             throw new ArgumentException("Query type is not specified.", nameof(request));
 
         var queryType = Type.GetType(request.QueryTypeName + "," + s_serviceContractAssemblyName, throwOnError: true)!;
@@ -38,9 +38,8 @@ public sealed class QueryService : IQueryService
         if (!queryType.HasClosedInterface(typeof(IQuery<>)))
             throw new ArgumentException("Query type is invalid.", nameof(request));
 
-        var query = (IQuery?)ServiceHostContractSerializer.Default.Deserialize(request.SerializedQuery ?? Array.Empty<byte>(), queryType);
-        if (query == null)
-            throw new ArgumentException("Query is not specified.", nameof(request));
+        var query = (IQuery?)ServiceHostContractSerializer.Default.Deserialize(request.SerializedQuery ?? Array.Empty<byte>(), queryType)
+            ?? throw new ArgumentException("Query is not specified.", nameof(request));
 
         object? result = null;
         ServiceErrorException? errorException = null;
@@ -60,25 +59,34 @@ public sealed class QueryService : IQueryService
             });
 
             while (await eventChannel.Reader.WaitToReadAsync(cancellationToken))
+            {
                 while (eventChannel.Reader.TryRead(out var @event))
+                {
                     yield return new QueryResponse.Notification
                     {
                         Event = new EventData { Value = @event }
                     };
+                }
+            }
         }
         else
+        {
             dispatchTask = _queryDispatcher.DispatchAsync(query, cancellationToken);
+        }
 
         try { result = await dispatchTask; }
         catch (ServiceErrorException ex) { errorException = ex; }
 
-        if (errorException != null)
+        if (errorException is not null)
+        {
             yield return new QueryResponse.Failure { Error = errorException.ToData() };
+        }
         else
-            yield return
-                result != null ?
-                new QueryResponse.Success { SerializedResult = ServiceHostContractSerializer.Default.Serialize(result, result.GetType()) } :
-                new QueryResponse.Success { IsResultNull = true };
+        {
+            yield return result is not null
+                ? new QueryResponse.Success { SerializedResult = ServiceHostContractSerializer.Default.Serialize(result, result.GetType()) }
+                : new QueryResponse.Success { IsResultNull = true };
+        }
     }
 
     public async ValueTask<QueryResponse> Invoke(QueryRequest request, CallContext context = default)

@@ -20,8 +20,8 @@ public class CSharpRazorTextExtractor : CSharpTextExtractor
             if (!builder.Features.OfType<SectionDirectivePass>().Any())
                 SectionDirective.Register(builder);
 
-            IRazorTargetExtensionFeature? razorTargetExtensionFeature = builder.Features.OfType<IRazorTargetExtensionFeature>().FirstOrDefault();
-            if (razorTargetExtensionFeature == null || !razorTargetExtensionFeature.TargetExtensions.OfType<TemplateTargetExtension>().Any())
+            var razorTargetExtensionFeature = builder.Features.OfType<IRazorTargetExtensionFeature>().FirstOrDefault();
+            if (razorTargetExtensionFeature is null || !razorTargetExtensionFeature.TargetExtensions.OfType<TemplateTargetExtension>().Any())
             {
                 // required for successfully parsing documents containing Templated Razor Delegates
                 builder.AddTargetExtension(new TemplateTargetExtension
@@ -38,7 +38,7 @@ public class CSharpRazorTextExtractor : CSharpTextExtractor
         var codeDocument = _projectEngine.Process(sourceDocument, fileKind: null, importSources: null, tagHelpers: null);
         var parsedDocument = codeDocument.GetCSharpDocument();
         var errorDiagnostic = parsedDocument.Diagnostics.OfType<RazorDiagnostic>().FirstOrDefault(d => d.Severity == RazorDiagnosticSeverity.Error);
-        if (errorDiagnostic != null)
+        if (errorDiagnostic is not null)
             throw new ArgumentException($"Razor code has errors: {errorDiagnostic}.", nameof(content));
 
         return parsedDocument.GeneratedCode;

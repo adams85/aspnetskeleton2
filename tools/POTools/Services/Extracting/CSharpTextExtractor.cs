@@ -55,11 +55,11 @@ public class CSharpTextExtractor : ILocalizableTextExtractor
     {
         return root.DescendantNodes()
             .OfType<MemberDeclarationSyntax>()
-            .Where(node =>
-                node is EnumMemberDeclarationSyntax ||
-                node is BaseFieldDeclarationSyntax ||
-                node is BasePropertyDeclarationSyntax ||
-                node is BaseMethodDeclarationSyntax);
+            .Where(node => node is
+                EnumMemberDeclarationSyntax
+                or BaseFieldDeclarationSyntax
+                or BasePropertyDeclarationSyntax
+                or BaseMethodDeclarationSyntax);
     }
 
     private IEnumerable<LocalizableTextInfo> AnalyzeDecoratedDeclaration(MemberDeclarationSyntax declaration, CancellationToken cancellationToken)
@@ -67,16 +67,16 @@ public class CSharpTextExtractor : ILocalizableTextExtractor
         AttributeSyntax? attribute;
         IEnumerable<string> ids;
 
-        if (declaration is FieldDeclarationSyntax fieldDeclaration &&
-            fieldDeclaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.ConstKeyword)) &&
-            (attribute = GetAttribute(declaration.AttributeLists)) != null)
+        if (declaration is FieldDeclarationSyntax fieldDeclaration
+            && fieldDeclaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.ConstKeyword))
+            && (attribute = GetAttribute(declaration.AttributeLists)) is not null)
         {
             ids = fieldDeclaration.Declaration.Variables
                 .Select(declarator => declarator.Initializer?.Value.ResolveStringConstantExpression())
-                .Where(value => value != null)!;
+                .Where(value => value is not null)!;
         }
-        else if (declaration is EnumMemberDeclarationSyntax enumMemberDeclaration &&
-            (attribute = GetAttribute(declaration.AttributeLists)) != null)
+        else if (declaration is EnumMemberDeclarationSyntax enumMemberDeclaration
+            && (attribute = GetAttribute(declaration.AttributeLists)) is not null)
         {
             var enumDeclaration = declaration.Ancestors().OfType<EnumDeclarationSyntax>().First();
 
@@ -109,8 +109,8 @@ public class CSharpTextExtractor : ILocalizableTextExtractor
                 .SelectMany(attributeList => attributeList.Attributes)
                 .FirstOrDefault(attribute =>
                     // only simple (unqualified) type names are supported because accepting qualified type names would be too much hassle for little gain
-                    attribute.Name is IdentifierNameSyntax attributeName &&
-                    (attributeName.Identifier.ValueText == _localizedAttributeName || attributeName.Identifier.ValueText == _localizedAttributeFullName));
+                    attribute.Name is IdentifierNameSyntax attributeName
+                    && (attributeName.Identifier.ValueText == _localizedAttributeName || attributeName.Identifier.ValueText == _localizedAttributeFullName));
         }
 
         string? GetAttributeParamValue(AttributeSyntax attribute, string argName)
@@ -129,7 +129,7 @@ public class CSharpTextExtractor : ILocalizableTextExtractor
             .OfType<ElementAccessExpressionSyntax>()
             .Where(elementAccess => elementAccess.Expression is IdentifierNameSyntax identifier && _localizerMemberNames.Contains(identifier.Identifier.ValueText))
             .Select(elementAccess => GetTextInfo(elementAccess, cancellationToken))
-            .Where(item => item != null)!;
+            .Where(item => item is not null)!;
 
         LocalizableTextInfo? GetTextInfo(ElementAccessExpressionSyntax translateExpression, CancellationToken cancellationToken)
         {
@@ -137,7 +137,7 @@ public class CSharpTextExtractor : ILocalizableTextExtractor
 
             var argList = translateExpression.ArgumentList;
             var id = GetId(argList);
-            if (id == null)
+            if (id is null)
                 return null;
 
             return new LocalizableTextInfo
@@ -160,17 +160,17 @@ public class CSharpTextExtractor : ILocalizableTextExtractor
             var factoryInvocation = node.Arguments
                 .Skip(1)
                 .Select(arg =>
-                    arg.Expression is InvocationExpressionSyntax invocation &&
-                        invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-                        memberAccess.Expression is IdentifierNameSyntax typeName &&
-                        typeName.Identifier.ValueText == _pluralTypeName &&
-                        memberAccess.Name is IdentifierNameSyntax memberName &&
-                        memberName.Identifier.ValueText == _pluralFactoryMemberName ?
-                    invocation :
-                    null)
-                .FirstOrDefault(invocation => invocation != null);
+                    arg.Expression is InvocationExpressionSyntax invocation
+                        && invocation.Expression is MemberAccessExpressionSyntax memberAccess
+                        && memberAccess.Expression is IdentifierNameSyntax typeName
+                        && typeName.Identifier.ValueText == _pluralTypeName
+                        && memberAccess.Name is IdentifierNameSyntax memberName
+                        && memberName.Identifier.ValueText == _pluralFactoryMemberName
+                    ? invocation
+                    : null)
+                .FirstOrDefault(invocation => invocation is not null);
 
-            if (factoryInvocation == null)
+            if (factoryInvocation is null)
                 return null;
 
             var args = factoryInvocation.ArgumentList.Arguments;
@@ -180,13 +180,13 @@ public class CSharpTextExtractor : ILocalizableTextExtractor
         string? GetContextId(BaseArgumentListSyntax node)
         {
             var args = node.Arguments;
-            if (!(args.Count > 1 && args[^1] is ArgumentSyntax arg &&
-                arg.Expression is InvocationExpressionSyntax factoryInvocation &&
-                    factoryInvocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-                    memberAccess.Expression is IdentifierNameSyntax typeName &&
-                    typeName.Identifier.ValueText == _textContextTypeName &&
-                    memberAccess.Name is IdentifierNameSyntax memberName &&
-                    memberName.Identifier.ValueText == _textContextFactoryMemberName))
+            if (!(args.Count > 1 && args[^1] is ArgumentSyntax arg
+                && arg.Expression is InvocationExpressionSyntax factoryInvocation
+                && factoryInvocation.Expression is MemberAccessExpressionSyntax memberAccess
+                && memberAccess.Expression is IdentifierNameSyntax typeName
+                && typeName.Identifier.ValueText == _textContextTypeName
+                && memberAccess.Name is IdentifierNameSyntax memberName
+                && memberName.Identifier.ValueText == _textContextFactoryMemberName))
             {
                 return null;
             }
@@ -200,25 +200,25 @@ public class CSharpTextExtractor : ILocalizableTextExtractor
     {
         return declaration switch
         {
-            EnumMemberDeclarationSyntax _ => AnalyzeDecoratedDeclaration(declaration, cancellationToken),
-            BaseFieldDeclarationSyntax _ => AnalyzeDecoratedDeclaration(declaration, cancellationToken)
+            EnumMemberDeclarationSyntax => AnalyzeDecoratedDeclaration(declaration, cancellationToken),
+            BaseFieldDeclarationSyntax => AnalyzeDecoratedDeclaration(declaration, cancellationToken)
                 .Concat(AnalyzeElementAccessExpressions(declaration, cancellationToken)),
-            BasePropertyDeclarationSyntax _ => AnalyzeElementAccessExpressions(declaration, cancellationToken),
-            BaseMethodDeclarationSyntax _ => AnalyzeElementAccessExpressions(declaration, cancellationToken),
+            BasePropertyDeclarationSyntax => AnalyzeElementAccessExpressions(declaration, cancellationToken),
+            BaseMethodDeclarationSyntax => AnalyzeElementAccessExpressions(declaration, cancellationToken),
             _ => Enumerable.Empty<LocalizableTextInfo>()
         };
     }
 
     public IEnumerable<LocalizableTextInfo> Extract(string content, CancellationToken cancellationToken = default)
     {
-        if (content == null)
+        if (content is null)
             throw new ArgumentNullException(nameof(content));
 
         var code = GetCode(content, cancellationToken);
 
         var syntaxTree = ParseText(code, cancellationToken);
         var errorDiagnostic = syntaxTree.GetDiagnostics(cancellationToken).FirstOrDefault(d => d.Severity >= DiagnosticSeverity.Error);
-        if (errorDiagnostic != null)
+        if (errorDiagnostic is not null)
             throw new ArgumentException($"Source code has errors: {errorDiagnostic} at {errorDiagnostic.Location}", nameof(content));
 
         var root = syntaxTree.GetRoot(cancellationToken);

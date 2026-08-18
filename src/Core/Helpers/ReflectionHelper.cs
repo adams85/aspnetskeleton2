@@ -17,13 +17,13 @@ public static class ReflectionHelper
     private const string NullableAttributeFullName = "System.Runtime.CompilerServices.NullableAttribute";
     private const string NullableContextAttributeFullName = "System.Runtime.CompilerServices.NullableContextAttribute";
 
-    private static readonly ConcurrentDictionary<Type, Delegate?> s_nullableFlagsAccessorCache = new ConcurrentDictionary<Type, Delegate?>();
+    private static readonly ConcurrentDictionary<Type, Delegate?> s_nullableFlagsAccessorCache = new();
 
     private static Func<Attribute, byte[]>? GetNullableAttributeFlagsAccessor(Type attributeType) =>
         (Func<Attribute, byte[]>?)s_nullableFlagsAccessorCache.GetOrAdd(attributeType, type =>
         {
             var field = attributeType.GetField("NullableFlags");
-            return field != null && field.FieldType == typeof(byte[]) ? field.MakeFastGetter<Attribute, byte[]>() : null;
+            return field is not null && field.FieldType == typeof(byte[]) ? field.MakeFastGetter<Attribute, byte[]>() : null;
         });
 
     public static bool? IsNonNullableRefType(this MemberInfo member)
@@ -31,16 +31,16 @@ public static class ReflectionHelper
         switch (member)
         {
             case FieldInfo field:
-                if (field.FieldType.IsValueType ||
-                    field.CustomAttributes.Any(attr => attr.AttributeType.FullName == MaybeNullAttributeFullName))
+                if (field.FieldType.IsValueType
+                    || field.CustomAttributes.Any(attr => attr.AttributeType.FullName == MaybeNullAttributeFullName))
                 {
                     return false;
                 }
 
                 break;
             case PropertyInfo property:
-                if (property.PropertyType.IsValueType ||
-                    property.GetMethod?.ReturnParameter?.CustomAttributes.FirstOrDefault(attr => attr.AttributeType.FullName == MaybeNullAttributeFullName) != null)
+                if (property.PropertyType.IsValueType
+                    || property.GetMethod?.ReturnParameter?.CustomAttributes.FirstOrDefault(attr => attr.AttributeType.FullName == MaybeNullAttributeFullName) is not null)
                 {
                     return false;
                 }
@@ -50,10 +50,10 @@ public static class ReflectionHelper
                 throw new ArgumentOutOfRangeException(nameof(member));
         }
 
-        Attribute? attribute = Attribute.GetCustomAttributes(member).FirstOrDefault(attr => attr.GetType().FullName == NullableAttributeFullName);
+        var attribute = Attribute.GetCustomAttributes(member).FirstOrDefault(attr => attr.GetType().FullName is NullableAttributeFullName);
         Func<Attribute, byte[]>? flagsAccessor;
         byte[]? flags;
-        if (attribute != null && (flagsAccessor = GetNullableAttributeFlagsAccessor(attribute.GetType())) != null && (flags = flagsAccessor(attribute)) != null)
+        if (attribute is not null && (flagsAccessor = GetNullableAttributeFlagsAccessor(attribute.GetType())) is not null && (flags = flagsAccessor(attribute)) is not null)
             return flags.FirstOrDefault() == 1;
 
         return null;
@@ -63,7 +63,7 @@ public static class ReflectionHelper
         (Func<Attribute, byte>?)s_nullableFlagsAccessorCache.GetOrAdd(attributeType, type =>
         {
             var field = attributeType.GetField("Flag");
-            return field != null && field.FieldType == typeof(byte) ? field.MakeFastGetter<Attribute, byte>() : null;
+            return field is not null && field.FieldType == typeof(byte) ? field.MakeFastGetter<Attribute, byte>() : null;
         });
 
     private static bool IsNonNullableContext(this Type type)
@@ -71,17 +71,17 @@ public static class ReflectionHelper
         Attribute? attribute;
         Func<Attribute, byte>? flagAccessor;
 
-        Type? currentType = type;
+        var currentType = type;
         do
         {
-            attribute = Attribute.GetCustomAttributes(currentType).FirstOrDefault(attr => attr.GetType().FullName == NullableContextAttributeFullName);
-            if (attribute != null && (flagAccessor = GetNullableContextAttributeFlagAccessor(attribute.GetType())) != null)
+            attribute = Attribute.GetCustomAttributes(currentType).FirstOrDefault(attr => attr.GetType().FullName is NullableContextAttributeFullName);
+            if (attribute is not null && (flagAccessor = GetNullableContextAttributeFlagAccessor(attribute.GetType())) is not null)
                 return flagAccessor(attribute) == 1;
         }
-        while ((currentType = currentType.DeclaringType) != null);
+        while ((currentType = currentType!.DeclaringType) is not null);
 
-        attribute = Attribute.GetCustomAttributes(type.Module).FirstOrDefault(attr => attr.GetType().FullName == NullableContextAttributeFullName);
-        if (attribute != null && (flagAccessor = GetNullableContextAttributeFlagAccessor(attribute.GetType())) != null)
+        attribute = Attribute.GetCustomAttributes(type.Module).FirstOrDefault(attr => attr.GetType().FullName is NullableContextAttributeFullName);
+        if (attribute is not null && (flagAccessor = GetNullableContextAttributeFlagAccessor(attribute.GetType())) is not null)
             return flagAccessor(attribute) == 1;
 
         return false;
@@ -89,7 +89,7 @@ public static class ReflectionHelper
 
     public static bool IsNonNullableContext(this Type type, IDictionary<Type, bool> cache)
     {
-        if (type == null)
+        if (type is null)
             return false;
 
         if (!cache.TryGetValue(type, out var result))

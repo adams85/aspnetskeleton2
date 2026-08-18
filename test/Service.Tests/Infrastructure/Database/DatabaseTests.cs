@@ -65,14 +65,14 @@ public class DatabaseTests
         {
             await using (var dbContext = testContext.CreateReadOnlyDbContext())
             {
-                Assert.True(await dbContext.Roles.CountAsync() > 0);
+                Assert.True(await dbContext.Roles.AnyAsync());
 
                 var admin = await dbContext.Users
                     .Include(user => user.Profile)
                     .SingleOrDefaultAsync(user => user.UserName == ApplicationConstants.BuiltInRootUserName);
 
                 Assert.NotNull(admin);
-                Assert.NotNull(admin!.Profile);
+                Assert.NotNull(admin.Profile);
             }
         }
     }
@@ -90,7 +90,7 @@ public class DatabaseTests
         {
             await using (var dbContext = testContext.CreateReadOnlyDbContext())
             {
-                Assert.True(await dbContext.Roles.CountAsync() > 0);
+                Assert.True(await dbContext.Roles.AnyAsync());
 
                 // ...
             }

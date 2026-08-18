@@ -16,7 +16,7 @@ internal sealed class MySqlModelCustomizer : RelationalModelCustomizer
 
     public MySqlModelCustomizer(IDbProperties dbProperties, ModelCustomizerDependencies dependencies) : base(dependencies)
     {
-        if (dbProperties == null)
+        if (dbProperties is null)
             throw new ArgumentNullException(nameof(dbProperties));
 
         _caseSensitiveCollation = dbProperties.CaseSensitiveCollation;
@@ -35,12 +35,12 @@ internal sealed class MySqlModelCustomizer : RelationalModelCustomizer
         {
             foreach (var property in entityType.GetProperties())
             {
-                if (property.PropertyInfo != null)
+                if (property.PropertyInfo is not null)
                 {
-                    if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() == null)
+                    if (Type.GetTypeCode(property.ClrType) == TypeCode.String && property.GetColumnType() is null)
                     {
                         var annotation = property.FindAnnotation(ModelBuilderExtensions.CaseInsensitiveAnnotationKey);
-                        var caseInsensitive = annotation != null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
+                        var caseInsensitive = annotation is not null || property.PropertyInfo.GetCustomAttributes<CaseInsensitiveAttribute>().Any();
                         if (caseInsensitive)
                             property.SetCollation(_caseInsensitiveCollation);
                     }

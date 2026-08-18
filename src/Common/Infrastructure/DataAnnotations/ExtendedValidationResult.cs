@@ -34,6 +34,5 @@ public class ExtendedValidationResult : ValidationResult
 
     public ValidationAttribute ValidationAttribute { get; }
 
-    private IDictionary<object, object>? _properties;
-    public IDictionary<object, object> Properties => LazyInitializer.EnsureInitialized(ref _properties, () => new Dictionary<object, object>())!;
+    public IDictionary<object, object> Properties => LazyInitializer.EnsureInitialized(ref field, () => new Dictionary<object, object>())!;
 }

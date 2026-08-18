@@ -26,7 +26,7 @@ internal sealed class GetCachedUserInfoQueryHandler : QueryHandler<GetCachedUser
 
             var result = await linq.FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
-            if (result != null)
+            if (result is not null)
             {
                 var rolesLinq =
                     from u in dbContext.Users.Where(u => u.Id == result.UserId)

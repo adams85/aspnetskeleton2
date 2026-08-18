@@ -25,10 +25,9 @@ public static class ServiceProxyServiceCollectionExtensions
         services.AddSingleton<ITranslationsProvider, TranslationsProvider>();
 
         services
-            .AddSingleton(sp =>
-                sp.GetRequiredService<ISettingsProvider>().EnableLocalization() ?
-                ActivatorUtilities.CreateInstance<POStringLocalizerFactory>(sp) :
-                (IStringLocalizerFactory)NullStringLocalizerFactory.Instance)
+            .AddSingleton(sp => sp.GetRequiredService<ISettingsProvider>().EnableLocalization()
+                ? ActivatorUtilities.CreateInstance<POStringLocalizerFactory>(sp)
+                : (IStringLocalizerFactory)NullStringLocalizerFactory.Instance)
             .AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
 
         services.AddApplicationInitializers();

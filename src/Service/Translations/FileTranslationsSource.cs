@@ -22,7 +22,7 @@ internal sealed class FileTranslationsSource : ITranslationsSource, IDisposable
 {
     private const string FileNamePattern = "*.po";
 
-    private static readonly POParserSettings s_parserSettings = new POParserSettings
+    private static readonly POParserSettings s_parserSettings = new()
     {
         SkipComments = true,
         SkipInfoHeaders = true,
@@ -103,7 +103,7 @@ internal sealed class FileTranslationsSource : ITranslationsSource, IDisposable
     }
 
     private IObservable<(string[], Exception?)> PollFiles() => Observable
-        .Defer<string[]>(() => Observable.Return(Directory.GetFiles(_translationsBasePath, FileNamePattern, SearchOption.AllDirectories)))
+        .Defer(() => Observable.Return(Directory.GetFiles(_translationsBasePath, FileNamePattern, SearchOption.AllDirectories)))
         .Do(OnObtainFilesSuccess, OnObtainFilesError)
         .Select(filePaths => (filePaths, (Exception?)null));
 
@@ -157,7 +157,7 @@ internal sealed class FileTranslationsSource : ITranslationsSource, IDisposable
     {
         FileStream fileStream;
         try { fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true); }
-        catch (Exception ex) when (ex is DirectoryNotFoundException || ex is FileNotFoundException) { return null; }
+        catch (Exception ex) when (ex is DirectoryNotFoundException or FileNotFoundException) { return null; }
 
         POParseResult parseResult;
         await using (fileStream.ConfigureAwait(false))
@@ -191,7 +191,7 @@ internal sealed class FileTranslationsSource : ITranslationsSource, IDisposable
 
         var culture = Path.GetDirectoryName(relativeFilePath);
         if (string.IsNullOrEmpty(culture) || !string.IsNullOrEmpty(Path.GetDirectoryName(culture)))
-            return (filePath, (TranslationsChangedEvent?)null);
+            return (filePath, default(TranslationsChangedEvent));
 
         var location = Path.GetFileNameWithoutExtension(relativeFilePath);
         return (filePath, new TranslationsChangedEvent
@@ -199,16 +199,15 @@ internal sealed class FileTranslationsSource : ITranslationsSource, IDisposable
             Version = _clock.TimestampTicks,
             Location = location,
             Culture = culture,
-            Data =
-                obtainFilesException == null ?
-                await LoadTranslationsAsync(filePath, cancellationToken).ConfigureAwait(false) :
-                null
+            Data = obtainFilesException is null
+                ? await LoadTranslationsAsync(filePath, cancellationToken).ConfigureAwait(false)
+                : null
         });
     }, cancellationToken);
 
     private IObservable<(string, TranslationsChangedEvent)> LoadFile(string filePath, Exception? obtainFilesException) => Observable
         .FromAsync(ct => LoadFileAsync(filePath, obtainFilesException, ct))
-        .Where(item => item.Event != null)!
+        .Where(item => item.Event is not null)!
         .Do(CachedDelegates.Noop<(string, TranslationsChangedEvent)>.Action, ex => _logger.LogError(ex, "Unexpected error occurred when loading translation file \"{PATH}\".", filePath));
 
     private string[] GetCurrentFiles()
@@ -224,7 +223,7 @@ internal sealed class FileTranslationsSource : ITranslationsSource, IDisposable
         {
             if (!_files.TryGetValue(key, out var file))
                 _files.Add(key, file = new FileInfo());
-            else if (file.LastEvent.Version >= @event.Version || file.LastEvent.Data == null && @event.Data == null)
+            else if (file.LastEvent.Version >= @event.Version || file.LastEvent.Data is null && @event.Data is null)
                 return false;
 
             file.FilePath = filePath;

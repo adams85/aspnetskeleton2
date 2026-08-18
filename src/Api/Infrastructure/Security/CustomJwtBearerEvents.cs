@@ -48,8 +48,8 @@ public class CustomJwtBearerEvents : JwtBearerEvents
             ValidateIssuerSigningKey = true,
             // When receiving a token, check that it is still valid.
             ValidateLifetime = true,
-            // This defines the maximum allowable clock skew - i.e. provides a tolerance on the token expiry time 
-            // when validating the lifetime. As we're creating the tokens locally and validating them on the same 
+            // This defines the maximum allowable clock skew - i.e. provides a tolerance on the token expiry time
+            // when validating the lifetime. As we're creating the tokens locally and validating them on the same
             // machines which should have synchronised time, this can be set to zero.
             ClockSkew = jwtAccessTokenClockSkew,
         };
@@ -71,7 +71,7 @@ public class CustomJwtBearerEvents : JwtBearerEvents
     {
         var result = await QueryDispatcher.DispatchAsync(new GetCachedUserInfoQuery { UserName = userName }, cancellationToken);
 
-        if (result == null)
+        if (result is null)
             return null;
 
         if (registerActivity)
@@ -97,7 +97,7 @@ public class CustomJwtBearerEvents : JwtBearerEvents
         try { Validators.ValidateLifetime(jwtToken.ValidFrom, jwtToken.ValidTo, jwtToken, context.Options.TokenValidationParameters); }
         catch (SecurityTokenValidationException ex)
         {
-            if (ex is not SecurityTokenExpiredException || (refreshToken = GetRefreshToken(context)) == null)
+            if (ex is not SecurityTokenExpiredException || (refreshToken = GetRefreshToken(context)) is null)
             {
                 context.Fail(ex);
                 return;
@@ -111,13 +111,13 @@ public class CustomJwtBearerEvents : JwtBearerEvents
         try { userInfo = await GetCachedUserInfoAsync(userName, registerActivity: true, context.HttpContext.RequestAborted); }
         catch { userInfo = null; }
 
-        if (userInfo == null || !userInfo.LoginAllowed)
+        if (userInfo is null || !userInfo.LoginAllowed)
         {
             context.Fail("User does not exist or is not allowed to access the application currently.");
             return;
         }
 
-        if (refreshToken != null && !await ValidateRefreshTokenAync(userName, refreshToken, context.HttpContext))
+        if (refreshToken is not null && !await ValidateRefreshTokenAync(userName, refreshToken, context.HttpContext))
         {
             context.Fail("Refresh token is invalid or expired.");
             return;

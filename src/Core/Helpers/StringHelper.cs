@@ -28,7 +28,7 @@ public static class StringHelper
     public static bool TryNormalizeCommaSeparatedList(string? value, [MaybeNullWhen(false)] out List<string> normalizedItems,
         Func<string, string?>? normalizeItem = null, StringSplitOptions options = StringSplitOptions.None)
     {
-        if (value == null)
+        if (value is null)
         {
             normalizedItems = default;
             return false;
@@ -42,7 +42,7 @@ public static class StringHelper
             if (enumerator.MoveNext())
             {
                 var normalizedItem = normalizeItem(enumerator.Current);
-                if (normalizedItem == null)
+                if (normalizedItem is null)
                 {
                     normalizedItems = default;
                     return false;
@@ -58,7 +58,7 @@ public static class StringHelper
                         break;
 
                     normalizedItem = normalizeItem(enumerator.Current);
-                    if (normalizedItem == null)
+                    if (normalizedItem is null)
                     {
                         normalizedItems = default;
                         return false;

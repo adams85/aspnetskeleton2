@@ -12,10 +12,10 @@ namespace WebApp.Service.Infrastructure;
 
 internal sealed class RestoreExecutionContextInterceptor : Interceptor
 {
-    private void LoadExecutionContextFrom(ServerCallContext context)
+    private static void LoadExecutionContextFrom(ServerCallContext context)
     {
         var headers = context.RequestHeaders;
-        if (headers == null)
+        if (headers is null)
             return;
 
         Metadata.Entry? identityAuthenticationTypeEntry = null, identityNameEntry = null, cultureNameEntry = null, uiCultureNameEntry = null;
@@ -23,11 +23,13 @@ internal sealed class RestoreExecutionContextInterceptor : Interceptor
         {
             var entry = headers[i];
 
-            if (Match(entry, IdentityAuthenticationTypeHeaderName, isBinary: false, ref identityAuthenticationTypeEntry) ||
-                Match(entry, IdentityNameHeaderName, isBinary: true, ref identityNameEntry) ||
-                Match(entry, CultureNameHeaderName, isBinary: false, ref cultureNameEntry) ||
-                Match(entry, UICultureNameHeaderName, isBinary: false, ref uiCultureNameEntry))
+            if (Match(entry, IdentityAuthenticationTypeHeaderName, isBinary: false, ref identityAuthenticationTypeEntry)
+                || Match(entry, IdentityNameHeaderName, isBinary: true, ref identityNameEntry)
+                || Match(entry, CultureNameHeaderName, isBinary: false, ref cultureNameEntry)
+                || Match(entry, UICultureNameHeaderName, isBinary: false, ref uiCultureNameEntry))
+            {
                 continue;
+            }
 
             static bool Match(Metadata.Entry currentEntry, string headerName, bool isBinary, ref Metadata.Entry? entry)
             {
@@ -39,19 +41,21 @@ internal sealed class RestoreExecutionContextInterceptor : Interceptor
             }
         }
 
-        if (cultureNameEntry == null || uiCultureNameEntry == null)
+        if (cultureNameEntry is null || uiCultureNameEntry is null)
             throw new InvalidOperationException($"{CultureNameHeaderName} and {UICultureNameHeaderName} headers must always be specified.");
 
         var httpContext = context.GetHttpContext();
         ClaimsIdentity identity;
 
-        if (identityAuthenticationTypeEntry != null && identityNameEntry != null)
+        if (identityAuthenticationTypeEntry is not null && identityNameEntry is not null)
         {
             var nameClaim = new Claim(ClaimTypes.Name, Encoding.UTF8.GetString(identityNameEntry.ValueBytes));
             identity = new ClaimsIdentity(new[] { nameClaim }, identityAuthenticationTypeEntry.Value);
         }
         else
+        {
             identity = new ClaimsIdentity();
+        }
 
         httpContext.User = new ClaimsPrincipal(identity);
 

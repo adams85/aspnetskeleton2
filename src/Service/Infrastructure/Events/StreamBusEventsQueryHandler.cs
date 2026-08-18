@@ -16,7 +16,7 @@ internal sealed class StreamBusEventsQueryHandler : QueryHandler<StreamBusEvents
 
     public override async Task<long> HandleAsync(StreamBusEventsQuery query, QueryContext context, CancellationToken cancellationToken)
     {
-        int eventCount = 0;
+        var eventCount = 0;
 
         var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 

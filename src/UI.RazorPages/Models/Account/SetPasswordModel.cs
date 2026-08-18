@@ -16,10 +16,10 @@ public record class SetPasswordModel
     [DisplayName(ConfirmPasswordDisplayName), Compare(nameof(NewPassword), ErrorMessage = ConfirmPasswordCompareErrorMessage), DataType(DataType.Password)]
     public string ConfirmPassword { get; init; } = null!;
 
-    public ChangePasswordCommand ToCommand(string userName, string verificationToken) => new ChangePasswordCommand()
+    public ChangePasswordCommand ToCommand(string userName, string verificationToken) => new()
     {
         UserName = userName,
-        NewPassword = this.NewPassword,
+        NewPassword = NewPassword,
         Verify = true,
         VerificationToken = verificationToken,
     };

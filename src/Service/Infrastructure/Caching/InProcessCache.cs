@@ -13,7 +13,7 @@ namespace WebApp.Service.Infrastructure.Caching;
 internal sealed class InProcessCache : ICache
 {
     private readonly IMemoryCache _memoryCache;
-    private readonly ConcurrentDictionary<string, ScopeToken> _scopeTokens = new ConcurrentDictionary<string, ScopeToken>();
+    private readonly ConcurrentDictionary<string, ScopeToken> _scopeTokens = new();
 
     public InProcessCache(IMemoryCache memoryCache)
     {
@@ -35,14 +35,14 @@ internal sealed class InProcessCache : ICache
     {
         return _memoryCache.GetOrCreateAsync(key, ce =>
         {
-            if (options != null)
+            if (options is not null)
             {
                 ce.AbsoluteExpirationRelativeToNow = options.AbsoluteExpiration;
                 ce.SlidingExpiration = options.SlidingExpiration;
                 ce.Priority = options.Priority ?? CacheOptions.DefaultPriority;
             }
 
-            if (scopes != null)
+            if (scopes is not null)
             {
                 foreach (var token in scopes.Select(GetOrCreateScopeToken))
                     ce.ExpirationTokens.Add(token);
@@ -100,7 +100,7 @@ internal sealed class InProcessCache : ICache
     {
         private readonly InProcessCache _owner;
         private readonly string _key;
-        private readonly List<ScopeTokenRegistration> _registrations = new List<ScopeTokenRegistration>();
+        private readonly List<ScopeTokenRegistration> _registrations = new();
         private bool _hasChanged;
 
         public ScopeToken(InProcessCache owner, string key)

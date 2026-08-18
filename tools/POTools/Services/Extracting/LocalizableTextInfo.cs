@@ -6,25 +6,22 @@ public class LocalizableTextInfo
 {
     public int LineNumber { get; set; }
 
-    private string _id = null!;
     public string Id
     {
-        get => _id;
-        set => _id = value.NormalizeNewLines();
-    }
+        get;
+        set => field = value.NormalizeNewLines();
+    } = null!;
 
-    private string? _pluralId;
     public string? PluralId
     {
-        get => _pluralId;
-        set => _pluralId = value.NormalizeNewLines();
+        get;
+        set => field = value.NormalizeNewLines();
     }
 
-    private string? _contextId;
     public string? ContextId
     {
-        get => _contextId;
-        set => _contextId = value.NormalizeNewLines();
+        get;
+        set => field = value.NormalizeNewLines();
     }
 
     public string? Translation { get; set; }

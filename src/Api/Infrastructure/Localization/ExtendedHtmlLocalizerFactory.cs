@@ -19,9 +19,9 @@ public sealed class ExtendedHtmlLocalizerFactory : IHtmlLocalizerFactory
     }
 
     private static IHtmlLocalizer CreateHtmlLocalizer(IStringLocalizer stringLocalizer) =>
-        stringLocalizer is IExtendedStringLocalizer extendedStringLocalizer ?
-        new ExtendedHtmlLocalizer(extendedStringLocalizer) :
-        new HtmlLocalizer(stringLocalizer);
+        stringLocalizer is IExtendedStringLocalizer extendedStringLocalizer
+        ? new ExtendedHtmlLocalizer(extendedStringLocalizer)
+        : new HtmlLocalizer(stringLocalizer);
 
     public IHtmlLocalizer Create(string baseName, string location) => CreateHtmlLocalizer(_stringLocalizerFactory.Create(baseName, location));
 

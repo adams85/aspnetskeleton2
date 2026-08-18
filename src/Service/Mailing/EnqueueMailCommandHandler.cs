@@ -33,7 +33,7 @@ namespace WebApp.Service.Mailing
                 await mailTypeDefinition!.ValidateModelAsync(validationContext, cancellationToken).ConfigureAwait(false);
 
                 if (validationContext.ErrorCode != null)
-                    new ServiceErrorException(validationContext.ErrorCode.Value, validationContext.ErrorArgsFactory?.Invoke());
+                    throw new ServiceErrorException(validationContext.ErrorCode.Value, validationContext.ErrorArgsFactory?.Invoke());
 
                 await _mailSenderService.EnqueueItemAsync(command.Model, dbContext, null, cancellationToken).ConfigureAwait(false);
             }
